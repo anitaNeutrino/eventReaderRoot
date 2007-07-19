@@ -9,7 +9,6 @@
 #include <iostream>
 #include "AnitaEventCalibrator.h"
 #include "UsefulAnitaEvent.h"
-#include <TMath.h>
 
 //Clock Period Hard Coded
 const float clockPeriod=29.970;
@@ -311,7 +310,7 @@ void AnitaEventCalibrator::processClockJitter() {
       Double_t meanLow=TMath::Mean(numLow,fLowArray);
        Double_t offset=(meanHigh+meanLow)/2;
        Double_t maxVal=meanHigh-offset;
-       //       Double_t minVal=meanLow-offset;
+       Double_t minVal=meanLow-offset;
 
        Int_t gotPhiGuess=0;
        Float_t phiGuess=0;
@@ -408,7 +407,7 @@ void AnitaEventCalibrator::processClockJitterFast() {
       Double_t meanLow=TMath::Mean(numLow,fLowArray);
        Double_t offset=(meanHigh+meanLow)/2;
        Double_t maxVal=meanHigh-offset;
-       //       Double_t minVal=meanLow-offset;
+       Double_t minVal=meanLow-offset;
        //       cout << maxVal << "\t" << minVal << endl;
        //       std::cout << offset << "\t" << maxVal << "\t" << minVal << std::endl;
 
@@ -677,27 +676,6 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
 	  if (index==1) {	  
 	    float epsilon_eff=tcalEpsilon[surf][labChip][irco];
 	    surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin]-epsilon_eff;
-	    
-	    
-	    //////////////////////////////////////////////
-	    //swapping time and voltage for non-monotonic time.
-	    if (ibin>0 && surfTimeArray[surf][ibin-1]>surfTimeArray[surf][ibin]){
-	       float tmp_time=surfTimeArray[surf][ibin];
-	       surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin-1];
-	       surfTimeArray[surf][ibin-1]=tmp_time;
-	       for (int chan=0; chan<NUM_CHAN; chan++){ 
-		  float tmp_v=mvArray[surf][chan][ibin];		
-		  mvArray[surf][chan][ibin]=mvArray[surf][chan][ibin-1];
-		  mvArray[surf][chan][ibin-1]=tmp_v;
-		  tmp_v=unwrappedArray[surf][chan][ibin];		
-		  unwrappedArray[surf][chan][ibin]=unwrappedArray[surf][chan][ibin-1];
-		  unwrappedArray[surf][chan][ibin-1]=(int)tmp_v;
-	      }	      
-	    }
-	    //end of time swapping
-	    //////////////////////
-	    
-	    
 	  }
 	}
 	ibin++;	
