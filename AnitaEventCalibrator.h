@@ -12,7 +12,6 @@
 //Includes
 #include <TObject.h>
 #include <TF1.h>
-#include <TH1.h>
 #include "AnitaConventions.h"
 
 
@@ -48,7 +47,6 @@ class AnitaEventCalibrator : public TObject
   
   //Variables for clock-based trigger jitter correction
   float clockJitterOffset[NUM_SURF][NUM_CHIP];
-  float fastClockJitterOffset[NUM_SURF][NUM_CHIP];
 
   //Cable Length Calib
   float groupDelayCalib[NUM_SURF][NUM_CHAN];
@@ -72,7 +70,6 @@ class AnitaEventCalibrator : public TObject
   void processEventJW(UsefulAnitaEvent *eventPtr,float temp);
   void zeroMean();
   void processClockJitter();
-  void processClockJitterFast();
 
  protected:
    static AnitaEventCalibrator *fgInstance;  

@@ -38,8 +38,6 @@ namespace WaveCalType {
     kVTFullClockZeroRG              = 0x0f, // kVTFullClockRG + Zero Mean
     kVTLabJWPlusClockZero           = 0x10, // kVTLabJWPlusClock + Zero Mean
     kVTFullJWPlusClockZero          = 0x11,  // kVTFullJWPlusClock + Zero Mean
-    kVTLabJWPlusFastClockZero       = 0x12, // kVTLabJWPlusClock (but faster and worse) + Zero Mean
-    kVTFullJWPlusFastClockZero      = 0x13,  // kVTFullJWPlusClock (but faster and worse)  + Zero Mean
     kNotACalib
   } WaveCalType_t;
 
