@@ -27,8 +27,8 @@ LIBS		= -lz -lm $(ROOTLIBS)
 
 ROOT_LIBRARY = libAnitaEvent.so
 TREE_MAKER = makeHeadTreeRunFiles makePrettyHkRunFiles makeAdu5PatFiles makeAdu5VtgFiles makeSurfhkFiles makeTurfRateFiles
-LIB_OBJS = RawAnitaEvent.o UsefulAnitaEvent.o  AnitaEventCalibrator.o AnitaGeomTool.o RawAnitaHeader.o PrettyAnitaHk.o Adu5Pat.o Adu5Vtg.o SurfHk.o TurfRate.o RawDataReader.o AnitaConventions.o TimedAnitaHeader.o eventDict.o
-CLASS_HEADERS = RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaHk.h Adu5Pat.h Adu5Vtg.h SurfHk.h TurfRate.h AnitaEventCalibrator.h AnitaConventions.h AnitaGeomTool.h TimedAnitaHeader.h
+LIB_OBJS = RawAnitaEvent.o UsefulAnitaEvent.o  AnitaEventCalibrator.o AnitaGeomTool.o RawAnitaHeader.o PrettyAnitaHk.o Adu5Pat.o Adu5Vtg.o SurfHk.o TurfRate.o RawDataReader.o AnitaConventions.o eventDict.o
+CLASS_HEADERS = RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaHk.h Adu5Pat.h Adu5Vtg.h SurfHk.h TurfRate.h AnitaEventCalibrator.h AnitaConventions.h AnitaGeomTool.h
 
 
 
@@ -43,7 +43,7 @@ readRawData : $(ROOT_LIBRARY) readRawData.$(SRCSUF)
 $(ROOT_LIBRARY) : $(LIB_OBJS) 
 	@echo "Linking $@ ..."
 	$(LD) $(SOFLAGS) $(LDFLAGS) $(LIB_OBJS) -o $@
-	@ rm -f *Dict* 	
+
 
 %.$(OBJSUF) : %.$(SRCSUF)
 	@echo "<**Compiling**> "$<

@@ -86,9 +86,6 @@ Calibration Options
 15      kVTFullClockZeroRG -- kVTFullClockRG + Zero Mean
 16      kVTLabJWPlusClockZero -- kVTLabJWPlusClock + Zero Mean
 17      kVTFullJWPlusClockZero -- kVTFullJWPlusClock + Zero Mean
-18      kVTLabJWPlusFastClockZero -- kVTLabJWPlusClock (no fit)+ Zero Mean
-19      kVTFullJWPlusFastClockZero -- kVTFullJWPlusClock (no fit)+ Zero Mean
-
 <<<<< end output
 b) New in this version is the feature that all channel waveforms are now zero padded out to 260 samples.
 
