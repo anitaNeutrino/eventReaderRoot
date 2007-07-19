@@ -3,11 +3,7 @@ const float clockPeriod=29.970;
 
 void plotClockChannels()
 {
-  gStyle->SetPadLeftMargin(0.05);
-  gStyle->SetPadRightMargin(0.05);
-  gStyle->SetStatX(0.995);
-  gStyle->SetStatY(1);
-  plotClockChannels(1028,0,1);
+  plotClockChannels(1028,0,40);
 }
   
 
@@ -18,11 +14,11 @@ void plotClockChannels(int run, int startEntry, int numEntries) {
   char headerName[FILENAME_MAX];
   char hkName[FILENAME_MAX];
   sprintf(eventName,"/unix/anita1/webData/firstDay/run%d/eventFile%d*.root",run,run);
-  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/timedHeadFile%d.root",run,run);
+  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/headFile%d.root",run,run);
   sprintf(hkName,"/unix/anita1/webData/firstDay/run%d/prettyHkFile%d.root",run,run);
 
   RawAnitaEvent *event = 0;
-  TimedAnitaHeader *header =0;
+  RawAnitaHeader *header =0;
   PrettyAnitaHk *hk = 0;
   
   TChain *eventChain = new TChain("eventTree");
@@ -47,23 +43,21 @@ void plotClockChannels(int run, int startEntry, int numEntries) {
 
   TCanvas *canClocks = (TCanvas*) gROOT->FindObject("canClocks");
   if(!canClocks) {
-    canClocks = new TCanvas("canClocks","canClocks",600,800);
+    canClocks = new TCanvas("canClocks","canClocks",600,900);
   }
   TGraph *gr[9]={0};
 
 
 
   TF1 *sqaurey = new TF1("sqaurey",funcSquareWave,5,90,5);
-  sqaurey->SetNpx(1000);
-  sqaurey->SetParameters(25,1,-1,0.441,0.33);
+  //  sqaurey->SetNpx(1000);
+  sqaurey->SetParameters(25,200,-200,0.45,0.5);
   sqaurey->SetParLimits(0,0,35);
-  sqaurey->SetParLimits(1,1,1);
-  sqaurey->SetParLimits(2,-1,-1);
-  sqaurey->SetParLimits(3,0.441,0.441);
-  sqaurey->SetParLimits(4,0.33,0.33);
-  
-  TH1F histHigh("histHigh","histHigh",1000,0,1000);
-  TH1F histLow("histLow","histLow",1000,-1000,0);
+  sqaurey->SetParLimits(1,50,350);
+  sqaurey->SetParLimits(2,-400,-50);
+  sqaurey->SetParLimits(3,0.4,0.5);
+  sqaurey->SetParLimits(4,0.5,0.5);
+
   for(int entry=startEntry;entry<startEntry+numEntries;entry++) {
     
     //Stupidly most do this to be perfectly safe  
@@ -72,7 +66,7 @@ void plotClockChannels(int run, int startEntry, int numEntries) {
     prettyHkTree->GetEntry(entry);
     
     
-    UsefulAnitaEvent realEvent(event,WaveCalType::kVTFullJWPlus,hk);
+    UsefulAnitaEvent realEvent(event,WaveCalType::kVTFullJWPlusClockZero,hk);
     cout << realEvent.eventNumber << " " << header->eventNumber << endl;
     //  cout << realEvent.gotCalibTemp << " " << realEvent.calibTemp << endl;
     
@@ -81,10 +75,10 @@ void plotClockChannels(int run, int startEntry, int numEntries) {
     for(int chan=0;chan<9;chan++) {
       if(gr[chan]) delete gr[chan];
     }
-    canClocks->Divide(1,9,0,0);
+    canClocks->Divide(1,9,0);
 
-    //    gStyle->SetStatX(1);
-    //    gStyle->SetStatY(1);
+    gStyle->SetStatX(1);
+    gStyle->SetStatY(1);
     gStyle->SetStatH(0.3);
     gStyle->SetLabelSize(0.1,"xy");
 
@@ -92,52 +86,13 @@ void plotClockChannels(int run, int startEntry, int numEntries) {
        canClocks->cd(surf+1);
        gPad->SetRightMargin(0.005);
        gPad->SetGridx();
-       TH1F *framey = gPad->DrawFrame(-10,-1.5,110,+1.5);
+       TH1F *framey = gPad->DrawFrame(-10,-300,110,+300);
        framey->GetXaxis()->SetNdivisions();
   //       sqaurey->SetParameters(25,200,-200,15,15,0.33,0.33);
        Int_t ci=UsefulAnitaEvent::getChanIndex(surf,8);
-       //       gr[surf] = realEvent.getGraph(ci);
-       //       gr[surf]->Draw("l");
+       gr[surf] = realEvent.getGraph(ci);
+       gr[surf]->Draw("l");
        //       if(surf==5)
-
-       
-       //       Double_t maxVal=TMath::MaxElement(realEvent.fNumPoints[ci],realEvent.fVolts[ci]);
-       //       Double_t minVal=TMath::MinElement(realEvent.fNumPoints[ci],realEvent.fVolts[ci]);
-       histLow.Reset();
-       histHigh.Reset();
-       for(int i=0;i<realEvent.fNumPoints[ci];i++) {
-	 if(realEvent.fVolts[ci][i]>0) {
-	   histHigh.Fill(realEvent.fVolts[ci][i]);
-	   }
-	 else {
-	   histLow.Fill(realEvent.fVolts[ci][i]);
-	 }
-       }
-       //cout << maxVal << "\t" << minVal << endl;
-       //       cout << histHigh.GetMean() << "\t" << histLow.GetMean() << endl;
-       Double_t offset=(histHigh.GetMean()+histLow.GetMean())/2;
-       Double_t maxVal=histHigh.GetMean()-offset;
-       Double_t minVal=histLow.GetMean()-offset;
-       //       cout << maxVal << "\t" << minVal << endl;
-       
-       Double_t times[260];
-       Double_t volts[260];
-       for(int i=0;i<realEvent.fNumPoints[ci];i++) {
-	 times[i]=realEvent.fTimes[ci][i];
-	 Double_t tempV=realEvent.fVolts[ci][i]-offset;
-	 if(tempV>maxVal*0.9)
-	   volts[i]=1;
-	 else if(tempV<minVal*0.9)
-	   volts[i]=-1;
-	 else {
-	   volts[i]=tempV/maxVal;
-	 }
-       }
-       gr[surf]= new TGraph(realEvent.fNumPoints[ci],times,volts);
-
-       //       gr[surf] = realEvent.getGraph(ci);
-       gr[surf]->Draw("lp");
-
        
        
        //Take a guess at phi
@@ -154,9 +109,9 @@ void plotClockChannels(int run, int startEntry, int numEntries) {
 
 
        //       cout << phiGuess << endl;
-       sqaurey->SetParameter(0,phiGuess);//,1,-1,0.5,0.33);
+       sqaurey->SetParameters(phiGuess,200,-200,0.5,0.5);
        //       sqaurey->SetParameters(phiGuess,200,-200,12.8,16.4,0.33,0.33);
-       //       gr[surf]->Fit(sqaurey,"QR");
+       gr[surf]->Fit(sqaurey,"QR");
     }
     canClocks->Update();
     //    gSystem->Sleep(1000);

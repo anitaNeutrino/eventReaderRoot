@@ -12,7 +12,6 @@
 //Includes
 #include <TObject.h>
 #include <TF1.h>
-#include <TH1.h>
 #include "AnitaConventions.h"
 
 

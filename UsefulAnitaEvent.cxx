@@ -290,7 +290,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 }
 
 
-TGraph *UsefulAnitaEvent::getGraphFromSurfAndChan(int surf, int chan) 
+TGraph *UsefulAnitaEvent::getGraph(int surf, int chan) 
 {
   return getGraph(getChanIndex(surf,chan));
 }

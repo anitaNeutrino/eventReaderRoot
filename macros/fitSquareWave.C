@@ -1,7 +1,7 @@
 #include "AnitaConventions.h"
 #include "UsefulAnitaEvent.h"
 #include "RawAnitaEvent.h"
-#include "TimedAnitaHeader.h"
+#include "RawAnitaHeader.h"
 #include "PrettyAnitaHk.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -35,11 +35,11 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
   char headerName[FILENAME_MAX];
   char hkName[FILENAME_MAX];
   sprintf(eventName,"/unix/anita1/webData/firstDay/run%d/eventFile%d*.root",run,run);
-  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/timedHeadFile%d.root",run,run);
+  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/headFile%d.root",run,run);
   sprintf(hkName,"/unix/anita1/webData/firstDay/run%d/prettyHkFile%d.root",run,run);
 
   RawAnitaEvent *event = 0;
-  TimedAnitaHeader *header =0;
+  RawAnitaHeader *header =0;
   PrettyAnitaHk *hk = 0;
   
   TChain *eventChain = new TChain("eventTree");
@@ -69,12 +69,12 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
 
   TF1 *sqaurey = new TF1("sqaurey",myFuncSquareWave,5,90,5);
   //  sqaurey->SetNpx(1000);
-  sqaurey->SetParameters(25,1,-1,0.441,0.33);
+  sqaurey->SetParameters(25,200,-200,0.44,0.5);
   sqaurey->SetParLimits(0,0,35);
-  sqaurey->SetParLimits(1,1,1);
-  sqaurey->SetParLimits(2,-1,-1);
-  sqaurey->SetParLimits(3,0.441,0.441);
-  sqaurey->SetParLimits(4,0.33,0.33);
+  sqaurey->SetParLimits(1,50,350);
+  sqaurey->SetParLimits(2,-400,-50);
+  sqaurey->SetParLimits(3,0.44,0.44);
+  sqaurey->SetParLimits(4,0.5,0.5);
 
 
   TFile *fp = new TFile("clockPhaseCalib.root","RECREATE");
@@ -112,8 +112,6 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
   if(nentries<maxEntry)
      maxEntry=nentries;
 
-  TH1F histHigh("histHigh","histHigh",1000,0,1000);
-  TH1F histLow("histLow","histLow",1000,-1000,0);
   for(Long64_t entry=startEntry;entry<maxEntry;entry++) {
     
     //Stupidly must do this to be perfectly safe  
@@ -132,53 +130,40 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
        //       }
        //       graphPad->cd(surf+1);
        Int_t ci=UsefulAnitaEvent::getChanIndex(surf,8);
+       gr[surf] = realEvent.getGraph(ci);
 
-       histLow.Reset();
-       histHigh.Reset();
-       for(int i=0;i<realEvent.fNumPoints[ci];i++) {
-	  if(realEvent.fVolts[ci][i]>0) {
-	   histHigh.Fill(realEvent.fVolts[ci][i]);
-	  }
-	  else {
-	     histLow.Fill(realEvent.fVolts[ci][i]);
-	  }
-       }
-       //cout << maxVal << "\t" << minVal << endl;
-       //       cout << histHigh.GetMean() << "\t" << histLow.GetMean() << endl;
-       Double_t offset=(histHigh.GetMean()+histLow.GetMean())/2;
-       Double_t maxVal=histHigh.GetMean()-offset;
-       Double_t minVal=histLow.GetMean()-offset;
-       //       cout << maxVal << "\t" << minVal << endl;
+       Int_t numPoints= gr[surf]->GetN();
+       //       Double_t mean = gr[surf]->GetMean(2);
+       //       cout << mean << endl;
+       Double_t *times = gr[surf]->GetX();
+       Double_t *volts = gr[surf]->GetY();
+
+       //       for(int i=0;i<numPoints;i++) {
+	  //	  cout << times[i] << "\t" << volts[i] << endl;
+       // volts[i]-=mean;
+       //       }
+     
        
-       Int_t numPoints=realEvent.fNumPoints[ci];
-       Double_t times[260];
-       Double_t volts[260];
-       Int_t gotPhiGuess=0;
+//        //       gr[surf]->Draw("al");
+//        //Take a guess at phi
+       Double_t vMax=TMath::MaxElement(numPoints,volts);
+       Double_t vMin=TMath::MinElement(numPoints,volts);
+
+
        Float_t phiGuess=0;
-       for(int i=0;i<realEvent.fNumPoints[ci];i++) {
-	  times[i]=realEvent.fTimes[ci][i];
-	 Double_t tempV=realEvent.fVolts[ci][i]-offset;	
-	 if(tempV>maxVal*0.9)
-	   volts[i]=1;
-	 else if(tempV<minVal*0.9)
-	   volts[i]=-1;
-	 else {
-	   volts[i]=tempV/maxVal;
-	 }
-	 
-	 if(!gotPhiGuess) {
-	    if(tempV>=0 && (realEvent.fVolts[ci][i+1]-offset)<0) {
-	       if(i>3) {
-		  phiGuess=times[i];
-		  gotPhiGuess=1;
-	       }
-	    }
-	 }
-	 
+       for(int i=0;i<realEvent.fNumPoints[ci]-1;i++) {
+	  if(volts[i]>=0 &&
+	     volts[i+1]<0) {
+	     phiGuess=times[i];
+	     if(i>3)
+		break;
+	  }
        }
+       //       cout << phiGuess << endl; 
        {
 	  TGraph grTemp(numPoints,times,volts);
-	  sqaurey->SetParameter(0,phiGuess);//,1,-1,0.441,0.33);
+	  //	  sqaurey->SetParameters(phiGuess,200,-200,0.44,0.55);
+	  sqaurey->SetParameters(phiGuess,vMax,vMin,0.44,0.5);
 
   
 	  grTemp.Fit(sqaurey,"QR","goff");
@@ -215,24 +200,24 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
 	  histLowFrac[surf]->Fill(sqaurey->GetParameter(3));
 
        }
-       //       delete gr[surf];
+       delete gr[surf];
     }
     
   }
-  TCanvas * canLowFrac = new TCanvas("canLowFrac","canLowFrac");
-  canLowFrac->Divide(2,5);
-  for(int surf=0;surf<9;surf++) {
-     canLowFrac->cd(surf+1);
-     histLowFrac[surf]->Draw();
-  }
+//   TCanvas * canLowFrac = new TCanvas("canLowFrac","canLowFrac");
+//   canLowFrac->Divide(2,5);
+//   for(int surf=0;surf<9;surf++) {
+//      canLowFrac->cd(surf+1);
+//      histLowFrac[surf]->Draw();
+//   }
 
 
-  TCanvas * canSlopeTime = new TCanvas("canSlopeTime","canSlopeTime");
-  canSlopeTime->Divide(2,5);
-  for(int surf=0;surf<9;surf++) {
-     canSlopeTime->cd(surf+1);
-     histSlopeTime[surf]->Draw();
-  }
+//   TCanvas * canSlopeTime = new TCanvas("canSlopeTime","canSlopeTime");
+//   canSlopeTime->Divide(2,5);
+//   for(int surf=0;surf<9;surf++) {
+//      canSlopeTime->cd(surf+1);
+//      histSlopeTime[surf]->Draw();
+//   }
 
 
   ofstream CalibNums("clockCalibNumsFitted.dat");
