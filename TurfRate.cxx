@@ -38,9 +38,9 @@ TurfRate::TurfRate(Int_t           trun,
    payloadTime=tpayloadTime;
    payloadTimeUs=tpayloadTimeUs;
    memcpy(l1Rates,tl1Rates,sizeof(UShort_t)*8*4);
-   memcpy(upperL2Rates,tupperL2Rates,sizeof(UChar_t)*16);
-   memcpy(lowerL2Rates,tlowerL2Rates,sizeof(UChar_t)*16);
-   memcpy(l3Rates,tl3Rates,sizeof(UChar_t)*16);
+   memcpy(upperL2Rates,tupperL2Rates,sizeof(UShort_t)*16);
+   memcpy(lowerL2Rates,tlowerL2Rates,sizeof(UShort_t)*16);
+   memcpy(l3Rates,tl3Rates,sizeof(UShort_t)*16);
    intFlag=tintFlag;
 
 }
