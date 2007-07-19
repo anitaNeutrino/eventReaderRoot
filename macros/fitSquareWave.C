@@ -1,7 +1,7 @@
 #include "AnitaConventions.h"
 #include "UsefulAnitaEvent.h"
 #include "RawAnitaEvent.h"
-#include "TimedAnitaHeader.h"
+#include "RawAnitaHeader.h"
 #include "PrettyAnitaHk.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -14,10 +14,9 @@
 #include <iostream>
 #include <fstream>
 
-const float clockPeriod=29.970;
 
 
-Double_t myFuncSquareWave(Double_t *x, Double_t *par);
+Double_t funcSquareWave(Double_t *x, Double_t *par);
 void fitSquareWave(int run, int startEntry, int numEntries);
 
 void fitSquareWave()
@@ -35,11 +34,11 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
   char headerName[FILENAME_MAX];
   char hkName[FILENAME_MAX];
   sprintf(eventName,"/unix/anita1/webData/firstDay/run%d/eventFile%d*.root",run,run);
-  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/timedHeadFile%d.root",run,run);
+  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/headFile%d.root",run,run);
   sprintf(hkName,"/unix/anita1/webData/firstDay/run%d/prettyHkFile%d.root",run,run);
 
   RawAnitaEvent *event = 0;
-  TimedAnitaHeader *header =0;
+  RawAnitaHeader *header =0;
   PrettyAnitaHk *hk = 0;
   
   TChain *eventChain = new TChain("eventTree");
@@ -66,31 +65,37 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
   //  char pngName[180];
   TGraph *gr[9]={0};
 
-
-  TF1 *sqaurey = new TF1("sqaurey",myFuncSquareWave,5,90,5);
+  
+  TF1 *sqaurey = new TF1("sqaurey",funcSquareWave,5,90,7);
   //  sqaurey->SetNpx(1000);
-  sqaurey->SetParameters(25,1,-1,0.441,0.33);
+  sqaurey->SetParameters(25,200,-200,12.881,16.428,0.33,0.33);
   sqaurey->SetParLimits(0,0,35);
-  sqaurey->SetParLimits(1,1,1);
-  sqaurey->SetParLimits(2,-1,-1);
-  sqaurey->SetParLimits(3,0.441,0.441);
-  sqaurey->SetParLimits(4,0.33,0.33);
+  sqaurey->SetParLimits(1,50,350);
+  sqaurey->SetParLimits(2,-400,-50);
+  //  sqaurey->SetParLimits(3,8,16);
+  //  sqaurey->SetParLimits(4,10,20);
+  sqaurey->SetParLimits(3,12.881,12.881);
+  sqaurey->SetParLimits(4,16.428,16.428);
+  sqaurey->SetParLimits(5,0.33,0.33);
+  sqaurey->SetParLimits(6,0.33,0.33);
 
 
   TFile *fp = new TFile("clockPhaseCalib.root","RECREATE");
-  TH1F *histLowFrac[9];
-  TH1F *histSlopeTime[9];
+  TH1F *histLowDt[9];
+  TH1F *histHighDt[9];
 
+  TH1F *histLowAdcChip[9][4];
+  TH1F *histHighAdcChip[9][4];
   
   TH1F *histPhiDiff[9];
   TH1F *histPhiDiffChip[9][4];
 
   char histName[180];
   for(int surf=0;surf<9;surf++) {
-     sprintf(histName,"histLowFrac%d",surf);
-     histLowFrac[surf] = new TH1F(histName,histName,1000,0,1);
-     sprintf(histName,"histSlopeTime%d",surf);
-     histSlopeTime[surf] = new TH1F(histName,histName,1000,0,1);
+     sprintf(histName,"histLowDt%d",surf);
+     histLowDt[surf] = new TH1F(histName,histName,1000,0,30);
+     sprintf(histName,"histHighDt%d",surf);
+     histHighDt[surf] = new TH1F(histName,histName,1000,0,30);
 
 
      sprintf(histName,"histPhiDiff%d",surf);
@@ -98,12 +103,31 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
      for(int chip=0;chip<4;chip++) {
 	sprintf(histName,"histPhiDiffChip%d_%d",surf,chip);
 	histPhiDiffChip[surf][chip] = new TH1F(histName,histName,200,-10,10);
+	sprintf(histName,"histLowAdcChip%d_%d",surf,chip);
+	histLowAdcChip[surf][chip] = new TH1F(histName,histName,500,-500,0);
+	sprintf(histName,"histHighAdcChip%d_%d",surf,chip);
+	histHighAdcChip[surf][chip] = new TH1F(histName,histName,500,0,500);
      }
 
   }
+
+  TH1F *histLowDtAll = new TH1F("histLowDtAll","histLowDtAll",3000,0,30);
+  TH1F *histHighDtAll = new TH1F("histHighDtAll","histHighDtAll",3000,0,30);
   
-  TH1F *histLowFracAll = new TH1F("histLowFracAll","histLowFracAll",1000,0,1);
-  TH1F *histSlopeTimeAll = new TH1F("histSlopeTimeAll","histSlopeTimeAll",1000,0,1);
+
+  UInt_t eventNumber;
+  Int_t surfNum,chipNum;
+  Double_t phase,phase0;
+  Double_t low,high;
+  TTree *phaseTree = new TTree("phaseTree","Tree of Clock Phase Related Quantities");
+  phaseTree->Branch("eventNumber",&eventNumber,"eventNumber/i");
+  phaseTree->Branch("surf",&surfNum,"surf/I");
+  phaseTree->Branch("chip",&chipNum,"chip/I");
+  phaseTree->Branch("phase",&phase,"phase/D");
+  phaseTree->Branch("phase0",&phase0,"phase0/D");
+  phaseTree->Branch("low",&low,"low/D");
+  phaseTree->Branch("high",&high,"high/D");
+
 
 
   Long64_t nentries=eventChain->GetEntries();
@@ -112,8 +136,6 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
   if(nentries<maxEntry)
      maxEntry=nentries;
 
-  TH1F histHigh("histHigh","histHigh",1000,0,1000);
-  TH1F histLow("histLow","histLow",1000,-1000,0);
   for(Long64_t entry=startEntry;entry<maxEntry;entry++) {
     
     //Stupidly must do this to be perfectly safe  
@@ -132,72 +154,56 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
        //       }
        //       graphPad->cd(surf+1);
        Int_t ci=UsefulAnitaEvent::getChanIndex(surf,8);
+       gr[surf] = realEvent.getGraph(ci);
 
-       histLow.Reset();
-       histHigh.Reset();
-       for(int i=0;i<realEvent.fNumPoints[ci];i++) {
-	  if(realEvent.fVolts[ci][i]>0) {
-	   histHigh.Fill(realEvent.fVolts[ci][i]);
-	  }
-	  else {
-	     histLow.Fill(realEvent.fVolts[ci][i]);
-	  }
-       }
-       //cout << maxVal << "\t" << minVal << endl;
-       //       cout << histHigh.GetMean() << "\t" << histLow.GetMean() << endl;
-       Double_t offset=(histHigh.GetMean()+histLow.GetMean())/2;
-       Double_t maxVal=histHigh.GetMean()-offset;
-       Double_t minVal=histLow.GetMean()-offset;
-       //       cout << maxVal << "\t" << minVal << endl;
+       Int_t numPoints= gr[surf]->GetN();
+       //       Double_t mean = gr[surf]->GetMean(2);
+       //       cout << mean << endl;
+       Double_t *times = gr[surf]->GetX();
+       Double_t *volts = gr[surf]->GetY();
+
+       //       for(int i=0;i<numPoints;i++) {
+	  //	  cout << times[i] << "\t" << volts[i] << endl;
+       // volts[i]-=mean;
+       //       }
+     
        
-       Int_t numPoints=realEvent.fNumPoints[ci];
-       Double_t times[260];
-       Double_t volts[260];
-       Int_t gotPhiGuess=0;
+//        //       gr[surf]->Draw("al");
+//        //Take a guess at phi
        Float_t phiGuess=0;
-       for(int i=0;i<realEvent.fNumPoints[ci];i++) {
-	  times[i]=realEvent.fTimes[ci][i];
-	 Double_t tempV=realEvent.fVolts[ci][i]-offset;	
-	 if(tempV>maxVal*0.9)
-	   volts[i]=1;
-	 else if(tempV<minVal*0.9)
-	   volts[i]=-1;
-	 else {
-	   volts[i]=tempV/maxVal;
-	 }
-	 
-	 if(!gotPhiGuess) {
-	    if(tempV>=0 && (realEvent.fVolts[ci][i+1]-offset)<0) {
-	       if(i>3) {
-		  phiGuess=times[i];
-		  gotPhiGuess=1;
-	       }
-	    }
-	 }
-	 
+       for(int i=0;i<realEvent.fNumPoints[ci]-1;i++) {
+	  if(volts[i]>=0 &&
+	     volts[i+1]<0) {
+	     phiGuess=times[i];
+	     if(i>3)
+		break;
+	  }
        }
+       //       cout << phiGuess << endl; 
        {
 	  TGraph grTemp(numPoints,times,volts);
-	  sqaurey->SetParameter(0,phiGuess);//,1,-1,0.441,0.33);
-
-  
+	  sqaurey->SetParameters(phiGuess,200,-200,12.881,16.428,0.33,0.33);
 	  grTemp.Fit(sqaurey,"QR","goff");
 	  //gr[surf]->Fit(sqaurey,"QR","goff");
 
 	  if(surf==0) 
 	     phi0=sqaurey->GetParameter(0);
 
-
+	  histLowDt[surf]->Fill(sqaurey->GetParameter(3));
+	  histLowDtAll->Fill(sqaurey->GetParameter(3));
+	  histHighDt[surf]->Fill(sqaurey->GetParameter(4));
+	  histHighDtAll->Fill(sqaurey->GetParameter(4));
 	  
 	  
-	  //	  float period=sqaurey->GetParameter(3)+sqaurey->GetParameter(4)+
-	  //	     sqaurey->GetParameter(5)+sqaurey->GetParameter(6);
+	  
+	  float period=sqaurey->GetParameter(3)+sqaurey->GetParameter(4)+
+	     sqaurey->GetParameter(5)+sqaurey->GetParameter(6);
 	  
 	  float phi=sqaurey->GetParameter(0);
 	  if((phi-phi0)>15)
-	     phi-=clockPeriod;
+	     phi-=period;
 	  if((phi-phi0)<-15)
-	     phi+=clockPeriod;
+	     phi+=period;
 	  
 	  
 	  //       if(surf==4)
@@ -206,36 +212,50 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
 
 	  Int_t labChip=realEvent.getLabChip(ci);
 	  histPhiDiffChip[surf][labChip]->Fill(phi-phi0);
+	  histLowAdcChip[surf][labChip]->Fill(sqaurey->GetParameter(2));
+	  histHighAdcChip[surf][labChip]->Fill(sqaurey->GetParameter(1));
 
 
-	  histSlopeTimeAll->Fill(sqaurey->GetParameter(4));
-	  histSlopeTime[surf]->Fill(sqaurey->GetParameter(4));
-	  
-	  histLowFracAll->Fill(sqaurey->GetParameter(3));
-	  histLowFrac[surf]->Fill(sqaurey->GetParameter(3));
+	  eventNumber=realEvent.eventNumber;
+	  surfNum=surf;
+	  chipNum=labChip;
+	  low=sqaurey->GetParameter(2);
+	  high=sqaurey->GetParameter(1);
+	  phase=phi;
+	  phase0=phi0;
+	  phaseTree->Fill();
 
        }
-       //       delete gr[surf];
+       delete gr[surf];
     }
     
   }
-  TCanvas * canLowFrac = new TCanvas("canLowFrac","canLowFrac");
-  canLowFrac->Divide(2,5);
-  for(int surf=0;surf<9;surf++) {
-     canLowFrac->cd(surf+1);
-     histLowFrac[surf]->Draw();
-  }
+//   TCanvas * canLow = new TCanvas("canLow","canLow");
+//   canLow->Divide(2,5);
+//   for(int surf=0;surf<9;surf++) {
+//      canLow->cd(surf+1);
+//      histLowAdc[surf]->Draw();
+//   }
 
 
-  TCanvas * canSlopeTime = new TCanvas("canSlopeTime","canSlopeTime");
-  canSlopeTime->Divide(2,5);
-  for(int surf=0;surf<9;surf++) {
-     canSlopeTime->cd(surf+1);
-     histSlopeTime[surf]->Draw();
-  }
+//   TCanvas * canHigh = new TCanvas("canHigh","canHigh");
+//   canHigh->Divide(2,5);
+//   for(int surf=0;surf<9;surf++) {
+//      canHigh->cd(surf+1);
+//      histHighAdc[surf]->Draw();
+//   }
+
+//   TCanvas * canPhi = new TCanvas("canPhi","canPhi");
+//   canPhi->Divide(2,5);
+//   for(int surf=0;surf<9;surf++) {
+//      canPhi->cd(surf+1);
+//      histPhiDiff[surf]->Draw();
+//      histPhiDiff[surf]->Write();
+//   }
 
 
-  ofstream CalibNums("clockCalibNumsFitted.dat");
+
+  ofstream CalibNums("clockCalibNums.dat");
   CalibNums << "#SURF" << "\t" << "CHIP" << "\t" << "Calib" << endl;
   TCanvas * canPhiChip = new TCanvas("canPhiChip","canPhiChip");
   canPhiChip->Divide(4,9);
@@ -250,39 +270,46 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
 	   calib=histPhiDiffChip[surf][chip]->GetFunction("gaus")->GetParameter(1);
 	}
 	histPhiDiffChip[surf][chip]->Write();
+	histLowAdcChip[surf][chip]->Write();
+	histHighAdcChip[surf][chip]->Write();
 	CalibNums << surf << "\t" << chip << "\t" << calib << endl;
      }
   }
+  phaseTree->Write();
+  //  fp->Close();
+//   TCanvas *canAll = new TCanvas("canAll","canAll");
+//   canAll->Divide(1,2);
+//   canAll->cd(1);
+//   histLowDtAll->Draw();
+//   canAll->cd(2);
+//   histHighDtAll->Draw();
 
 
 }
 
-
-Double_t myFuncSquareWave(Double_t *x, Double_t *par)
+Double_t funcSquareWave(Double_t *x, Double_t *par)
 {
    Double_t phi=par[0];
    Double_t a=par[1];
    Double_t b=par[2];
+   Double_t dtLow=par[3];
+   Double_t dtHigh=par[4];
+   Double_t sllh=par[5];
+   Double_t slhl=par[6];
 
-   Double_t sllh=par[4];
-   Double_t slhl=par[4];
-   
-   Double_t periodLeft=clockPeriod-2*par[4];   
-   Double_t dtLow=par[3]*periodLeft;
-   Double_t dtHigh=(1-par[3])*periodLeft;
 
+   Double_t period=dtLow+dtHigh+sllh+slhl;
 
    Double_t t=x[0]-phi;
    
    Double_t mlh=(a-b)/sllh;
    Double_t mhl=(b-a)/slhl;
 
-   //   cout << t << "\t" << clockPeriod << endl;
    while(t<0) {
-      t+=clockPeriod;
+      t+=period;
    }
-   while(t>clockPeriod) {
-      t-=clockPeriod;
+   while(t>period) {
+      t-=period;
    }
    if(t<dtLow)
       return b;

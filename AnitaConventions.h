@@ -34,17 +34,11 @@ namespace WaveCalType {
     kVTFullClockRG                  = 0x0b, // kVTFullRG + Clock Jitter Correction 
     kVTLabJWPlusClock               = 0x0c, // kVTLabJWPlus + Clock Jitter Correction 
     kVTFullJWPlusClock              = 0x0d, // kVTFullJWPlus + Clock Jitter Correction 
-    kVTLabClockZeroRG               = 0x0e, // kVTLabClockRG + Zero Mean
-    kVTFullClockZeroRG              = 0x0f, // kVTFullClockRG + Zero Mean
-    kVTLabJWPlusClockZero           = 0x10, // kVTLabJWPlusClock + Zero Mean
-    kVTFullJWPlusClockZero          = 0x11,  // kVTFullJWPlusClock + Zero Mean
-    kVTLabJWPlusFastClockZero       = 0x12, // kVTLabJWPlusClock (but faster and worse) + Zero Mean
-    kVTFullJWPlusFastClockZero      = 0x13,  // kVTFullJWPlusClock (but faster and worse)  + Zero Mean
-    kNotACalib
+    kVTLabClockZeroRG               = 0x10, // kVTLabClockRG + Zero Mean
+    kVTFullClockZeroRG              = 0x11, // kVTFullClockRG + Zero Mean
+    kVTLabJWPlusClockZero           = 0x12, // kVTLabJWPlusClock + Zero Mean
+    kVTFullJWPlusClockZero          = 0x13  // kVTFullJWPlusClock + Zero Mean
   } WaveCalType_t;
-
-  const char *calTypeAsString(WaveCalType::WaveCalType_t calType);
-  void listAllCalTypes();
 }
 
 ///First up we'll add some definitions of the raw data

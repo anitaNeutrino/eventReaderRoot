@@ -35,17 +35,6 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
    calibrateEvent(calType);
 }
 
-UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, Float_t surfTemp) 
-   : RawAnitaEvent(*eventPtr)
-{
-
-   gotCalibTemp=1;
-   calibTemp=surfTemp;
-     
-   //Default Constructor
-   calibrateEvent(calType);
-}
-
 UsefulAnitaEvent::~UsefulAnitaEvent() {
    //Default Destructor
 }
@@ -231,7 +220,6 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
        
    case WaveCalType::kVTLabJWPlusClock:
    case WaveCalType::kVTLabJWPlusClockZero: 
-   case WaveCalType::kVTLabJWPlusFastClockZero:
       // kVTLabJWPlus + Clock Jitter Correction (+ Zero Mean) 
       for(int surf=0;surf<NUM_SURF;surf++) {
 	 for(int chan=0;chan<NUM_CHAN;chan++) {
@@ -249,9 +237,8 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 
       
 
-   case WaveCalType::kVTFullJWPlusClock:              
-   case WaveCalType::kVTFullJWPlusClockZero:  
-   case WaveCalType::kVTFullJWPlusFastClockZero:        
+    case WaveCalType::kVTFullJWPlusClock:              
+    case WaveCalType::kVTFullJWPlusClockZero:          
        // kVTFullJWPlus + Clock Jitter Correction (+ Zero Mean)
        for(int surf=0;surf<NUM_SURF;surf++) {
 	 for(int chan=0;chan<NUM_CHAN;chan++) {
@@ -290,7 +277,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 }
 
 
-TGraph *UsefulAnitaEvent::getGraphFromSurfAndChan(int surf, int chan) 
+TGraph *UsefulAnitaEvent::getGraph(int surf, int chan) 
 {
   return getGraph(getChanIndex(surf,chan));
 }

@@ -13,11 +13,11 @@ void plotOneSurf(int run, int startEntry, int numEntries,int surf) {
   char headerName[FILENAME_MAX];
   char hkName[FILENAME_MAX];
   sprintf(eventName,"/unix/anita1/webData/firstDay/run%d/eventFile%d*.root",run,run);
-  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/timedHeadFile%d.root",run,run);
+  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/headFile%d.root",run,run);
   sprintf(hkName,"/unix/anita1/webData/firstDay/run%d/prettyHkFile%d.root",run,run);
 
   RawAnitaEvent *event = 0;
-  TimedAnitaHeader *header =0;
+  RawAnitaHeader *header =0;
   PrettyAnitaHk *hk = 0;
   
   TChain *eventChain = new TChain("eventTree");
@@ -54,7 +54,7 @@ void plotOneSurf(int run, int startEntry, int numEntries,int surf) {
     prettyHkTree->GetEntry(entry);
     
     
-    UsefulAnitaEvent realEvent(event,WaveCalType::kVTFullJWPlusFastClockZero,hk);
+    UsefulAnitaEvent realEvent(event,WaveCalType::kVTFullJWPlusClockZero,hk);
     cout << realEvent.eventNumber << " " << header->eventNumber << endl;
     //  cout << realEvent.gotCalibTemp << " " << realEvent.calibTemp << endl;
     
