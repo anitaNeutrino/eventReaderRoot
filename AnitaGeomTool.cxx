@@ -49,7 +49,6 @@ namespace AnitaGeom {
    int coneAntNums[NUM_PHI]={-1,4,-1,1,-1,5,-1,2,-1,6,-1,3,-1,7,-1,0};
    int conePhiNums[8]={15,3,7,11,1,5,9,13};
 
-
 }
 
 AnitaGeomTool*  AnitaGeomTool::fgInstance = 0;
@@ -101,7 +100,7 @@ int AnitaGeomTool::getChanIndexFromRingPhiPol(AnitaRing::AnitaRing_t ring,
 int AnitaGeomTool::getChanIndexFromAntPol(int ant,
 					  AnitaPol::AnitaPol_t pol)
 {
-   if(ant<0 || ant>31) return -1;
+   if(ant<0 || ant>32) return -1;
    int surf,chan;
    surf=AnitaGeom::antToSurfMap[ant];
    if(pol==AnitaPol::kHorizontal) 
@@ -112,106 +111,5 @@ int AnitaGeomTool::getChanIndexFromAntPol(int ant,
       return -1;
 
    return getChanIndex(surf,chan);
-
-}
-
-
-int AnitaGeomTool::getAzimuthPartner(int rx)
-{
-
-  if (rx<16) 
-     return AnitaGeom::lowerAntNums[AnitaGeom::upperPhiNums[rx]];
-  else
-     return AnitaGeom::upperAntNums[AnitaGeom::lowerPhiNums[rx-16]]; 
-
-  return -1;
-}
-
-void AnitaGeomTool::getThetaPartners(int rx,int& rxleft,int& rxright)
-{
-  if (rx<16) {
-     int phi=AnitaGeom::upperPhiNums[rx];
-     int phiLeft=phi-1;
-     if(phiLeft<0) phiLeft=15;
-     int phiRight=phi+1;
-     if(phiRight>15) phiRight=0;
-     rxleft=AnitaGeom::upperAntNums[phiLeft];
-     rxright=AnitaGeom::upperAntNums[phiRight];
-  }
-  else {
-     int phi=AnitaGeom::lowerPhiNums[rx-16];
-     int phiLeft=phi-1;
-     if(phiLeft<0) phiLeft=15;
-     int phiRight=phi+1;
-     if(phiRight>15) phiRight=0;
-     rxleft=AnitaGeom::lowerAntNums[phiLeft];
-     rxright=AnitaGeom::lowerAntNums[phiRight];
-  }
-}
-
-int AnitaGeomTool::getPhiSector(int rx)
-{
-  if (rx<16)
-    return AnitaGeom::upperPhiNums[rx];
-  else
-    return AnitaGeom::lowerPhiNums[rx-16];
-
-  return 0;
-}
-float AnitaGeomTool::getDirectionwrtNorth(int phimax,float heading) {
-
-    if(phimax<0 || phimax>=16) return -1.;
-
-    //Copied this change from Amy don't (yet) know if it is correct
-    float direction=(1.*360./16)+heading-(phimax*360./16);
-    //    float direction=(2*360./16)+heading-(phimax*360./16);
-//    float direction=heading+(phimax*360./16);
-    if(direction>360) direction-=360;
-    //std::cout << direction << endl;
-    return direction;
-
-}
-
-
-
-int AnitaGeomTool::getSurfChanFromChanIndex(int chanIndex, // input channel index
-				int &surf,int &chan) // output surf and channel
-{
-  if(chanIndex<0 || chanIndex>=NUM_DIGITZED_CHANNELS)
-    return 0;
-
-  //  std::cout << "chanIndex is " << chanIndex << "\n";
-  chan=chanIndex%9; // 0 to 8
-  surf=(chanIndex-chan)/9; // 0 to 8
-
-  return 1;
-
-}
-int AnitaGeomTool::getAntPolFromSurfChan(int surf,int chan,int &ant, AnitaPol::AnitaPol_t &pol) 
-{
-
-  ant=AnitaGeom::surfToAntMap[surf][chan];
-
-  //  std::cout << "surf, chan, ant are " << surf << " " << chan << "\n";
-
-  if (ant>0)
-    pol=AnitaPol::kHorizontal;
-  else
-    pol=AnitaPol::kVertical;
-
-  ant=abs(ant)-1; // so that it's from 0 to 31
-
-  return 1;
-}
-int AnitaGeomTool::getLayer(int irx) 
-{
-  if (irx<8)
-    return 0;
-  else if (irx>=8 && irx<16)
-    return 1;
-  else if (irx>=16)
-    return 2;
-
-  return 0;
 
 }
