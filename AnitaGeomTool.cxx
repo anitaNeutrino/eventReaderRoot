@@ -118,37 +118,53 @@ int AnitaGeomTool::getChanIndexFromAntPol(int ant,
 
 int AnitaGeomTool::getAzimuthPartner(int rx)
 {
+  // input antenna number 0 to 31
+  if (rx<8)
+    return 2*(rx+1)+15;
+  else if (rx>=8 && rx<16)
+    return 2*(rx-7)+15;
+  else if (rx>=16) {
+    if (rx==16)
+      return 8;
+    else if (rx%2==0)
+      return (rx-16)/2+8;
+    else if (rx%2==1)
+      return (rx-17)/2;
 
-  if (rx<16) 
-     return AnitaGeom::lowerAntNums[AnitaGeom::upperPhiNums[rx]];
-  else
-     return AnitaGeom::upperAntNums[AnitaGeom::lowerPhiNums[rx-16]]; 
-
+  }
+ 
   return -1;
 }
 
 void AnitaGeomTool::getThetaPartners(int rx,int& rxleft,int& rxright)
 {
-  if (rx<16) {
-     int phi=AnitaGeom::upperPhiNums[rx];
-     int phiLeft=phi-1;
-     if(phiLeft<0) phiLeft=15;
-     int phiRight=phi+1;
-     if(phiRight>15) phiRight=0;
-     rxleft=AnitaGeom::upperAntNums[phiLeft];
-     rxright=AnitaGeom::upperAntNums[phiRight];
-  }
-  else {
-     int phi=AnitaGeom::lowerPhiNums[rx-16];
-     int phiLeft=phi-1;
-     if(phiLeft<0) phiLeft=15;
-     int phiRight=phi+1;
-     if(phiRight>15) phiRight=0;
-     rxleft=AnitaGeom::lowerAntNums[phiLeft];
-     rxright=AnitaGeom::lowerAntNums[phiRight];
-  }
-}
+  // input antenna number 0 to 31
+  if (rx<0 || rx>31)    
+    std::cout << "Antenna number out of range!\n";  
+  if (rx<8)    
+    rxleft=rx+8;
+  else if (rx==8)
+    rxleft=7; 
+  else if (rx<16)    
+    rxleft=rx-9;  
+  else if (rx==16)    
+    rxleft=31;  
+  else    
+    rxleft=rx-1;  
+ 
+  if (rx<7)    
+    rxright=rx+9;  
+  if (rx==7)    
+    rxright=8;  
+  if (rx<16)   
+    rxright=rx-8;  
+  if (rx<31)   
+    rxright=rx+1;  
+  if (rx==31)    
+    rxright=16;   
+  //  std::cout << "rx, rxleft, rxright " << rx << " " << rxleft << " " << rxright << "\n"; 
 
+}
 int AnitaGeomTool::getPhiSector(int rx)
 {
   if (rx<16)
@@ -161,10 +177,7 @@ int AnitaGeomTool::getPhiSector(int rx)
 float AnitaGeomTool::getDirectionwrtNorth(int phimax,float heading) {
 
     if(phimax<0 || phimax>=16) return -1.;
-
-    //Copied this change from Amy don't (yet) know if it is correct
-    float direction=(1.*360./16)+heading-(phimax*360./16);
-    //    float direction=(2*360./16)+heading-(phimax*360./16);
+    float direction=(2*360./16)+heading-(phimax*360./16);
 //    float direction=heading+(phimax*360./16);
     if(direction>360) direction-=360;
     //std::cout << direction << endl;
@@ -202,16 +215,4 @@ int AnitaGeomTool::getAntPolFromSurfChan(int surf,int chan,int &ant, AnitaPol::A
   ant=abs(ant)-1; // so that it's from 0 to 31
 
   return 1;
-}
-int AnitaGeomTool::getLayer(int irx) 
-{
-  if (irx<8)
-    return 0;
-  else if (irx>=8 && irx<16)
-    return 1;
-  else if (irx>=16)
-    return 2;
-
-  return 0;
-
 }
