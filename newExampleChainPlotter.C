@@ -1,4 +1,4 @@
-//#include "AnitaConventions.h"
+#include "AnitaConventions.h"
 
 void newExampleChainPlotter()
 {
@@ -13,11 +13,11 @@ void newExampleChainPlotter(int run) {
   char headerName[FILENAME_MAX];
   char hkName[FILENAME_MAX];
   sprintf(eventName,"/unix/anita1/webData/initial/run%d/eventFile%d*.root",run,run);
-  sprintf(headerName,"/unix/anita1/webData/initial/run%d/timedHeadFile%d.root",run,run);
+  sprintf(headerName,"/unix/anita1/webData/initial/run%d/headFile%d.root",run,run);
   sprintf(hkName,"/unix/anita1/webData/initial/run%d/prettyHkFile%d.root",run,run);
 
   RawAnitaEvent *event = 0;
-  TimedAnitaHeader *header =0;
+  RawAnitaHeader *header =0;
   PrettyAnitaHk *hk = 0;
   
   TChain *eventChain = new TChain("eventTree");
@@ -45,7 +45,7 @@ void newExampleChainPlotter(int run) {
   prettyHkTree->GetEntry(1000);
 
 
-  UsefulAnitaEvent realEvent(event,WaveCalType::kVTFullJWPlus,hk);
+  UsefulAnitaEvent realEvent(event,WaveCalType::kVTFullJW,hk);
   cout << realEvent.eventNumber << " " << header->eventNumber << endl;
   cout << realEvent.gotCalibTemp << " " << realEvent.calibTemp << endl;
   TGraph *gr = realEvent.getGraph(14,AnitaPol::kHorizontal);
