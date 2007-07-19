@@ -11,8 +11,6 @@
 
 //Includes
 #include <TObject.h>
-#include <TF1.h>
-#include <TH1.h>
 #include "AnitaConventions.h"
 
 
@@ -46,33 +44,21 @@ class AnitaEventCalibrator : public TObject
   float tcalEpsilon[NUM_SURF][NUM_CHIP][NUM_RCO];
   float tcalRcoDelayBin[NUM_SURF][NUM_CHIP][NUM_RCO];
   
-  //Variables for clock-based trigger jitter correction
-  float clockJitterOffset[NUM_SURF][NUM_CHIP];
-  float fastClockJitterOffset[NUM_SURF][NUM_CHIP];
-
   //Cable Length Calib
   float groupDelayCalib[NUM_SURF][NUM_CHAN];
 
   //Temporary variables that don't really need to be part of the class
   int rawArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
-  int fLabChip[NUM_SURF][NUM_CHAN];
   int rcobit[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
   int scaArray[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
   int unwrappedArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
+  double timeArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
   double surfTimeArray[NUM_SURF][NUM_SAMP];
   double mvArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
   int numPointsArray[NUM_SURF][NUM_CHAN];
 
-  double clockPhiArray[NUM_SURF];
-  double timeArray[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
 
-  TF1 *fSquareWave;
 
-  void processEventRG(UsefulAnitaEvent *eventPtr);
-  void processEventJW(UsefulAnitaEvent *eventPtr,float temp);
-  void zeroMean();
-  void processClockJitter();
-  void processClockJitterFast();
 
  protected:
    static AnitaEventCalibrator *fgInstance;  
@@ -80,12 +66,12 @@ class AnitaEventCalibrator : public TObject
 
  private:
   void loadCalib();
+  void processEventRG(UsefulAnitaEvent *eventPtr);
+  void processEventJW(UsefulAnitaEvent *eventPtr,float temp);
   float Get_Interpolation_X(float x1, float y1, float x2, float y2, float y);
    
-  
 
-  ClassDef(AnitaEventCalibrator,1);
-  
+
 };
 
 
