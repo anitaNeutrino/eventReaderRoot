@@ -1,4 +1,4 @@
-//#include "AnitaConventions.h"
+#include "AnitaConventions.h"
 
 void sillyFriendChainExample()
 {
@@ -33,6 +33,6 @@ void sillyFriendChainExample(int run) {
   eventChain->AddFriend("adu5PatTree",gpsName);
 
   //Draw something
-  eventTree->Draw("header.eventNumber:eventNumber");
+  eventTree->Draw("pressures[1]:altitude");
 
 }

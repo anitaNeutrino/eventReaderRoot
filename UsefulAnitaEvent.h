@@ -23,7 +23,6 @@ class UsefulAnitaEvent: public RawAnitaEvent
  public:
   UsefulAnitaEvent();
   UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, PrettyAnitaHk *theHk=0);
-  UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, Float_t surfTemp);
   ~UsefulAnitaEvent();
   int calibrateEvent(WaveCalType::WaveCalType_t calType);
 
@@ -31,8 +30,6 @@ class UsefulAnitaEvent: public RawAnitaEvent
   static int getChanIndex(int surf, int chan)
      {return chan+(9*surf);}
 
-
-  TGraph *getGraphFromSurfAndChan(int surf, int chan);
   TGraph *getGraph(int chanIndex);
   TGraph *getGraph(int ant, AnitaPol::AnitaPol_t pol);
   TGraph *getGraph(AnitaRing::AnitaRing_t ring,
