@@ -1,0 +1,38 @@
+##############################################################################
+###### Event Reader --- A Prototype ANITA Event Reader in ROOT format   ######
+######                                                                  ######
+###### Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                          ######
+##############################################################################
+
+
+Introduction
+============
+This is version 2.1 of the ANITA Event Reader for ROOT. It is meant to be a
+simple class that will read in the raw event data (in ROOT format as available
+at ) and convert it into UsefulAnitaEvent calibrated objects. 
+
+
+Compiling libAnitaEvent.so
+===========================
+a) Ensure you have a vald ROOT installation (http://root.cern.ch) and the ROOTSYS environmental variable is correctly set
+b) Type make
+
+Running the example scripts
+==========================
+There are four example root scripts. In order to run them you need to download the new run sized ROOT trees from eg:
+http://www.physics.ohio-state.edu/anita/private/flightData/firstDay/ 
+(click on the Event (ROOT) link on the lefthand side).
+
+The first script illustrates how you can use friend trees to plot variables from different trees against each other. After editing the script to point at the approprite data location on your machine, you should be able to run the script by:
+root sillyFriendExample.C
+
+The second script illustrates how you can use friend trees to get a properly calibrated (including temperature calibration) voltage/time data from the data. Once again after making the neccesary local adjustments to point at the data on your machine, you should be able to run the script by:
+root newExamplePlotter.C
+
+Then there are two scripts, sillyFriendChainExample.C and newExampleChainPlotter.C, that do the same as the first two scripts but are for the more general case where there can be multiple event files in a run (ROOT files are subject to a 2GB file limit). You could extend these examples to form a TChain of multiple runs. 
+
+Notes
+======
+As of version 2.0 the implementation of the data interface is frozen. If people have comments, complaints or requests they shouldn't hesitate to contact me. 
+
+In AnitaGeomTool and therefore in the rest of the code it should be noted that a 'C' style numbering convention is used. Therefore antennas are numbered 0-31 and phi sectors numbered 0-15. 

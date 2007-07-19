@@ -1,0 +1,51 @@
+##############################################################################
+###### Event Reader --- A Prototype ANITA Event Reader in ROOT format   ######
+######                                                                  ######
+###### Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                          ######
+##############################################################################
+
+
+Introduction
+============
+This is version 1.0 of the ANITA Event Reader for ROOT. It is meant to be a
+simple class that will read in the raw event data (in ROOT format as available
+at ) and convert it into UsefulAnitaEvent calibrated objects. 
+
+
+
+Compiling dumpEvents
+====================
+a) Type make
+
+Running dumpEvents
+=================
+The directory containg libEventReader.so must be in either your system library
+path or your own LD_LIBRARY_PATH.
+
+For usage instructions run dumpEvents:
+Usage: 
+        ./dumpEvents <psev filename> <calib type>
+
+Available Calib Types:
+        0  --  No Calibration
+        1  --  Just Unwrap
+        2  --  Raw(ish) ADCs
+        3  --  Default Calibration
+        4  --  Full Labrador Calibration (from ANITA note 115)
+        5  --  Full Labrador Calibration + Measured Cable Delays
+        6  --  Jiwoo's Time Calibration (no voltage calibration)
+        7  --  Jiwoo's Time Calibration + Measured Cable Delays
+
+
+Running the root script
+=======================
+The simple root script will look for a psev file named testFile.dat.gz in the
+local directory. Either edit the script to point to a real file or copy/link a
+real file to this location. Then type:
+root simpleRootExample.C
+
+
+Notes
+======
+Version 2.0 is also very rough around the edges. If people have comments,
+complaints or requests they shouldn't hesitate to contact me. 
