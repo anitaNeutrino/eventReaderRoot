@@ -13,7 +13,6 @@
 #include <TObject.h>
 #include <TGraph.h>
 #include "RawAnitaEvent.h"
-#include "PrettyAnitaHk.h"
 #include "AnitaConventions.h"
 #include "AnitaEventCalibrator.h"
 
@@ -22,8 +21,7 @@ class UsefulAnitaEvent: public RawAnitaEvent
 
  public:
   UsefulAnitaEvent();
-  UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, PrettyAnitaHk *theHk=0);
-  UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, Float_t surfTemp);
+  UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType);
   ~UsefulAnitaEvent();
   int calibrateEvent(WaveCalType::WaveCalType_t calType);
 
@@ -31,8 +29,6 @@ class UsefulAnitaEvent: public RawAnitaEvent
   static int getChanIndex(int surf, int chan)
      {return chan+(9*surf);}
 
-
-  TGraph *getGraphFromSurfAndChan(int surf, int chan);
   TGraph *getGraph(int chanIndex);
   TGraph *getGraph(int ant, AnitaPol::AnitaPol_t pol);
   TGraph *getGraph(AnitaRing::AnitaRing_t ring,
@@ -41,8 +37,6 @@ class UsefulAnitaEvent: public RawAnitaEvent
 
 
   //The calibrated numbers
-  Int_t gotCalibTemp;
-  Float_t calibTemp;
   WaveCalType::WaveCalType_t fCalType;
   int fNumPoints[NUM_DIGITZED_CHANNELS];
   double fVolts[NUM_DIGITZED_CHANNELS][NUM_SAMP];

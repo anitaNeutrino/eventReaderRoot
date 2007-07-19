@@ -14,7 +14,7 @@ ROOTINCLUDES      = -I$(ROOTSYS)/include
 INCLUDES	= 
 CXXFLAGS	= $(EXCEPTION) $(OPT) $(CXXOPT) -fPIC $(INCLUDES) $(ROOTINCLUDES)
 
-ROOTLIBS      = -L$(ROOTSYS)/lib $(shell $(ROOTSYS)/bin/root-config --libs) -lMinuit -lTreePlayer
+ROOTLIBS      = -L$(ROOTSYS)/lib $(shell $(ROOTSYS)/bin/root-config --libs) -lMinuit
 ROOTGLIBS     = -L$(ROOTSYS)/lib $(shell $(ROOTSYS)/bin/root-config --glibs)
 LIBS		= -lz -lm $(ROOTLIBS)
 
@@ -26,24 +26,21 @@ LIBS		= -lz -lm $(ROOTLIBS)
 
 
 ROOT_LIBRARY = libAnitaEvent.so
-TREE_MAKER = makeHeadTreeRunFiles makePrettyHkRunFiles makeAdu5PatFiles makeAdu5VtgFiles makeSurfhkFiles makeTurfRateFiles
-LIB_OBJS = RawAnitaEvent.o UsefulAnitaEvent.o  AnitaEventCalibrator.o AnitaGeomTool.o RawAnitaHeader.o PrettyAnitaHk.o Adu5Pat.o Adu5Vtg.o SurfHk.o TurfRate.o RawDataReader.o AnitaConventions.o TimedAnitaHeader.o eventDict.o
-CLASS_HEADERS = RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaHk.h Adu5Pat.h Adu5Vtg.h SurfHk.h TurfRate.h AnitaEventCalibrator.h AnitaConventions.h AnitaGeomTool.h TimedAnitaHeader.h
-
+TREE_MAKER = makeBodyTree
+LIB_OBJS = RawAnitaEvent.${OBJSUF} RawAnitaEventDict.$(OBJSUF) UsefulAnitaEvent.$(OBJSUF) UsefulAnitaEventDict.$(OBJSUF) AnitaEventCalibrator.$(OBJSUF) AnitaEventCalibratorDict.$(OBJSUF) AnitaGeomTool.$(OBJSUF)
+ROOT_OBJS = eventdict.o
 
 
 all : $(ROOT_LIBRARY) 
-raw: readRawData
 
-readRawData : $(ROOT_LIBRARY) readRawData.$(SRCSUF)
-	@echo "<**Compiling**> "  
-	$(LD)  $(CXXFLAGS) $(LDFLAGS) readRawData.$(SRCSUF) $(ROOT_LIBRARY) $(LIBS) -o $@
-
+$(TREE_MAKER) : $(ROOT_LIBRARY) $(TREE_MAKER).$(SRCSUF)
+	@echo "<**Linking**> "  
+	$(LD)  $(CXXFLAGS) $(LDFLAGS) $(TREE_MAKER).$(SRCSUF) $(ROOT_LIBRARY) $(LIBS) -o $@
 
 $(ROOT_LIBRARY) : $(LIB_OBJS) 
 	@echo "Linking $@ ..."
 	$(LD) $(SOFLAGS) $(LDFLAGS) $(LIB_OBJS) -o $@
-	@ rm -f *Dict* 	
+
 
 %.$(OBJSUF) : %.$(SRCSUF)
 	@echo "<**Compiling**> "$<
@@ -54,10 +51,10 @@ $(ROOT_LIBRARY) : $(LIB_OBJS)
 	$(CXX) $(CXXFLAGS) $ -c $< -o  $@
 
 
-eventDict.C: $(CLASS_HEADERS)
+%Dict.C: %.h
 	@echo "Generating dictionary ..."
-	@ rm -f *Dict* 
-	rootcint $@ -c $(CLASS_HEADERS) LinkDef.h
+#	@ rm -f *Dict* 
+	rootcint $@ -c $<
 
 clean:
 	@rm -f *Dict*
