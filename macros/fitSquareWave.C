@@ -1,7 +1,7 @@
 #include "AnitaConventions.h"
 #include "UsefulAnitaEvent.h"
 #include "RawAnitaEvent.h"
-#include "TimedAnitaHeader.h"
+#include "RawAnitaHeader.h"
 #include "PrettyAnitaHk.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -35,11 +35,11 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
   char headerName[FILENAME_MAX];
   char hkName[FILENAME_MAX];
   sprintf(eventName,"/unix/anita1/webData/firstDay/run%d/eventFile%d*.root",run,run);
-  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/timedHeadFile%d.root",run,run);
+  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/headFile%d.root",run,run);
   sprintf(hkName,"/unix/anita1/webData/firstDay/run%d/prettyHkFile%d.root",run,run);
 
   RawAnitaEvent *event = 0;
-  TimedAnitaHeader *header =0;
+  RawAnitaHeader *header =0;
   PrettyAnitaHk *hk = 0;
   
   TChain *eventChain = new TChain("eventTree");
@@ -158,9 +158,9 @@ void fitSquareWave(int run, int startEntry, int numEntries) {
        for(int i=0;i<realEvent.fNumPoints[ci];i++) {
 	  times[i]=realEvent.fTimes[ci][i];
 	 Double_t tempV=realEvent.fVolts[ci][i]-offset;	
-	 if(tempV>maxVal*0.9)
+	 if(tempV>maxVal*0.5)
 	   volts[i]=1;
-	 else if(tempV<minVal*0.9)
+	 else if(tempV<minVal*0.5)
 	   volts[i]=-1;
 	 else {
 	   volts[i]=tempV/maxVal;

@@ -1,7 +1,7 @@
 #include "AnitaConventions.h"
 #include "UsefulAnitaEvent.h"
 #include "RawAnitaEvent.h"
-#include "TimedAnitaHeader.h"
+#include "RawAnitaHeader.h"
 #include "PrettyAnitaHk.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -34,11 +34,11 @@ void dontFitSquareWave(int run, int startEntry, int numEntries) {
   char headerName[FILENAME_MAX];
   char hkName[FILENAME_MAX];
   sprintf(eventName,"/unix/anita1/webData/firstDay/run%d/eventFile%d*.root",run,run);
-  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/timedHeadFile%d.root",run,run);
+  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/headFile%d.root",run,run);
   sprintf(hkName,"/unix/anita1/webData/firstDay/run%d/prettyHkFile%d.root",run,run);
 
   RawAnitaEvent *event = 0;
-  TimedAnitaHeader *header =0;
+  RawAnitaHeader *header =0;
   PrettyAnitaHk *hk = 0;
   
   TChain *eventChain = new TChain("eventTree");
@@ -91,8 +91,6 @@ void dontFitSquareWave(int run, int startEntry, int numEntries) {
   if(nentries<maxEntry)
      maxEntry=nentries;
 
-  TH1F histHigh("histHigh","histHigh",1000,0,1000);
-  TH1F histLow("histLow","histLow",1000,-1000,0);
   for(Long64_t entry=startEntry;entry<maxEntry;entry++) {
     
     //Stupidly must do this to be perfectly safe  
@@ -107,48 +105,31 @@ void dontFitSquareWave(int run, int startEntry, int numEntries) {
     Float_t phi0=0;
     for(int surf=0;surf<9;surf++) {
        Int_t ci=UsefulAnitaEvent::getChanIndex(surf,8);
+       gr[surf] = realEvent.getGraph(ci);
 
-       histLow.Reset();
-       histHigh.Reset();
-       for(int i=0;i<realEvent.fNumPoints[ci];i++) {
-	  if(realEvent.fVolts[ci][i]>0) {
-	   histHigh.Fill(realEvent.fVolts[ci][i]);
-	  }
-	  else {
-	     histLow.Fill(realEvent.fVolts[ci][i]);
-	  }
-       }
-       //cout << maxVal << "\t" << minVal << endl;
-       //       cout << histHigh.GetMean() << "\t" << histLow.GetMean() << endl;
-       Double_t offset=(histHigh.GetMean()+histLow.GetMean())/2;
-       Double_t maxVal=histHigh.GetMean()-offset;
-       Double_t minVal=histLow.GetMean()-offset;
-       //       cout << maxVal << "\t" << minVal << endl;
-       
-       Int_t numPoints=realEvent.fNumPoints[ci];
-       Double_t times[260];
-       Double_t volts[260];
-       Int_t gotPhiGuess=0;
+       Int_t numPoints= gr[surf]->GetN();
+       Double_t *times = gr[surf]->GetX();
+       Double_t *volts = gr[surf]->GetY();
+
+//        //Take a guess at phi
+       Double_t vMax=TMath::MaxElement(numPoints,volts);
+       Double_t vMin=TMath::MinElement(numPoints,volts);
+
+
        Float_t phiGuess=0;
-       for(int i=0;i<realEvent.fNumPoints[ci];i++) {
-	  times[i]=realEvent.fTimes[ci][i];
-	 Double_t tempV=realEvent.fVolts[ci][i]-offset;	
-	 if(tempV>maxVal*0.9)
-	   volts[i]=1;
-	 else if(tempV<minVal*0.9)
-	   volts[i]=-1;
-	 else {
-	   volts[i]=tempV/maxVal;
-	 }
-       }
-       
        for(int i=0;i<realEvent.fNumPoints[ci]-1;i++) {
-	 if(volts[i]>=0 &&
-	    volts[i+1]<0) {
-	   phiGuess=interpolateX(times[i],volts[i],times[i+1],volts[i+1],0);
-	   if(i>3)
-	     break;
-	 }
+	  if(volts[i]>=0 &&
+	     volts[i+1]<0) {
+	     phiGuess=times[i];
+	     float v1=volts[i];
+	     if(v1>0.6*vMax) v1=0.8*vMax;
+	     float v2=volts[i+1];
+	     if(v2<0.6*vMin) v2=0.8*vMin;
+
+	     phiGuess=interpolateX(times[i],v1,times[i+1],v2,0);
+	     if(i>3)
+		break;
+	  }
        }
        //       cout << phiGuess << endl; 
        {

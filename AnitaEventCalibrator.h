@@ -67,6 +67,8 @@ class AnitaEventCalibrator : public TObject
   double timeArray[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
 
   TF1 *fSquareWave;
+  TH1F *fHistLow;
+  TH1F *fHistHigh;
 
   void processEventRG(UsefulAnitaEvent *eventPtr);
   void processEventJW(UsefulAnitaEvent *eventPtr,float temp);
