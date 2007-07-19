@@ -32,7 +32,7 @@ class UsefulAnitaEvent: public RawAnitaEvent
      {return chan+(9*surf);}
 
 
-  TGraph *getGraphFromSurfAndChan(int surf, int chan);
+  TGraph *getGraph(int surf, int chan);
   TGraph *getGraph(int chanIndex);
   TGraph *getGraph(int ant, AnitaPol::AnitaPol_t pol);
   TGraph *getGraph(AnitaRing::AnitaRing_t ring,

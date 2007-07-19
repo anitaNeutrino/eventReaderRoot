@@ -47,13 +47,13 @@ class AnitaGeomTool
   
   static int getAzimuthPartner(int rx); // output the antenna that points to the same place in phi as the input antenna
   
-  static void getThetaPartners(int rx,int& rxleft,int& rxright); // output the antennas that are in neighbouring phi sectors (not the neighbouring antennas)
+  static void getThetaPartners(int rx,int& rxleft,int& rxright); // output the antenna that points to the same place in phi as the input antenna
 
   static int getPhiSector(int rx); // phi sector of this antenna.  rx runs from 0 to 31.
 
   static float getDirectionwrtNorth(int phi,float heading); // get direction that a phi sector is pointing wrt north.  Also takes heading as a input.
 
-  static int getLayer(int irx); // get layer given antenna number
+
 
 
 
