@@ -9,12 +9,9 @@
 #include <iostream>
 #include "AnitaEventCalibrator.h"
 #include "UsefulAnitaEvent.h"
-#include <TMath.h>
-
-//Clock Period Hard Coded
-const float clockPeriod=29.970;
 
 //Fitting function
+
 Double_t funcSquareWave(Double_t *x, Double_t *par)
 {
    Double_t phi=par[0];
@@ -58,50 +55,17 @@ Double_t funcSquareWave(Double_t *x, Double_t *par)
 }
 
 
-Double_t newFuncSquareWave(Double_t *x, Double_t *par)
-{
-   Double_t phi=par[0];
-   Double_t a=par[1];
-   Double_t b=par[2];
-
-   Double_t sllh=par[4];
-   Double_t slhl=par[4];
-   
-   Double_t periodLeft=clockPeriod-2*par[4];   
-   Double_t dtLow=par[3]*periodLeft;
-   Double_t dtHigh=(1-par[3])*periodLeft;
-
-
-   Double_t t=x[0]-phi;
-   
-   Double_t mlh=(a-b)/sllh;
-   Double_t mhl=(b-a)/slhl;
-
-   while(t<0) {
-      t+=clockPeriod;
-   }
-   while(t>clockPeriod) {
-      t-=clockPeriod;
-   }
-   if(t<dtLow)
-      return b;
-   if(t<dtLow+sllh) {
-      Double_t t1=t-dtLow;
-      return (t1*mlh)+b;
-   }
-   if(t<dtLow+sllh+dtHigh)
-      return a;
-   if(t<dtLow+sllh+dtHigh+slhl) {
-      Double_t t2=t-(dtLow+sllh+dtHigh);
-      return (mhl*t2)+a;
-   }
-   
-      
-   return a;
 
 
 
-}
+
+
+
+
+
+
+
+
 
 
 
@@ -115,7 +79,6 @@ AnitaEventCalibrator::AnitaEventCalibrator()
    : TObject()
 {
    fSquareWave=0;
-
    //Default constructor
    std::cout << "AnitaEventCalibrator::AnitaEventCalibrator()" << std::endl;
    loadCalib();
@@ -151,8 +114,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
    if(calType==WaveCalType::kVTFullJW || calType==WaveCalType::kVTLabJW ||
       calType==WaveCalType::kVTFullJWPlus || calType==WaveCalType::kVTLabJWPlus ||
       calType==WaveCalType::kVTFullJWPlusClock || calType==WaveCalType::kVTLabJWPlusClock ||
-      calType==WaveCalType::kVTLabJWPlusClockZero || calType==WaveCalType::kVTFullJWPlusClockZero ||
-      calType==WaveCalType::kVTLabJWPlusFastClockZero || calType==WaveCalType::kVTFullJWPlusFastClockZero) {
+      calType==WaveCalType::kVTLabJWPlusClockZero || calType==WaveCalType::kVTFullJWPlusClockZero) {
       //Do nothing
       if(eventPtr->gotCalibTemp)
 	 processEventJW(eventPtr,eventPtr->calibTemp);
@@ -172,14 +134,9 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
       processClockJitter();
    }
 
-   if(calType==WaveCalType::kVTLabJWPlusFastClockZero || calType==WaveCalType::kVTFullJWPlusFastClockZero) {
-     processClockJitterFast();
-   }
-
    //Zero Mean
    if(calType==WaveCalType::kVTLabClockZeroRG || calType==WaveCalType::kVTFullClockZeroRG ||
-      calType==WaveCalType::kVTLabJWPlusClockZero || calType==WaveCalType::kVTFullJWPlusClockZero ||
-      calType==WaveCalType::kVTLabJWPlusFastClockZero || calType==WaveCalType::kVTFullJWPlusFastClockZero) {
+      calType==WaveCalType::kVTLabJWPlusClockZero || calType==WaveCalType::kVTFullJWPlusClockZero) {
 
       zeroMean();
    }
@@ -190,168 +147,60 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
 
 
 
-// void AnitaEventCalibrator::processClockJitter() {
-//    if(!fSquareWave) {
-//       fSquareWave = new TF1("fSquareWave",funcSquareWave,5,90,7);
-//       fSquareWave->SetParameters(25,200,-200,12.881,16.428,0.33,0.33);
-//       fSquareWave->SetParLimits(0,0,35);
-//       fSquareWave->SetParLimits(1,50,350);
-//       fSquareWave->SetParLimits(2,-400,-50);
-//       //  fSquareWave->SetParLimits(3,8,16);
-//       //  fSquareWave->SetParLimits(4,10,20);
-//       fSquareWave->SetParLimits(3,12.881,12.881);
-//       fSquareWave->SetParLimits(4,16.428,16.428);
-//       fSquareWave->SetParLimits(5,0.33,0.33);
-//       fSquareWave->SetParLimits(6,0.33,0.33);
-//    }
-
-//    Float_t phi0=0;
-//    Double_t times[NUM_SAMP];
-//    Double_t volts[NUM_SAMP];
-
-//    for(int surf=0;surf<NUM_SURF;surf++) {
-//       //First fill temp arrays
-//       Int_t numPoints=numPointsArray[surf][8];
-//       for(int samp=0;samp<numPoints-1;samp++) {
-// 	 times[samp]=surfTimeArray[surf][samp];
-// 	 volts[samp]=mvArray[surf][8][samp];
-//       }
-
-//       Double_t vMax=TMath::MaxElement(numPoints,volts);
-//       Double_t vMin=TMath::MinElement(numPoints,volts);
-
-//       //Next need to guess what phi is
-//       Float_t phiGuess=0;
-//       for(int i=0;i<numPoints-1;i++) {
-// 	 if(volts[i]>=0 &&
-// 	     volts[i+1]<0) {
-// 	    phiGuess=times[i];
-// 	    if(i>3)
-// 	       break;
-// 	 }
-//       }
-           
-//       TGraph grTemp(numPoints,times,volts);
-//       fSquareWave->SetParameters(phiGuess,0.9*vMax,0.9*vMin,12.881,16.428,0.33,0.33);
-//       grTemp.Fit(fSquareWave,"QR","goff");
-
-
-//       if(surf==0) 
-// 	 phi0=fSquareWave->GetParameter(0);
-      
-//       float period=fSquareWave->GetParameter(3)+fSquareWave->GetParameter(4)+
-// 	 fSquareWave->GetParameter(5)+fSquareWave->GetParameter(6);
-      
-//       float phi=fSquareWave->GetParameter(0);
-//       if((phi-phi0)>15)
-// 	 phi-=period;
-//       if((phi-phi0)<-15)
-// 	 phi+=period;
-      
-//       Double_t clockCor=phi-phi0;
-//       clockPhiArray[surf]=(phi-phi0)-clockJitterOffset[surf][fLabChip[surf][8]];
-//       //      std::cout << phi << "\t"  << phi0 << "\t" << clockJitterOffset[surf][fLabChip[surf][8]]
-//       //		<< std::endl;
-
-
-//       //Now can actually shift times
-//       // Normal channels are corrected by DeltaPhi - <DeltaPhi>
-//       // Clock channels are corrected by DeltaPhi (just so the clocks line up)
-//       for(int chan=0;chan<NUM_CHAN;chan++) {
-// 	 for(int samp=0;samp<numPoints;samp++) {
-// 	    if(chan<8) {
-// 	       timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockPhiArray[surf];
-// 	    }
-// 	    else
-// 	       timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockCor;
-// 	 }
-//       }
-
-
-//    }
-   
-// }
-
-
 void AnitaEventCalibrator::processClockJitter() {
    if(!fSquareWave) {
-      fSquareWave = new TF1("fSquareWave",newFuncSquareWave,5,90,5);
-      fSquareWave->SetParameters(25,1,-1,0.439,0.33);
+      fSquareWave = new TF1("fSquareWave",funcSquareWave,5,90,7);
+      fSquareWave->SetParameters(25,200,-200,12.881,16.428,0.33,0.33);
       fSquareWave->SetParLimits(0,0,35);
-      fSquareWave->SetParLimits(1,1,1);
-      fSquareWave->SetParLimits(2,-1,-1);
-      fSquareWave->SetParLimits(3,0.439,0.439);
-      fSquareWave->SetParLimits(4,0.33,0.33);
-      
+      fSquareWave->SetParLimits(1,50,350);
+      fSquareWave->SetParLimits(2,-400,-50);
+      //  fSquareWave->SetParLimits(3,8,16);
+      //  fSquareWave->SetParLimits(4,10,20);
+      fSquareWave->SetParLimits(3,12.881,12.881);
+      fSquareWave->SetParLimits(4,16.428,16.428);
+      fSquareWave->SetParLimits(5,0.33,0.33);
+      fSquareWave->SetParLimits(6,0.33,0.33);
    }
 
-  Double_t fLowArray[NUM_SAMP];
-  Double_t fHighArray[NUM_SAMP];
    Float_t phi0=0;
    Double_t times[NUM_SAMP];
    Double_t volts[NUM_SAMP];
 
-
    for(int surf=0;surf<NUM_SURF;surf++) {
       //First fill temp arrays
       Int_t numPoints=numPointsArray[surf][8];
-      Int_t numHigh=0;
-      Int_t numLow=0;
-      for(int samp=0;samp<numPoints;samp++) {
-	 if(mvArray[surf][8][samp]>0) {
-	    fHighArray[numHigh]=mvArray[surf][8][samp];
-	    numHigh++;
-	 }
-	  else {
-	    fLowArray[numLow]=mvArray[surf][8][samp];
-	    numLow++;
-	  }
+      for(int samp=0;samp<numPoints-1;samp++) {
+	 times[samp]=surfTimeArray[surf][samp];
+	 volts[samp]=mvArray[surf][8][samp];
       }
-      Double_t meanHigh=TMath::Mean(numHigh,fHighArray);
-      Double_t meanLow=TMath::Mean(numLow,fLowArray);
-       Double_t offset=(meanHigh+meanLow)/2;
-       Double_t maxVal=meanHigh-offset;
-       //       Double_t minVal=meanLow-offset;
 
-       Int_t gotPhiGuess=0;
-       Float_t phiGuess=0;
-       for(int i=0;i<numPoints;i++) {
-	  times[i]=surfTimeArray[surf][i];
-	 Double_t tempV=mvArray[surf][8][i]-offset;	
-// 	 if(tempV>maxVal*0.6)
-// 	   volts[i]=1;
-// 	 else if(tempV<minVal*0.6)
-// 	   volts[i]=-1;
-// 	 else {
-	 volts[i]=tempV/maxVal;
-	   //	 }
-	 
-	 if(!gotPhiGuess) {
-	    if(tempV>=0 && (mvArray[surf][8][i+1]-offset)<0) {
-	       if(i>3) {
-		  phiGuess=times[i];
-		  gotPhiGuess=1;
-	       }
-	    }
+      //Next need to guess what phi is
+      Float_t phiGuess=0;
+      for(int i=0;i<numPoints-1;i++) {
+	 if(volts[i]>=0 &&
+	     volts[i+1]<0) {
+	    phiGuess=times[i];
+	    if(i>3)
+	       break;
 	 }
-	 
-       }
-
+      }
            
       TGraph grTemp(numPoints,times,volts);
-      fSquareWave->SetParameter(0,phiGuess);
+      fSquareWave->SetParameters(phiGuess,200,-200,12.881,16.428,0.33,0.33);
       grTemp.Fit(fSquareWave,"QR","goff");
 
 
       if(surf==0) 
 	 phi0=fSquareWave->GetParameter(0);
       
+      float period=fSquareWave->GetParameter(3)+fSquareWave->GetParameter(4)+
+	 fSquareWave->GetParameter(5)+fSquareWave->GetParameter(6);
       
       float phi=fSquareWave->GetParameter(0);
       if((phi-phi0)>15)
-	 phi-=clockPeriod;
+	 phi-=period;
       if((phi-phi0)<-15)
-	 phi+=clockPeriod;
+	 phi+=period;
       
       Double_t clockCor=phi-phi0;
       clockPhiArray[surf]=(phi-phi0)-clockJitterOffset[surf][fLabChip[surf][8]];
@@ -377,104 +226,6 @@ void AnitaEventCalibrator::processClockJitter() {
    
 }
 
-
-void AnitaEventCalibrator::processClockJitterFast() {
- 
-  Double_t fLowArray[NUM_SAMP];
-  Double_t fHighArray[NUM_SAMP];
-
-
-
-   Double_t phi0=0;
-   Double_t times[NUM_SAMP];
-   Double_t volts[NUM_SAMP];
-
-   for(int surf=0;surf<NUM_SURF;surf++) {
-      //First fill temp arrays
-      Int_t numPoints=numPointsArray[surf][8];
-      Int_t numHigh=0;
-      Int_t numLow=0;
-      for(int samp=0;samp<numPoints;samp++) {
-	 if(mvArray[surf][8][samp]>0) {
-	    fHighArray[numHigh]=mvArray[surf][8][samp];
-	    numHigh++;
-	 }
-	  else {
-	    fLowArray[numLow]=mvArray[surf][8][samp];
-	    numLow++;
-	  }
-      }
-      Double_t meanHigh=TMath::Mean(numHigh,fHighArray);
-      Double_t meanLow=TMath::Mean(numLow,fLowArray);
-       Double_t offset=(meanHigh+meanLow)/2;
-       Double_t maxVal=meanHigh-offset;
-       //       Double_t minVal=meanLow-offset;
-       //       cout << maxVal << "\t" << minVal << endl;
-       //       std::cout << offset << "\t" << maxVal << "\t" << minVal << std::endl;
-
-       for(int i=0;i<numPoints;i++) {
-	  times[i]=surfTimeArray[surf][i];
-	 Double_t tempV=mvArray[surf][8][i]-offset;	
-	 //	 if(tempV>maxVal*0.9)
-	 //	   volts[i]=1;
-	 //	 else if(tempV<minVal*0.9)
-	 //	   volts[i]=-1;
-	 //	 else {
-	   volts[i]=tempV/maxVal;
-	   //	 }
-	 
-       }
-      
-
-       Double_t phiGuess=0;
-       for(int i=0;i<numPoints-1;i++) {
-	  if(volts[i]>=0 &&
-	     volts[i+1]<0) {
-	     phiGuess=Get_Interpolation_X(times[i],volts[i],times[i+1],volts[i+1],0);
-	     //	     	     std::cout << surf << "\t" << 8 << "\t" << times[i] << "\t" << times[i+1] 
-	     //	     		       << "\t" << volts[i] << "\t" << volts[i+1] << "\t" << phiGuess << std::endl;
-	     if(i>3)
-	       break;
-	  }
-       }
-       
-       if(surf==0) 
-	  phi0=phiGuess;
-       
-       double phi=phiGuess;
-       if((phi-phi0)>15)
-	  phi-=clockPeriod;
-       if((phi-phi0)<-15)
-	  phi+=clockPeriod;
-       
-       
-       Double_t clockCor=phi-phi0;
-       clockPhiArray[surf]=clockCor-fastClockJitterOffset[surf][fLabChip[surf][8]];
-       //       std::cout << phi << "\t"  << phi0 << "\t" << fastClockJitterOffset[surf][fLabChip[surf][8]]
-       //		 << std::endl;
-       
-       
-       //       std::cout << surf << "\t" << 8 <<  "\t" << phiGuess << "\t" << phi << "\t" << phi0 
-       //       		 << "\t" << clockCor << std::endl;
-       //Now can actually shift times
-       // Normal channels are corrected by DeltaPhi - <DeltaPhi>
-       // Clock channels are corrected by DeltaPhi (just so the clocks line up)
-       for(int chan=0;chan<NUM_CHAN;chan++) {
-	  for(int samp=0;samp<numPoints;samp++) {
-	     if(chan<8) {
-		timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockPhiArray[surf];
-	     }
-	     else
-		timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockCor;
-	  }
-       }
-       
-       
-   }
-}
-
-
-
 void AnitaEventCalibrator::zeroMean() {
    //Won't do it for the clock channel due to the assymmetry of the clock signal
    for(int surf=0;surf<NUM_SURF;surf++) {
@@ -497,10 +248,9 @@ void AnitaEventCalibrator::processEventRG(UsefulAnitaEvent *eventPtr) {
       for(int chan=0;chan<NUM_CHAN;chan++) {	 
 	    int goodPoints=0;
 	    int chanIndex=getChanIndex(surf,chan);
-	    int firstHitbus=eventPtr->getFirstHitBus(chanIndex);
-	    int lastHitbus=eventPtr->getLastHitBus(chanIndex);
-	    //	    int wrappedHitbus=((eventPtr->chipIdFlag[chanIndex])&0x8)>>3;
-	    int wrappedHitbus=eventPtr->getWrappedHitBus(chanIndex);
+	    int firstHitbus=eventPtr->firstHitbus[chanIndex];
+	    int lastHitbus=eventPtr->lastHitbus[chanIndex];
+	    int wrappedHitbus=((eventPtr->chipIdFlag[chanIndex])&0x8)>>3;
 	       	    
 	    int labChip=(eventPtr->chipIdFlag[chanIndex])&0x3;
 	    fLabChip[surf][chan]=labChip;
@@ -602,10 +352,9 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
     for (int chan=0; chan<NUM_CHAN; chan++){ 
       int goodPoints=0;
       chanIndex=getChanIndex(surf,chan);
-      int firstHitbus=eventPtr->getFirstHitBus(chanIndex);
-      int lastHitbus=eventPtr->getLastHitBus(chanIndex);
-//      int wrappedHitbus=((eventPtr->chipIdFlag[chanIndex])&0x8)>>3;
-      int wrappedHitbus=eventPtr->getWrappedHitBus(chanIndex);
+      int firstHitbus=eventPtr->firstHitbus[chanIndex];
+      int lastHitbus=eventPtr->lastHitbus[chanIndex];
+      int wrappedHitbus=((eventPtr->chipIdFlag[chanIndex])&0x8)>>3;
 	
 
       labChip=(eventPtr->chipIdFlag[chanIndex])&0x3;
@@ -677,27 +426,6 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
 	  if (index==1) {	  
 	    float epsilon_eff=tcalEpsilon[surf][labChip][irco];
 	    surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin]-epsilon_eff;
-	    
-	    
-	    //////////////////////////////////////////////
-	    //swapping time and voltage for non-monotonic time.
-	    if (ibin>0 && surfTimeArray[surf][ibin-1]>surfTimeArray[surf][ibin]){
-	       float tmp_time=surfTimeArray[surf][ibin];
-	       surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin-1];
-	       surfTimeArray[surf][ibin-1]=tmp_time;
-	       for (int chan=0; chan<NUM_CHAN; chan++){ 
-		  float tmp_v=mvArray[surf][chan][ibin];		
-		  mvArray[surf][chan][ibin]=mvArray[surf][chan][ibin-1];
-		  mvArray[surf][chan][ibin-1]=tmp_v;
-		  tmp_v=unwrappedArray[surf][chan][ibin];		
-		  unwrappedArray[surf][chan][ibin]=unwrappedArray[surf][chan][ibin-1];
-		  unwrappedArray[surf][chan][ibin-1]=(int)tmp_v;
-	      }	      
-	    }
-	    //end of time swapping
-	    //////////////////////
-	    
-	    
 	  }
 	}
 	ibin++;	
@@ -865,13 +593,6 @@ void AnitaEventCalibrator::loadCalib() {
        //       std::cout << surf <<  " " << chip << " " << calib << std::endl;
     }
 
-    sprintf(fileName,"%s/fastClockCalibNums.dat",calibDir);
-    std::ifstream FastClockCalibFile(fileName);
-    FastClockCalibFile.getline(firstLine,179);
-    while(FastClockCalibFile >> surf >> chip >> calib) {
-       fastClockJitterOffset[surf][chip]=calib;
-       //       std::cout << surf <<  " " << chip << " " << calib << std::endl;
-    }
 
     //Load Jiwoo calibrations
     sprintf(fileName,"%s/jiwoo_timecode/anita_surf_time_constant_epsilon.txt",calibDir);

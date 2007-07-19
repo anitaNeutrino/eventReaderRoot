@@ -11,7 +11,7 @@ void plotAllClocks()
    gStyle->SetTitleSize(0.1,"xy");
    gStyle->SetTitleOffset(0.5,"y");
    gStyle->SetOptTitle(0);
-   plotAllClocks(1028,1610,1);
+  plotAllClocks(1028,27165,10);
 }
   
 
@@ -22,11 +22,11 @@ void plotAllClocks(int run, int startEntry, int numEntries) {
   char headerName[FILENAME_MAX];
   char hkName[FILENAME_MAX];
   sprintf(eventName,"/unix/anita1/webData/firstDay/run%d/eventFile%d*.root",run,run);
-  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/timedHeadFile%d.root",run,run);
+  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/headFile%d.root",run,run);
   sprintf(hkName,"/unix/anita1/webData/firstDay/run%d/prettyHkFile%d.root",run,run);
 
   RawAnitaEvent *event = 0;
-  TimedAnitaHeader *header =0;
+  RawAnitaHeader *header =0;
   PrettyAnitaHk *hk = 0;
   
   TChain *eventChain = new TChain("eventTree");
@@ -61,43 +61,48 @@ void plotAllClocks(int run, int startEntry, int numEntries) {
     //Stupidly must do this to be perfectly safe  
     eventChain->GetEntry(entry);
     headTree->GetEntry(entry);
-    prettyHkTree->GetEntry(entry);	
+    prettyHkTree->GetEntry(entry);
+    if((((header->trigTime>=6680000)&&(header->trigTime<=6682000))	//50ms pulses	
+	||((header->trigTime>=80181200)&&(header->trigTime<=80181700))	//600ms pulses	
+	//	||((header->trigTime>=13363300)&&(header->trigTime<=13363500))
+	||((header->trigTime>=66800000)&&(header->trigTime<=66820000)))	//500ms pulses	
+       &&((int)(header->trigType)%2!=0)) {		
        
-    
        
-    UsefulAnitaEvent realEvent(event,WaveCalType::kVTFullJWPlus,hk);
-    cout << entry << "\t" <<  realEvent.eventNumber << " " << header->eventNumber << endl;
-    //  cout << realEvent.gotCalibTemp << " " << realEvent.calibTemp << endl;
-    canClock->Clear();
-    canClock->SetTopMargin(0);
-    TPaveText *topPave = new TPaveText(0.05,0.92,0.95,0.98);
-    topPave->SetBorderSize(0);
-    
-    sprintf(textLabel,"Event %lu",realEvent.eventNumber);
-    TText *eventText = topPave->AddText(textLabel);
-    eventText->SetTextColor(50);
-    topPave->Draw();
-    
-    TPad *graphPad = new TPad("graphPad","This is pad1",0,0,1,0.9);
-    graphPad->SetTopMargin(0);
-    graphPad->Draw();
-    graphPad->Clear();
-    //    graphPad->Clear();
-    for(int surf=0;surf<9;surf++) {
-      if(gr[surf]) delete gr[surf];
+       
+       UsefulAnitaEvent realEvent(event,WaveCalType::kVTFullJWPlus,hk);
+       cout << entry << "\t" <<  realEvent.eventNumber << " " << header->eventNumber << endl;
+       //  cout << realEvent.gotCalibTemp << " " << realEvent.calibTemp << endl;
+       canClock->Clear();
+       canClock->SetTopMargin(0);
+       TPaveText *topPave = new TPaveText(0.05,0.92,0.95,0.98);
+       topPave->SetBorderSize(0);
+       
+       sprintf(textLabel,"Event %lu",realEvent.eventNumber);
+       TText *eventText = topPave->AddText(textLabel);
+       eventText->SetTextColor(50);
+       topPave->Draw();
+       
+       TPad *graphPad = new TPad("graphPad","This is pad1",0,0,1,0.9);
+       graphPad->SetTopMargin(0);
+       graphPad->Draw();
+       graphPad->Clear();
+       //    graphPad->Clear();
+       for(int surf=0;surf<9;surf++) {
+	  if(gr[surf]) delete gr[surf];
+       }
+       graphPad->Divide(2,5);
+       
+       for(int surf=0;surf<9;surf++) {
+	  graphPad->cd(surf+1);
+	  gr[surf] = realEvent.getGraph(UsefulAnitaEvent::getChanIndex(surf,8));
+	  gr[surf]->Draw("al");
+       }
+       canClock->Update();
+       sprintf(pngName,"clocks%lu.png",realEvent.eventNumber);
+       canClock->Print(pngName);
+       //       break;
+       gSystem->Sleep(1000);
     }
-    graphPad->Divide(2,5);
-    
-    for(int surf=0;surf<9;surf++) {
-      graphPad->cd(surf+1);
-      gr[surf] = realEvent.getGraph(UsefulAnitaEvent::getChanIndex(surf,8));
-      gr[surf]->Draw("al");
-    }
-    canClock->Update();
-    sprintf(pngName,"clocks%lu.png",realEvent.eventNumber);
-    canClock->Print(pngName);
-    //       break;
-    gSystem->Sleep(1000);
-  
   }
 }
