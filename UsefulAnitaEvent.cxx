@@ -156,6 +156,10 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 		this->fVolts[chanIndex][samp]=fCalibrator->unwrappedArray[surf][chan][samp];
 		this->fTimes[chanIndex][samp]=fCalibrator->surfTimeArray[surf][samp]+
 		    fCalibrator->groupDelayCalib[surf][chan];
+		//		if(chan==0) {
+		   //		   std::cout << surf << "\t" << chan << "\t" << samp << "\t"
+		   //			     << fCalibrator->surfTimeArray[surf][samp] << std::endl;
+		//		}
 	    }
 	 }
       }
