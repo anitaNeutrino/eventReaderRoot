@@ -456,9 +456,14 @@ void AnitaEventCalibrator::processClockJitterFast() {
        
        //       std::cout << surf << "\t" << 8 <<  "\t" << phiGuess << "\t" << phi << "\t" << phi0 
        //       		 << "\t" << clockCor << std::endl;
+
+
+
+       
        //Now can actually shift times
        // Normal channels are corrected by DeltaPhi - <DeltaPhi>
        // Clock channels are corrected by DeltaPhi (just so the clocks line up)
+       //       std::cout << "clockCor:\t" << clockCor << "\t" << clockPhiArray[surf] << std::endl;
        for(int chan=0;chan<NUM_CHAN;chan++) {
 	  for(int samp=0;samp<numPoints;samp++) {
 	     if(chan<8) {
@@ -617,7 +622,18 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
 	 rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
       }
       
- 
+      if(firstHitbus==lastHitbus) {
+	 std::cout << "Something wrong with HITBUS of event:\t" << eventPtr->eventNumber << "\t" << surf 
+		   << "\t" << chan << "\n";
+	 //Something wrong add this hack	 
+	 for(int tempChan=0;tempChan<NUM_CHAN;tempChan++) {
+	    Int_t tempChanIndex=getChanIndex(surf,tempChan);
+	    firstHitbus=eventPtr->getFirstHitBus(tempChanIndex);
+	    lastHitbus=eventPtr->getLastHitBus(tempChanIndex);
+	    wrappedHitbus=eventPtr->getWrappedHitBus(tempChanIndex);
+	    if(firstHitbus!=lastHitbus) break;	       
+	 }
+      }
 
       if(!wrappedHitbus) {
 	int numHitBus=1+lastHitbus-firstHitbus;
@@ -626,7 +642,11 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
       else {
 	goodPoints=lastHitbus-(firstHitbus+1);
       }
-
+//       if(surf==0 && chan==0) {
+// 	 std::cout << std::hex << (int)eventPtr->chipIdFlag[chanIndex] << "\n";
+// 	 std::cout << std::dec << firstHitbus << "\t" << lastHitbus << "\t" << wrappedHitbus
+// 		   << "\t" << goodPoints << std::endl; 
+//       }
 
       int firstSamp,lastSamp;
       if(!wrappedHitbus) {
@@ -862,7 +882,7 @@ void AnitaEventCalibrator::loadCalib() {
     ClockCalibFile.getline(firstLine,179);
     while(ClockCalibFile >> surf >> chip >> calib) {
        clockJitterOffset[surf][chip]=calib;
-       //       std::cout << surf <<  " " << chip << " " << calib << std::endl;
+       //       std::cout << "clockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
     }
 
     sprintf(fileName,"%s/fastClockCalibNums.dat",calibDir);
@@ -870,7 +890,7 @@ void AnitaEventCalibrator::loadCalib() {
     FastClockCalibFile.getline(firstLine,179);
     while(FastClockCalibFile >> surf >> chip >> calib) {
        fastClockJitterOffset[surf][chip]=calib;
-       //       std::cout << surf <<  " " << chip << " " << calib << std::endl;
+       //       std::cout << "fastClockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
     }
 
     //Load Jiwoo calibrations
