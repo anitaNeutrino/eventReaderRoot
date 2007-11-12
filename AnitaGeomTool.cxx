@@ -9,6 +9,12 @@
 #include <iostream>
 #include "AnitaGeomTool.h"
 
+#include "TString.h"
+#include "TObjArray.h"
+#include "TObjString.h"
+
+#define INCHTOMETER 0.0254
+
 namespace AnitaGeom {
    
    //Positive is horizontal
@@ -58,6 +64,7 @@ AnitaGeomTool*  AnitaGeomTool::fgInstance = 0;
 AnitaGeomTool::AnitaGeomTool()
 {
    //Default constructor
+   readPhotogrammetry();
    //   std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
    //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
 
@@ -125,6 +132,36 @@ int AnitaGeomTool::getAzimuthPartner(int rx)
      return AnitaGeom::upperAntNums[AnitaGeom::lowerPhiNums[rx-16]]; 
 
   return -1;
+}
+
+void AnitaGeomTool::getNeighbors(int rx,int& rxleft,int& rxright)
+{
+    // input antenna number 0 to 31
+  if (rx<0 || rx>31)    
+    std::cout << "Antenna number out of range!\n";  
+  if (rx<8)    
+    rxleft=rx+8;
+  else if (rx==8)
+    rxleft=7; 
+  else if (rx<16)    
+    rxleft=rx-9;  
+  else if (rx==16)    
+    rxleft=31;  
+  else    
+    rxleft=rx-1;  
+ 
+  if (rx<7)    
+    rxright=rx+9;  
+  else if (rx==7)    
+    rxright=8;  
+  else if (rx<16)   
+    rxright=rx-8;  
+  else if (rx<31)   
+    rxright=rx+1;  
+  else if (rx==31)    
+    rxright=16;   
+  //  std::cout << "rx, rxleft, rxright " << rx << " " << rxleft << " " << rxright << "\n"; 
+
 }
 
 void AnitaGeomTool::getThetaPartners(int rx,int& rxleft,int& rxright)
@@ -216,6 +253,611 @@ int AnitaGeomTool::getLayer(int irx)
 
 }
 
+
+void AnitaGeomTool::readPhotogrammetry()
+{
+
+  char calibDir[FILENAME_MAX];
+  char fileName[FILENAME_MAX];
+  char *calibEnv=getenv("ANITA_CALIB_DIR");
+  if(!calibEnv) {
+    sprintf(calibDir,"calib");
+  }
+  else {
+    strncpy(calibDir,calibEnv,FILENAME_MAX);
+  }
+
+  sprintf(fileName,"%s/antennaPositionTables.csv",calibDir);
+  std::ifstream AntennaFile(fileName);
+  if(!AntennaFile) {
+     std::cerr << "Couldn't open:\t" << fileName << "\n";
+     return;
+  }
+
+
+  //First up are the antenna positions
+  TString line;
+  for(int i=0;i<4;i++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << line.Data() << "\n";
+  }
+  
+  for(int ant=0;ant<32;ant++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << "Seavey:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<8;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   if (ant+1 != subString.Atoi()) {
+	      std::cerr << "Antenna number mismatch\n";
+	   }
+	   break;
+	case 1:	   
+	   xAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 2:	   
+	   yAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 3:	   
+	   zAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 4:	   
+	   rAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 5:	   
+	   azCentreFromDeckHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	   break;
+	case 6:	   
+	   apertureAzFromDeckHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	   break;
+	case 7:	   
+	   apertureElFromDeckHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	   break;
+	default:	   
+	   break;
+	}
+   
+     }
+     tokens->Delete();
+  }
+
+  //Now bicones and discones  
+  for(int i=0;i<2;i++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << line.Data() << "\n";
+  }
+
+
+  for(int ant=0;ant<4;ant++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << "Bicones:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	   
+	   xAntFromDeckBicone[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 2:	   
+	   yAntFromDeckBicone[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 3:	   
+	   zAntFromDeckBicone[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+   
+     }
+     tokens->Delete();
+  }
+
+  for(int ant=0;ant<4;ant++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << "Discones:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	   
+	   xAntFromDeckDiscone[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 2:	   
+	   yAntFromDeckDiscone[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 3:	   
+	   zAntFromDeckDiscone[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+   
+     }
+     tokens->Delete();
+  }
+
+  //Now box enclosures and the like
+  for(int i=0;i<2;i++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << line.Data() << "\n";
+  }
+  for(int corner=0;corner<4;corner++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << "Anita Box:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	   
+	   xAnitaBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 2:	   
+	   yAnitaBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 3:	   
+	   zAnitaBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+   
+     }
+     tokens->Delete();
+  }
+  for(int i=0;i<2;i++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << line.Data() << "\n";
+  }
+  for(int corner=0;corner<4;corner++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << "Battery Box:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	   
+	   xBatteryBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 2:	   
+	   yBatteryBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 3:	   
+	   zBatteryBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+   
+     }
+     tokens->Delete();
+  }
+  for(int i=0;i<2;i++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << line.Data() << "\n";
+  }
+  for(int corner=0;corner<4;corner++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << "Sip Box:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	   
+	   xSipBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 2:	   
+	   ySipBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 3:	   
+	   zSipBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+   
+     }
+     tokens->Delete();
+  }
+  //Now gps stuff
+  for(int i=0;i<2;i++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << line.Data() << "\n";
+  }
+  {
+     line.ReadLine(AntennaFile);
+     //std::cout << "GPS Plane:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	 
+	case 2:	
+	case 3:	     
+	   gpsPlaneFromDeck[j-1]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+	
+     }
+     tokens->Delete();
+  }  
+  {
+     line.ReadLine(AntennaFile);
+     //std::cout << "GPS Heading:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	 
+	case 2:	
+	case 3:	     
+	   gpsHeadingFromDeck[j-1]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+	
+     }
+     tokens->Delete();
+  }  
+
+  aftForeOffsetAngleDeck=TMath::ATan(gpsHeadingFromDeck[1]/gpsHeadingFromDeck[0]);
+  
+  //Now switch to the (more useful) vertical measurements
+  //First up are the antenna positions
+  for(int i=0;i<5;i++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << line.Data() << "\n";
+  }
+  
+  for(int ant=0;ant<32;ant++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << "Seavey:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<8;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	//std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   if (ant+1 != subString.Atoi()) {
+	      std::cerr << "Antenna number mismatch\n";
+	   }
+	   break;
+	case 1:	   
+	   xAntFromVerticalHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 2:	   
+	   yAntFromVerticalHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 3:	   
+	   zAntFromVerticalHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 4:	   
+	   rAntFromVerticalHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 5:	   
+	   azCentreFromVerticalHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	   if(azCentreFromVerticalHorn[ant]<0)
+	      azCentreFromVerticalHorn[ant]+=TMath::TwoPi();
+	   break;
+	case 6:	   
+	   apertureAzFromVerticalHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	   break;
+	case 7:	   
+	   apertureElFromVerticalHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	   break;
+	default:	   
+	   break;
+	}
+   
+     }
+     tokens->Delete();
+  }
+
+  //Now bicones and discones  
+  for(int i=0;i<2;i++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << line.Data() << "\n";
+  }
+
+
+  for(int ant=0;ant<4;ant++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << "Bicones:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	//std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	   
+	   xAntFromVerticalBicone[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 2:	   
+	   yAntFromVerticalBicone[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 3:	   
+	   zAntFromVerticalBicone[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+   
+     }
+     tokens->Delete();
+  }
+
+  for(int ant=0;ant<4;ant++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << "Discones:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	//std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	   
+	   xAntFromVerticalDiscone[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 2:	   
+	   yAntFromVerticalDiscone[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 3:	   
+	   zAntFromVerticalDiscone[ant]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+   
+     }
+     tokens->Delete();
+  }
+
+  //Now box enclosures and the like
+  for(int i=0;i<2;i++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << line.Data() << "\n";
+  }
+  for(int corner=0;corner<4;corner++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << "Anita Box:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	//std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	   
+	   xAnitaBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 2:	   
+	   yAnitaBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 3:	   
+	   zAnitaBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+   
+     }
+     tokens->Delete();
+  }
+  for(int i=0;i<2;i++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << line.Data() << "\n";
+  }
+  for(int corner=0;corner<4;corner++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << "Battery Box:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	//std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	   
+	   xBatteryBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 2:	   
+	   yBatteryBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 3:	   
+	   zBatteryBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+   
+     }
+     tokens->Delete();
+  }
+  for(int i=0;i<2;i++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << line.Data() << "\n";
+  }
+  for(int corner=0;corner<4;corner++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << "Sip Box:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	//std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	   
+	   xSipBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 2:	   
+	   ySipBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	case 3:	   
+	   zSipBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+   
+     }
+     tokens->Delete();
+  }
+  //Now gps stuff
+  for(int i=0;i<2;i++) {
+     line.ReadLine(AntennaFile);
+     //std::cout << line.Data() << "\n";
+  }
+  {
+     line.ReadLine(AntennaFile);
+     //std::cout << "GPS Plane:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	//std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	 
+	case 2:	
+	case 3:	     
+	   gpsPlaneFromVertical[j-1]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+	
+     }
+     tokens->Delete();
+  }  
+  {
+     line.ReadLine(AntennaFile);
+     //std::cout << "GPS Heading:\t" << line.Data() << "\n";
+     TObjArray *tokens = line.Tokenize(",");
+     for(int j=0;j<4;j++) {
+	const TString subString = ((TObjString*)tokens->At(j))->GetString();
+	//	TString *subString = (TString*) tokens->At(j);
+	//	//std::cout << j << "\t" << subString.Data() << "\n";
+	switch(j) {
+	case 0:
+	   break;
+	case 1:	 
+	case 2:	
+	case 3:	     
+	   gpsHeadingFromVertical[j-1]=subString.Atof()*INCHTOMETER; //m
+	   break;
+	default:	   
+	   break;
+	}
+	
+     }
+     tokens->Delete();
+  }  
+  aftForeOffsetAngleVertical=TMath::ATan(gpsHeadingFromVertical[1]/gpsHeadingFromVertical[0]);
+
+
+}
+
+//Non static thingies
+void AnitaGeomTool::getAntXYZ(int ant, Double_t &x, Double_t &y, Double_t &z)
+{
+   if(ant>=0 && ant<32) {
+      x=xAntFromVerticalHorn[ant];
+      y=yAntFromVerticalHorn[ant];
+      z=zAntFromVerticalHorn[ant];
+   }
+}
+
+Double_t AnitaGeomTool::getAntZ(int ant) {
+   if(ant>=0 && ant<32) {
+      return zAntFromVerticalHorn[ant];
+   }
+   return 0;
+}
+
+Double_t AnitaGeomTool::getAntR(int ant) {
+   if(ant>=0 && ant<32) {
+      return rAntFromVerticalHorn[ant];
+   }
+   return 0;
+}
+
+Double_t AnitaGeomTool::getAntPhiPosition(int ant) {
+   if(ant>=0 && ant<32) {
+      return azCentreFromVerticalHorn[ant];
+   }
+   return 0;
+}
+
+Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(int ant) {
+   if(ant>=0 && ant<32) {
+      Double_t phi=azCentreFromVerticalHorn[ant]-aftForeOffsetAngleVertical;
+      if(phi<0)
+	 phi+=TMath::TwoPi();
+      return phi;
+   }
+   return 0;
+}
+
+Int_t AnitaGeomTool::getUpperAntNearestPhiWave(Double_t phiWave) {
+   Double_t phiPrime=phiWave+aftForeOffsetAngleVertical;
+   if(phiPrime>TMath::TwoPi()) 
+      phiPrime-=TMath::TwoPi();
+   Double_t minDiff=TMath::TwoPi();
+   Int_t minAnt=0;;
+   for(int ant=0;ant<16;ant++) {
+      //      std::cout << ant << "\t" << azCentreFromVerticalHorn[ant] << "\t" << phiPrime << "\t" << TMath::Abs(azCentreFromVerticalHorn[ant]-phiPrime) << "\n";
+      if(TMath::Abs(azCentreFromVerticalHorn[ant]-phiPrime)<minDiff) {
+	 minDiff=TMath::Abs(azCentreFromVerticalHorn[ant]-phiPrime);
+	 minAnt=ant;
+      }
+   }
+   return minAnt;
+}
+
 int AnitaGeomTool::getPhiFromAnt(int ant)
 {
   if(ant<16)
@@ -237,3 +879,4 @@ int AnitaGeomTool::getAntFromPhiRing(int phi, AnitaRing::AnitaRing_t ring)
   }
 
 }
+

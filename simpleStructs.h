@@ -123,4 +123,19 @@ typedef struct {
     SurfChannelPedSubbed_t channel[NUM_DIGITZED_CHANNELS];
 } PedSubbedEventBody_t;
 
+typedef struct { 
+    GenericHeader_t gHdr;
+    unsigned long unixTime;
+    unsigned long unixTimeUs;
+    unsigned short globalThreshold; //set to zero if there isn't one
+    unsigned short errorFlag; //Will define at some point    
+    unsigned short scalerGoal; //What are we aiming for with the scaler rate
+    unsigned short upperWords[ACTIVE_SURFS];
+    unsigned short scaler[ACTIVE_SURFS][SCALERS_PER_SURF];
+    unsigned short threshold[ACTIVE_SURFS][SCALERS_PER_SURF];
+    unsigned short setThreshold[ACTIVE_SURFS][SCALERS_PER_SURF];
+    unsigned short rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
+    unsigned short surfTrigBandMask[ACTIVE_SURFS][2];
+} FullSurfHkStruct_t;
+
 #endif //SIMPLESTRUCTS_H
