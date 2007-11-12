@@ -30,5 +30,7 @@
 #pragma link C++ enum          AnitaPol::EAnitaPol;
 #pragma link C++ nestedtypedef AnitaPol::AnitaPol_t;
 
+#pragma link C++ namespace     AnitaLocations;
+
 #endif
 

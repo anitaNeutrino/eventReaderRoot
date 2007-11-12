@@ -622,6 +622,7 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
 	 rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
       }
       
+      ///      std::cout << surf << "\t" << chan << "\t" << firstHitbus << "\t" << lastHitbus << "\t" << wrappedHitbus << "\n";
       if(firstHitbus==lastHitbus) {
 	 std::cout << "Something wrong with HITBUS of event:\t" << eventPtr->eventNumber << "\t" << surf 
 		   << "\t" << chan << "\n";
@@ -877,22 +878,22 @@ void AnitaEventCalibrator::loadCalib() {
     }
 
 
-    sprintf(fileName,"%s/clockCalibNums.dat",calibDir);
+    sprintf(fileName,"%s/newClockCalibNums.dat",calibDir);
     std::ifstream ClockCalibFile(fileName);
     ClockCalibFile.getline(firstLine,179);
     while(ClockCalibFile >> surf >> chip >> calib) {
       clockJitterOffset[surf][chip]=calib;
-      clockJitterOffset[surf][chip]=0;  //RJN hack for test
-       //       std::cout << "clockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
+      //      clockJitterOffset[surf][chip]=0;  //RJN hack for test
+      std::cout << "clockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
     }
 
-    sprintf(fileName,"%s/fastClockCalibNums.dat",calibDir);
+    sprintf(fileName,"%s/newFastClockCalibNums.dat",calibDir);
     std::ifstream FastClockCalibFile(fileName);
     FastClockCalibFile.getline(firstLine,179);
     while(FastClockCalibFile >> surf >> chip >> calib) {
        fastClockJitterOffset[surf][chip]=calib;
-       fastClockJitterOffset[surf][chip]=0; //RJN hack for test
-       //       std::cout << "fastClockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
+       //       fastClockJitterOffset[surf][chip]=0; //RJN hack for test
+       std::cout << "fastClockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
     }
 
     //Load Jiwoo calibrations

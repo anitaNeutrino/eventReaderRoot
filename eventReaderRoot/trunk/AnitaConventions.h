@@ -50,6 +50,8 @@ namespace WaveCalType {
 ///First up we'll add some definitions of the raw data
 
 #define ACTIVE_SURFS 9
+#define SCALERS_PER_SURF 32
+#define RFCHAN_PER_SURF 8
 #define CHANNELS_PER_SURF 9
 #define LABRADORS_PER_SURF 4 /*jjb 2006-04-19 */
 #define RCO_PER_LAB 2
@@ -57,6 +59,9 @@ namespace WaveCalType {
 #define MAX_NUMBER_SAMPLES 260
 #define EFFECTIVE_SAMPLES 256
 #define NUM_PHI 16
+#define NUM_SEAVEYS 32
+#define NUM_BICONES 4
+#define NUM_DISCONES 4
 
 #define NUM_SURF ACTIVE_SURFS
 #define NUM_CHAN CHANNELS_PER_SURF
@@ -83,6 +88,15 @@ namespace AnitaPol {
    } AnitaPol_t;
 }
 
+namespace AnitaLocations { 
+   const double LONGITUDE_SURF_SEAVEY=167.06405555; // longitude, latitude and altitude of surface seavey
+   const double LATITUDE_SURF_SEAVEY=-77.86177777;
+   const double ALTITUDE_SURF_SEAVEY=-13.0;
+   
+   const double LONGITUDE_BH=167.06679444;
+   const double LATITUDE_BH=-77.861936111;
+   const double ALTITUDE_BH=-33.67;
+}
 
 
 #endif //ANITACONVENTIONS_H

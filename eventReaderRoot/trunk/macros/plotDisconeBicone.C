@@ -1,6 +1,6 @@
 //#include "AnitaConventions.h"
 
-void plotAllClocks()
+void plotDisconeBicone()
 {
    gStyle->SetPadTopMargin(0.05);
    gStyle->SetPadBottomMargin(0.2);
@@ -11,19 +11,19 @@ void plotAllClocks()
    gStyle->SetTitleSize(0.1,"xy");
    gStyle->SetTitleOffset(0.5,"y");
    gStyle->SetOptTitle(0);
-   plotAllClocks(1028,1612,1);
+   plotDisconeBicone(1030,10000,1);
 }
   
 
-void plotAllClocks(int run, int startEntry, int numEntries) {
+void plotDisconeBicone(int run, int startEntry, int numEntries) {
   gSystem->Load("libAnitaEvent.so");
 
   char eventName[FILENAME_MAX];
   char headerName[FILENAME_MAX];
   char hkName[FILENAME_MAX];
-  sprintf(eventName,"/unix/anita1/webData/firstDay/run%d/eventFile%d*.root",run,run);
-  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/timedHeadFile%d.root",run,run);
-  sprintf(hkName,"/unix/anita1/webData/firstDay/run%d/prettyHkFile%d.root",run,run);
+  sprintf(eventName,"/unix/anita1/webData/initial/run%d/eventFile%d*.root",run,run);
+  sprintf(headerName,"/unix/anita1/webData/initial/run%d/timedHeadFile%d.root",run,run);
+  sprintf(hkName,"/unix/anita1/webData/initial/run%d/prettyHkFile%d.root",run,run);
 
   RawAnitaEvent *event = 0;
   TimedAnitaHeader *header =0;
@@ -86,24 +86,25 @@ void plotAllClocks(int run, int startEntry, int numEntries) {
     for(int surf=0;surf<9;surf++) {
       if(gr[surf]) delete gr[surf];
     }
-    graphPad->Divide(2,5);
+    graphPad->Divide(2,4);
 
-    for(int surf=0;surf<9;surf++) {
-      graphPad->cd(surf+1);
-      gr[surf] = realEvent.getGraph(UsefulAnitaEvent::getChanIndex(surf,8));
-      gr[surf]->Draw("al");
-      if(surf==0) {
-	cout << "Float_t clockVals[260]={";
-	Double_t *x=gr[surf]->GetY();
-	Double_t N=gr[surf]->GetN();
+    cout << "Float_t discVals[8][260]={\n";
+    for(int chan=0;chan<8;chan++) {
+      graphPad->cd(chan+1);
+      gr[chan] = realEvent.getGraph(UsefulAnitaEvent::getChanIndex(8,chan));
+      gr[chan]->Draw("al");
+      //      if(chan==0) {
+      cout << "{";
+	Double_t *x=gr[chan]->GetY();
+	Double_t N=gr[chan]->GetN();
 	for(int i=0;i<260;i++) {
 	  if(i<N) {
 	    cout << x[i] << ",";
 	  }
 	  else cout << 0 << ",";
 	}
-	cout << "};\n";
-      }
+	cout << "},\n";
+	//      }
 
 
     }
