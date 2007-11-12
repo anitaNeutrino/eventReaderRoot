@@ -215,3 +215,25 @@ int AnitaGeomTool::getLayer(int irx)
   return 0;
 
 }
+
+int AnitaGeomTool::getPhiFromAnt(int ant)
+{
+  if(ant<16)
+    return AnitaGeom::upperPhiNums[ant];
+  return AnitaGeom::lowerPhiNums[ant];
+
+}
+
+
+int AnitaGeomTool::getAntFromPhiRing(int phi, AnitaRing::AnitaRing_t ring)
+{
+  switch(ring) {
+  case AnitaRing::kUpperRing:
+    return AnitaGeom::upperAntNums[phi];
+   case AnitaRing::kLowerRing:
+      return AnitaGeom::lowerAntNums[phi];
+  default:
+    return -1;
+  }
+
+}
