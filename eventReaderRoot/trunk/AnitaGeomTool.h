@@ -29,7 +29,7 @@ class AnitaGeomTool
   static AnitaGeomTool*  Instance();
   
 
-  //Generally useful function
+  //Generally useful functions
   static int getChanIndex(int surf, int chan)
      {return chan+(9*surf);}
 
@@ -55,6 +55,8 @@ class AnitaGeomTool
 
   static int getLayer(int irx); // get layer given antenna number
 
+  static int getPhiFromAnt(int ant);
+  static int getAntFromPhiRing(int phi, AnitaRing::AnitaRing_t ring);
 
 
  protected:
