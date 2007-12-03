@@ -307,6 +307,7 @@ void AnitaGeomTool::readPhotogrammetry()
 	   break;
 	case 4:	   
 	   rAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	   //	   std::cout << ant << "\t" << rAntFromDeckHorn[ant] << "\n";
 	   break;
 	case 5:	   
 	   azCentreFromDeckHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
@@ -814,13 +815,15 @@ void AnitaGeomTool::getAntXYZ(int ant, Double_t &x, Double_t &y, Double_t &z)
 Double_t AnitaGeomTool::getAntZ(int ant) {
    if(ant>=0 && ant<32) {
       return zAntFromVerticalHorn[ant];
+      //      return zAntFromDeckHorn[ant];
    }
    return 0;
 }
 
 Double_t AnitaGeomTool::getAntR(int ant) {
    if(ant>=0 && ant<32) {
-      return rAntFromVerticalHorn[ant];
+      return rAntFromVerticalHorn[ant]-0.3;
+	    //return rAntFromDeckHorn[ant];
    }
    return 0;
 }

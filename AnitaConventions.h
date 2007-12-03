@@ -70,6 +70,10 @@ namespace WaveCalType {
 #define NUM_SAMP MAX_NUMBER_SAMPLES
 #define NUM_EFF_SAMP EFFECTIVE_SAMPLES
 
+//Trigger Stuff
+#define ANTS_PER_SURF 4
+#define TRIGGER_SURFS 8
+#define PHI_SECTORS 16
 
 //Now some geometry and polarisation considerations
 namespace AnitaRing {

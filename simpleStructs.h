@@ -138,4 +138,99 @@ typedef struct {
     unsigned short surfTrigBandMask[ACTIVE_SURFS][2];
 } FullSurfHkStruct_t;
 
+//Monitor Structs
+
+typedef struct {
+    unsigned short diskSpace[8]; //In units of 10 MegaBytes
+    char bladeLabel[10];
+    char usbIntLabel[10];
+    char usbExtLabel[10];
+} DiskSpaceStruct_t;
+
+typedef struct {
+    unsigned short eventLinks[10]; //10 Priorities
+    unsigned short cmdLinksLOS;
+    unsigned short cmdLinksSIP;
+    unsigned short headLinks;
+    unsigned short gpsLinks;
+    unsigned short hkLinks;
+    unsigned short monitorLinks;
+    unsigned short surfHkLinks;
+    unsigned short turfHkLinks;
+    unsigned short pedestalLinks;
+} QueueStruct_t;
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned long unixTime;
+    DiskSpaceStruct_t diskInfo;
+    QueueStruct_t queueInfo;
+} MonitorStruct_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned long unixTime;
+    unsigned long ramDiskInodes;
+    unsigned long runStartTime;
+    unsigned long runStartEventNumber; //Start eventNumber
+    unsigned long runNumber; //Run number
+    unsigned short dirFiles[3]; // /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
+    unsigned short dirLinks[3]; // /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
+    unsigned short otherFlag;
+} OtherMonitorStruct_t;
+
+//Hk Structs
+
+typedef enum {
+    IP320_RAW=0x100,
+    IP320_AVZ=0x200,
+    IP320_CAL=0x300
+} AnalogueCode_t;
+
+typedef struct {
+    unsigned short data[40];
+} AnalogueDataStruct_t;
+
+typedef struct {
+    long data[40];
+} AnalogueCorrectedDataStruct_t;
+
+typedef struct {
+    AnalogueCode_t code;
+    AnalogueDataStruct_t board[3];
+} FullAnalogueStruct_t;
+
+typedef struct {
+    unsigned short temp[2];
+} SBSTemperatureDataStruct_t;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+} MagnetometerDataStruct_t;
+
+
+typedef struct {    
+    GenericHeader_t gHdr;
+    unsigned long unixTime;
+    unsigned long unixTimeUs;
+    FullAnalogueStruct_t ip320;
+    MagnetometerDataStruct_t mag;
+    SBSTemperatureDataStruct_t sbs;
+} HkDataStruct_t;
+
+
+//Turf and SURF structs
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned long unixTime;
+    unsigned long unixTimeUs;    
+    unsigned short l1Rates[TRIGGER_SURFS][ANTS_PER_SURF]; // 3 of 8 counters
+    unsigned char upperL2Rates[PHI_SECTORS];
+    unsigned char lowerL2Rates[PHI_SECTORS];
+    unsigned char l3Rates[PHI_SECTORS];
+} TurfRateStruct_t;
+
+
 #endif //SIMPLESTRUCTS_H
