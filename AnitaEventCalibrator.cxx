@@ -878,12 +878,12 @@ void AnitaEventCalibrator::loadCalib() {
     }
 
 
-    sprintf(fileName,"%s/newClockCalibNums.dat",calibDir);
+    sprintf(fileName,"%s/newSlowClockCalibNums.dat",calibDir);
     std::ifstream ClockCalibFile(fileName);
     ClockCalibFile.getline(firstLine,179);
     while(ClockCalibFile >> surf >> chip >> calib) {
       clockJitterOffset[surf][chip]=calib;
-      clockJitterOffset[surf][chip]=0;  //RJN hack for test
+      //      clockJitterOffset[surf][chip]=0;  //RJN hack for test
       //      std::cout << "clockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
     }
 
@@ -892,7 +892,7 @@ void AnitaEventCalibrator::loadCalib() {
     FastClockCalibFile.getline(firstLine,179);
     while(FastClockCalibFile >> surf >> chip >> calib) {
        fastClockJitterOffset[surf][chip]=calib;
-       fastClockJitterOffset[surf][chip]=0; //RJN hack for test
+       //       fastClockJitterOffset[surf][chip]=0; //RJN hack for test
        //       std::cout << "fastClockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
     }
 
