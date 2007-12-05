@@ -111,6 +111,16 @@ class AnitaGeomTool
   Double_t getAntPhiPositionRelToAftFore(int ant);
   Int_t getUpperAntNearestPhiWave(Double_t phiWave);
 
+  
+  void getAntFaceXYZ(int ant, Double_t &x, Double_t &y, Double_t &z);
+  Double_t getAntFaceZ(int ant);
+  Double_t getAntFaceR(int ant);
+  Double_t getAntFacePhiPosition(int ant);
+  Double_t getAntFacePhiPositionRelToAftFore(int ant);
+  Int_t getUpperAntFaceNearestPhiWave(Double_t phiWave);
+
+  Float_t feedToAntFront; //m
+ 
 
    Float_t xAntFromDeckHorn[NUM_SEAVEYS]; //m
    Float_t yAntFromDeckHorn[NUM_SEAVEYS]; //m
@@ -119,6 +129,14 @@ class AnitaGeomTool
    Float_t azCentreFromDeckHorn[NUM_SEAVEYS]; //radians
    Float_t apertureAzFromDeckHorn[NUM_SEAVEYS]; //radians
    Float_t apertureElFromDeckHorn[NUM_SEAVEYS]; //radians
+
+   
+   Float_t xFeedFromDeckHorn[NUM_SEAVEYS]; //m
+   Float_t yFeedFromDeckHorn[NUM_SEAVEYS]; //m
+   Float_t zFeedFromDeckHorn[NUM_SEAVEYS]; //m
+   Float_t rFeedFromDeckHorn[NUM_SEAVEYS]; //m
+   Float_t azFeedFromDeckHorn[NUM_SEAVEYS]; //radians
+
    
    Float_t xAntFromDeckBicone[NUM_BICONES]; //m
    Float_t yAntFromDeckBicone[NUM_BICONES]; //m
@@ -149,6 +167,13 @@ class AnitaGeomTool
    Float_t azCentreFromVerticalHorn[NUM_SEAVEYS]; //radians
    Float_t apertureAzFromVerticalHorn[NUM_SEAVEYS]; //radians
    Float_t apertureElFromVerticalHorn[NUM_SEAVEYS]; //radians
+  
+   Float_t xFeedFromVerticalHorn[NUM_SEAVEYS]; //m
+   Float_t yFeedFromVerticalHorn[NUM_SEAVEYS]; //m
+   Float_t zFeedFromVerticalHorn[NUM_SEAVEYS]; //m
+   Float_t rFeedFromVerticalHorn[NUM_SEAVEYS]; //m
+   Float_t azFeedFromVerticalHorn[NUM_SEAVEYS]; //radians
+
    
    Float_t xAntFromVerticalBicone[NUM_BICONES]; //m
    Float_t yAntFromVerticalBicone[NUM_BICONES]; //m
