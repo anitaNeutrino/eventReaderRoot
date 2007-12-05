@@ -100,3 +100,9 @@ In AnitaGeomTool and therefore in the rest of the code it should be noted that a
 
 You can set the environmental variable ANITA_CALIB_DIR to point to the location of the calib sub directory which contains the calibration constants used to calibrate the data. If ANITA_CALIB_DIR is not set it defaults to 'calib'. See the setup scripts for more details.
 
+As of version 3.2.0 AnitaGeomTool has an interface to Kurt's photogrammetry data.In particular through the following family of functions:
+a)  Double_t getAntZ(int ant);    // along with x,y,z,r and phi	
+b)  Double_t getAntFaceZ(int ant) // along with x,y,z,r and phi	
+The positions of the centre of the antenna face (the numbers from Kurt) are given by the b) family of functions. The a) family of functions return a position 20cm behind the face of the antenna, this position is meant to approximate teh timing centre of the antenna.
+
+The clock calib numbers were derived by looking at Seavey calibration pulses from Willy Field, using baselines given by the locations of the antenna timing centres. Clearly those using their own clock calibrations (namely Andres and Jiwoo) wouldn't want to use this option.

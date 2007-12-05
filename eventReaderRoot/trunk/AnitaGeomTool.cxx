@@ -64,8 +64,8 @@ AnitaGeomTool*  AnitaGeomTool::fgInstance = 0;
 AnitaGeomTool::AnitaGeomTool()
 {
    //Default constructor
-  feedToAntFront=0.15; //Arbitrary value selected to minimise the timing residuals.
-   readPhotogrammetry();
+  feedToAntFront=0.2; //Arbitrary value selected to minimise the timing residuals.
+  readPhotogrammetry();
    //   std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
    //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
 
