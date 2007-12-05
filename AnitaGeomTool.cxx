@@ -64,7 +64,6 @@ AnitaGeomTool*  AnitaGeomTool::fgInstance = 0;
 AnitaGeomTool::AnitaGeomTool()
 {
    //Default constructor
-  feedToAntFront=0.15; //Arbitrary value selected to minimise the timing residuals.
    readPhotogrammetry();
    //   std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
    //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
@@ -153,13 +152,13 @@ void AnitaGeomTool::getNeighbors(int rx,int& rxleft,int& rxright)
  
   if (rx<7)    
     rxright=rx+9;  
-  else if (rx==7)    
+  if (rx==7)    
     rxright=8;  
-  else if (rx<16)   
+  if (rx<16)   
     rxright=rx-8;  
-  else if (rx<31)   
+  if (rx<31)   
     rxright=rx+1;  
-  else if (rx==31)    
+  if (rx==31)    
     rxright=16;   
   //  std::cout << "rx, rxleft, rxright " << rx << " " << rxleft << " " << rxright << "\n"; 
 
@@ -254,7 +253,6 @@ int AnitaGeomTool::getLayer(int irx)
 
 }
 
-
 void AnitaGeomTool::readPhotogrammetry()
 {
 
@@ -308,7 +306,6 @@ void AnitaGeomTool::readPhotogrammetry()
 	   break;
 	case 4:	   
 	   rAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
-	   //	   std::cout << ant << "\t" << rAntFromDeckHorn[ant] << "\n";
 	   break;
 	case 5:	   
 	   azCentreFromDeckHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
@@ -325,29 +322,6 @@ void AnitaGeomTool::readPhotogrammetry()
    
      }
      tokens->Delete();
-
-     //Now try to find the location of the antenna feed point     
-     xFeedFromDeckHorn[ant]=xAntFromDeckHorn[ant]-
-       feedToAntFront*TMath::Cos( apertureAzFromDeckHorn[ant])*TMath::Cos(apertureElFromDeckHorn[ant]); //m
-     yFeedFromDeckHorn[ant]=yAntFromDeckHorn[ant]-
-       feedToAntFront*TMath::Sin( apertureAzFromDeckHorn[ant])*TMath::Cos(apertureElFromDeckHorn[ant]); //m
-     zFeedFromDeckHorn[ant]=zAntFromDeckHorn[ant]-feedToAntFront*TMath::Sin(apertureElFromDeckHorn[ant]); //m
-     rFeedFromDeckHorn[ant]=TMath::Sqrt(xFeedFromDeckHorn[ant]*xFeedFromDeckHorn[ant]+
-					yFeedFromDeckHorn[ant]*yFeedFromDeckHorn[ant]);//m
-     azFeedFromDeckHorn[ant]=TMath::ATan(yFeedFromDeckHorn[ant]/xFeedFromDeckHorn[ant]); //radians
-     if(xFeedFromDeckHorn[ant]<0)
-       azFeedFromDeckHorn[ant]+=TMath::Pi();
-     if(azFeedFromDeckHorn[ant]<0)
-       azFeedFromDeckHorn[ant]+=TMath::TwoPi();
-
-//      std::cout << "Face v Feed -- Ant " << ant  << std::endl;
-//      std::cout << apertureAzFromDeckHorn[ant] << "\t" << apertureElFromDeckHorn[ant] << "\n";
-//      std::cout << "x\t" << xAntFromDeckHorn[ant] << "\t" << xFeedFromDeckHorn[ant] << std::endl;
-//      std::cout << "y\t" << yAntFromDeckHorn[ant] << "\t" << yFeedFromDeckHorn[ant] << std::endl;
-//      std::cout << "z\t" << zAntFromDeckHorn[ant] << "\t" << zFeedFromDeckHorn[ant] << std::endl;
-//      std::cout << "r\t" << rAntFromDeckHorn[ant] << "\t" << rFeedFromDeckHorn[ant] << std::endl;
-//      std::cout << "phi\t" << azCentreFromDeckHorn[ant] << "\t" << azFeedFromDeckHorn[ant] << std::endl;
-     
   }
 
   //Now bicones and discones  
@@ -611,30 +585,6 @@ void AnitaGeomTool::readPhotogrammetry()
    
      }
      tokens->Delete();
-
-     
-     //Now try to find the location of the antenna feed point     
-     xFeedFromVerticalHorn[ant]=xAntFromVerticalHorn[ant]-
-       feedToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
-     yFeedFromVerticalHorn[ant]=yAntFromVerticalHorn[ant]-
-       feedToAntFront*TMath::Sin( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
-     zFeedFromVerticalHorn[ant]=zAntFromVerticalHorn[ant]-feedToAntFront*TMath::Sin(apertureElFromVerticalHorn[ant]); //m
-     rFeedFromVerticalHorn[ant]=TMath::Sqrt(xFeedFromVerticalHorn[ant]*xFeedFromVerticalHorn[ant]+
-					yFeedFromVerticalHorn[ant]*yFeedFromVerticalHorn[ant]);//m
-     azFeedFromVerticalHorn[ant]=TMath::ATan(yFeedFromVerticalHorn[ant]/xFeedFromVerticalHorn[ant]); //radians
-     if(xFeedFromVerticalHorn[ant]<0)
-       azFeedFromVerticalHorn[ant]+=TMath::Pi();
-     if(azFeedFromVerticalHorn[ant]<0)
-       azFeedFromVerticalHorn[ant]+=TMath::TwoPi();
-
-       
-//      std::cout << "Face v Feed -- Ant " << ant  << std::endl;
-//      std::cout << "x\t" << xAntFromVerticalHorn[ant] << "\t" << xFeedFromVerticalHorn[ant] << std::endl;
-//      std::cout << "y\t" << yAntFromVerticalHorn[ant] << "\t" << yFeedFromVerticalHorn[ant] << std::endl;
-//      std::cout << "z\t" << zAntFromVerticalHorn[ant] << "\t" << zFeedFromVerticalHorn[ant] << std::endl;
-//      std::cout << "r\t" << rAntFromVerticalHorn[ant] << "\t" << rFeedFromVerticalHorn[ant] << std::endl;
-//      std::cout << "phi\t" << azCentreFromVerticalHorn[ant] << "\t" << azFeedFromVerticalHorn[ant] << std::endl;
-
   }
 
   //Now bicones and discones  
@@ -850,43 +800,39 @@ void AnitaGeomTool::readPhotogrammetry()
 
 }
 
-
 //Non static thingies
 void AnitaGeomTool::getAntXYZ(int ant, Double_t &x, Double_t &y, Double_t &z)
 {
    if(ant>=0 && ant<32) {
-      x=xFeedFromVerticalHorn[ant];
-      y=yFeedFromVerticalHorn[ant];
-      z=zFeedFromVerticalHorn[ant];
+      x=xAntFromVerticalHorn[ant];
+      y=yAntFromVerticalHorn[ant];
+      z=zAntFromVerticalHorn[ant];
    }
 }
 
 Double_t AnitaGeomTool::getAntZ(int ant) {
    if(ant>=0 && ant<32) {
-      return zFeedFromVerticalHorn[ant];
-      //      return zAntFromDeckHorn[ant];
+      return zAntFromVerticalHorn[ant];
    }
    return 0;
 }
-
 Double_t AnitaGeomTool::getAntR(int ant) {
    if(ant>=0 && ant<32) {
-      return rFeedFromVerticalHorn[ant];
-	    //return rAntFromDeckHorn[ant];
+      return rAntFromVerticalHorn[ant];
    }
    return 0;
 }
 
 Double_t AnitaGeomTool::getAntPhiPosition(int ant) {
    if(ant>=0 && ant<32) {
-      return azFeedFromVerticalHorn[ant];
+      return azCentreFromVerticalHorn[ant];
    }
    return 0;
 }
 
 Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(int ant) {
    if(ant>=0 && ant<32) {
-      Double_t phi=azFeedFromVerticalHorn[ant]-aftForeOffsetAngleVertical;
+      Double_t phi=azCentreFromVerticalHorn[ant]-aftForeOffsetAngleVertical;
       if(phi<0)
 	 phi+=TMath::TwoPi();
       return phi;
@@ -901,69 +847,7 @@ Int_t AnitaGeomTool::getUpperAntNearestPhiWave(Double_t phiWave) {
    Double_t minDiff=TMath::TwoPi();
    Int_t minAnt=0;;
    for(int ant=0;ant<16;ant++) {
-      //      std::cout << ant << "\t" << azFeedFromVerticalHorn[ant] << "\t" << phiPrime << "\t" << TMath::Abs(azFeedFromVerticalHorn[ant]-phiPrime) << "\n";
-      if(TMath::Abs(azFeedFromVerticalHorn[ant]-phiPrime)<minDiff) {
-	 minDiff=TMath::Abs(azFeedFromVerticalHorn[ant]-phiPrime);
-	 minAnt=ant;
-      }
-   }
-   return minAnt;
-}
-
-
-
-
-//Non static thingies
-void AnitaGeomTool::getAntFaceXYZ(int ant, Double_t &x, Double_t &y, Double_t &z)
-{
-   if(ant>=0 && ant<32) {
-      x=xAntFromVerticalHorn[ant];
-      y=yAntFromVerticalHorn[ant];
-      z=zAntFromVerticalHorn[ant];
-   }
-}
-
-Double_t AnitaGeomTool::getAntFaceZ(int ant) {
-   if(ant>=0 && ant<32) {
-      return zAntFromVerticalHorn[ant];
-      //      return zAntFaceFromDeckHorn[ant];
-   }
-   return 0;
-}
-
-Double_t AnitaGeomTool::getAntFaceR(int ant) {
-   if(ant>=0 && ant<32) {
-      return rAntFromVerticalHorn[ant];
-	    //return rAntFromDeckHorn[ant];
-   }
-   return 0;
-}
-
-Double_t AnitaGeomTool::getAntFacePhiPosition(int ant) {
-   if(ant>=0 && ant<32) {
-      return azCentreFromVerticalHorn[ant];
-   }
-   return 0;
-}
-
-Double_t AnitaGeomTool::getAntFacePhiPositionRelToAftFore(int ant) {
-   if(ant>=0 && ant<32) {
-      Double_t phi=azCentreFromVerticalHorn[ant]-aftForeOffsetAngleVertical;
-      if(phi<0)
-	 phi+=TMath::TwoPi();
-      return phi;
-   }
-   return 0;
-}
-
-Int_t AnitaGeomTool::getUpperAntFaceNearestPhiWave(Double_t phiWave) {
-   Double_t phiPrime=phiWave+aftForeOffsetAngleVertical;
-   if(phiPrime>TMath::TwoPi()) 
-      phiPrime-=TMath::TwoPi();
-   Double_t minDiff=TMath::TwoPi();
-   Int_t minAnt=0;;
-   for(int ant=0;ant<16;ant++) {
-      //      std::cout << ant << "\t" << azFeedFromVerticalHorn[ant] << "\t" << phiPrime << "\t" << TMath::Abs(azFeedFromVerticalHorn[ant]-phiPrime) << "\n";
+      //      std::cout << ant << "\t" << azCentreFromVerticalHorn[ant] << "\t" << phiPrime << "\t" << TMath::Abs(azCentreFromVerticalHorn[ant]-phiPrime) << "\n";
       if(TMath::Abs(azCentreFromVerticalHorn[ant]-phiPrime)<minDiff) {
 	 minDiff=TMath::Abs(azCentreFromVerticalHorn[ant]-phiPrime);
 	 minAnt=ant;
@@ -971,32 +855,3 @@ Int_t AnitaGeomTool::getUpperAntFaceNearestPhiWave(Double_t phiWave) {
    }
    return minAnt;
 }
-
-
-
-
-
-
-
-int AnitaGeomTool::getPhiFromAnt(int ant)
-{
-  if(ant<16)
-    return AnitaGeom::upperPhiNums[ant];
-  return AnitaGeom::lowerPhiNums[ant];
-
-}
-
-
-int AnitaGeomTool::getAntFromPhiRing(int phi, AnitaRing::AnitaRing_t ring)
-{
-  switch(ring) {
-  case AnitaRing::kUpperRing:
-    return AnitaGeom::upperAntNums[phi];
-   case AnitaRing::kLowerRing:
-      return AnitaGeom::lowerAntNums[phi];
-  default:
-    return -1;
-  }
-
-}
-

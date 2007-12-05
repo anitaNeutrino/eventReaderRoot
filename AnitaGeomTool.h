@@ -40,6 +40,7 @@ class AnitaGeomTool
   
 
   
+  
   inline Double_t getGeoid(Double_t theta) {
      Double_t c=TMath::Cos(theta);
      return GEOID_MIN*GEOID_MAX/TMath::Sqrt(GEOID_MIN*GEOID_MIN-
@@ -71,7 +72,7 @@ class AnitaGeomTool
   }
   
   
-  //Generally useful functions
+  //Generally useful function
   static int getChanIndex(int surf, int chan)
      {return chan+(9*surf);}
 
@@ -99,8 +100,6 @@ class AnitaGeomTool
 
   static int getLayer(int irx); // get layer given antenna number
 
-  static int getPhiFromAnt(int ant);
-  static int getAntFromPhiRing(int phi, AnitaRing::AnitaRing_t ring);
 
 
   //Non static thingies
@@ -111,16 +110,6 @@ class AnitaGeomTool
   Double_t getAntPhiPositionRelToAftFore(int ant);
   Int_t getUpperAntNearestPhiWave(Double_t phiWave);
 
-  
-  void getAntFaceXYZ(int ant, Double_t &x, Double_t &y, Double_t &z);
-  Double_t getAntFaceZ(int ant);
-  Double_t getAntFaceR(int ant);
-  Double_t getAntFacePhiPosition(int ant);
-  Double_t getAntFacePhiPositionRelToAftFore(int ant);
-  Int_t getUpperAntFaceNearestPhiWave(Double_t phiWave);
-
-  Float_t feedToAntFront; //m
- 
 
    Float_t xAntFromDeckHorn[NUM_SEAVEYS]; //m
    Float_t yAntFromDeckHorn[NUM_SEAVEYS]; //m
@@ -129,14 +118,6 @@ class AnitaGeomTool
    Float_t azCentreFromDeckHorn[NUM_SEAVEYS]; //radians
    Float_t apertureAzFromDeckHorn[NUM_SEAVEYS]; //radians
    Float_t apertureElFromDeckHorn[NUM_SEAVEYS]; //radians
-
-   
-   Float_t xFeedFromDeckHorn[NUM_SEAVEYS]; //m
-   Float_t yFeedFromDeckHorn[NUM_SEAVEYS]; //m
-   Float_t zFeedFromDeckHorn[NUM_SEAVEYS]; //m
-   Float_t rFeedFromDeckHorn[NUM_SEAVEYS]; //m
-   Float_t azFeedFromDeckHorn[NUM_SEAVEYS]; //radians
-
    
    Float_t xAntFromDeckBicone[NUM_BICONES]; //m
    Float_t yAntFromDeckBicone[NUM_BICONES]; //m
@@ -167,13 +148,6 @@ class AnitaGeomTool
    Float_t azCentreFromVerticalHorn[NUM_SEAVEYS]; //radians
    Float_t apertureAzFromVerticalHorn[NUM_SEAVEYS]; //radians
    Float_t apertureElFromVerticalHorn[NUM_SEAVEYS]; //radians
-  
-   Float_t xFeedFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t yFeedFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t zFeedFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t rFeedFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t azFeedFromVerticalHorn[NUM_SEAVEYS]; //radians
-
    
    Float_t xAntFromVerticalBicone[NUM_BICONES]; //m
    Float_t yAntFromVerticalBicone[NUM_BICONES]; //m

@@ -50,8 +50,6 @@ namespace WaveCalType {
 ///First up we'll add some definitions of the raw data
 
 #define ACTIVE_SURFS 9
-#define SCALERS_PER_SURF 32
-#define RFCHAN_PER_SURF 8
 #define CHANNELS_PER_SURF 9
 #define LABRADORS_PER_SURF 4 /*jjb 2006-04-19 */
 #define RCO_PER_LAB 2
@@ -70,10 +68,6 @@ namespace WaveCalType {
 #define NUM_SAMP MAX_NUMBER_SAMPLES
 #define NUM_EFF_SAMP EFFECTIVE_SAMPLES
 
-//Trigger Stuff
-#define ANTS_PER_SURF 4
-#define TRIGGER_SURFS 8
-#define PHI_SECTORS 16
 
 //Now some geometry and polarisation considerations
 namespace AnitaRing {
