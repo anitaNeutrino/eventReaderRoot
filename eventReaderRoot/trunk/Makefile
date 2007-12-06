@@ -19,9 +19,17 @@ PROGRAMS = generateSecondaries generateNeutrinos
 
 all : $(ROOT_LIBRARY)
 
+tests: printStructSizes
+
 readRawData : $(ROOT_LIBRARY) readRawData.$(SRCSUF)
 	@echo "<**Compiling**> "  
 	$(LD)  $(CXXFLAGS) $(LDFLAGS) readRawData.$(SRCSUF) $(ROOT_LIBRARY) $(LIBS) -o $@
+
+
+printStructSizes : $(ROOT_LIBRARY) printStructSizes.$(SRCSUF)
+	@echo "<**Compiling**> "  
+	$(LD)  $(CXXFLAGS) $(LDFLAGS) printStructSizes.$(SRCSUF) $(ROOT_LIBRARY) $(LIBS) -o $@
+
 
 #The library
 $(ROOT_LIBRARY) : $(LIB_OBJS) 

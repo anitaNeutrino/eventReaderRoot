@@ -55,11 +55,11 @@ typedef enum {
 
 typedef struct {
     PacketCode_t code;    
-    unsigned long packetNumber; //Especially for Ped
+    unsigned int packetNumber; //Especially for Ped
     unsigned short numBytes;
     unsigned char feByte;
     unsigned char verId;
-    unsigned long checksum;
+    unsigned int checksum;
 } GenericHeader_t;
 
 typedef struct {
@@ -67,10 +67,10 @@ typedef struct {
     // 0=RF, 1=PPS1, 2=PPS2, 3=Soft/Ext, 4=L3Type1, 5,6 buffer depth at trig
     unsigned char l3Type1Count; //L3 counter
     unsigned short trigNum; //turf trigger counter
-    unsigned long trigTime;
+    unsigned int trigTime;
     unsigned short ppsNum;     // 1PPS
     unsigned short deadTime; // fraction = deadTime/64400
-    unsigned long c3poNum;     // 1 number of trigger time ticks per PPS
+    unsigned int c3poNum;     // 1 number of trigger time ticks per PPS
     unsigned short upperL1TrigPattern;
     unsigned short lowerL1TrigPattern;
     unsigned short upperL2TrigPattern;
@@ -82,20 +82,20 @@ typedef struct {
  
 typedef struct {
     GenericHeader_t gHdr;
-    unsigned long unixTime;       /* unix UTC sec*/
-    unsigned long unixTimeUs;     /* unix UTC microsec */
-    long gpsSubTime;     /* the GPS fraction of second (in ns) 
+    unsigned int unixTime;       /* unix UTC sec*/
+    unsigned int unixTimeUs;     /* unix UTC microsec */
+    int gpsSubTime;     /* the GPS fraction of second (in ns) 
 			   (for the X events per second that get 
 			   tagged with it, note it now includes
 			   second offset from unixTime)*/
-    unsigned long eventNumber;    /* Global event number */
+    unsigned int eventNumber;    /* Global event number */
     unsigned short surfMask;
     unsigned short calibStatus;   /* Were we flashing the pulser? */
     unsigned char priority; // priority and other
     unsigned char turfUpperWord; // The upper 8 bits from the TURF
     unsigned char otherFlag; //Currently unused 
     unsigned char otherFlag2; //Currently unused 
-    unsigned long antTrigMask; // What was the ant trigger mask
+    unsigned int antTrigMask; // What was the ant trigger mask
     TurfioStruct_t turfio; /*The X byte TURFIO data*/
 } AnitaEventHeader_t;
 
@@ -118,15 +118,15 @@ typedef struct {
 
 typedef struct {
     GenericHeader_t gHdr;
-    unsigned long eventNumber;    /* Global event number */
-    unsigned long whichPeds; //whichPedestals did we subtract
+    unsigned int eventNumber;    /* Global event number */
+    unsigned int whichPeds; //whichPedestals did we subtract
     SurfChannelPedSubbed_t channel[NUM_DIGITZED_CHANNELS];
 } PedSubbedEventBody_t;
 
 typedef struct { 
     GenericHeader_t gHdr;
-    unsigned long unixTime;
-    unsigned long unixTimeUs;
+    unsigned int unixTime;
+    unsigned int unixTimeUs;
     unsigned short globalThreshold; //set to zero if there isn't one
     unsigned short errorFlag; //Will define at some point    
     unsigned short scalerGoal; //What are we aiming for with the scaler rate
@@ -161,18 +161,18 @@ typedef struct {
 } QueueStruct_t;
 typedef struct {
     GenericHeader_t gHdr;
-    unsigned long unixTime;
+    unsigned int unixTime;
     DiskSpaceStruct_t diskInfo;
     QueueStruct_t queueInfo;
 } MonitorStruct_t;
 
 typedef struct {
     GenericHeader_t gHdr;
-    unsigned long unixTime;
-    unsigned long ramDiskInodes;
-    unsigned long runStartTime;
-    unsigned long runStartEventNumber; //Start eventNumber
-    unsigned long runNumber; //Run number
+    unsigned int unixTime;
+    unsigned int ramDiskInodes;
+    unsigned int runStartTime;
+    unsigned int runStartEventNumber; //Start eventNumber
+    unsigned int runNumber; //Run number
     unsigned short dirFiles[3]; // /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
     unsigned short dirLinks[3]; // /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
     unsigned short otherFlag;
@@ -191,7 +191,7 @@ typedef struct {
 } AnalogueDataStruct_t;
 
 typedef struct {
-    long data[40];
+    int data[40];
 } AnalogueCorrectedDataStruct_t;
 
 typedef struct {
@@ -212,8 +212,8 @@ typedef struct {
 
 typedef struct {    
     GenericHeader_t gHdr;
-    unsigned long unixTime;
-    unsigned long unixTimeUs;
+    unsigned int unixTime;
+    unsigned int unixTimeUs;
     FullAnalogueStruct_t ip320;
     MagnetometerDataStruct_t mag;
     SBSTemperatureDataStruct_t sbs;
@@ -224,8 +224,8 @@ typedef struct {
 
 typedef struct {
     GenericHeader_t gHdr;
-    unsigned long unixTime;
-    unsigned long unixTimeUs;    
+    unsigned int unixTime;
+    unsigned int unixTimeUs;    
     unsigned short l1Rates[TRIGGER_SURFS][ANTS_PER_SURF]; // 3 of 8 counters
     unsigned char upperL2Rates[PHI_SECTORS];
     unsigned char lowerL2Rates[PHI_SECTORS];
