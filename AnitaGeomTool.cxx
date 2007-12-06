@@ -139,7 +139,7 @@ void AnitaGeomTool::getNeighbors(int rx,int& rxleft,int& rxright)
 {
     // input antenna number 0 to 31
   if (rx<0 || rx>31)    
-    std::cout << "Antenna number out of range!\n";  
+     std::cout << "Antenna number " << rx << " out of range!\n";  
   if (rx<8)    
     rxleft=rx+8;
   else if (rx==8)
@@ -167,6 +167,8 @@ void AnitaGeomTool::getNeighbors(int rx,int& rxleft,int& rxright)
 
 void AnitaGeomTool::getThetaPartners(int rx,int& rxleft,int& rxright)
 {
+   if (rx<0 || rx>31)    
+    std::cerr << "Antenna number out of range!\n";     
   if (rx<16) {
      int phi=AnitaGeom::upperPhiNums[rx];
      int phiLeft=phi-1;
