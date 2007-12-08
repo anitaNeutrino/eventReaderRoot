@@ -611,6 +611,13 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
       int lastHitbus=eventPtr->getLastHitBus(chanIndex);
 //      int wrappedHitbus=((eventPtr->chipIdFlag[chanIndex])&0x8)>>3;
       int wrappedHitbus=eventPtr->getWrappedHitBus(chanIndex);
+      //Inset fix to sort out dodgy channel zero problems
+      if(chan==0 && firstHitbus==0) {
+	 firstHitbus=eventPtr->getFirstHitBus(chanIndex+1);
+	 lastHitbus=eventPtr->getLastHitBus(chanIndex+1);
+	 wrappedHitbus=eventPtr->getWrappedHitBus(chanIndex+1);
+      }
+
 	
 
       labChip=(eventPtr->chipIdFlag[chanIndex])&0x3;
