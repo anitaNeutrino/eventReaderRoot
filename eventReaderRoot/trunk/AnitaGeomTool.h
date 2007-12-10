@@ -12,8 +12,10 @@
 #define ANITAGEOMTOOL_H
 
 //Includes
+#include <iostream>
 #include <TObject.h>
 #include <TMath.h>
+#include <TVector3.h>
 #include "AnitaConventions.h"
 
 
@@ -70,6 +72,67 @@ class AnitaGeomTool
      return phi_deg*TMath::DegToRad();
   }
   
+  inline Double_t getPhi(Double_t p[3]){
+      // returns phi between 0 and 2pi.
+        double pt=0;
+        double phi=0;
+        pt=sqrt(p[0]*p[0]+p[1]*p[1]);
+        if (pt==0)
+          return 0.;
+        else if (pt!=0) {
+          if (p[1]/pt>1 || p[1]/pt<-1) {
+                std::cerr << "Error in getPhi. \n";
+                return 0;
+            }
+            phi=asin(p[1]/pt);
+        }
+        if (p[1]<0. && p[0]>0) phi += 2*TMath::Pi();
+        else if (phi>0 && p[0]<0.) phi = TMath::Pi() - phi;
+        else if (phi<0 && p[0]<0.) phi = -(TMath::Pi()+phi)+2*TMath::Pi();
+        return phi;
+    }
+
+     inline Double_t getPhi(TVector3 &thePos) {
+       double p[3]={thePos.X(),thePos.Y(),thePos.Z()};
+       return getPhi(p);
+       //return thePos.Theta();
+    }
+
+     inline Double_t getTheta(Double_t p[3]) {
+      double pz,pt;
+      double tantheta1=0;
+      double theta=0;
+
+      pz=p[2];
+      pt=sqrt(p[0]*p[0]+p[1]*p[1]);
+      tantheta1=pt/pz;
+      theta=atan(tantheta1);
+
+      if (pz<0)
+        theta += TMath::Pi();
+      return theta;
+    }
+
+
+     inline Double_t getTheta(TVector3 &thePos) {
+	double p[3]={thePos.X(),thePos.Y(),thePos.Z()};
+	thePos.GetXYZ(p);
+	return getTheta(p);
+     }
+     
+     inline void getLonLat(Double_t p[3],Double_t& lon,Double_t& lat) {
+        lon=getLon(getPhi(p));
+        lat=getLat(getTheta(p));
+/*      if(p[2]<0) { */
+/*         lat*=-1; */
+/*      } */
+    }
+
+     inline void getLonLat(TVector3 &thePos,Double_t& lon,Double_t& lat) {
+        lon=getLon(getPhi(thePos));
+        lat=getLat(getTheta(thePos));
+    }
+
   
   //Generally useful functions
   static int getChanIndex(int surf, int chan)
