@@ -1,0 +1,236 @@
+//////////////////////////////////////////////////////////////////////////////
+/////  simpleStructs.h        Minimalistic ANITA Event Structs           /////
+/////                                                                    /////
+/////  Description:                                                      /////
+/////     The minimal definitions and structures needed for reading      ///// 
+/////  ANITA event data.                                                  /////
+//////////////////////////////////////////////////////////////////////////////
+
+#ifndef SIMPLESTRUCTS_H
+#define SIMPLESTRUCTS_H
+
+
+///First up we'll add some definitions of the raw data
+#include "AnitaConventions.h"
+
+//Enumerations
+typedef enum {
+    PACKET_BD = 0xff, // AnitaEventBody_t -- No
+    PACKET_HD = 0x100, //AnitaEventHeader_t --Yes
+    PACKET_WV = 0x101, //RawWaveformPacket_t --Yes
+    PACKET_SURF = 0x102, //RawSurfPacket_t -- Yes
+    PACKET_HD_SLAC = 0x103,
+    PACKET_SURF_HK = 0x110, //FullSurfHkStruct_t --Yes
+    PACKET_TURF_RATE = 0x111, //TurfRateStruct_t -- Yes
+    PACKET_PEDSUB_WV = 0x120, //PedSubbedWaveformPacket_t -- Yes
+    PACKET_ENC_SURF = 0x121, //EncodedSurfPacketHeader_t -- Yes
+    PACKET_ENC_SURF_PEDSUB = 0x122, //EncodedPedSubbedSurfPacketHeader_t -- Yes
+    PACKET_ENC_EVENT_WRAPPER = 0x123, 
+    PACKET_PED_SUBBED_EVENT = 0x124, //PedSubbedEventBody_t -- No too big
+    PACKET_ENC_WV_PEDSUB = 0x125, // EncodedPedSubbedChannelPacketHeader_t -- Yes
+    PACKET_ENC_PEDSUB_EVENT_WRAPPER = 0x126,
+    PACKET_PEDSUB_SURF = 0x127, //PedSubbedSurfPacket_t -- Yes 
+    PACKET_LAB_PED = 0x130, //
+    PACKET_FULL_PED = 0x131, //Too big to telemeter
+    PACKET_GPS_ADU5_PAT = 0x200,
+    PACKET_GPS_ADU5_SAT = 0x201,
+    PACKET_GPS_ADU5_VTG = 0x202,
+    PACKET_GPS_G12_POS = 0x203,
+    PACKET_GPS_G12_SAT = 0x204,
+    PACKET_HKD = 0x300,
+    PACKET_CMD_ECHO = 0x400,
+    PACKET_MONITOR = 0x500,
+    PACKET_WAKEUP_LOS = 0x600,
+    PACKET_WAKEUP_HIGHRATE = 0x601,
+    PACKET_WAKEUP_COMM1 = 0x602,
+    PACKET_WAKEUP_COMM2 = 0x603,
+    PACKET_SLOW1 = 0x700,
+    PACKET_SLOW2 = 0x800,
+    PACKET_SLOW_FULL = 0x801,
+    PACKET_ZIPPED_PACKET = 0x900, // Is just a zipped version of another packet
+    PACKET_ZIPPED_FILE = 0xa00, // Is a zipped file
+    PACKET_RUN_START = 0xb00, 
+    PACKET_OTHER_MONITOR = 0xb01 
+} PacketCode_t;
+
+typedef struct {
+    PacketCode_t code;    
+    unsigned int packetNumber; //Especially for Ped
+    unsigned short numBytes;
+    unsigned char feByte;
+    unsigned char verId;
+    unsigned int checksum;
+} GenericHeader_t;
+
+typedef struct {
+    unsigned char trigType; //Trig type bit masks
+    // 0=RF, 1=PPS1, 2=PPS2, 3=Soft/Ext, 4=L3Type1, 5,6 buffer depth at trig
+    unsigned char l3Type1Count; //L3 counter
+    unsigned short trigNum; //turf trigger counter
+    unsigned int trigTime;
+    unsigned short ppsNum;     // 1PPS
+    unsigned short deadTime; // fraction = deadTime/64400
+    unsigned int c3poNum;     // 1 number of trigger time ticks per PPS
+    unsigned short upperL1TrigPattern;
+    unsigned short lowerL1TrigPattern;
+    unsigned short upperL2TrigPattern;
+    unsigned short lowerL2TrigPattern;
+    unsigned short l3TrigPattern;
+    unsigned char bufferDepth; //bits 0,1 trigTime depth 2,3 current depth
+    unsigned char reserved;
+} TurfioStruct_t;
+ 
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime;       /* unix UTC sec*/
+    unsigned int unixTimeUs;     /* unix UTC microsec */
+    int gpsSubTime;     /* the GPS fraction of second (in ns) 
+			   (for the X events per second that get 
+			   tagged with it, note it now includes
+			   second offset from unixTime)*/
+    unsigned int eventNumber;    /* Global event number */
+    unsigned short surfMask;
+    unsigned short calibStatus;   /* Were we flashing the pulser? */
+    unsigned char priority; // priority and other
+    unsigned char turfUpperWord; // The upper 8 bits from the TURF
+    unsigned char otherFlag; //Currently unused 
+    unsigned char otherFlag2; //Currently unused 
+    unsigned int antTrigMask; // What was the ant trigger mask
+    TurfioStruct_t turfio; /*The X byte TURFIO data*/
+} AnitaEventHeader_t;
+
+typedef struct {
+    unsigned char chanId;   // chan+9*surf
+    unsigned char chipIdFlag; // Bits 0,1 chipNum; Bit 3 hitBus wrap; 4-7 hitBusOff
+    unsigned char firstHitbus; // If wrappedHitbus=0 data runs, lastHitbus+1
+    unsigned char lastHitbus; //to firstHitbus-1 inclusive
+    //Otherwise it runs from firstHitbus+1 to lastHitbus-1 inclusive
+} RawSurfChannelHeader_t;
+
+typedef struct {
+    RawSurfChannelHeader_t header;
+    short xMax;
+    short xMin;
+    float mean; //Filled by pedestalLib
+    float rms; //Filled by pedestalLib
+    short data[MAX_NUMBER_SAMPLES]; //Pedestal subtracted and 11bit data
+} SurfChannelPedSubbed_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int eventNumber;    /* Global event number */
+    unsigned int whichPeds; //whichPedestals did we subtract
+    SurfChannelPedSubbed_t channel[NUM_DIGITZED_CHANNELS];
+} PedSubbedEventBody_t;
+
+typedef struct { 
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int unixTimeUs;
+    unsigned short globalThreshold; //set to zero if there isn't one
+    unsigned short errorFlag; //Will define at some point    
+    unsigned short scalerGoal; //What are we aiming for with the scaler rate
+    unsigned short upperWords[ACTIVE_SURFS];
+    unsigned short scaler[ACTIVE_SURFS][SCALERS_PER_SURF];
+    unsigned short threshold[ACTIVE_SURFS][SCALERS_PER_SURF];
+    unsigned short setThreshold[ACTIVE_SURFS][SCALERS_PER_SURF];
+    unsigned short rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
+    unsigned short surfTrigBandMask[ACTIVE_SURFS][2];
+} FullSurfHkStruct_t;
+
+//Monitor Structs
+
+typedef struct {
+    unsigned short diskSpace[8]; //In units of 10 MegaBytes
+    char bladeLabel[10];
+    char usbIntLabel[10];
+    char usbExtLabel[10];
+} DiskSpaceStruct_t;
+
+typedef struct {
+    unsigned short eventLinks[10]; //10 Priorities
+    unsigned short cmdLinksLOS;
+    unsigned short cmdLinksSIP;
+    unsigned short headLinks;
+    unsigned short gpsLinks;
+    unsigned short hkLinks;
+    unsigned short monitorLinks;
+    unsigned short surfHkLinks;
+    unsigned short turfHkLinks;
+    unsigned short pedestalLinks;
+} QueueStruct_t;
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    DiskSpaceStruct_t diskInfo;
+    QueueStruct_t queueInfo;
+} MonitorStruct_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int ramDiskInodes;
+    unsigned int runStartTime;
+    unsigned int runStartEventNumber; //Start eventNumber
+    unsigned int runNumber; //Run number
+    unsigned short dirFiles[3]; // /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
+    unsigned short dirLinks[3]; // /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
+    unsigned short otherFlag;
+} OtherMonitorStruct_t;
+
+//Hk Structs
+
+typedef enum {
+    IP320_RAW=0x100,
+    IP320_AVZ=0x200,
+    IP320_CAL=0x300
+} AnalogueCode_t;
+
+typedef struct {
+    unsigned short data[40];
+} AnalogueDataStruct_t;
+
+typedef struct {
+    int data[40];
+} AnalogueCorrectedDataStruct_t;
+
+typedef struct {
+    AnalogueCode_t code;
+    AnalogueDataStruct_t board[3];
+} FullAnalogueStruct_t;
+
+typedef struct {
+    unsigned short temp[2];
+} SBSTemperatureDataStruct_t;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+} MagnetometerDataStruct_t;
+
+
+typedef struct {    
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int unixTimeUs;
+    FullAnalogueStruct_t ip320;
+    MagnetometerDataStruct_t mag;
+    SBSTemperatureDataStruct_t sbs;
+} HkDataStruct_t;
+
+
+//Turf and SURF structs
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int unixTimeUs;    
+    unsigned short l1Rates[TRIGGER_SURFS][ANTS_PER_SURF]; // 3 of 8 counters
+    unsigned char upperL2Rates[PHI_SECTORS];
+    unsigned char lowerL2Rates[PHI_SECTORS];
+    unsigned char l3Rates[PHI_SECTORS];
+} TurfRateStruct_t;
+
+
+#endif //SIMPLESTRUCTS_H
