@@ -628,20 +628,6 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
       for(int samp=0;samp<NUM_SAMP;samp++) {
 	 rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
       }
-      
-      ///      std::cout << surf << "\t" << chan << "\t" << firstHitbus << "\t" << lastHitbus << "\t" << wrappedHitbus << "\n";
-      if(firstHitbus==lastHitbus) {
-	 std::cout << "Something wrong with HITBUS of event:\t" << eventPtr->eventNumber << "\t" << surf 
-		   << "\t" << chan << "\n";
-	 //Something wrong add this hack	 
-	 for(int tempChan=0;tempChan<NUM_CHAN;tempChan++) {
-	    Int_t tempChanIndex=getChanIndex(surf,tempChan);
-	    firstHitbus=eventPtr->getFirstHitBus(tempChanIndex);
-	    lastHitbus=eventPtr->getLastHitBus(tempChanIndex);
-	    wrappedHitbus=eventPtr->getWrappedHitBus(tempChanIndex);
-	    if(firstHitbus!=lastHitbus) break;	       
-	 }
-      }
 
       if(!wrappedHitbus) {
 	int numHitBus=1+lastHitbus-firstHitbus;
@@ -650,6 +636,30 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
       else {
 	goodPoints=lastHitbus-(firstHitbus+1);
       }
+      
+      //      std::cout << surf << "\t" << chan << "\t" << firstHitbus << "\t" << lastHitbus << "\t" << wrappedHitbus << "\t" << goodPoints << "\n";
+      if(firstHitbus==lastHitbus ||goodPoints<100) {
+	 std::cout << "Something wrong with HITBUS of event:\t" << eventPtr->eventNumber << "\t" << surf 
+		   << "\t" << chan << "\n";
+	 //Something wrong add this hack	 
+	 for(int tempChan=chan+1;tempChan<chan+2;tempChan++) {
+	    Int_t tempChanIndex=getChanIndex(surf,tempChan);
+	    firstHitbus=eventPtr->getFirstHitBus(tempChanIndex);
+	    lastHitbus=eventPtr->getLastHitBus(tempChanIndex);
+	    wrappedHitbus=eventPtr->getWrappedHitBus(tempChanIndex);
+	    if(!wrappedHitbus) {
+	      int numHitBus=1+lastHitbus-firstHitbus;
+	      goodPoints=NUM_SAMP-numHitBus;
+	    }
+	    else {
+	      goodPoints=lastHitbus-(firstHitbus+1);
+	    }
+	    
+	    if(goodPoints) break;	       
+	 }
+      }
+
+
 //       if(surf==0 && chan==0) {
 // 	 std::cout << std::hex << (int)eventPtr->chipIdFlag[chanIndex] << "\n";
 // 	 std::cout << std::dec << firstHitbus << "\t" << lastHitbus << "\t" << wrappedHitbus
