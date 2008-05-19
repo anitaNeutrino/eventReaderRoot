@@ -530,6 +530,28 @@ void AnitaEventCalibrator::processEventRG(UsefulAnitaEvent *eventPtr) {
 		goodPoints=lastHitbus-(firstHitbus+1);
 	    }
 	    
+	    if(firstHitbus==lastHitbus || goodPoints<100) {
+	      std::cout << "Something wrong with HITBUS of event:\t" << eventPtr->eventNumber << "\t" << surf 
+			<< "\t" << chan << "\n";
+	      //Something wrong add this hack	 
+	      for(int tempChan=chan+1;tempChan<chan+2;tempChan++) {
+		Int_t tempChanIndex=getChanIndex(surf,tempChan);
+		firstHitbus=eventPtr->getFirstHitBus(tempChanIndex);
+		lastHitbus=eventPtr->getLastHitBus(tempChanIndex);
+		wrappedHitbus=eventPtr->getWrappedHitBus(tempChanIndex);
+		if(!wrappedHitbus) {
+		  int numHitBus=1+lastHitbus-firstHitbus;
+		  goodPoints=NUM_SAMP-numHitBus;
+		}
+		else {
+		  goodPoints=lastHitbus-(firstHitbus+1);
+		}
+		
+		if(goodPoints) break;	       
+	      }
+	    }
+	    
+
 	    int firstSamp,lastSamp;
 	    if(!wrappedHitbus) {
 		firstSamp=lastHitbus+1;
@@ -612,7 +634,7 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
 //      int wrappedHitbus=((eventPtr->chipIdFlag[chanIndex])&0x8)>>3;
       int wrappedHitbus=eventPtr->getWrappedHitBus(chanIndex);
       //Inset fix to sort out dodgy channel zero problems
-      if(chan==0 && firstHitbus==0) {
+      if(chan==0 && (firstHitbus==0 || firstHitbus==lastHitbus)) {
 	 firstHitbus=eventPtr->getFirstHitBus(chanIndex+1);
 	 lastHitbus=eventPtr->getLastHitBus(chanIndex+1);
 	 wrappedHitbus=eventPtr->getWrappedHitBus(chanIndex+1);
@@ -628,6 +650,7 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
       for(int samp=0;samp<NUM_SAMP;samp++) {
 	 rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
       }
+      
 
       if(!wrappedHitbus) {
 	int numHitBus=1+lastHitbus-firstHitbus;
@@ -636,9 +659,11 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
       else {
 	goodPoints=lastHitbus-(firstHitbus+1);
       }
-      
+
       //      std::cout << surf << "\t" << chan << "\t" << firstHitbus << "\t" << lastHitbus << "\t" << wrappedHitbus << "\t" << goodPoints << "\n";
-      if(firstHitbus==lastHitbus ||goodPoints<100) {
+
+
+      if(firstHitbus==lastHitbus || goodPoints<100) {
 	 std::cout << "Something wrong with HITBUS of event:\t" << eventPtr->eventNumber << "\t" << surf 
 		   << "\t" << chan << "\n";
 	 //Something wrong add this hack	 
@@ -659,8 +684,7 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
 	 }
       }
 
-
-//       if(surf==0 && chan==0) {
+ //      if(surf==0 && chan==0) {
 // 	 std::cout << std::hex << (int)eventPtr->chipIdFlag[chanIndex] << "\n";
 // 	 std::cout << std::dec << firstHitbus << "\t" << lastHitbus << "\t" << wrappedHitbus
 // 		   << "\t" << goodPoints << std::endl; 
