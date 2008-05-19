@@ -16,6 +16,6 @@
 #alias root="root -l"
 
 ##Event Reader Stuff
-export EVENT_READER_DIR=/home/rjn/anita/eventReaderRoot/branches/R3.2
+export EVENT_READER_DIR=/home/rjn/anita/eventReaderRoot/branches/R3.3
 export ANITA_CALIB_DIR=${EVENT_READER_DIR}/calib
 export LD_LIBRARY_PATH=${EVENT_READER_DIR}:${LD_LIBRARY_PATH}
