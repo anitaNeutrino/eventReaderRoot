@@ -6,11 +6,37 @@
 include Makefile.arch
 
 #Site Specific  Flags
-SYSINCLUDES	= -I/sw/include
-SYSLIBS         = -L/sw/lib
+SYSINCLUDES	=
+SYSLIBS         = 
+
+ifdef ANITA_UTIL_INSTALL_DIR
+ANITA_UTIL_LIB_DIR=${ANITA_UTIL_INSTALL_DIR}/lib
+ANITA_UTIL_INC_DIR=${ANITA_UTIL_INSTALL_DIR}/includes
+else
+ANITA_UTIL_LIB_DIR=
+ANITA_UTIL_INC_DIR=
+endif
+
+#Toggles the FFT functions on and off
+#USE_FFT_TOOLS=1
+
+ifdef USE_FFT_TOOLS
+FFTLIBS = -lRootFftwWrapper -lfftw3
+FFTFLAG = -DUSE_FFT_TOOLS
+else
+FFTLIBS =
+FFTFLAG =
+endif
+
+#Generic and Site Specific Flags
+CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) -I$(EVENT_READER_DIR) -I${ANITA_UTIL_INC_DIR}
+LDFLAGS      += -g $(ROOTLDFLAGS) -L$(EVENT_READER_DIR)
+
+
+LIBS          = $(ROOTLIBS) -lMathMore -lMinuit $(SYSLIBS) -L$(EVENT_READER_DIR) -L$(ANITA_UTIL_LIB_DIR) $(FFTLIBS)
+GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 #Now the bits we're actually compiling
-
 ROOT_LIBRARY = libAnitaEvent.${DLLSUF}
 LIB_OBJS = RawAnitaEvent.o UsefulAnitaEvent.o  AnitaEventCalibrator.o AnitaGeomTool.o RawAnitaHeader.o PrettyAnitaHk.o Adu5Pat.o Adu5Vtg.o SurfHk.o TurfRate.o RawDataReader.o AnitaConventions.o TimedAnitaHeader.o eventDict.o
 CLASS_HEADERS = RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaHk.h Adu5Pat.h Adu5Vtg.h SurfHk.h TurfRate.h AnitaEventCalibrator.h AnitaConventions.h AnitaGeomTool.h TimedAnitaHeader.h

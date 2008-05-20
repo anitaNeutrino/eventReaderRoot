@@ -40,6 +40,8 @@ namespace WaveCalType {
     kVTFullJWPlusClockZero          = 0x11,  // kVTFullJWPlusClock + Zero Mean
     kVTLabJWPlusFastClockZero       = 0x12, // kVTLabJWPlusClock (but faster and worse) + Zero Mean
     kVTFullJWPlusFastClockZero      = 0x13,  // kVTFullJWPlusClock (but faster and worse)  + Zero Mean
+    kVTFullJWPlusFancyClockZero     = 0x14, // Switching to using soemthing like Andres correlation method
+    kVTFullJWPlusFudge              = 0x15, // kVTFullJW + Voltage Correction +Fudge Factor
     kNotACalib
   } WaveCalType_t;
 
@@ -49,7 +51,7 @@ namespace WaveCalType {
 
 ///First up we'll add some definitions of the raw data
 
-#define ACTIVE_SURFS 9
+#define ACTIVE_SURFS 10
 #define SCALERS_PER_SURF 32
 #define RFCHAN_PER_SURF 8
 #define CHANNELS_PER_SURF 9
@@ -74,6 +76,24 @@ namespace WaveCalType {
 #define ANTS_PER_SURF 4
 #define TRIGGER_SURFS 8
 #define PHI_SECTORS 16
+
+//Acromag stuff
+#define CHANS_PER_IP320 40
+#define NUM_IP320_BOARDS 3
+
+
+//Process Stuff
+#define NUM_PROCESSES 16 //Actually a couple more than we need
+
+//GPS stuff
+#define MAX_SATS 12
+#define MAX_CMD_LENGTH 20
+
+
+#define NUM_PRIORITIES 10
+#define NUM_SATABLADES 8
+#define NUM_SATAMINIS 4
+#define NUM_USBS 31
 
 //Now some geometry and polarisation considerations
 namespace AnitaRing {

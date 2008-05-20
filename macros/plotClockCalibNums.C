@@ -1,7 +1,7 @@
 
 void plotClockCalibNums()
 {
-  TFile *fp = new TFile("rootFiles/clockPhaseCalib100000.root");
+  TFile *fp = new TFile("rootFiles/clockPhaseCalibCrossCor100000.root");
   char histName[180];
 
   gStyle->SetOptTitle(0);
@@ -27,8 +27,9 @@ void plotClockCalibNums()
 
   for(int surf=0;surf<9;surf++) {
     for(int chip=0;chip<4;chip++) {
-	
+       
       TPad *paddy=can->cd((4*surf)+chip+1);
+      gPad->SetLogy(1);
       if(chip==3)
 	paddy->SetRightMargin(0.005);
       //      texty->SetTextColor(1);

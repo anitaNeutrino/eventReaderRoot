@@ -7,5 +7,6 @@ void runPlotOneSurf() {
 			  
   gSystem->Load("libAnitaEvent.so");
   gSystem->CompileMacro("plotOneSurfCompile.C","k");
-  plotOneSurf(1028,1000,1,1);
+  //  plotOneSurf(1055,1,1,1);
+  plotOneSurf(1030,176247,1,1);
 }

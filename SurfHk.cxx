@@ -28,12 +28,12 @@ SurfHk::SurfHk(Int_t           trun,
 	       UShort_t        tglobalThreshold,
 	       UShort_t        terrorFlag,
 	       UShort_t        tscalerGoal,
-	       UShort_t        tupperWords[9],
-	       UShort_t        tscaler[9][32],
-	       UShort_t        tthreshold[9][32],
-	       UShort_t        tsetThreshold[9][32],
-	       UShort_t        trfPower[9][8],
-	       UShort_t        tsurfTrigBandMask[9][2],
+	       UShort_t        tupperWords[ACTIVE_SURFS],
+	       UShort_t        tscaler[ACTIVE_SURFS][SCALERS_PER_SURF],
+	       UShort_t        tthreshold[ACTIVE_SURFS][SCALERS_PER_SURF],
+	       UShort_t        tsetThreshold[ACTIVE_SURFS][SCALERS_PER_SURF],
+	       UShort_t        trfPower[ACTIVE_SURFS][RFCHAN_PER_SURF],
+	       UShort_t        tsurfTrigBandMask[ACTIVE_SURFS][2],
 	       Int_t           tintFlag)
 {
 
@@ -44,12 +44,12 @@ SurfHk::SurfHk(Int_t           trun,
    globalThreshold=tglobalThreshold;
    errorFlag=terrorFlag;
    scalerGoal=tscalerGoal;
-   memcpy(upperWords,tupperWords,sizeof(UShort_t)*9);
-   memcpy(scaler,tscaler,sizeof(UShort_t)*9*32);
-   memcpy(threshold,tthreshold,sizeof(UShort_t)*9*32);
-   memcpy(setThreshold,tsetThreshold,sizeof(UShort_t)*9*32);
-   memcpy(rfPower,trfPower,sizeof(UShort_t)*9*8);
-   memcpy(surfTrigBandMask,tsurfTrigBandMask,sizeof(UShort_t)*9*2);
+   memcpy(upperWords,tupperWords,sizeof(UShort_t)*ACTIVE_SURFS);
+   memcpy(scaler,tscaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+   memcpy(threshold,tthreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+   memcpy(setThreshold,tsetThreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+   memcpy(rfPower,trfPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
+   memcpy(surfTrigBandMask,tsurfTrigBandMask,sizeof(UShort_t)*ACTIVE_SURFS*2);
    intFlag=tintFlag;
 
 }

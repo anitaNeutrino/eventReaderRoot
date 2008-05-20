@@ -1,4 +1,5 @@
 //#include "AnitaConventions.h"
+#include <iostream>
 
 void plotThisClockEvent()
 {
@@ -11,16 +12,20 @@ void plotThisClockEvent()
    gStyle->SetTitleSize(0.1,"xy");
    gStyle->SetTitleOffset(0.5,"y");
    gStyle->SetOptTitle(0);
-   plotThisClockEvent(1028,201870);
+   plotThisClockEvent(1028,255488);
 }
   
 
 void plotThisClockEvent(int run, int eventNumber) {
+
+  gSystem->Load("libMathMore.so");
+  gSystem->Load("/usr/lib64/libfftw3.so");
+  gSystem->Load("libRootFftwWrapper.so");
   gSystem->Load("libAnitaEvent.so");
 
-  char eventName[FILENAME_MAX];
-  char headerName[FILENAME_MAX];
-  char hkName[FILENAME_MAX];
+  char eventName[180];
+  char headerName[180];
+  char hkName[180];
   sprintf(eventName,"/unix/anita1/webData/firstDay/run%d/eventFile%d*.root",run,run);
   sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/timedHeadFile%d.root",run,run);
   sprintf(hkName,"/unix/anita1/webData/firstDay/run%d/prettyHkFile%d.root",run,run);
@@ -60,7 +65,7 @@ void plotThisClockEvent(int run, int eventNumber) {
 
   TCanvas *canClock = (TCanvas*) gROOT->FindObject("canClock");
   if(!canClock) {
-    canClock = new TCanvas("canClock","canClock",800,800);
+    canClock = new TCanvas("canClock","canClock",800,400);
   }
   char textLabel[180];
   char pngName[180];
@@ -77,7 +82,7 @@ void plotThisClockEvent(int run, int eventNumber) {
        
     
        
-    UsefulAnitaEvent realEvent(event,WaveCalType::kVTFullJWPlus,hk);
+    UsefulAnitaEvent realEvent(event,WaveCalType::kVTFullJWPlusFancyClockZero,hk);
     cout << entry << "\t" <<  realEvent.eventNumber << " " << header->eventNumber << endl;
     //  cout << realEvent.gotCalibTemp << " " << realEvent.calibTemp << endl;
     canClock->Clear();
@@ -98,18 +103,21 @@ void plotThisClockEvent(int run, int eventNumber) {
     for(int surf=0;surf<9;surf++) {
       if(gr[surf]) delete gr[surf];
     }
-    graphPad->Divide(2,5);
-    
+    //    graphPad->Divide(2,5);
+    graphPad->cd();
+    TH1F *framey = gPad->DrawFrame(-10,-300,110,300);
     for(int surf=0;surf<9;surf++) {
-      graphPad->cd(surf+1);
+       //      graphPad->cd(surf+1);
       gr[surf] = realEvent.getGraph(UsefulAnitaEvent::getChanIndex(surf,8));
-      gr[surf]->Draw("al");
+      gr[surf]->SetLineColor(getNiceColour(surf));
+      gr[surf]->Draw("l");
+	       
     }
     canClock->Update();
     sprintf(pngName,"clocks%lu.png",realEvent.eventNumber);
-    canClock->Print(pngName);
+    //    canClock->Print(pngName);
     //       break;
-    gSystem->Sleep(1000);
+    //    gSystem->Sleep(1000);
   
   }
 }

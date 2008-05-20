@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include "AnitaGeomTool.h"
+#include "AnitaConventions.h"
 
 #include "TString.h"
 #include "TObjArray.h"
@@ -19,24 +20,27 @@ namespace AnitaGeom {
    
    //Positive is horizontal
    //Negative is vetical
-   int antToSurfMap[32]={1,3,5,7,1,3,5,7,0,2,4,6,0,2,4,6,
+   int antToSurfMap[NUM_SEAVEYS]={1,3,5,7,1,3,5,7,0,2,4,6,0,2,4,6,
 			 0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-   int hAntToChan[32]={4,4,4,4,5,5,5,5,4,4,4,4,5,5,5,5,
+   int hAntToChan[NUM_SEAVEYS]={4,4,4,4,5,5,5,5,4,4,4,4,5,5,5,5,
 		       6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7};
-   int vAntToChan[32]={0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,
+   int vAntToChan[NUM_SEAVEYS]={0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,
 		       2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3};
    
    // Note that this array uses antenna number 1-32 as it needs
    // the negative sign to indicate polarization
-   int surfToAntMap[9][8]={{-9,-13,-17,-25,9,13,17,25},
-			   {-1,-5,-18,-26,1,5,18,26},
-			   {-10,-14,-19,-27,10,14,19,27},
-			   {-2,-6,-20,-28,2,6,20,28},
-			   {-11,-15,-21,-29,11,15,21,29},
-			   {-3,-7,-22,-30,3,7,22,30},
-			   {-12,-16,-23,-31,12,16,23,31},
-			   {-4,-8,-24,-32,4,8,24,32},
-			   {37,38,39,40,33,34,35,36}};
+  //Need to update this with the ANITA-II numbers
+  int surfToAntMap[ACTIVE_SURFS][RFCHAN_PER_SURF]=
+    {{-9,-13,-17,-25,9,13,17,25},
+     {-1,-5,-18,-26,1,5,18,26},
+     {-10,-14,-19,-27,10,14,19,27},
+     {-2,-6,-20,-28,2,6,20,28},
+     {-11,-15,-21,-29,11,15,21,29},
+     {-3,-7,-22,-30,3,7,22,30},
+     {-12,-16,-23,-31,12,16,23,31},
+     {-4,-8,-24,-32,4,8,24,32},
+     {37,38,39,40,33,34,35,36},
+     {41,42,42,44,45,46,47,48}};
    
    int biconeIndexArray[4]={72,73,74,75}; //phi=2,6,10,14
    int disconeIndexArray[4]={77,78,79,76}; //phi=4,8,12,16
@@ -221,8 +225,8 @@ int AnitaGeomTool::getSurfChanFromChanIndex(int chanIndex, // input channel inde
     return 0;
 
   //  std::cout << "chanIndex is " << chanIndex << "\n";
-  chan=chanIndex%9; // 0 to 8
-  surf=(chanIndex-chan)/9; // 0 to 8
+  chan=chanIndex%CHANNELS_PER_SURF; // 0 to 8
+  surf=(chanIndex-chan)/CHANNELS_PER_SURF; // 0 to 8
 
   return 1;
 
@@ -285,7 +289,7 @@ void AnitaGeomTool::readPhotogrammetry()
      //std::cout << line.Data() << "\n";
   }
   
-  for(int ant=0;ant<32;ant++) {
+  for(int ant=0;ant<NUM_SEAVEYS;ant++) {
      line.ReadLine(AntennaFile);
      //std::cout << "Seavey:\t" << line.Data() << "\n";
      TObjArray *tokens = line.Tokenize(",");
@@ -570,7 +574,7 @@ void AnitaGeomTool::readPhotogrammetry()
      //std::cout << line.Data() << "\n";
   }
   
-  for(int ant=0;ant<32;ant++) {
+  for(int ant=0;ant<NUM_SEAVEYS;ant++) {
      line.ReadLine(AntennaFile);
      //std::cout << "Seavey:\t" << line.Data() << "\n";
      TObjArray *tokens = line.Tokenize(",");
@@ -856,7 +860,7 @@ void AnitaGeomTool::readPhotogrammetry()
 //Non static thingies
 void AnitaGeomTool::getAntXYZ(int ant, Double_t &x, Double_t &y, Double_t &z)
 {
-   if(ant>=0 && ant<32) {
+   if(ant>=0 && ant<NUM_SEAVEYS) {
       x=xFeedFromVerticalHorn[ant];
       y=yFeedFromVerticalHorn[ant];
       z=zFeedFromVerticalHorn[ant];
@@ -864,7 +868,7 @@ void AnitaGeomTool::getAntXYZ(int ant, Double_t &x, Double_t &y, Double_t &z)
 }
 
 Double_t AnitaGeomTool::getAntZ(int ant) {
-   if(ant>=0 && ant<32) {
+   if(ant>=0 && ant<NUM_SEAVEYS) {
       return zFeedFromVerticalHorn[ant];
       //      return zAntFromDeckHorn[ant];
    }
@@ -872,7 +876,7 @@ Double_t AnitaGeomTool::getAntZ(int ant) {
 }
 
 Double_t AnitaGeomTool::getAntR(int ant) {
-   if(ant>=0 && ant<32) {
+   if(ant>=0 && ant<NUM_SEAVEYS) {
       return rFeedFromVerticalHorn[ant];
 	    //return rAntFromDeckHorn[ant];
    }
@@ -880,14 +884,14 @@ Double_t AnitaGeomTool::getAntR(int ant) {
 }
 
 Double_t AnitaGeomTool::getAntPhiPosition(int ant) {
-   if(ant>=0 && ant<32) {
+   if(ant>=0 && ant<NUM_SEAVEYS) {
       return azFeedFromVerticalHorn[ant];
    }
    return 0;
 }
 
 Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(int ant) {
-   if(ant>=0 && ant<32) {
+   if(ant>=0 && ant<NUM_SEAVEYS) {
       Double_t phi=azFeedFromVerticalHorn[ant]-aftForeOffsetAngleVertical;
       if(phi<0)
 	 phi+=TMath::TwoPi();
@@ -918,7 +922,7 @@ Int_t AnitaGeomTool::getUpperAntNearestPhiWave(Double_t phiWave) {
 //Non static thingies
 void AnitaGeomTool::getAntFaceXYZ(int ant, Double_t &x, Double_t &y, Double_t &z)
 {
-   if(ant>=0 && ant<32) {
+   if(ant>=0 && ant<NUM_SEAVEYS) {
       x=xAntFromVerticalHorn[ant];
       y=yAntFromVerticalHorn[ant];
       z=zAntFromVerticalHorn[ant];
@@ -926,7 +930,7 @@ void AnitaGeomTool::getAntFaceXYZ(int ant, Double_t &x, Double_t &y, Double_t &z
 }
 
 Double_t AnitaGeomTool::getAntFaceZ(int ant) {
-   if(ant>=0 && ant<32) {
+   if(ant>=0 && ant<NUM_SEAVEYS) {
       return zAntFromVerticalHorn[ant];
       //      return zAntFaceFromDeckHorn[ant];
    }
@@ -934,7 +938,7 @@ Double_t AnitaGeomTool::getAntFaceZ(int ant) {
 }
 
 Double_t AnitaGeomTool::getAntFaceR(int ant) {
-   if(ant>=0 && ant<32) {
+   if(ant>=0 && ant<NUM_SEAVEYS) {
       return rAntFromVerticalHorn[ant];
 	    //return rAntFromDeckHorn[ant];
    }
@@ -942,14 +946,14 @@ Double_t AnitaGeomTool::getAntFaceR(int ant) {
 }
 
 Double_t AnitaGeomTool::getAntFacePhiPosition(int ant) {
-   if(ant>=0 && ant<32) {
+   if(ant>=0 && ant<NUM_SEAVEYS) {
       return azCentreFromVerticalHorn[ant];
    }
    return 0;
 }
 
 Double_t AnitaGeomTool::getAntFacePhiPositionRelToAftFore(int ant) {
-   if(ant>=0 && ant<32) {
+   if(ant>=0 && ant<NUM_SEAVEYS) {
       Double_t phi=azCentreFromVerticalHorn[ant]-aftForeOffsetAngleVertical;
       if(phi<0)
 	 phi+=TMath::TwoPi();

@@ -12,6 +12,7 @@
 #include "TF1.h"
 #include "TStyle.h"
 #include "TSystem.h"
+#include "TROOT.h"
 #include <iostream>
 #include <fstream>
 
@@ -28,9 +29,9 @@ void plotOneSurf(int run, int startEntry, int numEntries,int surf) {
   char eventName[FILENAME_MAX];
   char headerName[FILENAME_MAX];
   char hkName[FILENAME_MAX];
-  sprintf(eventName,"/unix/anita1/webData/firstDay/run%d/eventFile%d*.root",run,run);
-  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/timedHeadFile%d.root",run,run);
-  sprintf(hkName,"/unix/anita1/webData/firstDay/run%d/prettyHkFile%d.root",run,run);
+  sprintf(eventName,"/unix/anita1/webData/fullRoot/run%d/eventFile%d*.root",run,run);
+  sprintf(headerName,"/unix/anita1/webData/fullRoot/run%d/timedHeadFile%d.root",run,run);
+  sprintf(hkName,"/unix/anita1/webData/fullRoot/run%d/prettyHkFile%d.root",run,run);
 
   RawAnitaEvent *event = 0;
   TimedAnitaHeader *header =0;

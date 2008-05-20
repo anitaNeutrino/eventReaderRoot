@@ -180,6 +180,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
       }
       break;
    case WaveCalType::kVTFullJWPlus:
+   case WaveCalType::kVTFullJWPlusFudge:
       //All Jiwoo's lovely numbers + cable delay
       for(int surf=0;surf<NUM_SURF;surf++) {
 	 for(int chan=0;chan<NUM_CHAN;chan++) {
@@ -255,7 +256,8 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 
    case WaveCalType::kVTFullJWPlusClock:              
    case WaveCalType::kVTFullJWPlusClockZero:  
-   case WaveCalType::kVTFullJWPlusFastClockZero:        
+   case WaveCalType::kVTFullJWPlusFastClockZero:
+   case WaveCalType::kVTFullJWPlusFancyClockZero:        
        // kVTFullJWPlus + Clock Jitter Correction (+ Zero Mean)
        for(int surf=0;surf<NUM_SURF;surf++) {
 	 for(int chan=0;chan<NUM_CHAN;chan++) {

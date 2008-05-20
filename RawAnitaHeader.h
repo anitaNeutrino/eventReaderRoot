@@ -82,7 +82,7 @@ class RawAnitaHeader: public TObject
   Int_t           goodTimeFlag;
    
    
-  ClassDef(RawAnitaHeader,1);
+  ClassDef(RawAnitaHeader,10);
 };
 
 
