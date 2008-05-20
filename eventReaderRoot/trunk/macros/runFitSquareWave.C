@@ -7,5 +7,5 @@ void runFitSquareWave() {
 			  
   gSystem->Load("libAnitaEvent.so");
   gSystem->CompileMacro("fitSquareWave.C","k");
-  fitSquareWave(1028,0,100000);
+  fitSquareWave(1028,0,100);
 }

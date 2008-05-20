@@ -36,19 +36,27 @@ class AnitaEventCalibrator : public TObject
   static int getChanIndex(int surf, int chan)
      {return chan+(9*surf);}
 
+  //Some flags that do things
+  Int_t fApplyClockFudge; //Should we use my silly clock fudge factor
+  
+
+
   //Variables for RG Calib
   float mvCalibVals[NUM_SURF][NUM_CHAN][NUM_CHIP];
   float timeBaseCalib[NUM_SURF][NUM_CHIP][NUM_RCO];
   int rcoLatchCalib[NUM_SURF][NUM_CHIP];
   float epsilonCalib[NUM_SURF][NUM_CHIP][NUM_RCO]; //Note the rco is the end rco
+
   //Variables Jiwoo Calib
   float tcalTBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
   float tcalEpsilon[NUM_SURF][NUM_CHIP][NUM_RCO];
   float tcalRcoDelayBin[NUM_SURF][NUM_CHIP][NUM_RCO];
+  float tcalFudgeFactor[NUM_SURF][NUM_CHIP][NUM_RCO];
   
   //Variables for clock-based trigger jitter correction
   float clockJitterOffset[NUM_SURF][NUM_CHIP];
   float fastClockJitterOffset[NUM_SURF][NUM_CHIP];
+  float fancyClockJitterOffset[NUM_SURF][NUM_CHIP];
 
   //Cable Length Calib
   float groupDelayCalib[NUM_SURF][NUM_CHAN];
@@ -73,6 +81,7 @@ class AnitaEventCalibrator : public TObject
   void zeroMean();
   void processClockJitter();
   void processClockJitterFast();
+  void processClockJitterCorrelation();
 
  protected:
    static AnitaEventCalibrator *fgInstance;  

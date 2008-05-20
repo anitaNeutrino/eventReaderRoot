@@ -29,7 +29,7 @@ class UsefulAnitaEvent: public RawAnitaEvent
 
   //Generally useful function
   static int getChanIndex(int surf, int chan)
-     {return chan+(9*surf);}
+    {return chan+(CHANNELS_PER_SURF*surf);}
 
 
   TGraph *getGraphFromSurfAndChan(int surf, int chan);

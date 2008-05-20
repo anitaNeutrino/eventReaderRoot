@@ -53,7 +53,7 @@ class RawAnitaEvent: public TObject
   Int_t getWrappedHitBus(Int_t chanIndex) {
      return ((chipIdFlag[chanIndex])&0x8)>>3;
   }
-  ClassDef(RawAnitaEvent,1);
+  ClassDef(RawAnitaEvent,10);
 };
 
 
