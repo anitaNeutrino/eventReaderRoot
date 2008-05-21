@@ -52,7 +52,7 @@ namespace WaveCalType {
 ///First up we'll add some definitions of the raw data
 
 #define ACTIVE_SURFS 10
-#define SCALERS_PER_SURF 32
+#define SCALERS_PER_SURF 16
 #define RFCHAN_PER_SURF 8
 #define CHANNELS_PER_SURF 9
 #define LABRADORS_PER_SURF 4 /*jjb 2006-04-19 */
