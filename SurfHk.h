@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////////////
-/////  SurfHk.h        Pretty ANITA hk class                            /////
+/////  SurfHk.h        SURF hk class                                     /////
 /////                                                                    /////
 /////  Description:                                                      /////
-/////     A simple class for storing pretty ADU5 VTG objects in a TTree  /////
+/////     A simple class for storing SURF Hk objects in a TTree          /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
 
