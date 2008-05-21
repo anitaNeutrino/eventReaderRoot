@@ -672,7 +672,7 @@ typedef struct {
     unsigned short threshold[ACTIVE_SURFS][SCALERS_PER_SURF];
     unsigned short setThreshold[ACTIVE_SURFS][SCALERS_PER_SURF];
     unsigned short rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-    unsigned short surfTrigBandMask[ACTIVE_SURFS][2];
+    unsigned short surfTrigBandMask[ACTIVE_SURFS];
 } FullSurfHkStruct_t;
 
 typedef struct {
@@ -689,7 +689,7 @@ typedef struct {
   unsigned short rmsThresh[ACTIVE_SURFS][SCALERS_PER_SURF];
   unsigned short avgRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
   unsigned short rmsRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-  unsigned short surfTrigBandMask[ACTIVE_SURFS][2];
+  unsigned short surfTrigBandMask[ACTIVE_SURFS];
 } AveragedSurfHkStruct_t;
 
 
