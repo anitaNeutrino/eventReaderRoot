@@ -33,7 +33,7 @@ class SurfHk: public TObject
 	 UShort_t        tthreshold[ACTIVE_SURFS][SCALERS_PER_SURF],
 	 UShort_t        tsetThreshold[ACTIVE_SURFS][SCALERS_PER_SURF],
 	 UShort_t        trfPower[ACTIVE_SURFS][RFCHAN_PER_SURF],
-	 UShort_t        tsurfTrigBandMask[ACTIVE_SURFS][2],
+	 UShort_t        tsurfTrigBandMask[ACTIVE_SURFS],
 	 Int_t           tintFlag);
 
    Int_t           run;
@@ -48,7 +48,7 @@ class SurfHk: public TObject
    UShort_t        threshold[ACTIVE_SURFS][SCALERS_PER_SURF];
    UShort_t        setThreshold[ACTIVE_SURFS][SCALERS_PER_SURF];
    UShort_t        rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-   UShort_t        surfTrigBandMask[ACTIVE_SURFS][2];
+   UShort_t        surfTrigBandMask[ACTIVE_SURFS];
    Int_t           intFlag;
 
    
