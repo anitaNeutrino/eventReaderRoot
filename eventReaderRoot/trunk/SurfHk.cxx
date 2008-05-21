@@ -33,7 +33,7 @@ SurfHk::SurfHk(Int_t           trun,
 	       UShort_t        tthreshold[ACTIVE_SURFS][SCALERS_PER_SURF],
 	       UShort_t        tsetThreshold[ACTIVE_SURFS][SCALERS_PER_SURF],
 	       UShort_t        trfPower[ACTIVE_SURFS][RFCHAN_PER_SURF],
-	       UShort_t        tsurfTrigBandMask[ACTIVE_SURFS][2],
+	       UShort_t        tsurfTrigBandMask[ACTIVE_SURFS],
 	       Int_t           tintFlag)
 {
 
@@ -49,7 +49,7 @@ SurfHk::SurfHk(Int_t           trun,
    memcpy(threshold,tthreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
    memcpy(setThreshold,tsetThreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
    memcpy(rfPower,trfPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
-   memcpy(surfTrigBandMask,tsurfTrigBandMask,sizeof(UShort_t)*ACTIVE_SURFS*2);
+   memcpy(surfTrigBandMask,tsurfTrigBandMask,sizeof(UShort_t)*ACTIVE_SURFS);
    intFlag=tintFlag;
 
 }
