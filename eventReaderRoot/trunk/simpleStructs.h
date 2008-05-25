@@ -69,13 +69,13 @@
 #else
 #define VER_EVENT_BODY 10
 #define VER_PEDSUBBED_EVENT_BODY 10
-#define VER_EVENT_HEADER 10
+#define VER_EVENT_HEADER 11
 #define SLAC_VER_EVENT_HEADER 10
 #define VER_WAVE_PACKET 10
 #define VER_SURF_PACKET 10
 #define VER_ENC_WAVE_PACKET 10
 #define VER_ENC_SURF_PACKET 10
-#define VER_SURF_HK 10
+#define VER_SURF_HK 12
 #define VER_GPS_GGA 10
 #define VER_ADU5_PAT 10
 #define VER_ADU5_SAT 10
@@ -97,7 +97,9 @@
 #define VER_OTHER_MON 10
 #define VER_GPSD_START 10
 #define VER_LOGWATCHD_START 10
-#define VER_AVG_SURF_HK 10
+#define VER_AVG_SURF_HK 12
+#define VER_SUM_TURF_RATE 10
+#define VER_ACQD_START 10
 #endif
 
 
@@ -111,6 +113,7 @@ typedef enum {
     PACKET_SURF_HK = 0x110, //FullSurfHkStruct_t --Yes
     PACKET_TURF_RATE = 0x111, //TurfRateStruct_t -- Yes
     PACKET_AVG_SURF_HK = 0x112, //AveragedSurfHkStruct_t -- yes
+    PACKET_SUM_TURF_RATE = 0x113, //SummedTurfRateStruct_t -- yes
     PACKET_PEDSUB_WV = 0x120, //PedSubbedWaveformPacket_t -- Yes
     PACKET_ENC_SURF = 0x121, //EncodedSurfPacketHeader_t -- Yes
     PACKET_ENC_SURF_PEDSUB = 0x122, //EncodedPedSubbedSurfPacketHeader_t -- Yes
@@ -142,7 +145,8 @@ typedef enum {
     PACKET_RUN_START = 0xb00, 
     PACKET_OTHER_MONITOR = 0xb01,
     PACKET_GPSD_START = 0xc00,
-    PACKET_LOGWATCHD_START = 0xc01
+    PACKET_LOGWATCHD_START = 0xc01,
+    PACKET_ACQD_START = 0xc02
 } PacketCode_t;
 
 typedef enum {
@@ -489,24 +493,36 @@ typedef struct {
   unsigned char l3Rates[PHI_SECTORS];
 } TurfRateStruct_t;
 
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime; //Time of first hk
+  unsigned short numRates; //Number of rates in average
+  unsigned short deltaT; //Difference in time between first and last 
+  unsigned int l1Rates[TRIGGER_SURFS][ANTS_PER_SURF]; // 3 of 8 counters
+  unsigned short upperL2Rates[PHI_SECTORS];
+  unsigned short lowerL2Rates[PHI_SECTORS];
+  unsigned short l3Rates[PHI_SECTORS];
+} SummedTurfRateStruct_t;
+
 
 typedef struct {
-    GenericHeader_t gHdr;
-    unsigned int unixTime;       /* unix UTC sec*/
-    unsigned int unixTimeUs;     /* unix UTC microsec */
-    int gpsSubTime;     /* the GPS fraction of second (in ns) 
-			   (for the X events per second that get 
+  GenericHeader_t gHdr;
+  unsigned int unixTime;       /* unix UTC sec*/
+  unsigned int unixTimeUs;     /* unix UTC microsec */
+  int gpsSubTime;     /* the GPS fraction of second (in ns) 
+			 (for the X events per second that get 
 			   tagged with it, note it now includes
 			   second offset from unixTime)*/
-    unsigned int eventNumber;    /* Global event number */
-    unsigned short surfMask;
-    unsigned short calibStatus;   /* Were we flashing the pulser? */
-    unsigned char priority; // priority and other
-    unsigned char turfUpperWord; // The upper 8 bits from the TURF
-    unsigned char otherFlag; //Currently unused 
-    unsigned char otherFlag2; //Currently unused 
-    unsigned int antTrigMask; // What was the ant trigger mask
-    TurfioStruct_t turfio; /*The X byte TURFIO data*/
+  unsigned int eventNumber;    /* Global event number */
+  unsigned short calibStatus;   /* Were we flashing the pulser? */
+  unsigned char priority; // priority and other
+  unsigned char turfUpperWord; // The upper 8 bits from the TURF
+  unsigned char otherFlag; //Currently unused 
+  unsigned char errorFlag; //Bit 1 means sync slip
+  unsigned char otherFlag3;
+  unsigned char nadirAntTrigMask; //
+  unsigned int antTrigMask; // What was the ant trigger mask
+  TurfioStruct_t turfio; /*The X byte TURFIO data*/
 } AnitaEventHeader_t;
 
 
@@ -650,6 +666,16 @@ typedef struct {
   unsigned char tstBitMask;
 } GpsdStartStruct_t;
 
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime;
+  unsigned int numEvents;
+  float chanMean[ACTIVE_SURFS][CHANNELS_PER_SURF]; //Ped subtracted
+  float chanRMS[ACTIVE_SURFS][CHANNELS_PER_SURF]; //Ped subtracted
+  unsigned short threshVals[10];
+  unsigned short scalerVals[ACTIVE_SURFS][SCALERS_PER_SURF][10];
+} AcqdStartStruct_t;
+  
 
 typedef struct {    
     GenericHeader_t gHdr;

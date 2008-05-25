@@ -120,6 +120,10 @@ namespace AnitaLocations {
    const double LONGITUDE_BH=167.06679444;
    const double LATITUDE_BH=-77.861936111;
    const double ALTITUDE_BH=-33.67;
+
+   const double LONGITUDE_TD=158.4564333333;
+   const double LATITUDE_TD=77.88116666666;
+   const double ALTITUDE_TD=2712.72;
 }
 
 

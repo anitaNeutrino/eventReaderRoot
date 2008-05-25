@@ -167,6 +167,8 @@ class AnitaGeomTool
 
 
   //Non static thingies
+  void getPhiWave(Double_t balloonLon, Double_t balloonLat, Double_t ballonAlt, Double_t balloonHeading, Double_t sourceLon, Double_t sourceLat, Double_t sourceAlt, Double_t &thetaWave, Double_t &phiWave);
+
   void getAntXYZ(int ant, Double_t &x, Double_t &y, Double_t &z);
   Double_t getAntZ(int ant);
   Double_t getAntR(int ant);

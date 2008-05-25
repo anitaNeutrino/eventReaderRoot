@@ -26,12 +26,13 @@ class RawAnitaHeader: public TObject
 		 UInt_t   tpayloadTimeUs,
 		 UInt_t   tgpsSubTime,
 		 UInt_t   teventNumber,
-		 UShort_t tsurfMask,
 		 UShort_t tcalibStatus,
 		 UChar_t  tpriority,
 		 UChar_t  tturfUpperWord,
 		 UChar_t  totherFlag,
-		 UChar_t  totherFlag2,
+		 UChar_t  terrorFlag,
+		 UChar_t  totherFlag3,
+		 UChar_t  tnadirAntMask,
 		 UInt_t   tantTrigMask,
 		 UChar_t  ttrigType,
 		 UChar_t  tl3Type1Count,
@@ -57,12 +58,13 @@ class RawAnitaHeader: public TObject
   UInt_t          payloadTimeUs;
   UInt_t          gpsSubTime;
   UInt_t          eventNumber;
-  UShort_t        surfMask;
   UShort_t        calibStatus;
   UChar_t         priority;
   UChar_t         turfUpperWord;
   UChar_t         otherFlag;
-  UChar_t         otherFlag2;
+  UChar_t         errorFlag;
+  UChar_t         otherFlag3;
+  UChar_t         nadirAntTrigMask;
   UInt_t          antTrigMask;
   UChar_t         trigType;
   UChar_t         l3Type1Count;
@@ -82,7 +84,7 @@ class RawAnitaHeader: public TObject
   Int_t           goodTimeFlag;
    
    
-  ClassDef(RawAnitaHeader,10);
+  ClassDef(RawAnitaHeader,11);
 };
 
 

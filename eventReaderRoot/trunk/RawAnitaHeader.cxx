@@ -30,12 +30,13 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    payloadTimeUs=hdPtr->unixTimeUs;
    gpsSubTime=hdPtr->gpsSubTime;
    eventNumber=hdPtr->eventNumber;
-   surfMask=hdPtr->surfMask;
    calibStatus=hdPtr->calibStatus;
    priority=hdPtr->priority;
    turfUpperWord=hdPtr->turfUpperWord;
    otherFlag=hdPtr->otherFlag;
-   otherFlag2=hdPtr->otherFlag2;
+   errorFlag=hdPtr->errorFlag;
+   otherFlag3=hdPtr->otherFlag3;
+   nadirAntTrigMask=hdPtr->nadirAntTrigMask;
    antTrigMask=hdPtr->antTrigMask;
    trigType=hdPtr->turfio.trigType;
    l3Type1Count=hdPtr->turfio.l3Type1Count;
@@ -63,12 +64,13 @@ RawAnitaHeader::RawAnitaHeader(Int_t    trun,
 			       UInt_t   tpayloadTimeUs,
 			       UInt_t   tgpsSubTime,
 			       UInt_t   teventNumber,
-			       UShort_t tsurfMask,
 			       UShort_t tcalibStatus,
 			       UChar_t  tpriority,
 			       UChar_t  tturfUpperWord,
 			       UChar_t  totherFlag,
-			       UChar_t  totherFlag2,
+			       UChar_t  terrorFlag,
+			       UChar_t  totherFlag3,
+			       UChar_t  tnadirAntMask,
 			       UInt_t   tantTrigMask,
 			       UChar_t  ttrigType,
 			       UChar_t  tl3Type1Count,
@@ -91,12 +93,13 @@ RawAnitaHeader::RawAnitaHeader(Int_t    trun,
    payloadTimeUs=tpayloadTimeUs;
    gpsSubTime=tgpsSubTime;
    eventNumber=teventNumber;
-   surfMask=tsurfMask;
    calibStatus=tcalibStatus;
    priority=tpriority;
    turfUpperWord=tturfUpperWord;
    otherFlag=totherFlag;
-   otherFlag2=totherFlag2;
+   errorFlag=terrorFlag;
+   otherFlag3=totherFlag3;
+   nadirAntTrigMask=tnadirAntMask;
    antTrigMask=tantTrigMask;
    trigType=ttrigType;
    l3Type1Count=tl3Type1Count;
