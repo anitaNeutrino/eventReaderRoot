@@ -11,11 +11,12 @@
 
 //Includes
 #include <TObject.h>
-#include <TGraph.h>
 #include "RawAnitaEvent.h"
-#include "PrettyAnitaHk.h"
 #include "AnitaConventions.h"
-#include "AnitaEventCalibrator.h"
+
+class TGraph;
+class AnitaEventCalibrator;
+class PrettyAnitaHk;
 
 class UsefulAnitaEvent: public RawAnitaEvent
 {

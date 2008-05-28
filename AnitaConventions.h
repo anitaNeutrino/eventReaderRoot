@@ -61,7 +61,8 @@ namespace WaveCalType {
 #define MAX_NUMBER_SAMPLES 260
 #define EFFECTIVE_SAMPLES 256
 #define NUM_PHI 16
-#define NUM_SEAVEYS 32
+#define NUM_SEAVEYS 40
+#define NUM_NADIRS 8
 #define NUM_BICONES 4
 #define NUM_DISCONES 4
 
@@ -74,7 +75,7 @@ namespace WaveCalType {
 
 //Trigger Stuff
 #define ANTS_PER_SURF 4
-#define TRIGGER_SURFS 8
+#define TRIGGER_SURFS 8 //Needs to be updated for ANITA-II
 #define PHI_SECTORS 16
 
 //Acromag stuff
@@ -98,10 +99,9 @@ namespace WaveCalType {
 //Now some geometry and polarisation considerations
 namespace AnitaRing {
    typedef enum EAnitaRing {
-      kLowerRing  = 0,
-      kUpperRing  = 1,
-      kDisconeRing = 2,
-      kBiconeRing =3
+      kUpperRing  = 0,
+      kLowerRing  = 1,
+      kNadirRing = 2
    } AnitaRing_t;
 }
 

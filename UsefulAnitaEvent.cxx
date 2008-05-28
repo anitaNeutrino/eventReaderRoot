@@ -9,6 +9,9 @@
 
 #include "UsefulAnitaEvent.h"
 #include "AnitaGeomTool.h"
+#include "PrettyAnitaHk.h"
+#include "AnitaEventCalibrator.h"
+#include <TGraph.h>
 #include <iostream>
 #include <fstream>
 
@@ -305,6 +308,7 @@ TGraph *UsefulAnitaEvent::getGraph(int chanIndex)
 {
    if(chanIndex<0 || chanIndex>=NUM_DIGITZED_CHANNELS)
       return NULL;
+   //   std::cout << chanIndex << std::endl;
    
    TGraph *grPtr=new TGraph(fNumPoints[chanIndex],
 				fTimes[chanIndex],
@@ -327,3 +331,4 @@ TGraph *UsefulAnitaEvent::getGraph(AnitaRing::AnitaRing_t ring,
    return getGraph(AnitaGeomTool::getChanIndexFromRingPhiPol(ring,phi,pol));
 
 }
+

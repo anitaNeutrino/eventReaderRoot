@@ -16,6 +16,7 @@
 #include "TPaveText.h"
 #include "TPaveLabel.h"
 #include "TROOT.h"
+#include "TMath.h"
 #include <iostream>
 #include <fstream>
 
@@ -134,7 +135,7 @@ void plotOneSurf(char *baseDir,int run, int startEntry, int numEntries,int surf)
       gr[chan]=realEvent.getGraph(realEvent.getChanIndex(surf,chan));
       gr[chan]->SetLineColor(getNiceColour(chan));
       gr[chan]->Draw("al");
-      //      if(chan<8) gr[chan]->GetYaxis()->SetRangeUser(-5,5);
+      if(chan<8) gr[chan]->GetYaxis()->SetRangeUser(-50,50);
       cout << gr[chan]->GetN() << "\t" << gr[chan]->GetMean(2) << "\t" << gr[chan]->GetRMS(2) <<  endl;
     }
     canSurf->Update();
@@ -146,6 +147,12 @@ void plotOneSurf(char *baseDir,int run, int startEntry, int numEntries,int surf)
 
 void plotRMSCanvas(char *baseDir,int run,int startEntry,int numEntries)
 {
+  gROOT->SetStyle("Plain");
+  gStyle->SetPalette(1);
+  gStyle->SetCanvasColor(0);
+   gStyle->SetFrameFillColor(0);
+   //   gStyle->SetFillColor(0);
+   gROOT->ForceStyle();
    char eventName[FILENAME_MAX];
    char headerName[FILENAME_MAX];
    //  char hkName[FILENAME_MAX];
@@ -181,20 +188,25 @@ void plotRMSCanvas(char *baseDir,int run,int startEntry,int numEntries)
    TFile *fpOut = new TFile(fileName,"RECREATE");
    TH2F *histRMS = new TH2F("histRMS","histRMS",ACTIVE_SURFS,0.5,ACTIVE_SURFS+0.5,8,0.5,8.5);
    TH2F *histMean = new TH2F("histMean","histMean",ACTIVE_SURFS,0.5,ACTIVE_SURFS+0.5,8,0.5,8.5);
+   TH2F *histMax = new TH2F("histMax","histMax",ACTIVE_SURFS,0.5,ACTIVE_SURFS+0.5,8,0.5,8.5);
+   TH2F *histP2P = new TH2F("histP2P","histP2P",ACTIVE_SURFS,0.5,ACTIVE_SURFS+0.5,8,0.5,8.5);
    TTree *meanTree = new TTree("meanTree","Tree of Means");
-   UInt_t entry;
+   UInt_t treeEntry;
    UInt_t eventNumber;
    UInt_t triggerTime;
    UInt_t triggerTimeNs;
    Double_t chanMean[ACTIVE_SURFS][9];
    Double_t chanRMS[ACTIVE_SURFS][9];
-   meanTree->Branch("entry",&entry,"entry/i");
+   Double_t chanMax[ACTIVE_SURFS][9];
+   Double_t chanMin[ACTIVE_SURFS][9];
+   meanTree->Branch("entry",&treeEntry,"entry/i");
    meanTree->Branch("eventNumber",&eventNumber,"eventNumber/i");
    meanTree->Branch("triggerTime",&triggerTime,"triggerTime/i");
-   meanTree->Branch("triggerTimeNs",&triggerTimeNs,"triggerTimeNs");
-   meanTree->Branch("chanMean",&chanMean[0][0],"chanMean[10][9]");
-   meanTree->Branch("chanRMS",&chanRMS[0][0],"chanRMS[10][9]");
-
+   meanTree->Branch("triggerTimeNs",&triggerTimeNs,"triggerTimeNs/i");
+   meanTree->Branch("chanMean",&chanMean[0][0],"chanMean[10][9]/D");
+   meanTree->Branch("chanRMS",&chanRMS[0][0],"chanRMS[10][9]/D");
+   meanTree->Branch("chanMax",&chanMax[0][0],"chanMax[10][9]/D");
+   meanTree->Branch("chanMin",&chanMin[0][0],"chanMin[10][9]/D");
 
   Int_t count=0;
   for(int entry=startEntry;entry<startEntry+numEntries;entry++) {
@@ -208,23 +220,39 @@ void plotRMSCanvas(char *baseDir,int run,int startEntry,int numEntries)
      UsefulAnitaEvent realEvent(event,WaveCalType::kJustUnwrap);
      //     cout << realEvent.eventNumber << " " << header->eventNumber << endl;
      //  cout << realEvent.gotCalibTemp << " " << realEvent.calibTemp << endl;
+     treeEntry=entry;
+     eventNumber=header->eventNumber;
+     triggerTime=header->triggerTime;
+     triggerTimeNs=header->triggerTimeNs;
      
      
-     
-     for(int surf=0;surf<ACTIVE_SURFS;surf++) {
+     for(int surf=1;surf<ACTIVE_SURFS;surf++) {
 	for(int chan=0;chan<8;chan++) {
 	   TGraph *gr=realEvent.getGraph(realEvent.getChanIndex(surf,chan));
+	   Double_t *volts = gr->GetY();
+	   Double_t maxVolt=TMath::MaxElement(gr->GetN(),volts);
+	   Double_t minVolt=TMath::MinElement(gr->GetN(),volts);
 	   histRMS->Fill(surf+1,chan+1,gr->GetRMS(2));
 	   histMean->Fill(surf+1,chan+1,gr->GetMean(2));
-	   
+	   histMax->Fill(surf+1,chan+1,maxVolt);
+	   histP2P->Fill(surf+1,chan+1,maxVolt-minVolt);
+	   chanMean[surf][chan]=gr->GetMean(2);
+	   chanRMS[surf][chan]=gr->GetRMS(2);
+	   chanMax[surf][chan]=maxVolt;
+	   chanMin[surf][chan]=minVolt;
 	   delete gr;
 	}
      }
+     meanTree->Fill();
+
      count++;
   }
+  meanTree->AutoSave();
   Double_t scale=1./count;
   histMean->Scale(scale);
   histRMS->Scale(scale);
+  histMax->Scale(scale);
+  histP2P->Scale(scale);
   TCanvas *canRMS = (TCanvas*) gROOT->FindObject("canRMS");
   if(!canRMS) {
      canRMS = new TCanvas("canRMS","canRMS",800,600);
@@ -246,6 +274,28 @@ void plotRMSCanvas(char *baseDir,int run,int startEntry,int numEntries)
   histMean->SetYTitle("Channel");
   histMean->SetStats(0);
   histMean->Draw("colz");
+   
+  TCanvas *canMax = (TCanvas*) gROOT->FindObject("canMax");
+  if(!canMax) {
+     canMax = new TCanvas("canMax","canMax",800,600);
+  }
+  canMax->Clear();  
+  histMax->SetTitle("Waveform Max (No Clock)");
+  histMax->SetXTitle("SURF");
+  histMax->SetYTitle("Channel");
+  histMax->SetStats(0);
+  histMax->Draw("colz");
+   
+  TCanvas *canP2P = (TCanvas*) gROOT->FindObject("canP2P");
+  if(!canP2P) {
+     canP2P = new TCanvas("canP2P","canP2P",800,600);
+  }
+  canP2P->Clear();  
+  histP2P->SetTitle("Waveform P2P (No Clock)");
+  histP2P->SetXTitle("SURF");
+  histP2P->SetYTitle("Channel");
+  histP2P->SetStats(0);
+  histP2P->Draw("colz");
   
 
 }
