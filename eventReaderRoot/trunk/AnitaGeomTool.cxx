@@ -2,7 +2,7 @@
 /////  AnitaGeomTool.cxx        ANITA Geometry Tool                      /////
 /////                                                                    /////
 /////  Description:                                                      /////
-/////     Class for accessing ANITA Geometry Data                        /////
+/////     Class for accessing ANITA II Geometry Data                     /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
 #include <fstream>
@@ -21,46 +21,43 @@ namespace AnitaGeom {
    
    //Positive is horizontal
    //Negative is vetical
-   int antToSurfMap[NUM_SEAVEYS]={1,3,5,7,1,3,5,7,0,2,4,6,0,2,4,6,
-			 0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
+  int antToSurfMap[NUM_SEAVEYS]={5,7,6,1,5,7,6,1,0,2,3,4,0,2,3,4,
+				 0,5,2,7,3,6,4,1,0,5,2,7,3,6,4,1,
+				 8,9,8,9,8,9,8,9};
+				  
    int hAntToChan[NUM_SEAVEYS]={4,4,4,4,5,5,5,5,4,4,4,4,5,5,5,5,
-		       6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7};
-   int vAntToChan[NUM_SEAVEYS]={0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,
-		       2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3};
+				6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,
+				4,4,5,5,6,6,7,7};
+  
+  int vAntToChan[NUM_SEAVEYS]={0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,
+			       2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,
+			       0,0,1,1,2,2,3,3};
    
    // Note that this array uses antenna number 1-32 as it needs
    // the negative sign to indicate polarization
   //Need to update this with the ANITA-II numbers
   int surfToAntMap[ACTIVE_SURFS][RFCHAN_PER_SURF]=
     {{-9,-13,-17,-25,9,13,17,25},
-     {-1,-5,-18,-26,1,5,18,26},
-     {-10,-14,-19,-27,10,14,19,27},
-     {-2,-6,-20,-28,2,6,20,28},
-     {-11,-15,-21,-29,11,15,21,29},
-     {-3,-7,-22,-30,3,7,22,30},
-     {-12,-16,-23,-31,12,16,23,31},
      {-4,-8,-24,-32,4,8,24,32},
-     {37,38,39,40,33,34,35,36},
-     {41,42,42,44,45,46,47,48}};
+     {-10,-14,-19,-27,10,14,19,27},
+     {-11,-15,-21,-29,11,15,21,29},
+     {-12,-16,-23,-31,12,16,23,31},
+     {-1,-5,-18,-26,1,5,18,26},
+     {-3,-7,-22,-30,3,7,22,30},
+     {-2,-6,-20,-28,2,6,20,28},
+     {-33,-35,-37,-39,33,35,37,39},
+     {-34,-36,-38,40,34,36,38,40}};
+      
+  //Map from phi to antenna both start counting at zero
+  int upperAntNums[NUM_PHI]={8,0,9,1,10,2,11,3,12,4,13,5,14,6,15,7};
+  int lowerAntNums[NUM_PHI]={16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+  int nadirAntNums[NUM_PHI]={32,-1,33,-1,34,-1,35,-1,36,-1,37,-1,38,-1,39,-1};
    
-   int biconeIndexArray[4]={72,73,74,75}; //phi=2,6,10,14
-   int disconeIndexArray[4]={77,78,79,76}; //phi=4,8,12,16
+  //and the inverse (using ANT-1 and ANT-17 and ANT-32 with the arrays)
+  int upperPhiNums[NUM_PHI]={1,3,5,7,9,11,13,15,0,2,4,6,8,10,12,14};
+  int lowerPhiNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+  int nadirPhiNums[NUM_NADIRS]={0,1,2,3,4,5,6,7};
    
-   //Map from phi to antenna both start counting at zero
-   //int upperAntNums[NUM_PHI]={9,1,10,2,11,3,12,4,13,5,14,6,15,7,16,8};
-   //int lowerAntNums[NUM_PHI]={17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
-   int upperAntNums[NUM_PHI]={8,0,9,1,10,2,11,3,12,4,13,5,14,6,15,7};
-   int lowerAntNums[NUM_PHI]={16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
-   
-   //and the inverse (using ANT-1 and ANT-17 with the arrays)
-   int upperPhiNums[NUM_PHI]={1,3,5,7,9,11,13,15,0,2,4,6,8,10,12,14};
-   int lowerPhiNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-   
-   //Discone and bicones
-   int coneAntNums[NUM_PHI]={-1,4,-1,1,-1,5,-1,2,-1,6,-1,3,-1,7,-1,0};
-   int conePhiNums[8]={15,3,7,11,1,5,9,13};
-
-
 }
 
 AnitaGeomTool*  AnitaGeomTool::fgInstance = 0;
@@ -155,6 +152,9 @@ int AnitaGeomTool::getChanIndexFromRingPhiPol(AnitaRing::AnitaRing_t ring,
    case AnitaRing::kLowerRing:
       ant=AnitaGeom::lowerAntNums[phi];
       break;
+   case AnitaRing::kNadirRing:
+      ant=AnitaGeom::nadirAntNums[phi];
+      break;
    default:
       return -1;
    }
@@ -165,7 +165,7 @@ int AnitaGeomTool::getChanIndexFromRingPhiPol(AnitaRing::AnitaRing_t ring,
 int AnitaGeomTool::getChanIndexFromAntPol(int ant,
 					  AnitaPol::AnitaPol_t pol)
 {
-   if(ant<0 || ant>31) return -1;
+   if(ant<0 || ant>39) return -1;
    int surf,chan;
    surf=AnitaGeom::antToSurfMap[ant];
    if(pol==AnitaPol::kHorizontal) 
@@ -174,19 +174,18 @@ int AnitaGeomTool::getChanIndexFromAntPol(int ant,
       chan=AnitaGeom::vAntToChan[ant];
    else
       return -1;
-
    return getChanIndex(surf,chan);
-
 }
 
 
 int AnitaGeomTool::getAzimuthPartner(int rx)
 {
-
+  //Need to update for nadir ring
+  
   if (rx<16) 
      return AnitaGeom::lowerAntNums[AnitaGeom::upperPhiNums[rx]];
-  else
-     return AnitaGeom::upperAntNums[AnitaGeom::lowerPhiNums[rx-16]]; 
+  else if(rx<32)
+    return AnitaGeom::upperAntNums[AnitaGeom::lowerPhiNums[rx-16]]; 
 
   return -1;
 }
@@ -315,7 +314,7 @@ int AnitaGeomTool::getLayer(int irx)
 
 void AnitaGeomTool::readPhotogrammetry()
 {
-
+  //  return; //Hack for now
   char calibDir[FILENAME_MAX];
   char fileName[FILENAME_MAX];
   char *calibEnv=getenv("ANITA_CALIB_DIR");
@@ -341,7 +340,7 @@ void AnitaGeomTool::readPhotogrammetry()
      //std::cout << line.Data() << "\n";
   }
   
-  for(int ant=0;ant<NUM_SEAVEYS;ant++) {
+  for(int ant=0;ant<32;ant++) {
      line.ReadLine(AntennaFile);
      //std::cout << "Seavey:\t" << line.Data() << "\n";
      TObjArray *tokens = line.Tokenize(",");
@@ -626,7 +625,7 @@ void AnitaGeomTool::readPhotogrammetry()
      //std::cout << line.Data() << "\n";
   }
   
-  for(int ant=0;ant<NUM_SEAVEYS;ant++) {
+  for(int ant=0;ant<32;ant++) {
      line.ReadLine(AntennaFile);
      //std::cout << "Seavey:\t" << line.Data() << "\n";
      TObjArray *tokens = line.Tokenize(",");

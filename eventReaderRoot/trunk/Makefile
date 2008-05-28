@@ -39,7 +39,7 @@ GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 #Now the bits we're actually compiling
 ROOT_LIBRARY = libAnitaEvent.${DLLSUF}
 LIB_OBJS = RawAnitaEvent.o UsefulAnitaEvent.o  AnitaEventCalibrator.o AnitaGeomTool.o RawAnitaHeader.o PrettyAnitaHk.o Adu5Pat.o Adu5Vtg.o SurfHk.o TurfRate.o RawDataReader.o AnitaConventions.o TimedAnitaHeader.o eventDict.o
-CLASS_HEADERS = RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaHk.h Adu5Pat.h Adu5Vtg.h SurfHk.h TurfRate.h AnitaEventCalibrator.h AnitaConventions.h AnitaGeomTool.h TimedAnitaHeader.h
+CLASS_HEADERS = RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaHk.h Adu5Pat.h Adu5Vtg.h SurfHk.h TurfRate.h AnitaEventCalibrator.h AnitaConventions.h AnitaGeomTool.h TimedAnitaHeader.h simpleStructs.h
 
 PROGRAMS = generateSecondaries generateNeutrinos
 
@@ -86,6 +86,14 @@ eventDict.C: $(CLASS_HEADERS)
 	@echo "Generating dictionary ..."
 	@ rm -f *Dict* 
 	rootcint $@ -c $(CLASS_HEADERS) LinkDef.h
+
+install: $(ROOT_LIBRARY)
+ifeq ($(PLATFORM),macosx)
+	cp $(ROOT_LIBRARY) $(subst .$(DLLSUF),.so,$(ROOT_LIBRARY)) $(ANITA_UTIL_LIB_DIR)
+else
+	cp $(ROOT_LIBRARY) $(ANITA_UTIL_LIB_DIR)
+endif
+	cp  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
 
 clean:
 	@rm -f *Dict*
