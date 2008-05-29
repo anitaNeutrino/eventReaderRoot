@@ -21,26 +21,40 @@ TurfRate::~TurfRate() {
    //Default Destructor
 }
 
+TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *turfPtr)
+{
+   run=trun;
+   realTime=trealTime;
+   payloadTime=turfPtr->unixTime;
+   ppsNum=turfPtr->ppsNum;
+   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
+   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
+   intFlag=0;
+
+}
+
 
 
 TurfRate::TurfRate(Int_t           trun,
 		   UInt_t          trealTime,
 		   UInt_t          tpayloadTime,
-		   UInt_t          tpayloadTimeUs,
-		   UShort_t        tl1Rates[8][4],
-		   UChar_t         tupperL2Rates[16],
-		   UChar_t         tlowerL2Rates[16],
-		   UChar_t         tl3Rates[16],
+		   UInt_t          tppsNum,
+		   UShort_t        tl1Rates[PHI_SECTORS][2],
+		   UChar_t         tupperL2Rates[PHI_SECTORS],
+		   UChar_t         tlowerL2Rates[PHI_SECTORS],
+		   UChar_t         tl3Rates[PHI_SECTORS],
 		   Int_t           tintFlag)
 {
    run=trun;
    realTime=trealTime;
    payloadTime=tpayloadTime;
-   payloadTimeUs=tpayloadTimeUs;
-   memcpy(l1Rates,tl1Rates,sizeof(UShort_t)*8*4);
-   memcpy(upperL2Rates,tupperL2Rates,sizeof(UChar_t)*16);
-   memcpy(lowerL2Rates,tlowerL2Rates,sizeof(UChar_t)*16);
-   memcpy(l3Rates,tl3Rates,sizeof(UChar_t)*16);
+   ppsNum=tppsNum;
+   memcpy(l1Rates,tl1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
+   memcpy(upperL2Rates,tupperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(lowerL2Rates,tlowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(l3Rates,tl3Rates,sizeof(UChar_t)*PHI_SECTORS);
    intFlag=tintFlag;
 
 }
