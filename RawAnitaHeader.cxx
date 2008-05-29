@@ -120,3 +120,24 @@ RawAnitaHeader::RawAnitaHeader(Int_t    trun,
    triggerTimeNs=ttriggerTimeNs;
    goodTimeFlag=tgoodTimeFlag;
 } 
+
+char *RawAnitaHeader::trigTypeAsString()
+{
+   static char theString[20];
+   int count=0;
+   
+   char *trigTypes[4]={"RF","PPS1","PPS2","Soft"};
+   
+   for(int i=0;i<4;i++) {
+      if(trigType & (1<<i)) {
+	 if(count==0) {
+	    strcpy(theString,trigTypes[i]);
+	    count++;
+	 }
+	 else {
+	    sprintf(theString,"%s + %s",theString,trigTypes[i]);
+	 }
+      }
+   }
+   return theString;
+}

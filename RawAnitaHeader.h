@@ -83,6 +83,7 @@ class RawAnitaHeader: public TObject
   UInt_t          triggerTimeNs;
   Int_t           goodTimeFlag;
    
+  char *trigTypeAsString();
    
   ClassDef(RawAnitaHeader,11);
 };

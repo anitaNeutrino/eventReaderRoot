@@ -85,7 +85,7 @@
 #define VER_HK_FULL 10
 #define VER_CMD_ECHO 10
 #define VER_MONITOR 10
-#define VER_TURF_RATE 11
+#define VER_TURF_RATE 13
 #define VER_LAB_PED 10
 #define VER_FULL_PED 10
 #define VER_SLOW_1 10
@@ -98,7 +98,7 @@
 #define VER_GPSD_START 10
 #define VER_LOGWATCHD_START 10
 #define VER_AVG_SURF_HK 12
-#define VER_SUM_TURF_RATE 10
+#define VER_SUM_TURF_RATE 11
 #define VER_ACQD_START 10
 #endif
 
@@ -442,7 +442,7 @@ typedef struct {
     unsigned char rfPwrAvg[ACTIVE_SURFS][RFCHAN_PER_SURF];
     unsigned char avgScalerRates[TRIGGER_SURFS][ANTS_PER_SURF]; // * 2^7
     unsigned char rmsScalerRates[TRIGGER_SURFS][ANTS_PER_SURF];
-    unsigned char avgL1Rates[TRIGGER_SURFS]; // 3 of 8 counters
+    unsigned char avgL1Rates[TRIGGER_SURFS]; // 3 of 8 counters --fix later
     unsigned char avgUpperL2Rates[PHI_SECTORS]; 
     unsigned char avgLowerL2Rates[PHI_SECTORS];
     unsigned char avgL3Rates[PHI_SECTORS];    
@@ -487,10 +487,12 @@ typedef struct {
   GenericHeader_t gHdr;
   unsigned int unixTime;
   unsigned int ppsNum; //It's only updated every second so no need for sub-second timing
-  unsigned short l1Rates[TRIGGER_SURFS][ANTS_PER_SURF]; // 3 of 8 counters
+  unsigned short l1Rates[PHI_SECTORS][2]; // up and down counts
   unsigned char upperL2Rates[PHI_SECTORS];
   unsigned char lowerL2Rates[PHI_SECTORS];
   unsigned char l3Rates[PHI_SECTORS];
+  unsigned int antTrigMask;
+  unsigned char nadirAntTrigMask;
 } TurfRateStruct_t;
 
 typedef struct {
@@ -498,10 +500,12 @@ typedef struct {
   unsigned int unixTime; //Time of first hk
   unsigned short numRates; //Number of rates in average
   unsigned short deltaT; //Difference in time between first and last 
-  unsigned int l1Rates[TRIGGER_SURFS][ANTS_PER_SURF]; // 3 of 8 counters
+  unsigned int l1Rates[PHI_SECTORS][2]; //upper and lower rings only
   unsigned short upperL2Rates[PHI_SECTORS];
   unsigned short lowerL2Rates[PHI_SECTORS];
   unsigned short l3Rates[PHI_SECTORS];
+  unsigned int antTrigMask;
+  unsigned char nadirAntTrigMask; //Maybe need to pad three bytes
 } SummedTurfRateStruct_t;
 
 

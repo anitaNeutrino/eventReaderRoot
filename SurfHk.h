@@ -50,7 +50,9 @@ class SurfHk: public TObject
    UShort_t        rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
    UShort_t        surfTrigBandMask[ACTIVE_SURFS];
    Int_t           intFlag;
-
+   
+   Int_t isBandMasked(int surf, int scl)
+      { return (surfTrigBandMask[surf]&(1<<scl));}
    
   ClassDef(SurfHk,10);
 };
