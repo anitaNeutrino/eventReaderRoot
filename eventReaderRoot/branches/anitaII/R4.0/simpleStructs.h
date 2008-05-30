@@ -1,0 +1,939 @@
+//////////////////////////////////////////////////////////////////////////////
+/////  simpleStructs.h        Minimalistic ANITA Event Structs           /////
+/////                                                                    /////
+/////  Description:                                                      /////
+/////     The minimal definitions and structures needed for reading      ///// 
+/////  ANITA event data.                                                  /////
+//////////////////////////////////////////////////////////////////////////////
+
+#ifndef SIMPLESTRUCTS_H
+#define SIMPLESTRUCTS_H
+
+
+///First up we'll add some definitions of the raw data
+#include "AnitaConventions.h"
+
+#ifdef SLAC_DATA06
+//SLAC data definitions
+#define VER_EVENT_BODY 7
+#define VER_PEDSUBBED_EVENT_BODY 7
+#define VER_EVENT_HEADER 7
+#define VER_WAVE_PACKET 4
+#define VER_SURF_PACKET 4
+#define VER_ENC_WAVE_PACKET 4
+#define VER_ENC_SURF_PACKET 4
+#define VER_SURF_HK 5
+#define VER_ADU5_PAT 4
+#define VER_ADU5_SAT 4
+#define VER_ADU5_VTG 4
+#define VER_G12_POS 4
+#define VER_G12_SAT 4
+#define VER_HK_FULL 6
+#define VER_CMD_ECHO 4
+#define VER_MONITOR 5
+#define VER_TURF_RATE 6
+#define VER_LAB_PED 1
+#define VER_FULL_PED 1
+#define VER_SLOW_FULL 1
+#define VER_SLOW_1 1
+#define VER_SLOW_2 1
+#elif ANITA_1_DATA
+//ANITA 1 (2006/7) Data
+#define VER_EVENT_BODY 7
+#define VER_PEDSUBBED_EVENT_BODY 7
+#define VER_EVENT_HEADER 9
+#define SLAC_VER_EVENT_HEADER 7
+#define VER_WAVE_PACKET 6
+#define VER_SURF_PACKET 6
+#define VER_ENC_WAVE_PACKET 6
+#define VER_ENC_SURF_PACKET 6
+#define VER_SURF_HK 9
+#define VER_ADU5_PAT 4
+#define VER_ADU5_SAT 4
+#define VER_ADU5_VTG 4
+#define VER_G12_POS 4
+#define VER_G12_SAT 4
+#define VER_HK_FULL 6
+#define VER_CMD_ECHO 4
+#define VER_MONITOR 7
+#define VER_TURF_RATE 6
+#define VER_LAB_PED 1
+#define VER_FULL_PED 1
+#define VER_SLOW_1 1
+#define VER_SLOW_2 1
+#define VER_SLOW_FULL 1
+#define VER_ZIPPED_FILE 1
+#define VER_ZIPPED_PACKET 1
+#define VER_RUN_START 1
+#define VER_OTHER_MON 1
+#else
+#define VER_EVENT_BODY 10
+#define VER_PEDSUBBED_EVENT_BODY 10
+#define VER_EVENT_HEADER 11
+#define SLAC_VER_EVENT_HEADER 10
+#define VER_WAVE_PACKET 10
+#define VER_SURF_PACKET 10
+#define VER_ENC_WAVE_PACKET 10
+#define VER_ENC_SURF_PACKET 10
+#define VER_SURF_HK 12
+#define VER_GPS_GGA 10
+#define VER_ADU5_PAT 10
+#define VER_ADU5_SAT 10
+#define VER_ADU5_VTG 10
+#define VER_G12_POS 10
+#define VER_G12_SAT 10
+#define VER_HK_FULL 10
+#define VER_CMD_ECHO 10
+#define VER_MONITOR 10
+#define VER_TURF_RATE 13
+#define VER_LAB_PED 10
+#define VER_FULL_PED 10
+#define VER_SLOW_1 10
+#define VER_SLOW_2 10
+#define VER_SLOW_FULL 10
+#define VER_ZIPPED_FILE 10
+#define VER_ZIPPED_PACKET 10
+#define VER_RUN_START 10
+#define VER_OTHER_MON 10
+#define VER_GPSD_START 10
+#define VER_LOGWATCHD_START 10
+#define VER_AVG_SURF_HK 12
+#define VER_SUM_TURF_RATE 11
+#define VER_ACQD_START 10
+#endif
+
+
+//Enumerations
+typedef enum {
+    PACKET_BD = 0xff, // AnitaEventBody_t -- No
+    PACKET_HD = 0x100, //AnitaEventHeader_t --Yes
+    PACKET_WV = 0x101, //RawWaveformPacket_t --Yes
+    PACKET_SURF = 0x102, //RawSurfPacket_t -- Yes
+    PACKET_HD_SLAC = 0x103,
+    PACKET_SURF_HK = 0x110, //FullSurfHkStruct_t --Yes
+    PACKET_TURF_RATE = 0x111, //TurfRateStruct_t -- Yes
+    PACKET_AVG_SURF_HK = 0x112, //AveragedSurfHkStruct_t -- yes
+    PACKET_SUM_TURF_RATE = 0x113, //SummedTurfRateStruct_t -- yes
+    PACKET_PEDSUB_WV = 0x120, //PedSubbedWaveformPacket_t -- Yes
+    PACKET_ENC_SURF = 0x121, //EncodedSurfPacketHeader_t -- Yes
+    PACKET_ENC_SURF_PEDSUB = 0x122, //EncodedPedSubbedSurfPacketHeader_t -- Yes
+    PACKET_ENC_EVENT_WRAPPER = 0x123, 
+    PACKET_PED_SUBBED_EVENT = 0x124, //PedSubbedEventBody_t -- No too big
+    PACKET_ENC_WV_PEDSUB = 0x125, // EncodedPedSubbedChannelPacketHeader_t -- Yes
+    PACKET_ENC_PEDSUB_EVENT_WRAPPER = 0x126,
+    PACKET_PEDSUB_SURF = 0x127, //PedSubbedSurfPacket_t -- Yes 
+    PACKET_LAB_PED = 0x130, //
+    PACKET_FULL_PED = 0x131, //Too big to telemeter
+    PACKET_GPS_ADU5_PAT = 0x200,
+    PACKET_GPS_ADU5_SAT = 0x201,
+    PACKET_GPS_ADU5_VTG = 0x202,
+    PACKET_GPS_G12_POS = 0x203,
+    PACKET_GPS_G12_SAT = 0x204,
+    PACKET_GPS_GGA = 0x205, //New for ANITA-II
+    PACKET_HKD = 0x300,
+    PACKET_CMD_ECHO = 0x400,
+    PACKET_MONITOR = 0x500,
+    PACKET_WAKEUP_LOS = 0x600,
+    PACKET_WAKEUP_HIGHRATE = 0x601,
+    PACKET_WAKEUP_COMM1 = 0x602,
+    PACKET_WAKEUP_COMM2 = 0x603,
+    PACKET_SLOW1 = 0x700,
+    PACKET_SLOW2 = 0x800,
+    PACKET_SLOW_FULL = 0x801,
+    PACKET_ZIPPED_PACKET = 0x900, // Is just a zipped version of another packet
+    PACKET_ZIPPED_FILE = 0xa00, // Is a zipped file
+    PACKET_RUN_START = 0xb00, 
+    PACKET_OTHER_MONITOR = 0xb01,
+    PACKET_GPSD_START = 0xc00,
+    PACKET_LOGWATCHD_START = 0xc01,
+    PACKET_ACQD_START = 0xc02
+} PacketCode_t;
+
+typedef enum {
+    kNoEncoding=0
+} EventEncodingScheme_t;
+
+#ifdef SLAC_DATA06   
+typedef enum {
+    ENCODE_NONE=0, //Done
+    ENCODE_SOMETHING=0x100 //Done
+} ChannelEncodingType_t; 
+#else
+typedef enum {
+    ENCODE_NONE=0, //Done
+    ENCODE_LOSSLESS_12BIT=0x100, //Done
+    ENCODE_LOSSLESS_BINARY, //Done is just a marker for below
+    ENCODE_LOSSLESS_11BIT,
+    ENCODE_LOSSLESS_10BIT,
+    ENCODE_LOSSLESS_9BIT,
+    ENCODE_LOSSLESS_8BIT,
+    ENCODE_LOSSLESS_7BIT,
+    ENCODE_LOSSLESS_6BIT,
+    ENCODE_LOSSLESS_5BIT,
+    ENCODE_LOSSLESS_4BIT,
+    ENCODE_LOSSLESS_3BIT,
+    ENCODE_LOSSLESS_2BIT,
+    ENCODE_LOSSLESS_1BIT,
+    ENCODE_LOSSLESS_FIBONACCI, //Done
+    ENCODE_LOSSLESS_BINFIB_COMBO=0x200, //Done is just a marker for below
+    ENCODE_LOSSLESS_BINFIB_10BIT,
+    ENCODE_LOSSLESS_BINFIB_9BIT,
+    ENCODE_LOSSLESS_BINFIB_8BIT,
+    ENCODE_LOSSLESS_BINFIB_7BIT,
+    ENCODE_LOSSLESS_BINFIB_6BIT,
+    ENCODE_LOSSLESS_BINFIB_5BIT,
+    ENCODE_LOSSLESS_BINFIB_4BIT,
+    ENCODE_LOSSLESS_BINFIB_3BIT,
+    ENCODE_LOSSLESS_BINFIB_2BIT,
+    ENCODE_LOSSLESS_BINFIB_1BIT,
+    ENCODE_LOSSY_MULAW=0x300, //Done is just a marker for below
+    ENCODE_LOSSY_MULAW_8BIT,
+    ENCODE_LOSSY_MULAW_7BIT,
+    ENCODE_LOSSY_MULAW_6BIT,
+    ENCODE_LOSSY_MULAW_5BIT,
+    ENCODE_LOSSY_MULAW_4BIT,
+    ENCODE_LOSSY_MULAW_3BIT,
+    ENCODE_LOSSY_MULAW_11_8,
+    ENCODE_LOSSY_MULAW_11_7,
+    ENCODE_LOSSY_MULAW_11_6,
+    ENCODE_LOSSY_MULAW_11_5,
+    ENCODE_LOSSY_MULAW_11_4,
+    ENCODE_LOSSY_MULAW_11_3,
+    ENCODE_LOSSY_MULAW_10_8,
+    ENCODE_LOSSY_MULAW_10_7,
+    ENCODE_LOSSY_MULAW_10_6,
+    ENCODE_LOSSY_MULAW_10_5,
+    ENCODE_LOSSY_MULAW_10_4,
+    ENCODE_LOSSY_MULAW_10_3,
+    ENCODE_LOSSY_MULAW_9_7,
+    ENCODE_LOSSY_MULAW_9_6,
+    ENCODE_LOSSY_MULAW_9_5,
+    ENCODE_LOSSY_MULAW_9_4,
+    ENCODE_LOSSY_MULAW_9_3,
+    ENCODE_LOSSY_MULAW_8_6,
+    ENCODE_LOSSY_MULAW_8_5,
+    ENCODE_LOSSY_MULAW_8_4,
+    ENCODE_LOSSY_MULAW_8_3,
+    ENCODE_LOSSY_MULAW_7_5,
+    ENCODE_LOSSY_MULAW_7_4,
+    ENCODE_LOSSY_MULAW_7_3,
+    ENCODE_LOSSY_MULAW_6_4,
+    ENCODE_LOSSY_MULAW_6_3    
+} ChannelEncodingType_t;
+#endif
+
+typedef enum {
+    PRI_FORCED = 0,
+    PRI_CALIB = 1,
+    PRI_1 = 1,
+    PRI_2,
+    PRI_3,
+    PRI_4,
+    PRI_TIMEOUT,
+    PRI_6, 
+    PRI_7,
+    PRI_8,
+    PRI_PAYLOAD
+} PriorityCode;
+
+
+typedef enum {
+    IP320_RAW=0x100,
+    IP320_AVZ=0x200,
+    IP320_CAL=0x300
+} AnalogueCode_t;
+
+///////////////////////////////////////////////////////////////////////////
+//Structures
+///////////////////////////////////////////////////////////////////////////
+
+typedef struct {
+    PacketCode_t code;    
+    unsigned int packetNumber; //Especially for Ped
+    unsigned short numBytes;
+    unsigned char feByte;
+    unsigned char verId;
+    unsigned int checksum;
+} GenericHeader_t;
+
+typedef struct {
+    unsigned char trigType; //Trig type bit masks
+    unsigned char l3Type1Count; //L3 counter
+    unsigned short trigNum; //turf trigger counter
+    unsigned int trigTime;
+    unsigned int ppsNum;     // 1PPS
+    unsigned int c3poNum;     // 1 number of trigger time ticks per PPS
+    unsigned short upperL1TrigPattern;
+    unsigned short lowerL1TrigPattern;
+    unsigned short upperL2TrigPattern;
+    unsigned short lowerL2TrigPattern;
+    unsigned short l3TrigPattern;
+    unsigned short l3TrigPattern2;
+} SlacTurfioStruct_t;
+
+#ifdef SLAC_DATA06
+typedef SlacTurfioStruct_t TurfioStruct_t;
+#else
+typedef struct {
+    unsigned char trigType; //Trig type bit masks
+    // 0=RF, 1=PPS1, 2=PPS2, 3=Soft/Ext, 4=L3Type1, 5,6 buffer depth at trig
+    unsigned char l3Type1Count; //L3 counter
+    unsigned short trigNum; //turf trigger counter
+    unsigned int trigTime;
+    unsigned short ppsNum;     // 1PPS
+    unsigned short deadTime; // fraction = deadTime/64400
+    unsigned int c3poNum;     // 1 number of trigger time ticks per PPS
+    unsigned short upperL1TrigPattern;
+    unsigned short lowerL1TrigPattern;
+    unsigned short upperL2TrigPattern;
+    unsigned short lowerL2TrigPattern;
+    unsigned short l3TrigPattern;
+    unsigned char bufferDepth; //bits 0,1 trigTime depth 2,3 current depth
+    unsigned char reserved;
+} TurfioStruct_t;
+#endif
+
+
+typedef struct {
+    unsigned char chanId;   // chan+9*surf
+    unsigned char chipIdFlag; // Bits 0,1 chipNum; Bit 3 hitBus wrap; 4-7 hitBusOff
+    unsigned char firstHitbus;
+    unsigned char lastHitbus;
+    float mean; //Filled by Prioritizerd
+    float rms; //Filled by Prioritizerd
+
+} SlacRawSurfChannelHeader_t;
+
+typedef struct {
+    SlacRawSurfChannelHeader_t rawHdr;
+    ChannelEncodingType_t encType;
+    unsigned short numBytes;
+    unsigned short crc;
+} SlacEncodedSurfChannelHeader_t;
+
+#ifdef SLAC_DATA06
+typedef SlacRawSurfChannelHeader_t RawSurfChannelHeader_t;
+#else
+typedef struct {
+    unsigned char chanId;   // chan+9*surf
+    unsigned char chipIdFlag; // Bits 0,1 chipNum; Bit 3 hitBus wrap; 4-7 hitBusOff
+    unsigned char firstHitbus; // If wrappedHitbus=0 data runs, lastHitbus+1
+    unsigned char lastHitbus; //to firstHitbus-1 inclusive
+    //Otherwise it runs from firstHitbus+1 to lastHitbus-1 inclusive
+} RawSurfChannelHeader_t;
+#endif
+
+typedef struct {
+    RawSurfChannelHeader_t rawHdr;
+    ChannelEncodingType_t encType;
+    unsigned short numBytes;
+    unsigned short crc;
+} EncodedSurfChannelHeader_t;
+
+
+typedef struct {
+    RawSurfChannelHeader_t header;
+    unsigned short data[MAX_NUMBER_SAMPLES];
+} SurfChannelFull_t;
+
+typedef struct {
+    RawSurfChannelHeader_t header;
+    short xMax;
+    short xMin;
+    float mean; //Filled by pedestalLib
+    float rms; //Filled by pedestalLib
+    short data[MAX_NUMBER_SAMPLES]; //Pedestal subtracted and 11bit data
+} SurfChannelPedSubbed_t;
+
+typedef struct {
+    unsigned int unixTime;
+    unsigned int status;
+} CalibStruct_t;
+
+typedef struct {
+    unsigned short data[CHANS_PER_IP320];
+} AnalogueDataStruct_t;
+
+typedef struct {
+    int data[CHANS_PER_IP320];
+} AnalogueCorrectedDataStruct_t;
+
+typedef struct {
+    AnalogueCode_t code;
+    AnalogueDataStruct_t board[NUM_IP320_BOARDS];
+} FullAnalogueStruct_t;
+
+
+#ifdef ANITA_1_DATA
+typedef struct {
+    unsigned short temp[2];
+} SBSTemperatureDataStruct_t;
+#else
+typedef struct {
+  short temp[4]; // (4/100) * milli deg C
+} SBSTemperatureDataStruct_t;
+#endif
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+} MagnetometerDataStruct_t;
+
+
+typedef struct {    
+    unsigned short threshold;
+    unsigned short scaler[ACTIVE_SURFS][SCALERS_PER_SURF];
+} SimpleScalerStruct_t; //No inter used
+
+
+typedef struct {
+    unsigned short diskSpace[8]; //In units of 10 MegaBytes
+    char sataminiLabel[12];
+    char satabladeLabel[12];
+    char usbLabel[12];
+} DiskSpaceStruct_t;
+
+typedef struct {
+  unsigned short eventLinks[NUM_PRIORITIES]; //10 Priorities
+  unsigned short hkLinks[21]; //Needs to be finalised once everything is settled
+} QueueStruct_t;
+
+typedef struct {
+  unsigned long utime[NUM_PROCESSES];
+  unsigned long stime[NUM_PROCESSES];
+  unsigned long vsize[NUM_PROCESSES];
+} ProcessInfo_t;
+
+typedef struct {    
+    unsigned char numCmdBytes;
+    unsigned char cmd[MAX_CMD_LENGTH];
+} CommandStruct_t;
+
+typedef struct {
+  unsigned int numLines; //0 results in a cat, otherwise a tail
+  char filename[180];
+} LogWatchRequest_t;
+
+typedef struct {
+    unsigned char chanId;   // chan+9*surf
+    unsigned char chipId; // 0-3
+    unsigned short chipEntries;
+    unsigned short pedMean[MAX_NUMBER_SAMPLES]; // actual value
+    unsigned char pedRMS[MAX_NUMBER_SAMPLES]; //times 10
+} LabChipChannelPedStruct_t;
+
+typedef struct {
+    unsigned int eventNumber;
+    unsigned int runNumber;
+    int eventDiskBitMask; //Which disks was it written to?
+    char satabladeLabel[12];
+    char sataminiLabel[12];
+    char usbLabel[12];
+} IndexEntry_t;
+
+typedef struct {
+    unsigned int eventNumber;
+    int pri;
+} PlaybackRequest_t;
+
+typedef struct {
+    unsigned int eventNumber;
+    unsigned char rfPwrAvg[ACTIVE_SURFS][RFCHAN_PER_SURF];
+    unsigned char avgScalerRates[TRIGGER_SURFS][ANTS_PER_SURF]; // * 2^7
+    unsigned char rmsScalerRates[TRIGGER_SURFS][ANTS_PER_SURF];
+    unsigned char avgL1Rates[TRIGGER_SURFS]; // 3 of 8 counters --fix later
+    unsigned char avgUpperL2Rates[PHI_SECTORS]; 
+    unsigned char avgLowerL2Rates[PHI_SECTORS];
+    unsigned char avgL3Rates[PHI_SECTORS];    
+    unsigned char eventRate1Min; //Multiplied by 8
+    unsigned char eventRate10Min; //Multiplied by 8
+} SlowRateRFStruct_t;
+
+
+typedef struct {
+    short latitude;
+    short longitude;
+    short altitude;
+    unsigned char temps[8];  //{SBS,SURF,TURF,RAD,RFCM1,RFCM5,RFCM12,RFCM15}
+    unsigned char powers[4]; //{PV V, +24V, BAT I, 24 I}
+} SlowRateHkStruct_t;
+
+
+
+////////////////////////////////////////////////////////////////////////////
+//Telemetry Structs (may be used for onboard storage)
+////////////////////////////////////////////////////////////////////////////
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int lastEventNumber;
+    float latitude;
+    float longitude;
+    float altitude;
+    unsigned short sbsTemp[2];
+} SlowRateType1_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    SlowRateRFStruct_t rf;
+    SlowRateHkStruct_t hk;
+} SlowRateFull_t;
+
+
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime;
+  unsigned int ppsNum; //It's only updated every second so no need for sub-second timing
+  unsigned short l1Rates[PHI_SECTORS][2]; // up and down counts
+  unsigned char upperL2Rates[PHI_SECTORS];
+  unsigned char lowerL2Rates[PHI_SECTORS];
+  unsigned char l3Rates[PHI_SECTORS];
+  unsigned int antTrigMask;
+  unsigned char nadirAntTrigMask;
+} TurfRateStruct_t;
+
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime; //Time of first hk
+  unsigned short numRates; //Number of rates in average
+  unsigned short deltaT; //Difference in time between first and last 
+  unsigned int l1Rates[PHI_SECTORS][2]; //upper and lower rings only
+  unsigned short upperL2Rates[PHI_SECTORS];
+  unsigned short lowerL2Rates[PHI_SECTORS];
+  unsigned short l3Rates[PHI_SECTORS];
+  unsigned int antTrigMask;
+  unsigned char nadirAntTrigMask; //Maybe need to pad three bytes
+} SummedTurfRateStruct_t;
+
+
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime;       /* unix UTC sec*/
+  unsigned int unixTimeUs;     /* unix UTC microsec */
+  int gpsSubTime;     /* the GPS fraction of second (in ns) 
+			 (for the X events per second that get 
+			   tagged with it, note it now includes
+			   second offset from unixTime)*/
+  unsigned int eventNumber;    /* Global event number */
+  unsigned short calibStatus;   /* Were we flashing the pulser? */
+  unsigned char priority; // priority and other
+  unsigned char turfUpperWord; // The upper 8 bits from the TURF
+  unsigned char otherFlag; //Currently unused 
+  unsigned char errorFlag; //Bit 1 means sync slip
+  unsigned char otherFlag3;
+  unsigned char nadirAntTrigMask; //
+  unsigned int antTrigMask; // What was the ant trigger mask
+  TurfioStruct_t turfio; /*The X byte TURFIO data*/
+} AnitaEventHeader_t;
+
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int eventNumber;
+    SurfChannelFull_t waveform;
+} RawWaveformPacket_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int eventNumber;
+    unsigned int whichPeds;
+    SurfChannelPedSubbed_t waveform;
+} PedSubbedWaveformPacket_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int eventNumber;
+    SurfChannelFull_t waveform[CHANNELS_PER_SURF];
+} RawSurfPacket_t;
+
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int eventNumber;
+    unsigned int whichPeds;
+    SurfChannelPedSubbed_t waveform[CHANNELS_PER_SURF];
+} PedSubbedSurfPacket_t;
+
+
+// typedef struct {
+//      GenericHeader_t gHdr;
+//      unsigned int eventNumber;
+//      unsigned int whichPeds;
+//      EncodedSurfChannelHeader_t chanHead;
+// } EncodedWaveformPacket_t; //0x101
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int eventNumber;
+} EncodedSurfPacketHeader_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int eventNumber;
+    unsigned int whichPeds;
+} BaseWavePacketHeader_t;
+
+typedef BaseWavePacketHeader_t EncodedPedSubbedSurfPacketHeader_t;
+typedef BaseWavePacketHeader_t EncodedPedSubbedChannelPacketHeader_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int unixTimeUs;
+    unsigned int timeOfDay;
+    float heading;
+    float pitch;
+    float roll;
+    float mrms;
+    float brms;
+    float latitude;
+    float longitude;
+    float altitude;
+    unsigned int attFlag;
+} GpsAdu5PatStruct_t;
+
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime;
+  unsigned int unixTimeUs;
+  unsigned int timeOfDay;  
+  float latitude;
+  float longitude;
+  float altitude;
+  float hdop;
+  float geoidSeparation;
+  float ageOfCalc;
+  unsigned char posFixType;
+  unsigned char numSats;
+  unsigned short baseStationId;
+} GpsGgaStruct_t;
+
+typedef struct {
+    unsigned char prn;
+    unsigned char elevation;
+    unsigned char snr;
+    unsigned char flag; 
+    unsigned short azimuth;
+} GpsSatInfo_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int numSats;
+    GpsSatInfo_t sat[MAX_SATS];
+} GpsG12SatStruct_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned char numSats[4];
+    GpsSatInfo_t sat[4][MAX_SATS];
+} GpsAdu5SatStruct_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int unixTimeUs;
+    float trueCourse;
+    float magneticCourse;
+    float speedInKnots;
+    float speedInKPH;
+} GpsAdu5VtgStruct_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int unixTimeUs;
+    unsigned int timeOfDay;
+    unsigned int numSats;
+    float latitude;
+    float longitude;
+    float altitude;
+    float trueCourse;
+    float verticalVelocity;
+    float speedInKnots;
+    float pdop;
+    float hdop;
+    float vdop;
+    float tdop;
+} GpsG12PosStruct_t;
+
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime;
+  unsigned char ackCount[3];
+  unsigned char nakCount[3];
+  unsigned char rioBitMask;
+  unsigned char tstBitMask;
+} GpsdStartStruct_t;
+
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime;
+  unsigned int numEvents;
+  float chanMean[ACTIVE_SURFS][CHANNELS_PER_SURF]; //Ped subtracted
+  float chanRMS[ACTIVE_SURFS][CHANNELS_PER_SURF]; //Ped subtracted
+  unsigned short threshVals[10];
+  unsigned short scalerVals[ACTIVE_SURFS][SCALERS_PER_SURF][10];
+} AcqdStartStruct_t;
+  
+
+typedef struct {    
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int unixTimeUs;
+    FullAnalogueStruct_t ip320;
+    MagnetometerDataStruct_t mag;
+    SBSTemperatureDataStruct_t sbs;
+} HkDataStruct_t;
+
+typedef struct { 
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int unixTimeUs;
+    unsigned short globalThreshold; //set to zero if there isn't one
+    unsigned short errorFlag; //Will define at some point    
+    unsigned short scalerGoal; //What are we aiming for with the scaler rate
+    unsigned short upperWords[ACTIVE_SURFS];
+    unsigned short scaler[ACTIVE_SURFS][SCALERS_PER_SURF];
+    unsigned short threshold[ACTIVE_SURFS][SCALERS_PER_SURF];
+    unsigned short setThreshold[ACTIVE_SURFS][SCALERS_PER_SURF];
+    unsigned short rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
+    unsigned short surfTrigBandMask[ACTIVE_SURFS];
+} FullSurfHkStruct_t;
+
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime; //Time of first hk
+  unsigned short numHks; //Number of hks in average
+  unsigned short deltaT; //Difference in time between first and last 
+  unsigned int hadError; //Bit mask to be defined
+  unsigned short globalThreshold;
+  unsigned short scalerGoal;
+  unsigned short avgScaler[ACTIVE_SURFS][SCALERS_PER_SURF];
+  unsigned short rmsScaler[ACTIVE_SURFS][SCALERS_PER_SURF];
+  unsigned short avgThresh[ACTIVE_SURFS][SCALERS_PER_SURF];
+  unsigned short rmsThresh[ACTIVE_SURFS][SCALERS_PER_SURF];
+  unsigned short avgRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
+  unsigned short rmsRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
+  unsigned short surfTrigBandMask[ACTIVE_SURFS];
+} AveragedSurfHkStruct_t;
+
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned short goodFlag; // 0 is bad, 1 is good
+    unsigned short numCmdBytes; // number of cmd bytes (upto 10)
+    unsigned char cmd[MAX_CMD_LENGTH]; // the cmd bytes
+} CommandEcho_t;
+
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime;
+  DiskSpaceStruct_t diskInfo;
+  QueueStruct_t queueInfo;
+  ProcessInfo_t procInfo;
+} MonitorStruct_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int ramDiskInodes;
+    unsigned int runStartTime;
+    unsigned int runStartEventNumber; //Start eventNumber
+    unsigned int runNumber; //Run number
+    unsigned short dirFiles[3]; // /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
+    unsigned short dirLinks[3]; // /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
+    unsigned short processBitMask;
+} OtherMonitorStruct_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTimeStart;
+    unsigned int unixTimeEnd;
+    LabChipChannelPedStruct_t pedChan[CHANNELS_PER_SURF];
+} FullLabChipPedStruct_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int numUncompressedBytes;
+} ZippedPacket_t;
+
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime;
+  unsigned short numUncompressedBytes;
+  unsigned short segmentNumber;
+  char filename[60];
+} ZippedFile_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int unixTime; //Start time
+    unsigned int eventNumber; //Start eventNumber
+    unsigned int runNumber; //Run number
+} RunStart_t;
+
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime;
+  unsigned int runNumber;
+  float upTime;
+  float idleTime;
+} LogWatchdStart_t;
+
+/////////////////////////////////////////////////////////////////////////////
+// On-board structs
+////////////////////////////////////////////////////////////////////////////
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int eventNumber;    /* Global event number */
+    SurfChannelFull_t channel[NUM_DIGITZED_CHANNELS];
+} AnitaEventBody_t;
+
+typedef struct {
+    GenericHeader_t gHdr;
+    unsigned int eventNumber;    /* Global event number */
+    unsigned int whichPeds; //whichPedestals did we subtract
+    SurfChannelPedSubbed_t channel[NUM_DIGITZED_CHANNELS];
+} PedSubbedEventBody_t;
+
+typedef struct {
+    AnitaEventHeader_t header;
+    AnitaEventBody_t body;
+} AnitaEventFull_t;
+
+typedef struct {
+    GenericHeader_t gHdr; //gHdr.numBytes includes EncodedEventWrapper_t
+    unsigned int eventNumber;
+    unsigned numBytes; //Not including the EncodedEventWrapper_t;
+} EncodedEventWrapper_t; //Not implemented
+
+typedef struct {
+    unsigned int unixTime;
+    unsigned int subTime;
+    int fromAdu5; //2 is ADU52, 1 is ADU51 , 0 is g12
+} GpsSubTime_t;
+
+
+
+///////////////////////////////////////////////////////////////////////
+//Utility Structures
+//////////////////////////////////////////////////////////////////////
+typedef struct {
+    unsigned int pedUnixTime;
+    ChannelEncodingType_t encTypes[ACTIVE_SURFS][CHANNELS_PER_SURF];
+} EncodeControlStruct_t;
+
+////////////////////////////////////////////////////////////////////////////
+//Prioritizer Utitlity Structs
+///////////////////////////////////////////////////////////////////////////
+
+/* these are syntactic sugar to help us keep track of bit shifts */
+typedef int Fixed3_t; /*rescaled integer left shifted 3 bits */
+typedef int Fixed6_t; /*rescaled integer left shifted 6 bits */
+typedef int Fixed8_t; /*rescaled integer left shifted 8 bits */
+
+
+/*    FOR THREE STRUCTS THAT FOLLOW
+      valid samples==-1 prior to unwinding 
+*/
+
+typedef struct {
+     int data[MAX_NUMBER_SAMPLES];
+     int valid_samples; 
+} LogicChannel_t;
+
+typedef struct {
+     Fixed3_t data[MAX_NUMBER_SAMPLES];
+     Fixed3_t baseline;
+     short valid_samples;
+} TransientChannel3_t;
+
+typedef struct {
+     Fixed6_t data[MAX_NUMBER_SAMPLES];
+     short valid_samples;
+} TransientChannel6_t;
+
+typedef struct {
+     Fixed8_t data[MAX_NUMBER_SAMPLES];
+     Fixed8_t baseline;
+     short valid_samples;
+} TransientChannel8_t;
+
+typedef struct {
+     float data[MAX_NUMBER_SAMPLES];
+     short valid_samples;
+} TransientChannelF_t;
+
+typedef struct {
+     float data[MAX_NUMBER_SAMPLES];
+     short valid_samples;
+     float RMSall;
+     float RMSpre;
+} TransientChannelFRMS_t;
+
+typedef struct {
+     TransientChannel3_t ch[NUM_DIGITZED_CHANNELS]; 
+} AnitaTransientBody3_t; /* final corrected transient type 
+			    used to calculate power */
+
+typedef struct {
+     TransientChannel6_t ch[NUM_DIGITZED_CHANNELS]; 
+} AnitaPowerBody6_t; /* power from squaring an AnitaTransientBody3 */
+
+typedef struct {
+     TransientChannel8_t ch[NUM_DIGITZED_CHANNELS]; 
+} AnitaTransientBody8_t; /* used for pedestal subtraction, unwrapping, 
+			    averaging, and gain correction */
+
+typedef struct {
+     TransientChannelF_t ch[NUM_DIGITZED_CHANNELS]; 
+} AnitaTransientBodyF_t;
+
+
+typedef struct {
+     TransientChannel6_t S0,S1,S2,S3;
+} AnitaStokes6_t;
+
+///////////////////////////////////////////////////////////////////////////////
+////Pedestal Calculation and Storage  Structs
+//////////////////////////////////////////////////////////////////////////////
+typedef struct {
+    unsigned int unixTimeStart;
+    unsigned int unixTimeEnd;
+    LabChipChannelPedStruct_t pedChan[ACTIVE_SURFS][LABRADORS_PER_SURF][CHANNELS_PER_SURF];
+} FullPedStruct_t;
+
+typedef struct {
+    unsigned int unixTimeStart;
+    unsigned int unixTimeEnd;
+    unsigned short chipEntries[ACTIVE_SURFS][LABRADORS_PER_SURF];
+    unsigned int mean[ACTIVE_SURFS][LABRADORS_PER_SURF][CHANNELS_PER_SURF][MAX_NUMBER_SAMPLES];
+    unsigned int meanSq[ACTIVE_SURFS][LABRADORS_PER_SURF][CHANNELS_PER_SURF][MAX_NUMBER_SAMPLES];
+    unsigned int entries[ACTIVE_SURFS][LABRADORS_PER_SURF][CHANNELS_PER_SURF][MAX_NUMBER_SAMPLES];
+    float fmean[ACTIVE_SURFS][LABRADORS_PER_SURF][CHANNELS_PER_SURF][MAX_NUMBER_SAMPLES];
+    float frms[ACTIVE_SURFS][LABRADORS_PER_SURF][CHANNELS_PER_SURF][MAX_NUMBER_SAMPLES];
+} PedCalcStruct_t;
+
+
+typedef struct {
+    unsigned int unixTime; // Corresponds to unixTimeEnd above
+    unsigned int nsamples; // What was the mean occupancy
+    unsigned short thePeds[ACTIVE_SURFS][LABRADORS_PER_SURF][CHANNELS_PER_SURF][MAX_NUMBER_SAMPLES]; /* mean pedestal */
+    unsigned short pedsRMS[ACTIVE_SURFS][LABRADORS_PER_SURF][CHANNELS_PER_SURF][MAX_NUMBER_SAMPLES]; 
+    /* 10 x RMS of the samples (not of mean)*/
+} PedestalStruct_t;
+
+
+/////////////////////////////////////////////////////////////////////////////
+///// Slow Rate Stuff                                                   /////
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#endif //SIMPLESTRUCTS_H
