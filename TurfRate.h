@@ -30,6 +30,8 @@ class TurfRate: public TObject
 	   UChar_t         tupperL2Rates[PHI_SECTORS],
 	   UChar_t         tlowerL2Rates[PHI_SECTORS],
 	   UChar_t         tl3Rates[PHI_SECTORS],
+	   UInt_t          tantTrigMask,
+	   UChar_t         tnadirAntTrigMask,
 	   Int_t           tintFlag);
 
    Int_t           run;
@@ -40,6 +42,8 @@ class TurfRate: public TObject
    UChar_t         upperL2Rates[PHI_SECTORS];
    UChar_t         lowerL2Rates[PHI_SECTORS];
    UChar_t         l3Rates[PHI_SECTORS];
+   UInt_t          antTrigMask;
+   UChar_t         nadirAntTrigMask;
    Int_t           intFlag;
 
    Int_t getL1Rate(int phi, int ring) 
@@ -50,9 +54,10 @@ class TurfRate: public TObject
       return -1;}
    Int_t getL3Rate(int phi)
       {return l3Rates[phi];}
+   Int_t isAntMasked(int phi, int ring);
    
    
-  ClassDef(TurfRate,1);
+  ClassDef(TurfRate,13);
 };
 
 

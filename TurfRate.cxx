@@ -31,6 +31,8 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *turfPtr)
    memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
    memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
    memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
+   antTrigMask=turfPtr->antTrigMask;
+   nadirAntTrigMask=turfPtr->nadirAntTrigMask;
    intFlag=0;
 
 }
@@ -45,6 +47,8 @@ TurfRate::TurfRate(Int_t           trun,
 		   UChar_t         tupperL2Rates[PHI_SECTORS],
 		   UChar_t         tlowerL2Rates[PHI_SECTORS],
 		   UChar_t         tl3Rates[PHI_SECTORS],
+		   UInt_t          tantTrigMask,
+		   UChar_t         tnadirAntTrigMask,
 		   Int_t           tintFlag)
 {
    run=trun;
@@ -55,6 +59,24 @@ TurfRate::TurfRate(Int_t           trun,
    memcpy(upperL2Rates,tupperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
    memcpy(lowerL2Rates,tlowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
    memcpy(l3Rates,tl3Rates,sizeof(UChar_t)*PHI_SECTORS);
+   antTrigMask=tantTrigMask;
+   nadirAntTrigMask=tnadirAntTrigMask;
    intFlag=tintFlag;
 
+}
+
+Int_t TurfRate::isAntMasked(int phi, int ring)
+{
+   switch(ring) {
+   case AnitaRing::kUpperRing:
+      return  (antTrigMask&(1<<(phi+16)));
+   case AnitaRing::kLowerRing:
+      return  (antTrigMask&(1<<phi));
+   case AnitaRing::kNadirRing:
+      phi/=2;
+      return nadirAntTrigMask&(1<<phi);
+   default:
+      return 0;
+   }
+      
 }

@@ -53,3 +53,105 @@ SurfHk::SurfHk(Int_t           trun,
    intFlag=tintFlag;
 
 }
+
+Int_t SurfHk::getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band)
+{
+   Int_t surf,scl;
+   if(phi<0 || phi>16 || ring<0 || ring>2 || band<0 || band>3)
+      return -1;
+   if(ring==AnitaRing::kUpperRing|| ring==AnitaRing::kLowerRing) {
+      surf=phi/2; //SURF 1 has Phi 1 & 2
+      scl=8*(phi%2) + 4*ring + band;
+   }
+   else {
+      surf=8;
+      if(phi>=8) {
+	 surf=9;
+	 phi-=8;
+      }
+      scl=4*(phi/2) + band;
+   }      
+   return scaler[surf][scl];
+}
+
+Int_t SurfHk::getThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band)
+{
+   Int_t surf,scl;
+   if(phi<0 || phi>16 || ring<0 || ring>2 || band<0 || band>3)
+      return -1;
+   if(ring==AnitaRing::kUpperRing|| ring==AnitaRing::kLowerRing) {
+      surf=phi/2; //SURF 1 has Phi 1 & 2
+      scl=8*(phi%2) + 4*ring + band;
+   }
+   else {
+      surf=8;
+      if(phi>=8) {
+	 surf=9;
+	 phi-=8;
+      }
+      scl=4*(phi/2) + band;
+   }      
+   return threshold[surf][scl];
+
+}
+
+Int_t SurfHk::getSetThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band)
+{
+ Int_t surf,scl;
+   if(phi<0 || phi>16 || ring<0 || ring>2 || band<0 || band>3)
+      return -1;
+   if(ring==AnitaRing::kUpperRing|| ring==AnitaRing::kLowerRing) {
+      surf=phi/2; //SURF 1 has Phi 1 & 2
+      scl=8*(phi%2) + 4*ring + band;
+   }
+   else {
+      surf=8;
+      if(phi>=8) {
+	 surf=9;
+	 phi-=8;
+      }
+      scl=4*(phi/2) + band;
+   }      
+   return setThreshold[surf][scl];
+}
+
+Int_t SurfHk::isBandMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band)
+{
+Int_t surf,scl;
+   if(phi<0 || phi>16 || ring<0 || ring>2 || band<0 || band>3)
+      return -1;
+   if(ring==AnitaRing::kUpperRing|| ring==AnitaRing::kLowerRing) {
+      surf=phi/2; //SURF 1 has Phi 1 & 2
+      scl=8*(phi%2) + 4*ring + band;
+   }
+   else {
+      surf=8;
+      if(phi>=8) {
+	 surf=9;
+	 phi-=8;
+      }
+      scl=4*(phi/2) + band;
+   }      
+   return isBandMasked(surf,scl);
+
+}
+
+Int_t SurfHk::getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band)
+{
+   Int_t surf,scl;
+   if(phi<0 || phi>16 || ring<0 || ring>2 || band<0 || band>3)
+      return -1;
+   if(ring==AnitaRing::kUpperRing|| ring==AnitaRing::kLowerRing) {
+      surf=phi/2; //SURF 1 has Phi 1 & 2
+      scl=8*(phi%2) + 4*ring + band;
+   }
+   else {
+      surf=8;
+      if(phi>=8) {
+	 surf=9;
+	 phi-=8;
+      }
+      scl=4*(phi/2) + band;
+   }      
+   return scl +surf*SCALERS_PER_SURF;
+}

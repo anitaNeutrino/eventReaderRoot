@@ -112,6 +112,15 @@ namespace AnitaPol {
    } AnitaPol_t;
 }
 
+namespace AnitaBand {
+   typedef enum EAnitaBand {
+      kLow =0,
+      kMid =1,
+      kHigh =2,
+      kFull =3
+   } AnitaBand_t;
+}
+
 namespace AnitaLocations { 
    const double LONGITUDE_SURF_SEAVEY=167.06405555; // longitude, latitude and altitude of surface seavey
    const double LATITUDE_SURF_SEAVEY=-77.86177777;
