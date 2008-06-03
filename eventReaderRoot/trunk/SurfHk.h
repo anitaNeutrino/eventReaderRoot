@@ -53,7 +53,13 @@ class SurfHk: public TObject
    
    Int_t isBandMasked(int surf, int scl)
       { return (surfTrigBandMask[surf]&(1<<scl));}
-   
+
+   Int_t getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band);
+   Int_t getThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band);
+   Int_t getSetThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band);
+   Int_t isBandMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band);
+   Int_t getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band);
+
   ClassDef(SurfHk,10);
 };
 

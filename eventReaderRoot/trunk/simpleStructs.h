@@ -381,11 +381,12 @@ typedef struct {
 } MagnetometerDataStruct_t;
 
 
-typedef struct {    
-    unsigned short threshold;
-    unsigned short scaler[ACTIVE_SURFS][SCALERS_PER_SURF];
-} SimpleScalerStruct_t; //No inter used
 
+typedef struct {   
+  unsigned int unixTime;
+  unsigned int unixTimeUs;
+  unsigned short scaler[ACTIVE_SURFS][32];
+} SimpleScalerStruct_t; //No inter used
 
 typedef struct {
     unsigned short diskSpace[8]; //In units of 10 MegaBytes
@@ -492,7 +493,7 @@ typedef struct {
   unsigned char lowerL2Rates[PHI_SECTORS];
   unsigned char l3Rates[PHI_SECTORS];
   unsigned int antTrigMask;
-  unsigned char nadirAntTrigMask;
+   unsigned char nadirAntTrigMask; //Will need to do pad three bytes
 } TurfRateStruct_t;
 
 typedef struct {
