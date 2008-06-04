@@ -25,6 +25,9 @@ class RawAnitaEvent: public TObject
   UInt_t whichPeds;
   UInt_t eventNumber;
   
+  //SURF Event Numbers
+  UInt_t surfEventId[ACTIVE_SURFS];
+
   //Header stuff
   UChar_t chanId[NUM_DIGITZED_CHANNELS];
   UChar_t chipIdFlag[NUM_DIGITZED_CHANNELS];
@@ -53,7 +56,7 @@ class RawAnitaEvent: public TObject
   Int_t getWrappedHitBus(Int_t chanIndex) {
      return ((chipIdFlag[chanIndex])&0x8)>>3;
   }
-  ClassDef(RawAnitaEvent,10);
+  ClassDef(RawAnitaEvent,11);
 };
 
 

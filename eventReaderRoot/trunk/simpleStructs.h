@@ -67,9 +67,9 @@
 #define VER_RUN_START 1
 #define VER_OTHER_MON 1
 #else
-#define VER_EVENT_BODY 10
-#define VER_PEDSUBBED_EVENT_BODY 10
-#define VER_EVENT_HEADER 11
+#define VER_EVENT_BODY 11
+#define VER_PEDSUBBED_EVENT_BODY 11
+#define VER_EVENT_HEADER 12
 #define SLAC_VER_EVENT_HEADER 10
 #define VER_WAVE_PACKET 10
 #define VER_SURF_PACKET 10
@@ -85,7 +85,7 @@
 #define VER_HK_FULL 10
 #define VER_CMD_ECHO 10
 #define VER_MONITOR 10
-#define VER_TURF_RATE 13
+#define VER_TURF_RATE 14
 #define VER_LAB_PED 10
 #define VER_FULL_PED 10
 #define VER_SLOW_1 10
@@ -98,7 +98,7 @@
 #define VER_GPSD_START 10
 #define VER_LOGWATCHD_START 10
 #define VER_AVG_SURF_HK 13
-#define VER_SUM_TURF_RATE 11
+#define VER_SUM_TURF_RATE 14
 #define VER_ACQD_START 10
 #endif
 
@@ -275,21 +275,24 @@ typedef struct {
 typedef SlacTurfioStruct_t TurfioStruct_t;
 #else
 typedef struct {
-    unsigned char trigType; //Trig type bit masks
-    // 0=RF, 1=PPS1, 2=PPS2, 3=Soft/Ext, 4=L3Type1, 5,6 buffer depth at trig
-    unsigned char l3Type1Count; //L3 counter
-    unsigned short trigNum; //turf trigger counter
-    unsigned int trigTime;
-    unsigned short ppsNum;     // 1PPS
-    unsigned short deadTime; // fraction = deadTime/64400
-    unsigned int c3poNum;     // 1 number of trigger time ticks per PPS
-    unsigned short upperL1TrigPattern;
-    unsigned short lowerL1TrigPattern;
-    unsigned short upperL2TrigPattern;
-    unsigned short lowerL2TrigPattern;
-    unsigned short l3TrigPattern;
-    unsigned char bufferDepth; //bits 0,1 trigTime depth 2,3 current depth
-    unsigned char reserved;
+  unsigned char trigType; //Trig type bit masks
+  // 0=RF, 1=PPS1, 2=PPS2, 3=Soft/Ext, 4=L3Type1, 5,6 buffer depth at trig
+  unsigned char l3Type1Count; //L3 counter
+  unsigned short trigNum; //turf trigger counter
+  unsigned int trigTime;
+  unsigned short ppsNum;     // 1PPS
+  unsigned short deadTime; // fraction = deadTime/64400
+  unsigned int c3poNum;     // 1 number of trigger time ticks per PPS
+  unsigned short upperL1TrigPattern;
+  unsigned short lowerL1TrigPattern;
+  unsigned short upperL2TrigPattern;
+  unsigned short lowerL2TrigPattern;
+  unsigned short l3TrigPattern;
+  unsigned short otherTrigPattern[3];
+  unsigned char nadirL1TrigPattern;
+  unsigned char nadirL2TrigPattern; //Might just be the same thing
+  unsigned char bufferDepth; //bits 0,1 trigTime depth 2,3 current depth
+  unsigned char reserved;
 } TurfioStruct_t;
 #endif
 
@@ -488,12 +491,15 @@ typedef struct {
   GenericHeader_t gHdr;
   unsigned int unixTime;
   unsigned int ppsNum; //It's only updated every second so no need for sub-second timing
-  unsigned short l1Rates[PHI_SECTORS][2]; // up and down counts
-  unsigned char upperL2Rates[PHI_SECTORS];
-  unsigned char lowerL2Rates[PHI_SECTORS];
-  unsigned char l3Rates[PHI_SECTORS];
+  unsigned short l1Rates[PHI_SECTORS][2]; //x16 to get Hz
+  unsigned char upperL2Rates[PHI_SECTORS]; //x64 to get Hz
+  unsigned char lowerL2Rates[PHI_SECTORS]; //x64 to get Hz
+  unsigned char l3Rates[PHI_SECTORS]; //Hz
+  unsigned char nadirL1Rates[PHI_SECTORS]; //?? to get Hz
+  unsigned char nadirL2Rates[PHI_SECTORS]; //?? to get Hz
   unsigned int antTrigMask;
    unsigned char nadirAntTrigMask; //Will need to do pad three bytes
+  unsigned char reserved[3];
 } TurfRateStruct_t;
 
 typedef struct {
@@ -501,12 +507,14 @@ typedef struct {
   unsigned int unixTime; //Time of first hk
   unsigned short numRates; //Number of rates in average
   unsigned short deltaT; //Difference in time between first and last 
-  unsigned int l1Rates[PHI_SECTORS][2]; //upper and lower rings only
-  unsigned short upperL2Rates[PHI_SECTORS];
-  unsigned short lowerL2Rates[PHI_SECTORS];
-  unsigned short l3Rates[PHI_SECTORS];
+  unsigned int l1Rates[PHI_SECTORS][2]; //x16 to get Hz 
+  unsigned short upperL2Rates[PHI_SECTORS]; //x64 to get Hz
+  unsigned short lowerL2Rates[PHI_SECTORS]; //x64 to get Hz
+  unsigned short l3Rates[PHI_SECTORS]; //Hz
+  
   unsigned int antTrigMask;
   unsigned char nadirAntTrigMask; //Maybe need to pad three bytes
+  unsigned char reserved[3];
 } SummedTurfRateStruct_t;
 
 
@@ -518,13 +526,17 @@ typedef struct {
 			 (for the X events per second that get 
 			   tagged with it, note it now includes
 			   second offset from unixTime)*/
+  unsigned int turfEventId; //Turf event id that doesn't roll
   unsigned int eventNumber;    /* Global event number */
   unsigned short calibStatus;   /* Were we flashing the pulser? */
   unsigned char priority; // priority and other
   unsigned char turfUpperWord; // The upper 8 bits from the TURF
-  unsigned char otherFlag; //Currently unused 
-  unsigned char errorFlag; //Bit 1 means sync slip
-  unsigned char otherFlag3;
+  unsigned char otherFlag; // Currently the first two surf evNums 
+  unsigned char errorFlag; /*Bit 1 means sync slip between TURF and software
+			     Bit 2 is sync slip between SURF 1 and software
+			     Bit 3 is sync slip between SURF 10 and SURF 1
+			     Bit 4 is non matching TURF test pattern*/
+  unsigned char surfSlipFlag; /* Sync Slip between SURF 2-9 and SURF 1*/
   unsigned char nadirAntTrigMask; //
   unsigned int antTrigMask; // What was the ant trigger mask
   TurfioStruct_t turfio; /*The X byte TURFIO data*/
@@ -791,16 +803,18 @@ typedef struct {
 // On-board structs
 ////////////////////////////////////////////////////////////////////////////
 typedef struct {
-    GenericHeader_t gHdr;
-    unsigned int eventNumber;    /* Global event number */
-    SurfChannelFull_t channel[NUM_DIGITZED_CHANNELS];
+  GenericHeader_t gHdr;
+  unsigned int eventNumber;    /* Global event number */
+  unsigned int surfEventId[ACTIVE_SURFS]; //Id number from each SURF
+  SurfChannelFull_t channel[NUM_DIGITZED_CHANNELS];
 } AnitaEventBody_t;
 
 typedef struct {
-    GenericHeader_t gHdr;
-    unsigned int eventNumber;    /* Global event number */
-    unsigned int whichPeds; //whichPedestals did we subtract
-    SurfChannelPedSubbed_t channel[NUM_DIGITZED_CHANNELS];
+  GenericHeader_t gHdr;
+  unsigned int eventNumber;    /* Global event number */
+  unsigned int surfEventId[ACTIVE_SURFS];
+  unsigned int whichPeds; //whichPedestals did we subtract
+  SurfChannelPedSubbed_t channel[NUM_DIGITZED_CHANNELS];
 } PedSubbedEventBody_t;
 
 typedef struct {

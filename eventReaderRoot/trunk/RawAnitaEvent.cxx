@@ -28,6 +28,7 @@ RawAnitaEvent::RawAnitaEvent(PedSubbedEventBody_t *bdPtr)
    //Filling Constructor
    whichPeds=bdPtr->whichPeds;
    eventNumber=bdPtr->eventNumber;
+   memcpy(surfEventId,bdPtr->surfEventId,ACTIVE_SURFS*sizeof(UInt_t));
    
   for(int chan=0;chan<NUM_DIGITZED_CHANNELS;chan++) {
     chanId[chan]=bdPtr->channel[chan].header.chanId;

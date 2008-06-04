@@ -20,36 +20,6 @@ class RawAnitaHeader: public TObject
   RawAnitaHeader();
   RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t run, UInt_t realTime,
 		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag);
-  RawAnitaHeader(Int_t    trun,
-		 UInt_t   trealTime,
-		 UInt_t   tpayloadTime,
-		 UInt_t   tpayloadTimeUs,
-		 UInt_t   tgpsSubTime,
-		 UInt_t   teventNumber,
-		 UShort_t tcalibStatus,
-		 UChar_t  tpriority,
-		 UChar_t  tturfUpperWord,
-		 UChar_t  totherFlag,
-		 UChar_t  terrorFlag,
-		 UChar_t  totherFlag3,
-		 UChar_t  tnadirAntMask,
-		 UInt_t   tantTrigMask,
-		 UChar_t  ttrigType,
-		 UChar_t  tl3Type1Count,
-		 UShort_t ttrigNum,
-		 UInt_t   ttrigTime,
-		 UInt_t   tc3poNum,
-		 UShort_t tppsNum,
-		 UShort_t tdeadTime,
-		 UChar_t  tbufferDepth,
-		 UShort_t tupperL1TrigPattern,
-		 UShort_t tlowerL1TrigPattern,
-		 UShort_t tupperL2TrigPattern,
-		 UShort_t tlowerL2TrigPattern,
-		 UShort_t tl3TrigPattern,
-		 UInt_t   ttriggerTime,
-		 UInt_t   ttriggerTimeNs,
-		 Int_t    tgoodTimeFlag);		 
   ~RawAnitaHeader();
 
   Int_t           run;
@@ -57,13 +27,14 @@ class RawAnitaHeader: public TObject
   UInt_t          payloadTime;
   UInt_t          payloadTimeUs;
   UInt_t          gpsSubTime;
+  UInt_t          turfEventId;
   UInt_t          eventNumber;
   UShort_t        calibStatus;
   UChar_t         priority;
   UChar_t         turfUpperWord;
   UChar_t         otherFlag;
   UChar_t         errorFlag;
-  UChar_t         otherFlag3;
+  UChar_t         surfSlipFlag;
   UChar_t         nadirAntTrigMask;
   UInt_t          antTrigMask;
   UChar_t         trigType;
@@ -74,18 +45,22 @@ class RawAnitaHeader: public TObject
   UShort_t        ppsNum;
   UShort_t        deadTime;
   UChar_t         bufferDepth;
+  UChar_t         reserved;
   UShort_t        upperL1TrigPattern;
   UShort_t        lowerL1TrigPattern;
   UShort_t        upperL2TrigPattern;
   UShort_t        lowerL2TrigPattern;
   UShort_t        l3TrigPattern;
+  UShort_t        otherTrigPattern[3];
+  UChar_t         nadirL1TrigPattern;
+  UChar_t         nadirL2TrigPattern;
   UInt_t          triggerTime;
   UInt_t          triggerTimeNs;
   Int_t           goodTimeFlag;
    
   char *trigTypeAsString();
    
-  ClassDef(RawAnitaHeader,11);
+  ClassDef(RawAnitaHeader,12);
 };
 
 
