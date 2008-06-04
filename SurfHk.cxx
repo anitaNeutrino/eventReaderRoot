@@ -21,13 +21,32 @@ SurfHk::~SurfHk() {
    //Default Destructor
 }
 
+
+SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr)
+{
+  run=trun;
+  realTime=trealTime;
+  payloadTime=surfPtr->unixTime;
+  payloadTimeUs=surfPtr->unixTimeUs;
+  globalThreshold=surfPtr->globalThreshold;
+  errorFlag=surfPtr->errorFlag;
+  memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*BANDS_PER_ANT);
+  memcpy(upperWords,surfPtr->upperWords,sizeof(UShort_t)*ACTIVE_SURFS);
+  memcpy(scaler,surfPtr->scaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(threshold,surfPtr->threshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(setThreshold,surfPtr->setThreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(rfPower,surfPtr->rfPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
+  memcpy(surfTrigBandMask,surfPtr->surfTrigBandMask,sizeof(UShort_t)*ACTIVE_SURFS);
+  intFlag=0;
+}
+
 SurfHk::SurfHk(Int_t           trun,
 	       UInt_t          trealTime,
 	       UInt_t          tpayloadTime,
 	       UInt_t          tpayloadTimeUs,
 	       UShort_t        tglobalThreshold,
 	       UShort_t        terrorFlag,
-	       UShort_t        tscalerGoal,
+	       UShort_t        tscalerGoals[BANDS_PER_ANT],
 	       UShort_t        tupperWords[ACTIVE_SURFS],
 	       UShort_t        tscaler[ACTIVE_SURFS][SCALERS_PER_SURF],
 	       UShort_t        tthreshold[ACTIVE_SURFS][SCALERS_PER_SURF],
@@ -43,7 +62,7 @@ SurfHk::SurfHk(Int_t           trun,
    payloadTimeUs=tpayloadTimeUs;
    globalThreshold=tglobalThreshold;
    errorFlag=terrorFlag;
-   scalerGoal=tscalerGoal;
+   memcpy(scalerGoals,tscalerGoals,sizeof(UShort_t)*BANDS_PER_ANT);
    memcpy(upperWords,tupperWords,sizeof(UShort_t)*ACTIVE_SURFS);
    memcpy(scaler,tscaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
    memcpy(threshold,tthreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);

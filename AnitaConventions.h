@@ -77,6 +77,7 @@ namespace WaveCalType {
 #define ANTS_PER_SURF 4
 #define TRIGGER_SURFS 8 //Needs to be updated for ANITA-II
 #define PHI_SECTORS 16
+#define BANDS_PER_ANT 4
 
 //Acromag stuff
 #define CHANS_PER_IP320 40
