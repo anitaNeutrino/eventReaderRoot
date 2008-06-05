@@ -37,6 +37,8 @@ class RawAnitaHeader: public TObject
   UChar_t         surfSlipFlag;
   UChar_t         nadirAntTrigMask;
   UInt_t          antTrigMask;
+  UShort_t        phiTrigMask;
+  UChar_t         reserved[2];
   UChar_t         trigType;
   UChar_t         l3Type1Count;
   UShort_t        trigNum;
@@ -45,7 +47,7 @@ class RawAnitaHeader: public TObject
   UShort_t        ppsNum;
   UShort_t        deadTime;
   UChar_t         bufferDepth;
-  UChar_t         reserved;
+  UChar_t         turfioReserved;
   UShort_t        upperL1TrigPattern;
   UShort_t        lowerL1TrigPattern;
   UShort_t        upperL2TrigPattern;
@@ -60,7 +62,7 @@ class RawAnitaHeader: public TObject
    
   char *trigTypeAsString();
    
-  ClassDef(RawAnitaHeader,12);
+  ClassDef(RawAnitaHeader,13);
 };
 
 

@@ -39,6 +39,7 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    surfSlipFlag=hdPtr->surfSlipFlag;
    nadirAntTrigMask=hdPtr->nadirAntTrigMask;
    antTrigMask=hdPtr->antTrigMask;
+   phiTrigMask=hdPtr->phiTrigMask;
    trigType=hdPtr->turfio.trigType;
    l3Type1Count=hdPtr->turfio.l3Type1Count;
    trigNum=hdPtr->turfio.trigNum;
@@ -47,12 +48,13 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    ppsNum=hdPtr->turfio.ppsNum;
    deadTime=hdPtr->turfio.deadTime;
    bufferDepth=hdPtr->turfio.bufferDepth;
-   reserved=hdPtr->turfio.reserved;
+   turfioReserved=hdPtr->turfio.reserved;
    upperL1TrigPattern=hdPtr->turfio.upperL1TrigPattern;
    lowerL1TrigPattern=hdPtr->turfio.lowerL1TrigPattern;
    upperL2TrigPattern=hdPtr->turfio.upperL2TrigPattern;
    lowerL2TrigPattern=hdPtr->turfio.lowerL2TrigPattern;
    l3TrigPattern=hdPtr->turfio.l3TrigPattern;
+   memcpy(reserved,hdPtr->reserved,2*sizeof(UChar_t));
    memcpy(otherTrigPattern,hdPtr->turfio.otherTrigPattern,3*sizeof(UShort_t));
    nadirL1TrigPattern=hdPtr->turfio.nadirL1TrigPattern;
    nadirL2TrigPattern=hdPtr->turfio.nadirL2TrigPattern;
