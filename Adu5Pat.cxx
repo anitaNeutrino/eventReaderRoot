@@ -25,36 +25,23 @@ Adu5Pat::~Adu5Pat() {
 
 Adu5Pat::Adu5Pat(Int_t           trun,
 		 UInt_t          trealTime,
-		 UInt_t          treadTime,
-		 UInt_t          tpayloadTime,
-		 UInt_t          tpayloadTimeUs,
-		 UInt_t          ttimeOfDay,
-		 Float_t         tlatitude,
-		 Float_t         tlongitude,
-		 Float_t         taltitude,
-		 Float_t         theading,
-		 Float_t         tpitch,
-		 Float_t         troll,
-		 Float_t         tmrms,
-		 Float_t         tbrms,
-		 UInt_t          tattFlag,
-		 Int_t           tintFlag)
+		 GpsAdu5PatStruct_t *gpsStruct)
 {
 
    run=trun;
-   realTime=trealTime;
-   readTime=treadTime;
-   payloadTime=tpayloadTime;
-   payloadTimeUs=tpayloadTimeUs;
-   timeOfDay=ttimeOfDay;
-   latitude=tlatitude;
-   longitude=tlongitude;
-   altitude=taltitude;
-   heading=theading;
-   pitch=tpitch;
-   roll=troll;
-   mrms=tmrms;
-   brms=tbrms;
-   attFlag=tattFlag;
-   intFlag=tintFlag;
+   realTime=trealTime; //Need to do something with timeOfDay
+   readTime=gpsStruct->unixTime;
+   payloadTime=gpsStruct->unixTime;
+   payloadTimeUs=gpsStruct->unixTimeUs;
+   timeOfDay=gpsStruct->timeOfDay;
+   latitude=gpsStruct->latitude;
+   longitude=gpsStruct->longitude;
+   altitude=gpsStruct->altitude;
+   heading=gpsStruct->heading;
+   pitch=gpsStruct->pitch;
+   roll=gpsStruct->roll;
+   mrms=gpsStruct->mrms;
+   brms=gpsStruct->brms;
+   attFlag=gpsStruct->attFlag;
+   intFlag=0;
 }

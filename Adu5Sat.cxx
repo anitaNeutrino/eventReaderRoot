@@ -1,38 +1,43 @@
 //////////////////////////////////////////////////////////////////////////////
-/////  Adu5Vtg.cxx        ANITA ADU5 VTG reading class                   /////
+/////  Adu5Sat.cxx        ANITA ADU5 VTG reading class                   /////
 /////                                                                    /////
 /////  Description:                                                      /////
 /////     A simple class that reads in ADU5 VTG and produces trees       ///// 
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
 
-#include "Adu5Vtg.h"
+#include "Adu5Sat.h"
 #include <iostream>
 #include <fstream>
 
-ClassImp(Adu5Vtg);
+ClassImp(Adu5Sat);
 
-Adu5Vtg::Adu5Vtg() 
+Adu5Sat::Adu5Sat() 
 {
    //Default Constructor
 }
 
-Adu5Vtg::~Adu5Vtg() {
+Adu5Sat::~Adu5Sat() {
    //Default Destructor
 }
 
-Adu5Vtg::Adu5Vtg(Int_t           trun,
+Adu5Sat::Adu5Sat(Int_t           trun,
 		 UInt_t          trealTime,
-		 GpsAdu5VtgStruct_t *gpsStruct)
+		 GpsAdu5SatStruct_t *gpsStruct)
 {
 
    run=trun;
    realTime=trealTime;
    payloadTime=gpsStruct->unixTime;
-   payloadTimeUs=gpsStruct->unixTimeUs;
-   trueCourse=gpsStruct->trueCourse;
-   magneticCourse=gpsStruct->magneticCourse;
-   speedInKnots=gpsStruct->speedInKnots;
-   speedInKPH=gpsStruct->speedInKPH;
-   intFlag=0;
+   for(int ant=0;ant<4;ant++) {
+     numSats[ant]=gpsStruct->numSats[ant];
+     for(int i=0;i<MAX_SATS;i++) {
+       prn[ant][i]=gpsStruct->sat[ant][i].prn;
+       elevation[ant][i]=gpsStruct->sat[ant][i].elevation;
+       snr[ant][i]=gpsStruct->sat[ant][i].snr;
+       flag[ant][i]=gpsStruct->sat[ant][i].flag;
+       azimuth[ant][i]=gpsStruct->sat[ant][i].azimuth;
+     }
+   }
+
 }

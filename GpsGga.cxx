@@ -1,38 +1,44 @@
 //////////////////////////////////////////////////////////////////////////////
-/////  Adu5Vtg.cxx        ANITA ADU5 VTG reading class                   /////
+/////  GpsGga.cxx        ANITA ADU5 VTG reading class                   /////
 /////                                                                    /////
 /////  Description:                                                      /////
 /////     A simple class that reads in ADU5 VTG and produces trees       ///// 
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
 
-#include "Adu5Vtg.h"
+#include "GpsGga.h"
 #include <iostream>
 #include <fstream>
 
-ClassImp(Adu5Vtg);
+ClassImp(GpsGga);
 
-Adu5Vtg::Adu5Vtg() 
+GpsGga::GpsGga() 
 {
    //Default Constructor
 }
 
-Adu5Vtg::~Adu5Vtg() {
+GpsGga::~GpsGga() {
    //Default Destructor
 }
 
-Adu5Vtg::Adu5Vtg(Int_t           trun,
-		 UInt_t          trealTime,
-		 GpsAdu5VtgStruct_t *gpsStruct)
+GpsGga::GpsGga(Int_t           trun,
+	 UInt_t          trealTime,
+	 GpsGgaStruct_t *gpsStruct)
 {
 
    run=trun;
    realTime=trealTime;
+   intFlag=0;
    payloadTime=gpsStruct->unixTime;
    payloadTimeUs=gpsStruct->unixTimeUs;
-   trueCourse=gpsStruct->trueCourse;
-   magneticCourse=gpsStruct->magneticCourse;
-   speedInKnots=gpsStruct->speedInKnots;
-   speedInKPH=gpsStruct->speedInKPH;
-   intFlag=0;
+   timeOfDay=gpsStruct->timeOfDay;
+   numSats=gpsStruct->numSats;
+   latitude=gpsStruct->latitude;
+   longitude=gpsStruct->longitude;
+   altitude=gpsStruct->altitude;
+   hdop=gpsStruct->hdop;
+   geoidSeparation=gpsStruct->geoidSeparation;
+   ageOfCalc=gpsStruct->ageOfCalc;
+   posFixType=gpsStruct->posFixType;
+   baseStationId=gpsStruct->baseStationId;
 }

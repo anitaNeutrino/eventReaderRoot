@@ -1,47 +1,47 @@
 //////////////////////////////////////////////////////////////////////////////
-/////  Adu5Pat.h        Pretty ANITA hk class                            /////
+/////  GpsGga.h        Pretty ANITA hk class                            /////
 /////                                                                    /////
 /////  Description:                                                      /////
-/////     A simple class for storing pretty ADU5 PAT objects in a TTree  /////
+/////     A simple class for storing pretty ADU5 VTG objects in a TTree  /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef ADU5PAT_H
-#define ADU5PAT_H
+#ifndef GPSGGA_H
+#define GPSGGA_H
 
 //Includes
 #include <TObject.h>
 #include "simpleStructs.h"
 
-class Adu5Pat: public TObject
+class GpsGga: public TObject
 {
  public:
-  Adu5Pat();		 
-  ~Adu5Pat();
+  GpsGga();		 
+  ~GpsGga();
 
-  Adu5Pat(Int_t           trun,
-	  UInt_t          trealTime,
-	  GpsAdu5PatStruct_t *gpsStruct);
+  GpsGga(Int_t           trun,
+	 UInt_t          trealTime,
+	 GpsGgaStruct_t *gpsStruct);
 
    Int_t           run;
    UInt_t          realTime;
-   UInt_t          readTime;
    UInt_t          payloadTime;
    UInt_t          payloadTimeUs;
    UInt_t          timeOfDay;
+   UChar_t          numSats;
    Float_t         latitude;
    Float_t         longitude;
    Float_t         altitude;
-   Float_t         heading;
-   Float_t         pitch;
-   Float_t         roll;
-   Float_t         mrms;
-   Float_t         brms;
-   UInt_t          attFlag;
+   Float_t         hdop;
+   Float_t         geoidSeparation;
+   Float_t         ageOfCalc;
+   UChar_t         posFixType;
+   UChar_t         baseStationId;
    Int_t           intFlag;
+
    
-  ClassDef(Adu5Pat,10);
+  ClassDef(GpsGga,10);
 };
 
 
-#endif //ADU5PAT_H
+#endif //GPSGGA_H
