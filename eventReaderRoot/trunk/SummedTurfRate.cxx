@@ -1,47 +1,49 @@
 //////////////////////////////////////////////////////////////////////////////
-/////  TurfRate.cxx        ANITA ADU5 VTG reading class                   /////
+/////  SummedTurfRate.cxx        ANITA ADU5 VTG reading class                   /////
 /////                                                                    /////
 /////  Description:                                                      /////
 /////     A simple class that reads in ADU5 VTG and produces trees       ///// 
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
 
-#include "TurfRate.h"
+#include "SummedTurfRate.h"
 #include <iostream>
 #include <fstream>
 
-ClassImp(TurfRate);
+ClassImp(SummedTurfRate);
 
-TurfRate::TurfRate() 
+SummedTurfRate::SummedTurfRate() 
 {
    //Default Constructor
 }
 
-TurfRate::~TurfRate() {
+SummedTurfRate::~SummedTurfRate() {
    //Default Destructor
 }
 
-TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *turfPtr)
+SummedTurfRate::SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStruct_t *turfPtr)
 {
    run=trun;
    realTime=trealTime;
    payloadTime=turfPtr->unixTime;
-   ppsNum=turfPtr->ppsNum;   
-   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
-   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
-   memcpy(nadirL1Rates,turfPtr->nadirL1Rates,sizeof(UShort_t)*NADIR_ANTS);
-   memcpy(nadirL2Rates,turfPtr->nadirL2Rates,sizeof(UChar_t)*NADIR_ANTS);
+   numRates=turfPtr->numRates;
+   deltaT=turfPtr->deltaT;
+   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UInt_t)*PHI_SECTORS*2);
+   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UShort_t)*PHI_SECTORS);
+   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UShort_t)*PHI_SECTORS);
+   memcpy(l3Rates,turfPtr->l3Rates,sizeof(UShort_t)*PHI_SECTORS);
+   memcpy(nadirL1Rates,turfPtr->nadirL1Rates,sizeof(UInt_t)*NADIR_ANTS);
+   memcpy(nadirL2Rates,turfPtr->nadirL2Rates,sizeof(UShort_t)*NADIR_ANTS);
    antTrigMask=turfPtr->antTrigMask;
+   phiTrigMask=turfPtr->phiTrigMask;   
    nadirAntTrigMask=turfPtr->nadirAntTrigMask;
-   phiTrigMask=turfPtr->phiTrigMask;
    errorFlag=turfPtr->errorFlag;
    intFlag=0;
 
 }
 
-Int_t TurfRate::getL1Rate(int phi, int ring)
+
+Int_t SummedTurfRate::getL1Rate(int phi, int ring)
 {
   if(phi<0 || phi>15) return -1;
   switch(ring) {
@@ -57,7 +59,7 @@ Int_t TurfRate::getL1Rate(int phi, int ring)
   return -1;
 }
 
-Int_t TurfRate::getL2Rate(int phi, int ring)
+Int_t SummedTurfRate::getL2Rate(int phi, int ring)
 { 
   if(phi<0 || phi>15) return -1;
   switch(ring) {
@@ -75,12 +77,12 @@ Int_t TurfRate::getL2Rate(int phi, int ring)
 }
 
 
-Int_t TurfRate::isPhiMasked(int phi) {
+Int_t SummedTurfRate::isPhiMasked(int phi) {
   if(phi<0 || phi>15) return -1;
   return (phiTrigMask & (1<<phi));
 }
 
-Int_t TurfRate::isAntMasked(int phi, int ring)
+Int_t SummedTurfRate::isAntMasked(int phi, int ring)
 {
   if(phi<0 || phi>15) return -1;
    switch(ring) {

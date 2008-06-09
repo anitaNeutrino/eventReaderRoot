@@ -1,41 +1,40 @@
 //////////////////////////////////////////////////////////////////////////////
-/////  Adu5Vtg.h        Pretty ANITA hk class                            /////
+/////  Adu5Sat.h        Adu5 Satellite Info class                          /////
 /////                                                                    /////
 /////  Description:                                                      /////
-/////     A simple class for storing pretty ADU5 VTG objects in a TTree  /////
+/////     A simple class for storing pretty Adu5 SAT  objects in a TTree  /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef ADU5VTG_H
-#define ADU5VTG_H
+#ifndef ADU5SAT_H
+#define ADU5SAT_H
 
 //Includes
 #include <TObject.h>
 #include "simpleStructs.h"
 
-class Adu5Vtg: public TObject
+class Adu5Sat: public TObject
 {
  public:
-  Adu5Vtg();		 
-  ~Adu5Vtg();
+  Adu5Sat();		 
+  ~Adu5Sat();
 
-  Adu5Vtg(Int_t           trun,
+  Adu5Sat(Int_t           trun,
 	  UInt_t          trealTime,
-	  GpsAdu5VtgStruct_t *gpsStruct);
+	  GpsAdu5SatStruct_t *gpsStruct);
 
    Int_t           run;
    UInt_t          realTime;
    UInt_t          payloadTime;
-   UInt_t          payloadTimeUs;
-   Float_t         trueCourse;
-   Float_t         magneticCourse;
-   Float_t         speedInKnots;
-   Float_t         speedInKPH;
-   Int_t           intFlag;
-
+   UInt_t          numSats[4];
+   UChar_t         prn[4][MAX_SATS];
+   UChar_t         elevation[4][MAX_SATS];
+   UChar_t         snr[4][MAX_SATS];
+   UChar_t         flag[4][MAX_SATS];
+   UShort_t        azimuth[4][MAX_SATS];
    
-  ClassDef(Adu5Vtg,10);
+  ClassDef(Adu5Sat,10);
 };
 
 
-#endif //ADU5VTG_H
+#endif //ADU5SAT_H

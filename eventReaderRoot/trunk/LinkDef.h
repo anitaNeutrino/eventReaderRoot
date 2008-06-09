@@ -10,10 +10,20 @@
 #pragma link C++ class UsefulAnitaEvent+;
 #pragma link C++ class Adu5Pat+;
 #pragma link C++ class Adu5Vtg+;
+#pragma link C++ class G12Pos+;
+#pragma link C++ class G12Sat+;
+#pragma link C++ class GpsGga+;
+#pragma link C++ class Adu5Sat+;
 #pragma link C++ class AnitaEventCalibrator+;
 #pragma link C++ class PrettyAnitaHk+;
 #pragma link C++ class SurfHk+;
+#pragma link C++ class AveragedSurfHk+;
 #pragma link C++ class TurfRate+;
+#pragma link C++ class SummedTurfRate+;
+#pragma link C++ class AcqdStart+;
+#pragma link C++ class GpsdStart+;
+#pragma link C++ class LogWatchdStart+;
+#pragma link C++ class RunStart+;
 #pragma link C++ class AnitaGeomTool+;
 
 
@@ -25,6 +35,9 @@
 #pragma link C++ enum          AnitaRing::EAnitaRing;
 #pragma link C++ nestedtypedef AnitaRing::AnitaRing_t;
 
+#pragma link C++ namespace     AnitaBand;
+#pragma link C++ enum          AnitaBand::EAnitaBand;
+#pragma link C++ nestedtypedef AnitaBand::AnitaBand_t;
 
 #pragma link C++ namespace     AnitaPol;
 #pragma link C++ enum          AnitaPol::EAnitaPol;

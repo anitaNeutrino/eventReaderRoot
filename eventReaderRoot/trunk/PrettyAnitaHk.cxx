@@ -48,7 +48,7 @@ PrettyAnitaHk::PrettyAnitaHk(Int_t           trun,
    realTime=trealTime;
    payloadTime=tpayloadTime;
    payloadTimeUs=tpayloadTimeUs;
-   memcpy(intTemps,tintTemps,sizeof(Float_t)*17);
+   memcpy(intTemps,tintTemps,sizeof(Float_t)*19);
    memcpy(extTemps,textTemps,sizeof(Float_t)*25);
    memcpy(voltages,tvoltages,sizeof(Float_t)*11);
    memcpy(currents,tcurrents,sizeof(Float_t)*12);

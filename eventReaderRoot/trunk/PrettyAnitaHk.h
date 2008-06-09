@@ -42,7 +42,7 @@ class PrettyAnitaHk: public TObject
    UInt_t          realTime;
    UInt_t          payloadTime;
    UInt_t          payloadTimeUs;
-   Float_t         intTemps[17];
+   Float_t         intTemps[19]; //Includes extra sbsTemps
    Float_t         extTemps[25];
    Float_t         voltages[11];
    Float_t         currents[12];
@@ -57,7 +57,7 @@ class PrettyAnitaHk: public TObject
    Int_t           ssGoodFlag[4];   
    Int_t           intFlag;
    
-  ClassDef(PrettyAnitaHk,1);
+  ClassDef(PrettyAnitaHk,2);
 };
 
 

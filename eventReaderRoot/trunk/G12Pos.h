@@ -1,47 +1,49 @@
 //////////////////////////////////////////////////////////////////////////////
-/////  Adu5Pat.h        Pretty ANITA hk class                            /////
+/////  G12Pos.h        Pretty ANITA hk class                            /////
 /////                                                                    /////
 /////  Description:                                                      /////
-/////     A simple class for storing pretty ADU5 PAT objects in a TTree  /////
+/////     A simple class for storing pretty ADU5 VTG objects in a TTree  /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef ADU5PAT_H
-#define ADU5PAT_H
+#ifndef G12Pos_H
+#define G12Pos_H
 
 //Includes
 #include <TObject.h>
 #include "simpleStructs.h"
 
-class Adu5Pat: public TObject
+class G12Pos: public TObject
 {
  public:
-  Adu5Pat();		 
-  ~Adu5Pat();
+  G12Pos();		 
+  ~G12Pos();
 
-  Adu5Pat(Int_t           trun,
-	  UInt_t          trealTime,
-	  GpsAdu5PatStruct_t *gpsStruct);
+  G12Pos(Int_t           trun,
+	 UInt_t          trealTime,
+	 GpsG12PosStruct_t *gpsStruct);
 
    Int_t           run;
    UInt_t          realTime;
-   UInt_t          readTime;
    UInt_t          payloadTime;
    UInt_t          payloadTimeUs;
    UInt_t          timeOfDay;
+   UInt_t          numSats;
    Float_t         latitude;
    Float_t         longitude;
    Float_t         altitude;
-   Float_t         heading;
-   Float_t         pitch;
-   Float_t         roll;
-   Float_t         mrms;
-   Float_t         brms;
-   UInt_t          attFlag;
+   Float_t         trueCourse;
+   Float_t         verticalVelocity;
+   Float_t         speedInKnots;
+   Float_t         pdop;
+   Float_t         hdop;
+   Float_t         vdop;
+   Float_t         tdop;
    Int_t           intFlag;
+
    
-  ClassDef(Adu5Pat,10);
+  ClassDef(G12Pos,10);
 };
 
 
-#endif //ADU5PAT_H
+#endif //G12Pos_H
