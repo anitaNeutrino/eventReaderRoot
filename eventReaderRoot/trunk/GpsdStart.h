@@ -26,11 +26,11 @@ class GpsdStart: public TObject
    Int_t           run;
    UInt_t          realTime;
    UInt_t          payloadTime; 
-   UChar_t         ackCount[3];
-   UChar_t         nakCount[3];
-   UChar_t         rioBitMask;
+   UChar_t         ackCount[3]; ///< Number of acknowledge messages from each GPS
+   UChar_t         nakCount[3];///< Number of NAK messages from each GPS
+   UChar_t         rioBitMask; 
    UChar_t         tstBitMask;
-
+   
   ClassDef(GpsdStart,10);
 };
 

@@ -22,8 +22,11 @@
 #pragma link C++ class SummedTurfRate+;
 #pragma link C++ class AcqdStart+;
 #pragma link C++ class GpsdStart+;
+#pragma link C++ class MonitorHk+;
 #pragma link C++ class LogWatchdStart+;
 #pragma link C++ class RunStart+;
+#pragma link C++ class CommandEcho+;
+#pragma link C++ class OtherMonitorHk+;
 #pragma link C++ class AnitaGeomTool+;
 
 
