@@ -27,6 +27,7 @@
 #pragma link C++ class RunStart+;
 #pragma link C++ class CommandEcho+;
 #pragma link C++ class OtherMonitorHk+;
+#pragma link C++ class RawHk+;
 #pragma link C++ class AnitaGeomTool+;
 
 
