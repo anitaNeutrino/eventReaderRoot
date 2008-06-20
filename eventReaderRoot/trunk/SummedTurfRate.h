@@ -27,6 +27,8 @@ class SummedTurfRate: public TObject
    UInt_t           payloadTime;
    UShort_t         numRates;
    UShort_t         deltaT;
+   UInt_t           deadTime;
+   UChar_t          bufferCount[4];
    UInt_t           l1Rates[PHI_SECTORS][2];
    UShort_t         upperL2Rates[PHI_SECTORS];
    UShort_t         lowerL2Rates[PHI_SECTORS];
@@ -48,7 +50,7 @@ class SummedTurfRate: public TObject
    Int_t isAntMasked(int phi, int ring);
    Int_t isPhiMasked(int phi);
    
-  ClassDef(SummedTurfRate,15);
+  ClassDef(SummedTurfRate,16);
 };
 
 

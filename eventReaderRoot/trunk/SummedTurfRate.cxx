@@ -28,6 +28,8 @@ SummedTurfRate::SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStruct
    payloadTime=turfPtr->unixTime;
    numRates=turfPtr->numRates;
    deltaT=turfPtr->deltaT;
+   deadTime=turfPtr->deadTime;
+   memcpy(bufferCount,turfPtr->bufferCount,sizeof(UChar_t)*4);
    memcpy(l1Rates,turfPtr->l1Rates,sizeof(UInt_t)*PHI_SECTORS*2);
    memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UShort_t)*PHI_SECTORS);
    memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UShort_t)*PHI_SECTORS);
