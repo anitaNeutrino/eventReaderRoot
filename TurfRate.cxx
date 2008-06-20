@@ -27,6 +27,7 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *turfPtr)
    realTime=trealTime;
    payloadTime=turfPtr->unixTime;
    ppsNum=turfPtr->ppsNum;   
+   deadTime=turfPtr->deadTime;   
    memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
    memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
    memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);

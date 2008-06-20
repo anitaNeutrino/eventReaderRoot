@@ -25,7 +25,8 @@ class TurfRate: public TObject
    Int_t           run;
    UInt_t          realTime;
    UInt_t          payloadTime;
-   UInt_t          ppsNum;
+   UShort_t        ppsNum;
+   UShort_t        deadTime;
    UShort_t        l1Rates[PHI_SECTORS][2];
    UChar_t         upperL2Rates[PHI_SECTORS];
    UChar_t         lowerL2Rates[PHI_SECTORS];
@@ -48,7 +49,7 @@ class TurfRate: public TObject
    Int_t isPhiMasked(int phi);
    
    
-  ClassDef(TurfRate,15);
+  ClassDef(TurfRate,16);
 };
 
 
