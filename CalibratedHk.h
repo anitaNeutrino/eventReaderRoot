@@ -36,6 +36,10 @@ class CalibratedHk: public TObject
    Float_t         magZ;
    Short_t         sbsTemp[4];
    
+   Float_t   getInternalTemp(int index);
+   Float_t   getSBSTemp(int index);
+   Float_t   getExternalTemp(int index);
+
   ClassDef(CalibratedHk,10);
 };
 

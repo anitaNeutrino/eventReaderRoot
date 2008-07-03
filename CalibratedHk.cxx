@@ -18,7 +18,7 @@ ClassImp(CalibratedHk);
 float calSlope[3][40]=
 {
     {1,1,100,1,1,1,1,1,1,1,1,100,1,1,1,100,100,100,100,100,1,1,1,1,100,1,1,1,100,1,1,1,1,1,1,100,100,100,100,100},
-    {-2,1,2,-4,4,1,2,1,1,1,1,1,1,8,8,20,20,20,1,1,0.8,12,0.8,0.8,8,20,0.8,1,1,1,1,1,1,4,4,1,10.1377,18.252,1,1},
+    {2,1,2,-4,4,2,2,1,1,1,1,1,1,8,8,20,20,20,1,1,0.8,8,0.8,0.8,20,20,0.8,1,1,1,1,1,1,4,4,1,10.1377,18.252,1,1},
     {100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100}
 };
 
@@ -133,3 +133,27 @@ CalibratedHk::CalibratedHk(RawHk *hkPtr, RawHk *avzPtr, RawHk *calPtr)
   }
 }
 
+
+Float_t   CalibratedHk::getInternalTemp(int index)
+{
+  int internalTempChans[15]={0,20,1,21,2,22,3,23,4,24,5,25,6,26,7};
+  if(index>=0 && index<15)
+    return useful[2][internalTempChans[index]];
+  return -1;
+}
+
+Float_t   CalibratedHk::getExternalTemp(int index)
+{  
+  int externalTempChans[15]={32,13,33,14,34,15,35,16,36,17,37,18,38,19,39};
+  if(index>=0 && index<15)
+    return useful[2][externalTempChans[index]];
+  return -273;
+}
+
+Float_t   CalibratedHk::getSBSTemp(int index)
+{
+  Int_t sbsMagicAdd[4]={0,0,15,15};
+  if(index>=0 && index<4)
+    return (25e-3*sbsTemp[index]) + sbsMagicAdd[index];
+  return -273;
+}

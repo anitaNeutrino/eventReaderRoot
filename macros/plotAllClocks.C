@@ -22,9 +22,9 @@ void plotAllClocks(int run, int startEntry, int numEntries) {
   char eventName[FILENAME_MAX];
   char headerName[FILENAME_MAX];
   char hkName[FILENAME_MAX];
-  sprintf(eventName,"/unix/anita1/webData/firstDay/run%d/eventFile%d*.root",run,run);
-  sprintf(headerName,"/unix/anita1/webData/firstDay/run%d/timedHeadFile%d.root",run,run);
-  sprintf(hkName,"/unix/anita1/webData/firstDay/run%d/prettyHkFile%d.root",run,run);
+  sprintf(eventName,"/home/rjn/anita/data/testing/rootFiles/run%d/eventFile%d*.root",run,run);
+  sprintf(headerName,"/home/rjn/anita/data/testing/rootFiles/run%d/timedHeadFile%d.root",run,run);
+  sprintf(hkName,"/home/rjn/anita/data/testing/rootFiles/run%d/prettyHkFile%d.root",run,run);
 
   RawAnitaEvent *event = 0;
   TimedAnitaHeader *header =0;
