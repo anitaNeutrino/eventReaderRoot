@@ -94,7 +94,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	    memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
 	    memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
 	    for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
-	       this->fVolts[chanIndex][samp]=fCalibrator->unwrappedArray[surf][chan][samp];
+	      this->fVolts[chanIndex][samp]=fCalibrator->unwrappedArray[surf][chan][samp]*2; //*2 for the bit shifting
 	       this->fTimes[chanIndex][samp]=float(samp)/2.6;
 	    }
 	 }
