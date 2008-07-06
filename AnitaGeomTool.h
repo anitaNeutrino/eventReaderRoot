@@ -138,6 +138,19 @@ class AnitaGeomTool
   static int getChanIndex(int surf, int chan)
      {return chan+(9*surf);}
 
+  static AnitaRing::AnitaRing_t getRingFromAnt(int ant);
+
+  static void getSurfChanAntFromRingPhiPol(AnitaRing::AnitaRing_t ring,
+					   int phi,
+					   AnitaPol::AnitaPol_t pol,
+					   int &surf, int &chan, int &ant);
+
+  static void getRingAntPolPhiFromSurfChan(int surf, int chan,
+					  AnitaRing::AnitaRing_t &ring,
+					  int &ant,
+					  AnitaPol::AnitaPol_t &pol,
+					  int &phi);
+
   static int getChanIndexFromRingPhiPol(AnitaRing::AnitaRing_t ring,
 					int phi,
 					AnitaPol::AnitaPol_t pol);

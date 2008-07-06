@@ -311,6 +311,40 @@ int AnitaGeomTool::getLayer(int irx)
 
 }
 
+AnitaRing::AnitaRing_t AnitaGeomTool::getRingFromAnt(int ant) {
+  if (ant<8)
+    return AnitaRing::kUpperRing;
+  else if (ant>=8 && ant<16)
+    return AnitaRing::kUpperRing;
+  else if (ant<32)
+    return AnitaRing::kLowerRing;
+  else if (ant<40)
+    return AnitaRing::kNadirRing;
+  return AnitaRing::kNotARing;
+
+}
+
+void AnitaGeomTool::getRingAntPolPhiFromSurfChan(int surf, int chan,
+				 AnitaRing::AnitaRing_t &ring,
+				 int &ant,
+				 AnitaPol::AnitaPol_t &pol,
+				 int &phi)
+{
+  AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,pol);
+  ring=AnitaGeomTool::getRingFromAnt(ant);
+  phi=AnitaGeomTool::getPhiFromAnt(ant);
+}
+
+void AnitaGeomTool::getSurfChanAntFromRingPhiPol(AnitaRing::AnitaRing_t ring,
+						 int phi,
+						 AnitaPol::AnitaPol_t pol,
+						 int &surf, int &chan, int &ant)
+{
+  int chanIndex=AnitaGeomTool::getChanIndexFromRingPhiPol(ring,phi,pol);
+  AnitaGeomTool::getSurfChanFromChanIndex(chanIndex,surf,chan);
+  ant=AnitaGeomTool::getAntFromPhiRing(phi,ring);
+}
+
 
 void AnitaGeomTool::readPhotogrammetry()
 {
@@ -1039,7 +1073,12 @@ int AnitaGeomTool::getPhiFromAnt(int ant)
 {
   if(ant<16)
     return AnitaGeom::upperPhiNums[ant];
-  return AnitaGeom::lowerPhiNums[ant];
+  else if(ant<32)
+    return AnitaGeom::lowerPhiNums[ant-16];
+  else if(ant<40)
+    return AnitaGeom::nadirPhiNums[ant-32];
+  std::cerr << "There isn't an antenna " << ant << " (0-39 only)\n";
+  return -1;
 
 }
 

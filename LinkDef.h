@@ -4,6 +4,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
+#pragma link C++ class AnitaGeomTool+;
 #pragma link C++ class RawAnitaEvent+;
 #pragma link C++ class RawAnitaHeader+;
 #pragma link C++ class TimedAnitaHeader+;
@@ -29,7 +30,6 @@
 #pragma link C++ class OtherMonitorHk+;
 #pragma link C++ class RawHk+;
 #pragma link C++ class CalibratedHk+;
-#pragma link C++ class AnitaGeomTool+;
 
 
 #pragma link C++ namespace     WaveCalType;
