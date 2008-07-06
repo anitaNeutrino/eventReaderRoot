@@ -104,14 +104,16 @@ namespace AnitaRing {
    typedef enum EAnitaRing {
       kUpperRing  = 0,
       kLowerRing  = 1,
-      kNadirRing = 2
+      kNadirRing = 2,
+      kNotARing
    } AnitaRing_t;
 }
 
 namespace AnitaPol {
    typedef enum EAnitaPol {
       kHorizontal = 0,
-      kVertical   = 1
+      kVertical   = 1,
+      kNotAPol
    } AnitaPol_t;
 }
 
