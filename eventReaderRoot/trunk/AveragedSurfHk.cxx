@@ -24,6 +24,17 @@ AveragedSurfHk::~AveragedSurfHk() {
 
 AveragedSurfHk::AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct_t *surfPtr)
 {
+ if(surfPtr->gHdr.code!=PACKET_AVG_SURF_HK ||
+     surfPtr->gHdr.verId!=VER_AVG_SURF_HK ||
+     surfPtr->gHdr.numBytes!=sizeof(AveragedSurfHkStruct_t)) {
+    std::cerr << "Mismatched packet\n" 
+	      << "code:\t" << surfPtr->gHdr.code << "\t" << PACKET_AVG_SURF_HK 
+	      << "\nversion:\t" << surfPtr->gHdr.verId 
+	      << "\t" << VER_AVG_SURF_HK 
+	      << "\nsize:\t" << surfPtr->gHdr.numBytes << "\t"
+	      << sizeof(AveragedSurfHkStruct_t) << std::endl;
+  }
+
   run=trun;
   realTime=trealTime;
   payloadTime=surfPtr->unixTime;
@@ -33,6 +44,7 @@ AveragedSurfHk::AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct
   globalThreshold=surfPtr->globalThreshold;
   reserved=surfPtr->reserved;
   memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*BANDS_PER_ANT);
+  memcpy(scalerGoalsNadir,surfPtr->scalerGoalsNadir,sizeof(UShort_t)*BANDS_PER_ANT);
   memcpy(avgScaler,surfPtr->avgScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
   memcpy(rmsScaler,surfPtr->rmsScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
   memcpy(avgThresh,surfPtr->avgThresh,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);

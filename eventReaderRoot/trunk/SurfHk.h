@@ -30,6 +30,7 @@ class SurfHk: public TObject
 	 UShort_t        tglobalThreshold,
 	 UShort_t        terrorFlag,
 	 UShort_t        tscalerGoals[BANDS_PER_ANT],
+	 UShort_t        tscalerGoalsNadir[BANDS_PER_ANT],
 	 UShort_t        tupperWords[ACTIVE_SURFS],
 	 UShort_t        tscaler[ACTIVE_SURFS][SCALERS_PER_SURF],
 	 UShort_t        tthreshold[ACTIVE_SURFS][SCALERS_PER_SURF],
@@ -45,6 +46,7 @@ class SurfHk: public TObject
    UShort_t        globalThreshold;
    UShort_t        errorFlag;
    UShort_t        scalerGoals[BANDS_PER_ANT];
+   UShort_t        scalerGoalsNadir[BANDS_PER_ANT];
    UShort_t        upperWords[ACTIVE_SURFS];
    UShort_t        scaler[ACTIVE_SURFS][SCALERS_PER_SURF];
    UShort_t        threshold[ACTIVE_SURFS][SCALERS_PER_SURF];
@@ -62,7 +64,7 @@ class SurfHk: public TObject
    Int_t isBandMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band);
    Int_t getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band);
 
-  ClassDef(SurfHk,13);
+  ClassDef(SurfHk,14);
 };
 
 

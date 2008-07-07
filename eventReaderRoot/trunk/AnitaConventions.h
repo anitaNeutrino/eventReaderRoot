@@ -107,6 +107,8 @@ namespace AnitaRing {
       kNadirRing = 2,
       kNotARing
    } AnitaRing_t;
+   
+   char *ringAsString(AnitaRing::AnitaRing_t ring);
 }
 
 namespace AnitaPol {
@@ -115,6 +117,7 @@ namespace AnitaPol {
       kVertical   = 1,
       kNotAPol
    } AnitaPol_t;
+   char polAsChar(AnitaPol::AnitaPol_t pol);
 }
 
 namespace AnitaBand {
@@ -124,6 +127,7 @@ namespace AnitaBand {
       kHigh =2,
       kFull =3
    } AnitaBand_t;
+   char *bandAsString(AnitaBand::AnitaBand_t band);
 }
 
 namespace AnitaLocations { 

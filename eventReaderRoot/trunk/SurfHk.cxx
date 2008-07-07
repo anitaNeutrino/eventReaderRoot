@@ -24,6 +24,18 @@ SurfHk::~SurfHk() {
 
 SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr)
 {
+  if(surfPtr->gHdr.code!=PACKET_SURF_HK ||
+     surfPtr->gHdr.verId!=VER_SURF_HK ||
+     surfPtr->gHdr.numBytes!=sizeof(FullSurfHkStruct_t)) {
+    std::cerr << "Mismatched packet\n" 
+	      << "code:\t" << surfPtr->gHdr.code << "\t" << PACKET_SURF_HK 
+	      << "\nversion:\t" << surfPtr->gHdr.verId 
+	      << "\t" << VER_SURF_HK 
+	      << "\nsize:\t" << surfPtr->gHdr.numBytes << "\t"
+	      << sizeof(FullSurfHkStruct_t) << std::endl;
+  }
+     
+
   run=trun;
   realTime=trealTime;
   payloadTime=surfPtr->unixTime;
@@ -31,6 +43,7 @@ SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr)
   globalThreshold=surfPtr->globalThreshold;
   errorFlag=surfPtr->errorFlag;
   memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*BANDS_PER_ANT);
+  memcpy(scalerGoalsNadir,surfPtr->scalerGoalsNadir,sizeof(UShort_t)*BANDS_PER_ANT);
   memcpy(upperWords,surfPtr->upperWords,sizeof(UShort_t)*ACTIVE_SURFS);
   memcpy(scaler,surfPtr->scaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
   memcpy(threshold,surfPtr->threshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
@@ -47,6 +60,7 @@ SurfHk::SurfHk(Int_t           trun,
 	       UShort_t        tglobalThreshold,
 	       UShort_t        terrorFlag,
 	       UShort_t        tscalerGoals[BANDS_PER_ANT],
+	       UShort_t        tscalerGoalsNadir[BANDS_PER_ANT],
 	       UShort_t        tupperWords[ACTIVE_SURFS],
 	       UShort_t        tscaler[ACTIVE_SURFS][SCALERS_PER_SURF],
 	       UShort_t        tthreshold[ACTIVE_SURFS][SCALERS_PER_SURF],
@@ -63,6 +77,7 @@ SurfHk::SurfHk(Int_t           trun,
    globalThreshold=tglobalThreshold;
    errorFlag=terrorFlag;
    memcpy(scalerGoals,tscalerGoals,sizeof(UShort_t)*BANDS_PER_ANT);
+   memcpy(scalerGoalsNadir,tscalerGoalsNadir,sizeof(UShort_t)*BANDS_PER_ANT);
    memcpy(upperWords,tupperWords,sizeof(UShort_t)*ACTIVE_SURFS);
    memcpy(scaler,tscaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
    memcpy(threshold,tthreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
