@@ -32,6 +32,7 @@ class AveragedSurfHk: public TObject
    UShort_t        globalThreshold;
    UShort_t        reserved;
    UShort_t        scalerGoals[BANDS_PER_ANT];
+   UShort_t        scalerGoalsNadir[BANDS_PER_ANT];
    UShort_t        upperWords[ACTIVE_SURFS];
    UShort_t        avgScaler[ACTIVE_SURFS][SCALERS_PER_SURF];
    UShort_t        rmsScaler[ACTIVE_SURFS][SCALERS_PER_SURF];

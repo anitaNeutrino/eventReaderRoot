@@ -34,6 +34,42 @@ const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
    return "Unknown Calibration Type";
 }
 
+char *AnitaRing::ringAsString(AnitaRing::AnitaRing_t ring)
+{
+  switch(ring) {
+  case kUpperRing: return "Upper";
+  case kLowerRing: return "Lower";
+  case kNadirRing: return "Nadir";
+  default:
+    return "Unknown";
+  }
+  return "Unknown";
+}
+
+char AnitaPol::polAsChar(AnitaPol::AnitaPol_t pol)
+{
+  switch(pol) {
+  case kVertical: return 'V';
+  case kHorizontal: return 'H';
+      default:
+    return 'U';
+  }
+  return 'U';
+}
+
+char *AnitaBand::bandAsString(AnitaBand::AnitaBand_t band)
+{
+  switch(band) {
+  case kLow: return "Low";
+  case kMid: return "Mid";
+  case kHigh: return "High";
+  case kFull: return "Full";
+  default:
+    return "Unknown";
+  }
+  return "Unknown";
+}
+
 void WaveCalType::listAllCalTypes()
 {
    std::cout << "Calibration Options" << std::endl;
