@@ -24,6 +24,18 @@ MonitorHk::~MonitorHk() {
 
 MonitorHk::MonitorHk(Int_t trun, Int_t trealTime, MonitorStruct_t *monPtr)
 {
+
+ if(monPtr->gHdr.code!=PACKET_MONITOR ||
+     monPtr->gHdr.verId!=VER_MONITOR ||
+     monPtr->gHdr.numBytes!=sizeof(MonitorStruct_t)) {
+    std::cerr << "Mismatched packet\n" 
+	      << "code:\t" << monPtr->gHdr.code << "\t" << PACKET_MONITOR 
+	      << "\nversion:\t" << monPtr->gHdr.verId 
+	      << "\t" << VER_MONITOR 
+	      << "\nsize:\t" << monPtr->gHdr.numBytes << "\t"
+	      << sizeof(MonitorStruct_t) << std::endl;
+  }
+
   run=trun;
   realTime=trealTime;
   payloadTime=monPtr->unixTime;

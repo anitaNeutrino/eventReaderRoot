@@ -24,6 +24,17 @@ RawHk::~RawHk() {
 
 RawHk::RawHk(Int_t trun, Int_t trealTime, HkDataStruct_t *hkPtr)
 {
+
+ if(hkPtr->gHdr.code!=PACKET_HKD ||
+     hkPtr->gHdr.verId!=VER_HK_FULL ||
+     hkPtr->gHdr.numBytes!=sizeof(HkDataStruct_t)) {
+    std::cerr << "Mismatched packet\n" 
+	      << "code:\t" << hkPtr->gHdr.code << "\t" << PACKET_HKD 
+	      << "\nversion:\t" << hkPtr->gHdr.verId 
+	      << "\t" << VER_HK_FULL 
+	      << "\nsize:\t" << hkPtr->gHdr.numBytes << "\t"
+	      << sizeof(HkDataStruct_t) << std::endl;
+  }
   run=trun;
   realTime=trealTime;
   payloadTime=hkPtr->unixTime;

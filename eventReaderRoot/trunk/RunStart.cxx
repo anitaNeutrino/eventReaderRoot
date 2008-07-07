@@ -24,6 +24,18 @@ RunStart::~RunStart() {
 
 RunStart::RunStart(Int_t trun, Int_t trealTime, RunStart_t *startPtr)
 {
+
+
+ if(startPtr->gHdr.code!=PACKET_RUN_START ||
+     startPtr->gHdr.verId!=VER_RUN_START ||
+     startPtr->gHdr.numBytes!=sizeof(RunStart_t)) {
+    std::cerr << "Mismatched packet\n" 
+	      << "code:\t" << startPtr->gHdr.code << "\t" << PACKET_RUN_START 
+	      << "\nversion:\t" << startPtr->gHdr.verId 
+	      << "\t" << VER_RUN_START 
+	      << "\nsize:\t" << startPtr->gHdr.numBytes << "\t"
+	      << sizeof(RunStart_t) << std::endl;
+  }
   run=trun;
   realTime=trealTime;
   payloadTime=startPtr->unixTime;
