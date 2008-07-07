@@ -25,6 +25,17 @@ RawAnitaEvent::~RawAnitaEvent() {
 
 RawAnitaEvent::RawAnitaEvent(PedSubbedEventBody_t *bdPtr) 
 {
+  if(bdPtr->gHdr.code!=PACKET_PED_SUBBED_EVENT ||
+     bdPtr->gHdr.verId!=VER_PEDSUBBED_EVENT_BODY ||
+     bdPtr->gHdr.numBytes!=sizeof(PedSubbedEventBody_t)) {
+    std::cerr << "Mismatched packet\n" 
+	      << "code:\t" << bdPtr->gHdr.code << "\t" << PACKET_PED_SUBBED_EVENT 
+	      << "\nversion:\t" << bdPtr->gHdr.verId 
+	      << "\t" << VER_PEDSUBBED_EVENT_BODY 
+	      << "\nsize:\t" << bdPtr->gHdr.numBytes << "\t"
+	      << sizeof(PedSubbedEventBody_t) << std::endl;
+  }
+
    //Filling Constructor
    whichPeds=bdPtr->whichPeds;
    eventNumber=bdPtr->eventNumber;
