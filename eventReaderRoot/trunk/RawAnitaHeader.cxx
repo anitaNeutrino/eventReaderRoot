@@ -81,6 +81,7 @@ char *RawAnitaHeader::trigTypeAsString()
 {
    static char theString[20];
    int count=0;
+   sprintf(theString,"None");
    
    char *trigTypes[4]={"RF","PPS1","PPS2","Soft"};
    
