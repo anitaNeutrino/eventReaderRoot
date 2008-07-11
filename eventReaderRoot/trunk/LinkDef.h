@@ -31,7 +31,6 @@
 #pragma link C++ class RawHk+;
 #pragma link C++ class CalibratedHk+;
 
-
 #pragma link C++ namespace     WaveCalType;
 #pragma link C++ enum          WaveCalType::EWaveCalType;
 #pragma link C++ nestedtypedef WaveCalType::WaveCalType_t;
@@ -49,6 +48,7 @@
 #pragma link C++ nestedtypedef AnitaPol::AnitaPol_t;
 
 #pragma link C++ namespace     AnitaLocations;
+#pragma link C++ namespace     AnitaCompress;
 
 #endif
 

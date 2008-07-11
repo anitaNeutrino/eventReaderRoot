@@ -9,6 +9,7 @@
 #ifndef SIMPLESTRUCTS_H
 #define SIMPLESTRUCTS_H
 
+#define ANITA_STRUCTURES_H
 
 ///First up we'll add some definitions of the raw data
 #include "AnitaConventions.h"

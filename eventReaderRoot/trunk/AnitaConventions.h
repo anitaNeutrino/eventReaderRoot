@@ -17,6 +17,7 @@
 #endif
 #endif
 
+#define ANITA_FLIGHT_H
 
 namespace WaveCalType {
   typedef enum EWaveCalType {
@@ -50,7 +51,7 @@ namespace WaveCalType {
 }
 
 ///First up we'll add some definitions of the raw data
-
+#define NUM_SEAVEYS 40
 #define ACTIVE_SURFS 10
 #define SCALERS_PER_SURF 16
 #define RFCHAN_PER_SURF 8
@@ -61,7 +62,6 @@ namespace WaveCalType {
 #define MAX_NUMBER_SAMPLES 260
 #define EFFECTIVE_SAMPLES 256
 #define NUM_PHI 16
-#define NUM_SEAVEYS 40
 #define NUM_NADIRS 8
 #define NUM_BICONES 4
 #define NUM_DISCONES 4
@@ -81,6 +81,9 @@ namespace WaveCalType {
 #define TURF_BANK_SIZE 4
 #define NADIR_ANTS 8
 
+#define WRAPPED_HITBUS 0x8 //Bit 3 is the wrapped hitbus bit
+
+
 //Acromag stuff
 #define CHANS_PER_IP320 40
 #define NUM_IP320_BOARDS 3
@@ -98,6 +101,11 @@ namespace WaveCalType {
 #define NUM_SATABLADES 8
 #define NUM_SATAMINIS 4
 #define NUM_USBS 31
+
+#define WAKEUP_LOS_BUFFER_SIZE 4000
+#define WAKEUP_TDRSS_BUFFER_SIZE 500
+#define WAKEUP_LOW_RATE_BUFFER_SIZE 100
+
 
 //Now some geometry and polarisation considerations
 namespace AnitaRing {
