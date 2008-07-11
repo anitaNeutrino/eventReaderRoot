@@ -24,7 +24,9 @@ void fillGenericHeader(void *thePtr, PacketCode_t code, unsigned short numBytes)
 int checkPacket(void *thePtr);
 unsigned int simpleIntCrc(unsigned int *p, unsigned int n);
 char *packetCodeAsString(PacketCode_t code);
-
+int unzipZippedPacket(ZippedPacket_t *zipPacket, char *output, unsigned int numBytesOut);
+int zipBuffer(char *input, char *output, unsigned int inputBytes, unsigned int *outputBytes);
+int unzipBuffer(char *input, char *output, unsigned int inputBytes, unsigned int *outputBytes);
 //Compressed Waveform Stuff
 
 
