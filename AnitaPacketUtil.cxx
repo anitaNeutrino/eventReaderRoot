@@ -6,6 +6,7 @@
 #include "simpleStructs.h"
 #include "compress/mulawTables.h"
 #include <iostream>
+#include <zlib.h>
 
 
 
@@ -209,6 +210,50 @@ char *packetCodeAsString(PacketCode_t code) {
 }
 
 
+
+int unzipZippedPacket(ZippedPacket_t *zipPacket, char *output, unsigned int numBytesOut) {
+    char *input = (char*) zipPacket;
+    unsigned int returnBytes=numBytesOut;
+    int retVal=unzipBuffer(&input[sizeof(ZippedPacket_t)],output,zipPacket->gHdr.numBytes-sizeof(ZippedPacket_t),&returnBytes);
+    if(retVal!=0) 
+	return retVal;
+    if(zipPacket->numUncompressedBytes!=returnBytes)
+	return -1;
+    return 0;
+}
+
+
+
+int zipBuffer(char *input, char *output, unsigned int inputBytes, unsigned int *outputBytes)
+{
+    static int errorCounter=0;
+    int retVal=compress((unsigned char*)output,(unsigned long*)outputBytes,(unsigned char*)input,(unsigned long)inputBytes);
+    if(retVal==Z_OK)
+	return 0;
+    else {
+	if(errorCounter<100) {
+	    fprintf(stderr,"zlib compress returned %d  (%d of 100)\n",retVal,errorCounter);
+	    errorCounter++;
+	}
+	return -1;
+    }	
+}
+
+
+int unzipBuffer(char *input, char *output, unsigned int inputBytes, unsigned int *outputBytes)
+{
+    static int errorCounter=0;
+    int retVal=uncompress((unsigned char*)output,(unsigned long*)outputBytes,(unsigned char*)input,(unsigned long)inputBytes);
+    if(retVal==Z_OK)
+	return 0;
+    else {
+	if(errorCounter<100) {
+	    fprintf(stderr,"zlib compress returned %d  (%d of 100)\n",retVal,errorCounter);
+	    errorCounter++;
+	}
+	return -1;
+    }	
+}
 
 
 CompressErrorCode_t AnitaCompress::packPedSubbedEvent(PedSubbedEventBody_t *bdPtr,

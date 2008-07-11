@@ -40,11 +40,10 @@ class TurfRate: public TObject
    Int_t           intFlag;
 
    Int_t getL1Rate(int phi, int ring); 
-
    Int_t getL2Rate(int phi, int ring);
-
    Int_t getL3Rate(int phi)
       {return l3Rates[phi];}
+   Int_t getNadirL12Rate(int phi);
    Int_t isAntMasked(int phi, int ring);
    Int_t isPhiMasked(int phi);
    
