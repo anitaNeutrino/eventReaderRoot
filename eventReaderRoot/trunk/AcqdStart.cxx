@@ -38,6 +38,7 @@ AcqdStart::AcqdStart(Int_t trun, Int_t trealTime, AcqdStartStruct_t *startPtr)
   realTime=trealTime;
   payloadTime=startPtr->unixTime;
   numEvents=startPtr->numEvents;
+  memcpy(testBytes,startPtr->testBytes,sizeof(UChar_t)*8);
   memcpy(chanMean,startPtr->chanMean,sizeof(Float_t)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   memcpy(chanRMS,startPtr->chanRMS,sizeof(Float_t)*ACTIVE_SURFS*CHANNELS_PER_SURF);
   memcpy(threshVals,startPtr->threshVals,sizeof(UShort_t)*10);
