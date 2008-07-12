@@ -98,3 +98,45 @@ char *RawAnitaHeader::trigTypeAsString()
    }
    return theString;
 }
+
+
+int RawAnitaHeader::isInL3Pattern(int phi)
+{
+  if(phi<0 || phi>=PHI_SECTORS) return -1;
+  return l3TrigPattern&(1<<phi);
+}
+ 
+int RawAnitaHeader::isInL2Pattern(int phi, AnitaRing::AnitaRing_t ring)
+{
+  if(phi<0 || phi>=PHI_SECTORS) return -1;
+  switch(ring) {
+  case AnitaRing::kUpperRing:
+    return  (upperL2TrigPattern&(1<<(phi)));
+   case AnitaRing::kLowerRing:
+      return  (lowerL2TrigPattern&(1<<phi+16));
+  case AnitaRing::kNadirRing:
+    phi/=2;
+    return nadirL2TrigPattern&(1<<phi);
+  default:
+    return -1;
+  }      
+  return -1;
+}
+ 
+int RawAnitaHeader::isInL1Pattern(int phi, AnitaRing::AnitaRing_t ring)
+{ 
+  if(phi<0 || phi>=PHI_SECTORS) return -1;
+  switch(ring) {
+  case AnitaRing::kUpperRing:
+    return  (upperL1TrigPattern&(1<<(phi)));
+   case AnitaRing::kLowerRing:
+      return  (lowerL1TrigPattern&(1<<phi+16));
+  case AnitaRing::kNadirRing:
+    phi/=2;
+    return nadirL1TrigPattern&(1<<phi);
+  default:
+    return -1;
+  }      
+  return -1;
+  
+}

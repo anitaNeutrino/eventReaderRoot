@@ -66,6 +66,9 @@ namespace WaveCalType {
 #define NUM_BICONES 4
 #define NUM_DISCONES 4
 
+#define BASE_PACKET_MASK 0xffff
+
+
 #define NUM_SURF ACTIVE_SURFS
 #define NUM_CHAN CHANNELS_PER_SURF
 #define NUM_CHIP LABRADORS_PER_SURF

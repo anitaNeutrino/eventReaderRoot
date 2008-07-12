@@ -105,6 +105,7 @@
 #endif
 
 
+
 //Enumerations
 //!  The Packet Code
 /*!
@@ -155,6 +156,12 @@ typedef enum {
     PACKET_LOGWATCHD_START = 0xc01, ///< LogWatchdStart_t -- Yes
     PACKET_ACQD_START = 0xc02 ///<AcqdStartStruct_t -- Yes
 } PacketCode_t;
+
+typedef enum {
+    PACKET_FROM_G12 = 0x10000,
+    PACKET_FROM_ADU5A = 0x20000,
+    PACKET_FROM_ADU5B = 0x40000
+} AuxPacketCode_t;
 
 typedef enum {
     kNoEncoding=0
@@ -946,7 +953,7 @@ typedef struct {
 */
 typedef struct {
   GenericHeader_t gHdr;
-  unsigned char testBytes[8];
+    unsigned char testBytes[8];
   unsigned int unixTime;
   unsigned int numEvents;
   float chanMean[ACTIVE_SURFS][CHANNELS_PER_SURF]; ///<Ped subtracted

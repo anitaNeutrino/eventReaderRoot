@@ -61,6 +61,9 @@ class RawAnitaHeader: public TObject
   Int_t           goodTimeFlag;
    
   char *trigTypeAsString();
+  int isInL3Pattern(int phi);
+  int isInL2Pattern(int phi, AnitaRing::AnitaRing_t ring);
+  int isInL1Pattern(int phi, AnitaRing::AnitaRing_t ring);
    
   ClassDef(RawAnitaHeader,13);
 };
