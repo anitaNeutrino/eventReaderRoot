@@ -30,7 +30,7 @@ Adu5Sat::Adu5Sat(Int_t           trun,
 		 UInt_t          trealTime,
 		 GpsAdu5SatStruct_t *gpsStruct)
 {
-if(gpsStruct->gHdr.code!=PACKET_GPS_ADU5_SAT ||
+if(gpsStruct->gHdr.code&BASE_PACKET_MASK!=PACKET_GPS_ADU5_SAT ||
      gpsStruct->gHdr.verId!=VER_ADU5_SAT ||
      gpsStruct->gHdr.numBytes!=sizeof(GpsAdu5SatStruct_t)) {
     std::cerr << "Mismatched packet\n" 

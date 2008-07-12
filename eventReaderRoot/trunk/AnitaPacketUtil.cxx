@@ -92,15 +92,15 @@ int checkPacket(void *thePtr)
   unsigned int *typedPtr=(unsigned int*) thePtr;
   int retVal=0,packetSize=0;
   GenericHeader_t *gHdr= (GenericHeader_t*)typedPtr;
-  unsigned int intBytes=(gHdr->numBytes-sizeof(GenericHeader_t))/4;
+  unsigned int numInts=(gHdr->numBytes-sizeof(GenericHeader_t))/4;
   unsigned int *dataPtr=(unsigned int*) (typedPtr+sizeof(GenericHeader_t)); 
   unsigned int checksum=0;
-  if(intBytes<4000)
-    checksum=simpleIntCrc(dataPtr,intBytes);
+  if(numInts<4000)
+    checksum=simpleIntCrc(dataPtr,numInts);
   PacketCode_t code=gHdr->code;
   if(checksum!=gHdr->checksum) {
-    printf("Checksum Mismatch (possibly %s (%d)) (%u bytes) %u -- %u \n",
-	   packetCodeAsString(code),code,intBytes,checksum,gHdr->checksum);	
+    //    printf("Checksum Mismatch (possibly %s (%d)) (%u ints -- %d bytes) %u -- %u \n",
+    //	   packetCodeAsString(code),code,numInts,gHdr->numBytes,checksum,gHdr->checksum);	
     retVal+=PKT_E_CHECKSUM;
   }
   switch(code) {

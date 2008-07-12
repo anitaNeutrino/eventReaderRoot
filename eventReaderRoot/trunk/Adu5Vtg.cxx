@@ -26,7 +26,7 @@ Adu5Vtg::Adu5Vtg(Int_t           trun,
 		 GpsAdu5VtgStruct_t *gpsStruct)
 {
 
- if(gpsStruct->gHdr.code!=PACKET_GPS_ADU5_VTG ||
+ if(gpsStruct->gHdr.code&BASE_PACKET_MASK!=PACKET_GPS_ADU5_VTG ||
      gpsStruct->gHdr.verId!=VER_ADU5_VTG ||
      gpsStruct->gHdr.numBytes!=sizeof(GpsAdu5VtgStruct_t)) {
     std::cerr << "Mismatched packet\n" 
