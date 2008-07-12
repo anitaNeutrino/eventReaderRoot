@@ -13,6 +13,8 @@
 #include <TObject.h>
 #include "simpleStructs.h"
 
+class TPad;
+
 class G12Sat: public TObject
 {
  public:
@@ -33,6 +35,8 @@ class G12Sat: public TObject
    UChar_t         flag[MAX_SATS];
    UShort_t        azimuth[MAX_SATS];
    
+   void getCirclePlot(TPad *padSat);
+
   ClassDef(G12Sat,10);
 };
 

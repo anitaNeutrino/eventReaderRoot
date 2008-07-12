@@ -27,6 +27,7 @@ class AcqdStart: public TObject
    UInt_t          realTime;
    UInt_t          payloadTime; 
    UInt_t          numEvents;
+   UChar_t         testBytes[8];
    Float_t         chanMean[ACTIVE_SURFS][CHANNELS_PER_SURF]; ///<Ped subtracted
    Float_t         chanRMS[ACTIVE_SURFS][CHANNELS_PER_SURF]; ///<Ped subtracted
    UShort_t        threshVals[10];
