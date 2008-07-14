@@ -36,6 +36,11 @@ class MonitorHk: public TObject
    UInt_t          stime[NUM_PROCESSES];
    UInt_t          vsize[NUM_PROCESSES];
 
+   char *getDriveName(int driveInd);
+   int getDriveCapacity(int driveInd);
+   char *getHkQueueName(int hkInd);
+   char *getProcName(int procInd);
+
   ClassDef(MonitorHk,10);
 };
 

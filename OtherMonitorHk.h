@@ -35,6 +35,8 @@ class OtherMonitorHk: public TObject
    UShort_t        processBitMask;
    UShort_t        reserved;
 
+   char *getDirName(int dirInd);
+
   ClassDef(OtherMonitorHk,10);
 };
 
