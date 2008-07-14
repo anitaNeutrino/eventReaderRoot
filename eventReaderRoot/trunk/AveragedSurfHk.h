@@ -53,6 +53,7 @@ class AveragedSurfHk: public TObject
    Int_t isBandMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band);
    Int_t getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band);
    int getSurfScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band, Int_t &surf, Int_t &scl);
+   Int_t getScalerGoal(int surf, int scl);
   ClassDef(AveragedSurfHk,13);
 };
 
