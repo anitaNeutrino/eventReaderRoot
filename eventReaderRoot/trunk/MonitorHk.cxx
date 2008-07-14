@@ -50,3 +50,45 @@ MonitorHk::MonitorHk(Int_t trun, Int_t trealTime, MonitorStruct_t *monPtr)
   memcpy(vsize,monPtr->procInfo.vsize,sizeof(UInt_t)*NUM_PROCESSES);
 }
 
+
+
+char *MonitorHk::getDriveName(int driveInd) 
+{
+  char *diskNames[8]={"Ramdisk","Var","Home","PMC","Satablade","Satamini","UsbInt","Neobrick"};
+  if(driveInd<0 || driveInd>7)
+    return "Invalid";
+  return diskNames[driveInd];
+}
+
+int MonitorHk::getDriveCapacity(int driveInd) 
+{
+  int diskMax[8]={250,120,100,9000,800000,24000,8000,8000};
+  if(driveInd<0 || driveInd>7)
+    return -1;
+  return diskMax[driveInd];
+
+}
+
+char *MonitorHk::getHkQueueName(int hkInd)
+{
+  char *telemNames[21]=
+    {"LosCmd","SipCmd","Monitor","Header","Acromag",
+     "Adu5aSat","Adu5bSat","G12Sat","Adu5aPat","Adu5bPat","G12Pos",
+     "Adu5aVtg","Adu5bVtg","G12Gga","Adu5aGga","Adu5bGga","SurfHk",
+     "TurfHk","Other","Pedestal","Request"};
+  if(hkInd<0 || hkInd>20)
+    return "No Queue";
+  return telemNames[hkInd];
+}
+
+char *MonitorHk::getProcName(int procInd)
+{
+  
+  char *procName[16]=
+    {"Acqd","Archived","Calibd","Cmdd","Eventd","GPSd","Hkd","LOSd"
+     "Prioritizerd","SIPd","Monitord","Playbackd","Logwatchd","Neobrickd",
+     "n/a","n/a"};
+  if(procInd<0 || procInd>15)
+    return "No Proc";
+  return procName[procInd];
+}

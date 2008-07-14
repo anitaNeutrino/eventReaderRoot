@@ -49,3 +49,12 @@ OtherMonitorHk::OtherMonitorHk(Int_t trun, Int_t trealTime, OtherMonitorStruct_t
  
 }
 
+
+char *OtherMonitorHk::getDirName(int dirInd)
+{
+  char *dirNames[3]={"acqd","eventd","prioritizerd"};
+  if(dirInd<0 || dirInd>2)
+    return "unknown";
+  return dirNames[dirInd];
+ 
+}
