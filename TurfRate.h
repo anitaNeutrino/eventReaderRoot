@@ -46,6 +46,7 @@ class TurfRate: public TObject
    Int_t getNadirL12Rate(int phi);
    Int_t isAntMasked(int phi, int ring);
    Int_t isPhiMasked(int phi);
+   Float_t getDeadTimeFrac() {return deadTime/65535.;}
    
    
   ClassDef(TurfRate,16);

@@ -127,3 +127,18 @@ Int_t AveragedSurfHk::getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, Anit
     return -1;
   return scl +surf*SCALERS_PER_SURF;
 }
+
+
+Int_t AveragedSurfHk::getScalerGoal(int surf, int scl)
+{
+  int band=scl%4;
+  if(surf<8) {
+    //Upper or lower ring
+    return scalerGoals[band];
+  }
+  else if(surf<ACTIVE_SURFS) {
+    //Nadir Ring
+    return scalerGoalsNadir[band];
+  }
+  return -1;
+}

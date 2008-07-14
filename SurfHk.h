@@ -63,6 +63,7 @@ class SurfHk: public TObject
    Int_t getSetThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band);
    Int_t isBandMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band);
    Int_t getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band);
+   Int_t getScalerGoal(int surf, int scl);
 
   ClassDef(SurfHk,14);
 };
