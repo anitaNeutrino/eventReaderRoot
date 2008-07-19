@@ -14,6 +14,28 @@
 #include "AnitaConventions.h"
 #include "simpleStructs.h"
 
+
+#ifndef NUM_VOLTAGES
+#define NUM_VOLTAGES 11
+#endif
+#ifndef NUM_CURRENTS
+#define NUM_CURRENTS 12
+#endif
+#ifndef NUM_INT_TEMPS
+#define NUM_INT_TEMPS 15
+#endif
+#ifndef NUM_SBS_TEMPS
+#define NUM_SBS_TEMPS 4
+#endif
+#ifndef NUM_EXT_TEMPS
+#define NUM_EXT_TEMPS 25
+#endif
+#ifndef NUM_POWERS
+#define NUM_POWERS 6
+#endif
+
+#define NUM_ATTITUDE 13
+
 class RawHk;
 
 class CalibratedHk: public TObject
@@ -39,6 +61,18 @@ class CalibratedHk: public TObject
    Float_t   getInternalTemp(int index);
    Float_t   getSBSTemp(int index);
    Float_t   getExternalTemp(int index);
+   Float_t   getVoltage(int index);
+   Float_t   getCurrent(int index);
+   Float_t   getPower(int index);
+   Float_t   getAttitude(int index);
+
+   char *getPowerName(int index);
+   char *getCurrentName(int index);
+   char *getVoltageName(int index);
+   char *getExternalTempName(int index);
+   char *getInternalTempName(int index);
+   char *getSBSTempName(int index);
+   char *getAttitudeName(int index);
 
   ClassDef(CalibratedHk,10);
 };

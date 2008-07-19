@@ -20,7 +20,7 @@ unsigned int simpleIntCrc(unsigned int *p, unsigned int n)
     //
     sum += *p++;
   }
-  //    printf("%u %u\n",*p,sum);
+  //  printf("%u %u\n",*p,sum);
   return ((0xffffffff - sum) + 1);
 }
 
@@ -28,14 +28,20 @@ unsigned int simpleIntCrc(unsigned int *p, unsigned int n)
 
 
 void fillGenericHeader(void *thePtr, PacketCode_t code, unsigned short numBytes) {
+  //  printf("sizeof(GenericHeader_t):\t%d\n",sizeof(GenericHeader_t));
+  //  printf("numBytes %d\n",numBytes);
   unsigned int *typedPtr = (unsigned int *)thePtr;
   unsigned int intBytes=(numBytes-sizeof(GenericHeader_t))/4;
   GenericHeader_t *gHdr= (GenericHeader_t*)typedPtr;
-  unsigned int *dataPtr=(unsigned int*) (typedPtr+sizeof(GenericHeader_t));
+  unsigned int dodgyNum=(unsigned int)typedPtr;
+  dodgyNum+=sizeof(GenericHeader_t);
+  unsigned int *dataPtr=(unsigned int*)dodgyNum;
+  //  unsigned int *dataPtr=(unsigned int*) (typedPtr+sizeof(GenericHeader_t));  
+  //  printf("%u -- %u -- %u\n",thePtr,dataPtr,((unsigned int)(dataPtr)-(unsigned int)(thePtr)));
   gHdr->code=code;
   gHdr->numBytes=numBytes;
   gHdr->feByte=0xfe;
-  switch(code) {
+  switch(code&BASE_PACKET_MASK) {
   case PACKET_BD: gHdr->verId=VER_EVENT_BODY; break;
   case PACKET_HD: gHdr->verId=VER_EVENT_HEADER; break;
   case PACKET_HD_SLAC: gHdr->verId=SLAC_VER_EVENT_HEADER; break;
@@ -74,7 +80,7 @@ void fillGenericHeader(void *thePtr, PacketCode_t code, unsigned short numBytes)
     gHdr->verId=0; break;
   }
   gHdr->checksum=simpleIntCrc(dataPtr,intBytes);
-  //    printf("Int bytes %u\t checksum %u\n",intBytes,gHdr->checksum);
+  //  printf("Int bytes %u\t checksum %u\n",intBytes,gHdr->checksum);
 }
 
 #define PKT_E_CHECKSUM 0x1
@@ -93,7 +99,11 @@ int checkPacket(void *thePtr)
   int retVal=0,packetSize=0;
   GenericHeader_t *gHdr= (GenericHeader_t*)typedPtr;
   unsigned int numInts=(gHdr->numBytes-sizeof(GenericHeader_t))/4;
-  unsigned int *dataPtr=(unsigned int*) (typedPtr+sizeof(GenericHeader_t)); 
+  unsigned int dodgyNum=(unsigned int)typedPtr;
+  dodgyNum+=sizeof(GenericHeader_t);
+  unsigned int *dataPtr=(unsigned int*)dodgyNum;
+  //  unsigned int *dataPtr=(unsigned int*) (typedPtr+sizeof(GenericHeader_t)); 
+  //  std::cout << thePtr << "\t" << dataPtr << std::endl;
   unsigned int checksum=0;
   if(numInts<4000)
     checksum=simpleIntCrc(dataPtr,numInts);
@@ -103,7 +113,7 @@ int checkPacket(void *thePtr)
     //	   packetCodeAsString(code),code,numInts,gHdr->numBytes,checksum,gHdr->checksum);	
     retVal+=PKT_E_CHECKSUM;
   }
-  switch(code) {
+  switch(code&BASE_PACKET_MASK) {
   case PACKET_BD: packetSize=sizeof(AnitaEventBody_t); break;	    
   case PACKET_HD: packetSize=sizeof(AnitaEventHeader_t); break;	    
   case PACKET_WV: packetSize=sizeof(RawWaveformPacket_t); break;
@@ -152,8 +162,8 @@ int checkPacket(void *thePtr)
   case PACKET_GPSD_START: packetSize=sizeof(GpsdStartStruct_t); break;
   case PACKET_LOGWATCHD_START: packetSize=sizeof(LogWatchdStart_t); break;
   case PACKET_ACQD_START: packetSize=sizeof(AcqdStartStruct_t); break;
-  default: 
-    retVal+=PKT_E_CODE; break;
+    //  default: 
+    //    retVal+=PKT_E_CODE; break;
   }
   if(packetSize && (packetSize!=gHdr->numBytes))
     retVal+=PKT_E_SIZE;
@@ -309,9 +319,10 @@ CompressErrorCode_t AnitaCompress::unpackToPedSubbedEvent(PedSubbedEventBody_t *
 }
 
 
-CompressErrorCode_t AnitaCompress::unpackOneSurfToPedSubbedEvent(PedSubbedEventBody_t *bdPtr,
-								 unsigned char *input,
-								 int numBytes)
+CompressErrorCode_t 
+AnitaCompress::unpackOneSurfToPedSubbedEvent(PedSubbedEventBody_t *bdPtr,
+					     unsigned char *input,
+					     int numBytes)
 {
     int count=0;
     int chan=0;  
@@ -325,25 +336,30 @@ CompressErrorCode_t AnitaCompress::unpackOneSurfToPedSubbedEvent(PedSubbedEventB
     bdPtr->whichPeds=surfHdPtr->whichPeds;
     bdPtr->eventNumber=surfHdPtr->eventNumber;
     count+=sizeof(EncodedPedSubbedSurfPacketHeader_t);
-    for(chan=0;chan<CHANNELS_PER_SURF;chan++) {
-	
-	chanHdPtr = (EncodedSurfChannelHeader_t*)&input[count];
-	count+=sizeof(EncodedSurfChannelHeader_t);
-//	    printf("surf %d, chan %d, encType %d\n",
-//		   surf,chan,chanHdPtr->encType);
-	chanIndex=chanHdPtr->rawHdr.chanId;
-	if(chanIndex%ACTIVE_SURFS != chan) {
-	    printf("Error reading Encoded SURF packet, have chanId %d and chan %d\n",chanIndex,chan);
-	    return COMPRESS_E_UNPACK;
-	}
-	    	
-	retVal=decodePSChannel(chanHdPtr,
-			       &input[count],
-			       &(bdPtr->channel[chanIndex]));
-	if(retVal!=COMPRESS_E_OK) return retVal;
-	count+=chanHdPtr->numBytes;
-	if(count>numBytes)
-	    return COMPRESS_E_BADSIZE;
+    for(chan=0;chan<CHANNELS_PER_SURF;chan++) {	
+      chanHdPtr = (EncodedSurfChannelHeader_t*)&input[count];
+      count+=sizeof(EncodedSurfChannelHeader_t);
+      //      printf("chan %d, encType %d\n",
+      //	     chan,chanHdPtr->encType);
+      chanIndex=chanHdPtr->rawHdr.chanId;
+      if(chanIndex%9 != chan) {
+	printf("Error reading encoded Ped Subbed SURF packet, have chanId %d and chan %d\n",chanIndex,chan);
+	return COMPRESS_E_UNPACK;
+      }
+      
+      retVal=decodePSChannel(chanHdPtr,
+			     &input[count],
+			     &(bdPtr->channel[chanIndex]));
+
+      //      std::cout << chanIndex << "\t" << bdPtr->channel[chanIndex].data[0]
+      //		<< "\n";
+		
+
+      
+      if(retVal!=COMPRESS_E_OK) return retVal;
+      count+=chanHdPtr->numBytes;
+      if(count>numBytes)
+	return COMPRESS_E_BADSIZE;
     }
 	//Fill Generic Header_t;
 	
@@ -388,11 +404,12 @@ CompressErrorCode_t AnitaCompress::unpackOneWaveToPedSubbedEvent(PedSubbedEventB
 }
 
 
-CompressErrorCode_t AnitaCompress::unpackToPedSubbedEventWithStats(PedSubbedEventBody_t *bdPtr,
-								   unsigned char *input,
-								   int numBytes,
-								   EncodeControlStruct_t *cntlPtr,
-								   int *sizeArray)
+CompressErrorCode_t 
+AnitaCompress::unpackToPedSubbedEventWithStats(PedSubbedEventBody_t *bdPtr,
+					       unsigned char *input,
+					       int numBytes,
+					       EncodeControlStruct_t *cntlPtr,
+					       int *sizeArray)
 {
 
     int count=0;
@@ -407,13 +424,13 @@ CompressErrorCode_t AnitaCompress::unpackToPedSubbedEventWithStats(PedSubbedEven
 	return unpackToPedSubbedEventWithStats(bdPtr,&input[sizeof(EncodedEventWrapper_t)],numBytes-sizeof(EncodedEventWrapper_t),cntlPtr,sizeArray);
     }
 
-//    printf("unpackToPedSubbedEvent\n");
+    //    printf("unpackToPedSubbedEvent\n");
     for(surf=0;surf<ACTIVE_SURFS;surf++) {
-	surfHdPtr = (EncodedPedSubbedSurfPacketHeader_t*) &input[count];
-	bdPtr->whichPeds=surfHdPtr->whichPeds;
-	bdPtr->eventNumber=surfHdPtr->eventNumber;
-	count+=sizeof(EncodedPedSubbedSurfPacketHeader_t);
-	for(chan=0;chan<CHANNELS_PER_SURF;chan++) {
+      surfHdPtr = (EncodedPedSubbedSurfPacketHeader_t*) &input[count];
+      bdPtr->whichPeds=surfHdPtr->whichPeds;
+      bdPtr->eventNumber=surfHdPtr->eventNumber;
+      count+=sizeof(EncodedPedSubbedSurfPacketHeader_t);
+      for(chan=0;chan<CHANNELS_PER_SURF;chan++) {
 	    
 	    chanHdPtr = (EncodedSurfChannelHeader_t*)&input[count];
 	    count+=sizeof(EncodedSurfChannelHeader_t);

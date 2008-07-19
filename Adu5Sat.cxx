@@ -30,14 +30,14 @@ Adu5Sat::Adu5Sat(Int_t           trun,
 		 UInt_t          trealTime,
 		 GpsAdu5SatStruct_t *gpsStruct)
 {
-if(gpsStruct->gHdr.code&BASE_PACKET_MASK!=PACKET_GPS_ADU5_SAT ||
-     gpsStruct->gHdr.verId!=VER_ADU5_SAT ||
-     gpsStruct->gHdr.numBytes!=sizeof(GpsAdu5SatStruct_t)) {
+  if((gpsStruct->gHdr.code&BASE_PACKET_MASK)!=PACKET_GPS_ADU5_SAT ||
+     (gpsStruct->gHdr.verId)!=VER_ADU5_SAT ||
+     (gpsStruct->gHdr.numBytes)!=sizeof(GpsAdu5SatStruct_t)) {
     std::cerr << "Mismatched packet\n" 
-	      << "code:\t" << gpsStruct->gHdr.code << "\t" << PACKET_GPS_ADU5_SAT 
-	      << "\nversion:\t" << gpsStruct->gHdr.verId 
-	      << "\t" << VER_ADU5_SAT 
-	      << "\nsize:\t" << gpsStruct->gHdr.numBytes << "\t"
+	      << "code:\t" << (gpsStruct->gHdr.code&BASE_PACKET_MASK) << "\t" << PACKET_GPS_ADU5_SAT 
+	      << "\nversion:\t" << (int)gpsStruct->gHdr.verId 
+	      << "\t" << (int) VER_ADU5_SAT 
+	      << "\nsize:\t" << (int)gpsStruct->gHdr.numBytes << "\t"
 	      << sizeof(GpsAdu5SatStruct_t) << std::endl;
   }
    run=trun;
