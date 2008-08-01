@@ -29,8 +29,9 @@ class CommandEcho: public TObject
    UShort_t        goodFlag;
    UShort_t        numCmdBytes;
    UChar_t         cmd[MAX_CMD_LENGTH];
+   Int_t           fromPayload;
 
-  ClassDef(CommandEcho,10);
+  ClassDef(CommandEcho,11);
 };
 
 
