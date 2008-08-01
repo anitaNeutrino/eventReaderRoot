@@ -112,8 +112,8 @@ int RawAnitaHeader::isInL2Pattern(int phi, AnitaRing::AnitaRing_t ring)
   switch(ring) {
   case AnitaRing::kUpperRing:
     return  (upperL2TrigPattern&(1<<(phi)));
-   case AnitaRing::kLowerRing:
-      return  (lowerL2TrigPattern&(1<<phi+16));
+  case AnitaRing::kLowerRing:
+    return  (lowerL2TrigPattern&(1<<phi));
   case AnitaRing::kNadirRing:
     phi/=2;
     return nadirL2TrigPattern&(1<<phi);
@@ -129,8 +129,8 @@ int RawAnitaHeader::isInL1Pattern(int phi, AnitaRing::AnitaRing_t ring)
   switch(ring) {
   case AnitaRing::kUpperRing:
     return  (upperL1TrigPattern&(1<<(phi)));
-   case AnitaRing::kLowerRing:
-      return  (lowerL1TrigPattern&(1<<phi+16));
+  case AnitaRing::kLowerRing:
+    return  (lowerL1TrigPattern&(1<<phi));
   case AnitaRing::kNadirRing:
     phi/=2;
     return nadirL1TrigPattern&(1<<phi);

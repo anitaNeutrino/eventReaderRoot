@@ -160,7 +160,8 @@ typedef enum {
 typedef enum {
     PACKET_FROM_G12 = 0x10000,
     PACKET_FROM_ADU5A = 0x20000,
-    PACKET_FROM_ADU5B = 0x40000
+    PACKET_FROM_ADU5B = 0x40000,
+    CMD_FROM_PAYLOAD = 0x80000
 } AuxPacketCode_t;
 
 typedef enum {
