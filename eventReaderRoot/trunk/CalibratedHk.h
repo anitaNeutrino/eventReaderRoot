@@ -65,6 +65,15 @@ class CalibratedHk: public TObject
    Float_t   getCurrent(int index);
    Float_t   getPower(int index);
    Float_t   getAttitude(int index);
+   
+   //Sunsensor Stuff
+   void getSSMagnitude(int ssInd, Float_t *magnitude,Float_t *magX, Float_t *magY);
+   Float_t getSSTemp(int ssInd);
+   Int_t getSSXRatio(int ssInd, Float_t *xRatio);
+   Int_t getSSYRatio(int ssInd, Float_t *yRatio); 
+   Int_t getFancySS(int ssInd, Float_t pos[3], Float_t *azimuth,
+		    Float_t *elevation, Float_t *relAzimuth);
+
 
    char *getPowerName(int index);
    char *getCurrentName(int index);
