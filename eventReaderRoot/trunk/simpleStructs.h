@@ -555,6 +555,7 @@ typedef struct {
 typedef struct {    
     unsigned char numCmdBytes;
     unsigned char cmd[MAX_CMD_LENGTH];
+    unsigned int fromSipd; ///< 1 means it was a user command from SIPd, 0 is payload generated
 } CommandStruct_t;
 
 //!  On board log request struct
@@ -607,11 +608,10 @@ typedef struct {
 typedef struct {
     unsigned int eventNumber;
     unsigned char rfPwrAvg[ACTIVE_SURFS][RFCHAN_PER_SURF];
-  unsigned char avgScalerRates[TRIGGER_SURFS][ANTS_PER_SURF]; ///< * 2^7
+    unsigned char avgScalerRates[TRIGGER_SURFS][ANTS_PER_SURF]; ///< * 2^7
     unsigned char rmsScalerRates[TRIGGER_SURFS][ANTS_PER_SURF];
     unsigned char avgL1Rates[TRIGGER_SURFS]; ///< 3 of 8 counters --fix later
-    unsigned char avgUpperL2Rates[PHI_SECTORS]; 
-    unsigned char avgLowerL2Rates[PHI_SECTORS];
+    unsigned char avgL2Rates[PHI_SECTORS]; ///< average of upper and lower
     unsigned char avgL3Rates[PHI_SECTORS];    
     unsigned char eventRate1Min; ///<Multiplied by 8
     unsigned char eventRate10Min; ///<Multiplied by 8
@@ -622,10 +622,10 @@ typedef struct {
   Slow rate hk Stuff. May need updating for ANITA-II
 */
 typedef struct {
-    short latitude;
-    short longitude;
+    float latitude;
+    float longitude;
     short altitude;
-    unsigned char temps[8];  ///<{SBS,SURF,TURF,RAD,RFCM1,RFCM5,RFCM12,RFCM15}
+    unsigned char temps[4];  ///<{SBS,SURF,TURF,RAD}
     unsigned char powers[4]; ///<{PV V, +24V, BAT I, 24 I}
 } SlowRateHkStruct_t;
 

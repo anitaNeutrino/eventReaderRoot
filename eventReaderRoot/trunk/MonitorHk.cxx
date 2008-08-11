@@ -54,7 +54,7 @@ MonitorHk::MonitorHk(Int_t trun, Int_t trealTime, MonitorStruct_t *monPtr)
 
 char *MonitorHk::getDriveName(int driveInd) 
 {
-  char *diskNames[8]={"Ramdisk","Var","Home","PMC","Satablade","Satamini","UsbInt","Neobrick"};
+  char *diskNames[8]={"Ramdisk","Var","Home","PMC",satabladeLabel,sataminiLabel,usbLabel,"Neobrick"};
   if(driveInd<0 || driveInd>7)
     return "Invalid";
   return diskNames[driveInd];
