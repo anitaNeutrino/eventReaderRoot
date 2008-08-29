@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "SurfHk.h"
+#include "AnitaPacketUtil.h"
 #include <iostream>
 #include <fstream>
 
@@ -27,12 +28,13 @@ SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr)
   if(surfPtr->gHdr.code!=PACKET_SURF_HK ||
      surfPtr->gHdr.verId!=VER_SURF_HK ||
      surfPtr->gHdr.numBytes!=sizeof(FullSurfHkStruct_t)) {
-    std::cerr << "Mismatched packet\n" 
-	      << "code:\t" << surfPtr->gHdr.code << "\t" << PACKET_SURF_HK 
-	      << "\nversion:\t" << surfPtr->gHdr.verId 
-	      << "\t" << VER_SURF_HK 
-	      << "\nsize:\t" << surfPtr->gHdr.numBytes << "\t"
-	      << sizeof(FullSurfHkStruct_t) << std::endl;
+     std::cerr << "Mismatched packet\t" << packetCodeAsString(PACKET_SURF_HK)
+	 
+	       << "\ncode:\t" << (int)surfPtr->gHdr.code << "\t" << PACKET_SURF_HK 
+	       << "\nversion:\t" << (int)surfPtr->gHdr.verId 
+	       << "\t" << VER_SURF_HK 
+	       << "\nsize:\t" << surfPtr->gHdr.numBytes << "\t"
+	       << sizeof(FullSurfHkStruct_t) << std::endl;
   }
      
 
@@ -44,6 +46,106 @@ SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr)
   errorFlag=surfPtr->errorFlag;
   memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*BANDS_PER_ANT);
   memcpy(scalerGoalsNadir,surfPtr->scalerGoalsNadir,sizeof(UShort_t)*BANDS_PER_ANT);
+  memcpy(upperWords,surfPtr->upperWords,sizeof(UShort_t)*ACTIVE_SURFS);
+  memcpy(scaler,surfPtr->scaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(threshold,surfPtr->threshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(setThreshold,surfPtr->setThreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(rfPower,surfPtr->rfPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
+  memcpy(surfTrigBandMask,surfPtr->surfTrigBandMask,sizeof(UShort_t)*ACTIVE_SURFS);
+  intFlag=0;
+}
+
+
+SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer14_t *surfPtr)
+{
+  if(surfPtr->gHdr.code!=PACKET_SURF_HK ||
+     surfPtr->gHdr.verId!=14 ||
+     surfPtr->gHdr.numBytes!=sizeof(FullSurfHkStructVer14_t)) {
+     std::cerr << "Mismatched packet\t" << packetCodeAsString(PACKET_SURF_HK)
+	 
+	       << "\ncode:\t" << (int)surfPtr->gHdr.code << "\t" << PACKET_SURF_HK 
+	       << "\nversion:\t" << (int)surfPtr->gHdr.verId 
+	       << "\t" << 14
+	       << "\nsize:\t" << surfPtr->gHdr.numBytes << "\t"
+	       << sizeof(FullSurfHkStructVer14_t) << std::endl;
+  }
+     
+
+  run=trun;
+  realTime=trealTime;
+  payloadTime=surfPtr->unixTime;
+  payloadTimeUs=surfPtr->unixTimeUs;
+  globalThreshold=surfPtr->globalThreshold;
+  errorFlag=surfPtr->errorFlag;
+  memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*BANDS_PER_ANT);
+  memcpy(scalerGoalsNadir,surfPtr->scalerGoalsNadir,sizeof(UShort_t)*BANDS_PER_ANT);
+  memcpy(upperWords,surfPtr->upperWords,sizeof(UShort_t)*ACTIVE_SURFS);
+  memcpy(scaler,surfPtr->scaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(threshold,surfPtr->threshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(setThreshold,surfPtr->setThreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(rfPower,surfPtr->rfPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
+  memcpy(surfTrigBandMask,surfPtr->surfTrigBandMask,sizeof(UShort_t)*ACTIVE_SURFS);
+  intFlag=0;
+}
+
+SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer13_t *surfPtr)
+{
+  if(surfPtr->gHdr.code!=PACKET_SURF_HK ||
+     surfPtr->gHdr.verId!=13 ||
+     surfPtr->gHdr.numBytes!=sizeof(FullSurfHkStructVer13_t)) {
+     std::cerr << "Mismatched packet\t" << packetCodeAsString(PACKET_SURF_HK)
+	 
+	       << "\ncode:\t" << (int)surfPtr->gHdr.code << "\t" << PACKET_SURF_HK 
+	       << "\nversion:\t" << (int)surfPtr->gHdr.verId 
+	       << "\t" << 13
+	       << "\nsize:\t" << surfPtr->gHdr.numBytes << "\t"
+	       << sizeof(FullSurfHkStructVer13_t) << std::endl;
+  }
+     
+
+  run=trun;
+  realTime=trealTime;
+  payloadTime=surfPtr->unixTime;
+  payloadTimeUs=surfPtr->unixTimeUs;
+  globalThreshold=surfPtr->globalThreshold;
+  errorFlag=surfPtr->errorFlag;
+  memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*BANDS_PER_ANT);
+  for(int band=0;band<BANDS_PER_ANT;band++)
+     scalerGoalsNadir[band]=scalerGoals[band];
+  memcpy(upperWords,surfPtr->upperWords,sizeof(UShort_t)*ACTIVE_SURFS);
+  memcpy(scaler,surfPtr->scaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(threshold,surfPtr->threshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(setThreshold,surfPtr->setThreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(rfPower,surfPtr->rfPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
+  memcpy(surfTrigBandMask,surfPtr->surfTrigBandMask,sizeof(UShort_t)*ACTIVE_SURFS);
+  intFlag=0;
+}
+
+SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer12_t *surfPtr)
+{
+  if(surfPtr->gHdr.code!=PACKET_SURF_HK ||
+     surfPtr->gHdr.verId!=12 ||
+     surfPtr->gHdr.numBytes!=sizeof(FullSurfHkStructVer12_t)) {
+     std::cerr << "Mismatched packet\t" << packetCodeAsString(PACKET_SURF_HK)
+	 
+	       << "\ncode:\t" << (int)surfPtr->gHdr.code << "\t" << PACKET_SURF_HK 
+	       << "\nversion:\t" << (int)surfPtr->gHdr.verId 
+	       << "\t" << 12 
+	       << "\nsize:\t" << surfPtr->gHdr.numBytes << "\t"
+	       << sizeof(FullSurfHkStructVer12_t) << std::endl;
+  }
+     
+
+  run=trun;
+  realTime=trealTime;
+  payloadTime=surfPtr->unixTime;
+  payloadTimeUs=surfPtr->unixTimeUs;
+  globalThreshold=surfPtr->globalThreshold;
+  errorFlag=surfPtr->errorFlag;
+  for(int band=0;band<BANDS_PER_ANT;band++) {
+     scalerGoalsNadir[band]=surfPtr->scalerGoal;
+     scalerGoals[band]=surfPtr->scalerGoal;
+  }
   memcpy(upperWords,surfPtr->upperWords,sizeof(UShort_t)*ACTIVE_SURFS);
   memcpy(scaler,surfPtr->scaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
   memcpy(threshold,surfPtr->threshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);

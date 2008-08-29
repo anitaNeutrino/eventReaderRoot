@@ -19,6 +19,8 @@ class RawAnitaEvent: public TObject
  public:
   RawAnitaEvent();
   RawAnitaEvent(PedSubbedEventBody_t *psBody);
+  RawAnitaEvent(PedSubbedEventBodyVer11_t *psBody);
+  RawAnitaEvent(PedSubbedEventBodyVer10_t *psBody);
   ~RawAnitaEvent();
 
   //Important Stuff

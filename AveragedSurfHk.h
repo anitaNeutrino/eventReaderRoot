@@ -22,6 +22,9 @@ class AveragedSurfHk: public TObject
   ~AveragedSurfHk();
 
   AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct_t *surfPtr);
+  AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStructVer14_t *surfPtr);
+  AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStructVer13_t *surfPtr);
+  AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStructVer12_t *surfPtr);
 
    Int_t           run;
    UInt_t          realTime;
