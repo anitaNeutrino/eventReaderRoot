@@ -22,6 +22,9 @@ class SurfHk: public TObject
   ~SurfHk();
 
   SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr);
+  SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer14_t *surfPtr);
+  SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer13_t *surfPtr);
+  SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer12_t *surfPtr);
 
   SurfHk(Int_t           trun,
 	 UInt_t          trealTime,

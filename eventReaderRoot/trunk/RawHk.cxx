@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "RawHk.h"
+#include "AnitaPacketUtil.h"
 #include <iostream>
 #include <fstream>
 
@@ -28,7 +29,7 @@ RawHk::RawHk(Int_t trun, Int_t trealTime, HkDataStruct_t *hkPtr)
  if(hkPtr->gHdr.code!=PACKET_HKD ||
      hkPtr->gHdr.verId!=VER_HK_FULL ||
      hkPtr->gHdr.numBytes!=sizeof(HkDataStruct_t)) {
-    std::cerr << "Mismatched packet\n" 
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HKD) << "\n" 
 	      << "code:\t" << hkPtr->gHdr.code << "\t" << PACKET_HKD 
 	      << "\nversion:\t" << hkPtr->gHdr.verId 
 	      << "\t" << VER_HK_FULL 

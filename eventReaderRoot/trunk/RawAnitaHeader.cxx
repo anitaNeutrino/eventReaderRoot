@@ -8,6 +8,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "RawAnitaHeader.h"
+#include "AnitaPacketUtil.h"
 #include <iostream>
 #include <fstream>
 
@@ -29,7 +30,7 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
  if(hdPtr->gHdr.code!=PACKET_HD ||
      hdPtr->gHdr.verId!=VER_EVENT_HEADER ||
      hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeader_t)) {
-    std::cerr << "Mismatched packet\n" 
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
 	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
 	      << "\nversion:\t" << hdPtr->gHdr.verId 
 	      << "\t" << VER_EVENT_HEADER 
@@ -66,6 +67,224 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    lowerL2TrigPattern=hdPtr->turfio.lowerL2TrigPattern;
    l3TrigPattern=hdPtr->turfio.l3TrigPattern;
    memcpy(reserved,hdPtr->reserved,2*sizeof(UChar_t));
+   memcpy(otherTrigPattern,hdPtr->turfio.otherTrigPattern,3*sizeof(UShort_t));
+   nadirL1TrigPattern=hdPtr->turfio.nadirL1TrigPattern;
+   nadirL2TrigPattern=hdPtr->turfio.nadirL2TrigPattern;
+   run=trun;
+   realTime=trealTime;
+   triggerTime=ttriggerTime;
+   triggerTimeNs=ttriggerTimeNs;
+   goodTimeFlag=tgoodTimeFlag;
+}
+
+
+RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer13_t *hdPtr, Int_t trun, UInt_t trealTime,
+			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
+{
+ if(hdPtr->gHdr.code!=PACKET_HD ||
+     hdPtr->gHdr.verId!=13 ||
+     hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeaderVer13_t)) {
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
+	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
+	      << "\nversion:\t" << hdPtr->gHdr.verId 
+	      << "\t" << 13
+	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
+	      << sizeof(AnitaEventHeaderVer13_t) << std::endl;
+  }
+
+   payloadTime=hdPtr->unixTime;
+   payloadTimeUs=hdPtr->unixTimeUs;
+   gpsSubTime=hdPtr->gpsSubTime;
+   turfEventId=hdPtr->turfEventId;
+   eventNumber=hdPtr->eventNumber;
+   calibStatus=hdPtr->calibStatus;
+   priority=hdPtr->priority;
+   turfUpperWord=hdPtr->turfUpperWord;
+   otherFlag=hdPtr->otherFlag;
+   errorFlag=hdPtr->errorFlag;
+   surfSlipFlag=hdPtr->surfSlipFlag;
+   nadirAntTrigMask=hdPtr->nadirAntTrigMask;
+   antTrigMask=hdPtr->antTrigMask;
+   phiTrigMask=hdPtr->phiTrigMask;
+   trigType=hdPtr->turfio.trigType;
+   l3Type1Count=hdPtr->turfio.l3Type1Count;
+   trigNum=hdPtr->turfio.trigNum;
+   trigTime=hdPtr->turfio.trigTime;
+   c3poNum=hdPtr->turfio.c3poNum;
+   ppsNum=hdPtr->turfio.ppsNum;
+   deadTime=hdPtr->turfio.deadTime;
+   bufferDepth=hdPtr->turfio.bufferDepth;
+   turfioReserved=hdPtr->turfio.reserved;
+   upperL1TrigPattern=hdPtr->turfio.upperL1TrigPattern;
+   lowerL1TrigPattern=hdPtr->turfio.lowerL1TrigPattern;
+   upperL2TrigPattern=hdPtr->turfio.upperL2TrigPattern;
+   lowerL2TrigPattern=hdPtr->turfio.lowerL2TrigPattern;
+   l3TrigPattern=hdPtr->turfio.l3TrigPattern;
+   memcpy(reserved,hdPtr->reserved,2*sizeof(UChar_t));
+   memcpy(otherTrigPattern,hdPtr->turfio.otherTrigPattern,3*sizeof(UShort_t));
+   nadirL1TrigPattern=hdPtr->turfio.nadirL1TrigPattern;
+   nadirL2TrigPattern=hdPtr->turfio.nadirL2TrigPattern;
+   run=trun;
+   realTime=trealTime;
+   triggerTime=ttriggerTime;
+   triggerTimeNs=ttriggerTimeNs;
+   goodTimeFlag=tgoodTimeFlag;
+}
+
+
+RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer12_t *hdPtr, Int_t trun, UInt_t trealTime,
+			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
+{
+ if(hdPtr->gHdr.code!=PACKET_HD ||
+     hdPtr->gHdr.verId!=12 ||
+     hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeaderVer12_t)) {
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
+	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
+	      << "\nversion:\t" << hdPtr->gHdr.verId 
+	      << "\t" << 12
+	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
+	      << sizeof(AnitaEventHeaderVer12_t) << std::endl;
+  }
+
+   payloadTime=hdPtr->unixTime;
+   payloadTimeUs=hdPtr->unixTimeUs;
+   gpsSubTime=hdPtr->gpsSubTime;
+   turfEventId=hdPtr->turfEventId;
+   eventNumber=hdPtr->eventNumber;
+   calibStatus=hdPtr->calibStatus;
+   priority=hdPtr->priority;
+   turfUpperWord=hdPtr->turfUpperWord;
+   otherFlag=hdPtr->otherFlag;
+   errorFlag=hdPtr->errorFlag;
+   surfSlipFlag=hdPtr->surfSlipFlag;
+   nadirAntTrigMask=hdPtr->nadirAntTrigMask;
+   antTrigMask=hdPtr->antTrigMask;
+   phiTrigMask=0;
+   trigType=hdPtr->turfio.trigType;
+   l3Type1Count=hdPtr->turfio.l3Type1Count;
+   trigNum=hdPtr->turfio.trigNum;
+   trigTime=hdPtr->turfio.trigTime;
+   c3poNum=hdPtr->turfio.c3poNum;
+   ppsNum=hdPtr->turfio.ppsNum;
+   deadTime=hdPtr->turfio.deadTime;
+   bufferDepth=hdPtr->turfio.bufferDepth;
+   turfioReserved=hdPtr->turfio.reserved;
+   upperL1TrigPattern=hdPtr->turfio.upperL1TrigPattern;
+   lowerL1TrigPattern=hdPtr->turfio.lowerL1TrigPattern;
+   upperL2TrigPattern=hdPtr->turfio.upperL2TrigPattern;
+   lowerL2TrigPattern=hdPtr->turfio.lowerL2TrigPattern;
+   l3TrigPattern=hdPtr->turfio.l3TrigPattern;
+   memset(reserved,0,2*sizeof(UChar_t));
+   memcpy(otherTrigPattern,hdPtr->turfio.otherTrigPattern,3*sizeof(UShort_t));
+   nadirL1TrigPattern=hdPtr->turfio.nadirL1TrigPattern;
+   nadirL2TrigPattern=hdPtr->turfio.nadirL2TrigPattern;
+   run=trun;
+   realTime=trealTime;
+   triggerTime=ttriggerTime;
+   triggerTimeNs=ttriggerTimeNs;
+   goodTimeFlag=tgoodTimeFlag;
+}
+
+
+
+RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer11_t *hdPtr, Int_t trun, UInt_t trealTime,
+			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
+{
+ if(hdPtr->gHdr.code!=PACKET_HD ||
+     hdPtr->gHdr.verId!=11 ||
+     hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeaderVer11_t)) {
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
+	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
+	      << "\nversion:\t" << hdPtr->gHdr.verId 
+	      << "\t" << 11
+	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
+	      << sizeof(AnitaEventHeaderVer11_t) << std::endl;
+  }
+
+   payloadTime=hdPtr->unixTime;
+   payloadTimeUs=hdPtr->unixTimeUs;
+   gpsSubTime=hdPtr->gpsSubTime;
+   turfEventId=0;
+   eventNumber=hdPtr->eventNumber;
+   calibStatus=hdPtr->calibStatus;
+   priority=hdPtr->priority;
+   turfUpperWord=hdPtr->turfUpperWord;
+   otherFlag=hdPtr->otherFlag;
+   errorFlag=hdPtr->errorFlag;
+   surfSlipFlag=0;
+   nadirAntTrigMask=hdPtr->nadirAntTrigMask;
+   antTrigMask=hdPtr->antTrigMask;
+   phiTrigMask=0;
+   trigType=hdPtr->turfio.trigType;
+   l3Type1Count=hdPtr->turfio.l3Type1Count;
+   trigNum=hdPtr->turfio.trigNum;
+   trigTime=hdPtr->turfio.trigTime;
+   c3poNum=hdPtr->turfio.c3poNum;
+   ppsNum=hdPtr->turfio.ppsNum;
+   deadTime=hdPtr->turfio.deadTime;
+   bufferDepth=hdPtr->turfio.bufferDepth;
+   turfioReserved=hdPtr->turfio.reserved;
+   upperL1TrigPattern=hdPtr->turfio.upperL1TrigPattern;
+   lowerL1TrigPattern=hdPtr->turfio.lowerL1TrigPattern;
+   upperL2TrigPattern=hdPtr->turfio.upperL2TrigPattern;
+   lowerL2TrigPattern=hdPtr->turfio.lowerL2TrigPattern;
+   l3TrigPattern=hdPtr->turfio.l3TrigPattern;
+   memset(reserved,0,2*sizeof(UChar_t));
+   memcpy(otherTrigPattern,hdPtr->turfio.otherTrigPattern,3*sizeof(UShort_t));
+   nadirL1TrigPattern=hdPtr->turfio.nadirL1TrigPattern;
+   nadirL2TrigPattern=hdPtr->turfio.nadirL2TrigPattern;
+   run=trun;
+   realTime=trealTime;
+   triggerTime=ttriggerTime;
+   triggerTimeNs=ttriggerTimeNs;
+   goodTimeFlag=tgoodTimeFlag;
+}
+
+
+
+RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer10_t *hdPtr, Int_t trun, UInt_t trealTime,
+			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
+{
+ if(hdPtr->gHdr.code!=PACKET_HD ||
+     hdPtr->gHdr.verId!=10 ||
+     hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeaderVer10_t)) {
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
+	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
+	      << "\nversion:\t" << hdPtr->gHdr.verId 
+	      << "\t" << 10
+	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
+	      << sizeof(AnitaEventHeaderVer10_t) << std::endl;
+  }
+
+   payloadTime=hdPtr->unixTime;
+   payloadTimeUs=hdPtr->unixTimeUs;
+   gpsSubTime=hdPtr->gpsSubTime;
+   turfEventId=0;
+   eventNumber=hdPtr->eventNumber;
+   calibStatus=hdPtr->calibStatus;
+   priority=hdPtr->priority;
+   turfUpperWord=hdPtr->turfUpperWord;
+   otherFlag=hdPtr->otherFlag;
+   errorFlag=0;
+   surfSlipFlag=0;
+   nadirAntTrigMask=0;
+   antTrigMask=hdPtr->antTrigMask;
+   phiTrigMask=0;
+   trigType=hdPtr->turfio.trigType;
+   l3Type1Count=hdPtr->turfio.l3Type1Count;
+   trigNum=hdPtr->turfio.trigNum;
+   trigTime=hdPtr->turfio.trigTime;
+   c3poNum=hdPtr->turfio.c3poNum;
+   ppsNum=hdPtr->turfio.ppsNum;
+   deadTime=hdPtr->turfio.deadTime;
+   bufferDepth=hdPtr->turfio.bufferDepth;
+   turfioReserved=hdPtr->turfio.reserved;
+   upperL1TrigPattern=hdPtr->turfio.upperL1TrigPattern;
+   lowerL1TrigPattern=hdPtr->turfio.lowerL1TrigPattern;
+   upperL2TrigPattern=hdPtr->turfio.upperL2TrigPattern;
+   lowerL2TrigPattern=hdPtr->turfio.lowerL2TrigPattern;
+   l3TrigPattern=hdPtr->turfio.l3TrigPattern;
+   memset(reserved,0,2*sizeof(UChar_t));
    memcpy(otherTrigPattern,hdPtr->turfio.otherTrigPattern,3*sizeof(UShort_t));
    nadirL1TrigPattern=hdPtr->turfio.nadirL1TrigPattern;
    nadirL2TrigPattern=hdPtr->turfio.nadirL2TrigPattern;

@@ -21,6 +21,12 @@ class TurfRate: public TObject
   ~TurfRate();
 
   TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *ratePtr);
+  TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer16_t *ratePtr);
+  TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer15_t *ratePtr);
+  TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer14_t *ratePtr);
+  TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer13_t *ratePtr);
+  TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer12_t *ratePtr);
+  TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer11_t *ratePtr);
 
    Int_t           run;
    UInt_t          realTime;

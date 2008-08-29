@@ -20,6 +20,14 @@ class RawAnitaHeader: public TObject
   RawAnitaHeader();
   RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t run, UInt_t realTime,
 		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag);
+  RawAnitaHeader(AnitaEventHeaderVer13_t *hdPtr, Int_t run, UInt_t realTime,
+		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag);
+  RawAnitaHeader(AnitaEventHeaderVer12_t *hdPtr, Int_t run, UInt_t realTime,
+		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag);
+  RawAnitaHeader(AnitaEventHeaderVer11_t *hdPtr, Int_t run, UInt_t realTime,
+		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag);
+  RawAnitaHeader(AnitaEventHeaderVer10_t *hdPtr, Int_t run, UInt_t realTime,
+		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag);
   ~RawAnitaHeader();
 
   Int_t           run;

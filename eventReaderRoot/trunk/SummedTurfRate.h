@@ -21,6 +21,11 @@ class SummedTurfRate: public TObject
   ~SummedTurfRate();
 
   SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStruct_t *ratePtr);
+  SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStructVer16_t *ratePtr);
+  SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStructVer15_t *ratePtr);
+  SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStructVer14_t *ratePtr);
+  SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStructVer11_t *ratePtr);
+  SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStructVer10_t *ratePtr);
 
    Int_t            run;
    UInt_t           realTime;
