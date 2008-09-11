@@ -67,11 +67,11 @@ $(ROOT_LIBRARY) : $(LIB_OBJS)
 	@echo "Linking $@ ..."
 ifeq ($(PLATFORM),macosx)
 # We need to make both the .dylib and the .so
-	$(LD)  $(LIBS) $(SOFLAGS) $^ $(OutPutOpt) $@
+	$(LD)   $(SOFLAGS) $^ $(OutPutOpt) $@
 ifeq ($(MACOSX_MINOR),4)
 	ln -sf $@ $(subst .$(DLLSUF),.so,$@)
 else
-	$(LD) -bundle -undefined $(UNDEFOPT) $(LIBS) $(LDFLAGS) $^ \
+	$(LD) -bundle -undefined $(UNDEFOPT)  $(LDFLAGS) $^ \
 	 $(OutPutOpt) $(subst .$(DLLSUF),.so,$@)
 endif
 else

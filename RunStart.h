@@ -24,10 +24,10 @@ class RunStart: public TObject
   RunStart(Int_t run, Int_t trealTime, RunStart_t *startPtr);
 
   Int_t           run; //That I think
-   UInt_t          realTime;
-   UInt_t          payloadTime; 
-   UInt_t          runReported;
-   UInt_t         eventNumber;
+  UInt_t          realTime;
+  UInt_t          payloadTime; 
+  UInt_t          runReported;
+  UInt_t          eventNumber;
 
   ClassDef(RunStart,10);
 };
