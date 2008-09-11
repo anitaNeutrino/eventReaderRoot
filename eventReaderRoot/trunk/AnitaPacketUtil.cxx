@@ -33,7 +33,7 @@ void fillGenericHeader(void *thePtr, PacketCode_t code, unsigned short numBytes)
   unsigned int *typedPtr = (unsigned int *)thePtr;
   unsigned int intBytes=(numBytes-sizeof(GenericHeader_t))/4;
   GenericHeader_t *gHdr= (GenericHeader_t*)typedPtr;
-  unsigned int dodgyNum=(unsigned int)typedPtr;
+  unsigned long dodgyNum=(unsigned long)typedPtr;
   dodgyNum+=sizeof(GenericHeader_t);
   unsigned int *dataPtr=(unsigned int*)dodgyNum;
   //  unsigned int *dataPtr=(unsigned int*) (typedPtr+sizeof(GenericHeader_t));  
@@ -99,7 +99,7 @@ int checkPacket(void *thePtr)
   int retVal=0,packetSize=0;
   GenericHeader_t *gHdr= (GenericHeader_t*)typedPtr;
   unsigned int numInts=(gHdr->numBytes-sizeof(GenericHeader_t))/4;
-  unsigned int dodgyNum=(unsigned int)typedPtr;
+  unsigned long dodgyNum=(unsigned long)typedPtr;
   dodgyNum+=sizeof(GenericHeader_t);
   unsigned int *dataPtr=(unsigned int*)dodgyNum;
   //  unsigned int *dataPtr=(unsigned int*) (typedPtr+sizeof(GenericHeader_t)); 
