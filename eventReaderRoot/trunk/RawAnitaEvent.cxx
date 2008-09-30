@@ -121,3 +121,36 @@ RawAnitaEvent::RawAnitaEvent(PedSubbedEventBodyVer10_t *bdPtr)
     memcpy(data[chan],bdPtr->channel[chan].data,sizeof(Short_t)*MAX_NUMBER_SAMPLES);    
   }
 }
+
+Int_t RawAnitaEvent::getEarliestSample(Int_t chanIndex)
+{
+ Int_t lastHitBus=this->getLastHitBus(chanIndex);
+ Int_t firstHitbus=this->getFirstHitBus(chanIndex);
+ Int_t wrappedHitBus=this->getWrappedHitBus(chanIndex);
+ Int_t earliestSample=0;
+ if(!wrappedHitBus) {
+   earliestSample=lastHitBus+1;
+ }
+ else {
+   earliestSample=firstHitbus+1;
+ }
+ if(earliestSample<260) return earliestSample;
+ return 0;
+}
+
+Int_t RawAnitaEvent::getLatestSample(Int_t chanIndex)
+{
+ Int_t lastHitBus=this->getLastHitBus(chanIndex);
+ Int_t firstHitbus=this->getFirstHitBus(chanIndex);
+ Int_t wrappedHitBus=this->getWrappedHitBus(chanIndex);
+ Int_t latestSample=260;
+ if(!wrappedHitBus) {
+   latestSample=firstHitbus-1;
+ }
+ else {
+   latestSample=lastHitBus-1;
+ }
+ if(firstHitbus>=0) return latestSample;
+ return 259;
+}
+
