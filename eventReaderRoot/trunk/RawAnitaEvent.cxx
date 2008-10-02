@@ -150,7 +150,7 @@ Int_t RawAnitaEvent::getLatestSample(Int_t chanIndex)
  else {
    latestSample=lastHitBus-1;
  }
- if(firstHitbus>=0) return latestSample;
+ if(latestSample>=0) return latestSample;
  return 259;
 }
 
