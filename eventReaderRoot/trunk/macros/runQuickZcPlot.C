@@ -8,11 +8,11 @@ void runQuickZcPlot() {
 
   gSystem->Load("libMathMore.so");
   gSystem->Load("libPhysics.so");
-  gSystem->Load("/sw/lib/libfftw3.so");
+  gSystem->Load("libfftw3.so");
   gSystem->Load("libRootFftwWrapper.so");		  
   gSystem->Load("libAnitaEvent.so");
 
   gSystem->CompileMacro("quickZCPlot.C","k");
   //  quickPulserSearch();
-  quickZCPlot("/home/rjn/anita/data/palestine/root/",3459,0,100000);
+  quickZCPlot("/unix/anita2/palestine08/root/",3871,0,1000000);
 }
