@@ -85,36 +85,60 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
   sprintf(outName,"zcFile%d.root",run);
 
   TFile *fpOut = new TFile(outName,"RECREATE");
-  TH1F *histFirstRco[4];
-  TH1F *histSecondRco[4];
-  TH1F *histAll[4]; 
+  TH1F *histZcFirstRco[10][4];
+  TH1F *histZcSecondRco[10][4];
+  TH1F *histZcChip[10][4];
+  TH1F *histZcAll = new TH1F("histZcAll","histZcAll",260,-0.5,259.5); 
+  TH1F *histSampFirstRco[10][4];
+  TH1F *histSampSecondRco[10][4];
+  TH1F *histSampChip[10][4];
+  TH1F *histSampAll = new TH1F("histSampAll","histSampAll",260,-0.5,259.5); 
   TTree *zcTree = new TTree("zcTree","Tree of ZC stuff");
   Int_t zcPreHitbus,zcPostHitbus;
   Int_t sampPreHitbus,sampPostHitbus;
   Int_t earliestSample,latestSample;
+  Int_t surfNum,chipNum;
+  Int_t got255;
   zcTree->Branch("sampPreHitbus",&sampPreHitbus,"sampPreHitbus/I");
   zcTree->Branch("sampPostHitbus",&sampPostHitbus,"sampPostHitbus/I");
   zcTree->Branch("zcPreHitbus",&zcPreHitbus,"zcPreHitbus/I");
   zcTree->Branch("zcPostHitbus",&zcPostHitbus,"zcPostHitbus/I");
   zcTree->Branch("earliestSample",&earliestSample,"earliestSample/I");
   zcTree->Branch("latestSample",&latestSample,"latestSample/I");
+  zcTree->Branch("surf",&surfNum,"surf/I");
+  zcTree->Branch("chip",&chipNum,"chip/I");
+  zcTree->Branch("got255",&got255,"got255/I");
 
   char histName[180];
   char histTitle[180];
-  for(int lab=0;lab<4;lab++) {
-    sprintf(histName,"histFirstRco_%d",lab);
-    sprintf(histTitle,"Zero Crossings First RCO Lab %d",lab);
-    histFirstRco[lab] = new TH1F(histName,histTitle,260,-0.5,259.5);
-    sprintf(histName,"histSecondRco_%d",lab);
-    sprintf(histTitle,"Zero Crossings Second RCO Lab %d",lab);
-    histSecondRco[lab] = new TH1F(histName,histTitle,260,-0.5,259.5);
-    sprintf(histName,"histAll_%d",lab);
-    sprintf(histTitle,"Zero Crossings Both RCO Lab %d",lab);
-    histAll[lab] = new TH1F(histName,histTitle,260,-0.5,259.5);
+  for(int surf=0;surf<10;surf++) {
+     for(int lab=0;lab<4;lab++) {
+	sprintf(histName,"histZcFirstRco_%d_%d",surf,lab);
+	sprintf(histTitle,"Zero Crossings First RCO (SURF %d, Chip %d)",surf,lab);
+	histZcFirstRco[surf][lab] = new TH1F(histName,histTitle,260,-0.5,259.5);
+	sprintf(histName,"histZcSecondRco_%d_%d",surf,lab);
+	sprintf(histTitle,"Zero Crossings Second RCO (SURF %d , Chip %d)",surf,lab);
+	histZcSecondRco[surf][lab] = new TH1F(histName,histTitle,260,-0.5,259.5);
+	sprintf(histName,"histZcChip_%d_%d",surf,lab);
+	sprintf(histTitle,"Zero Crossings Both RCO (SURF %d, Chip %d)",surf,lab);
+	histZcChip[surf][lab] = new TH1F(histName,histTitle,260,-0.5,259.5);
+
+	sprintf(histName,"histSampFirstRco_%d_%d",surf,lab);
+	sprintf(histTitle,"Zero Crossings First RCO (SURF %d, Chip %d)",surf,lab);
+	histSampFirstRco[surf][lab] = new TH1F(histName,histTitle,260,-0.5,259.5);
+	sprintf(histName,"histSampSecondRco_%d_%d",surf,lab);
+	sprintf(histTitle,"Zero Crossings Second RCO (SURF %d , Chip %d)",surf,lab);
+	histSampSecondRco[surf][lab] = new TH1F(histName,histTitle,260,-0.5,259.5);
+	sprintf(histName,"histSampChip_%d_%d",surf,lab);
+	sprintf(histTitle,"Zero Crossings Both RCO (SURF %d, Chip %d)",surf,lab);
+	histSampChip[surf][lab] = new TH1F(histName,histTitle,260,-0.5,259.5);
+     }
   }
 
   Long64_t starEvery=maxEntry/40;
   if(starEvery==0) starEvery++;
+
+  Int_t chan=1;
 
   for(Long64_t entry=startEntry;entry<maxEntry;entry++) {
     
@@ -126,110 +150,189 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
     headTree->GetEntry(entry);
     //    prettyHkTree->GetEntry(entry);
    
-    
-    
     UsefulAnitaEvent realEvent(event,WaveCalType::kNoCalib);
-    TGraph *gr = realEvent.getGraphFromSurfAndChan(0,0);
-    Int_t labChip=realEvent.getLabChip(0);
-    earliestSample=realEvent.getEarliestSample(0);
-    latestSample=realEvent.getLatestSample(0);
-
-    Double_t offset=gr->GetMean(2);
-    Double_t *adcs=gr->GetY();
-
-    //    cout << earliestSample << "\t" << latestSample << endl;
-    if(latestSample<earliestSample) {
-      //We have two RCO's
-      
-      Int_t countZC=0;
-      for(int samp=earliestSample;samp<259;samp++) {
-	Double_t firstVal=adcs[samp]-offset;
-	Double_t secondVal=adcs[samp+1]-offset;
-	//	if(firstVal>=0 && secondVal<0) {
-	if((firstVal>=0 && secondVal<0) || (firstVal<0 && secondVal>=0)) {  
-	  //We have a ZC
-	  countZC++;
-	  if(TMath::Abs(firstVal)<TMath::Abs(secondVal)) {
-	    histFirstRco[labChip]->Fill(samp);
-	    histAll[labChip]->Fill(samp);
-	  }
-	  else if(TMath::Abs(firstVal)>TMath::Abs(secondVal)) {
-	    histFirstRco[labChip]->Fill(samp+1);
-	    histAll[labChip]->Fill(samp+1);
-	  }
-	  else {
-	    histFirstRco[labChip]->Fill(samp,0.5);
-	    histAll[labChip]->Fill(samp,0.5);
-	    histFirstRco[labChip]->Fill(samp+1,0.5);
-	    histAll[labChip]->Fill(samp+1,0.5);
-	  }
-	}
-      }
-      zcPostHitbus=countZC;
-      sampPostHitbus=261-earliestSample;
-      countZC=0;
-      if(latestSample>0) {
-	for(int samp=0;samp<latestSample-1;samp++) {
-	  Double_t firstVal=adcs[samp]-offset;
-	  Double_t secondVal=adcs[samp+1]-offset;
-	  //	  if(firstVal>=0 && secondVal<0) {
-	  if((firstVal>=0 && secondVal<0) || (firstVal<0 && secondVal>=0)) {   
-	    //We have a ZC
-	    countZC++;
-	    if(TMath::Abs(firstVal)<TMath::Abs(secondVal)) {
-	      histSecondRco[labChip]->Fill(samp);
-	      histAll[labChip]->Fill(samp);
-	    }
-	    else if(TMath::Abs(firstVal)>TMath::Abs(secondVal)) {
-	      histSecondRco[labChip]->Fill(samp+1);
-	      histAll[labChip]->Fill(samp+1);
-	    }
-	    else {
-	      histSecondRco[labChip]->Fill(samp,0.5);
-	      histAll[labChip]->Fill(samp,0.5);
-	      histSecondRco[labChip]->Fill(samp+1,0.5);
-	      histAll[labChip]->Fill(samp+1,0.5);
-	    }
-	  }
-	}
-	zcPreHitbus=countZC;
-	sampPreHitbus=latestSample+1;
-      }
     
+    for(int surf=0;surf<10;surf++) {
+       TGraph *gr = realEvent.getGraphFromSurfAndChan(surf,chan);
+       Int_t labChip=realEvent.getLabChip(surf*9 + chan);
+       earliestSample=realEvent.getEarliestSample(surf*9 + chan);
+       latestSample=realEvent.getLatestSample(surf*9 + chan);
 
-    }
-    else {
-      //Only one RCO
-      Int_t countZC=0;
-      for(int samp=earliestSample;samp<latestSample-1;samp++) {
-	Double_t firstVal=adcs[samp]-offset;
-	Double_t secondVal=adcs[samp+1]-offset;
-	if((firstVal>=0 && secondVal<0) || (firstVal<0 && secondVal>=0)) {
-	  //We have a ZC
-	  countZC++;
-	  if(TMath::Abs(firstVal)<TMath::Abs(secondVal)) {
-	    histFirstRco[labChip]->Fill(samp);
-	    histAll[labChip]->Fill(samp);
-	  }
-	  else if(TMath::Abs(firstVal)>TMath::Abs(secondVal)) {
-	    histFirstRco[labChip]->Fill(samp+1);
-	    histAll[labChip]->Fill(samp+1);
-	  }
-	  else {
-	    histFirstRco[labChip]->Fill(samp,0.5);
-	    histAll[labChip]->Fill(samp,0.5);
-	    histFirstRco[labChip]->Fill(samp+1,0.5);
-	    histAll[labChip]->Fill(samp+1,0.5);
-	  }
-	}
-      }
-      zcPostHitbus=countZC;
-      sampPostHitbus=(latestSample+1)-earliestSample;
-      zcPreHitbus=0;
-      sampPreHitbus=0;
-    }
-    zcTree->Fill();
+       Double_t offset=gr->GetMean(2);
+       Double_t *adcs=gr->GetY();
+       
+       surfNum=surf;
+       chipNum=labChip;
 
+       //    cout << earliestSample << "\t" << latestSample << endl;
+       got255=0;
+       if(latestSample<earliestSample) {
+	  //We have two RCO's	  
+	  Int_t countZC=0;
+	  for(int samp=earliestSample;samp<259;samp++) {
+	     histSampAll->Fill(samp,0.5);
+	     histSampAll->Fill(samp+1,0.5);
+	     histSampChip[surf][labChip]->Fill(samp,0.5);
+	     histSampChip[surf][labChip]->Fill(samp+1,0.5);
+	     histSampFirstRco[surf][labChip]->Fill(samp,0.5);
+	     histSampFirstRco[surf][labChip]->Fill(samp+1,0.5);
+	     Double_t firstVal=adcs[samp]-offset;
+	     Double_t secondVal=adcs[samp+1]-offset;
+	     //	if(firstVal>=0 && secondVal<0) {
+	     if((firstVal>=0 && secondVal<0) || (firstVal<0 && secondVal>=0)) {  
+
+	       //	       if(surf==0 && samp==254) 
+	       //		 cout << realEvent.eventNumber << "\t" << samp
+	       //		      << "\t" << firstVal << "\t" << secondVal << "\tA\n";
+		//We have a ZC
+		countZC++;
+		Double_t sum=TMath::Abs(firstVal)+TMath::Abs(secondVal);
+		Double_t right=TMath::Abs(firstVal)/sum;
+		Double_t left=TMath::Abs(firstVal)/sum;
+		histZcFirstRco[surf][labChip]->Fill(samp,left);
+		histZcFirstRco[surf][labChip]->Fill(samp+1,right);
+		histZcChip[surf][labChip]->Fill(samp,left);
+		histZcChip[surf][labChip]->Fill(samp+1,right);
+		histZcAll->Fill(samp,left);
+		histZcAll->Fill(samp+1,right);
+		if(samp==254 || samp==255)
+		  got255++;
+	// 	if(TMath::Abs(firstVal)<TMath::Abs(secondVal)) {
+// 		   histZcFirstRco[surf][labChip]->Fill(samp);
+// 		   histZcChip[surf][labChip]->Fill(samp);
+// 		   histZcAll->Fill(samp);
+// 		}
+// 		else if(TMath::Abs(firstVal)>TMath::Abs(secondVal)) {
+// 		   histZcFirstRco[surf][labChip]->Fill(samp+1);
+// 		   histZcChip[surf][labChip]->Fill(samp+1);
+// 		   histZcAll->Fill(samp+1);
+// 		}
+// 		else {
+// 		   histZcFirstRco[surf][labChip]->Fill(samp,0.5);
+// 		   histZcFirstRco[surf][labChip]->Fill(samp+1,0.5);
+// 		   histZcChip[surf][labChip]->Fill(samp,0.5);
+// 		   histZcChip[surf][labChip]->Fill(samp+1,0.5);
+// 		   histZcAll->Fill(samp,0.5);
+// 		   histZcAll->Fill(samp+1,0.5);
+// 		}
+	     }
+	  }
+	  zcPostHitbus=countZC;
+	  sampPostHitbus=261-earliestSample;
+	  countZC=0;
+	  if(latestSample>0) {
+	     for(int samp=0;samp<latestSample-1;samp++) {
+		histSampAll->Fill(samp,0.5);
+		histSampAll->Fill(samp+1,0.5);
+		histSampChip[surf][labChip]->Fill(samp,0.5);
+		histSampChip[surf][labChip]->Fill(samp+1,0.5);
+		histSampSecondRco[surf][labChip]->Fill(samp,0.5);
+		histSampSecondRco[surf][labChip]->Fill(samp+1,0.5);
+		Double_t firstVal=adcs[samp]-offset;
+		Double_t secondVal=adcs[samp+1]-offset;
+		//	  if(firstVal>=0 && secondVal<0) {
+		if((firstVal>=0 && secondVal<0) || (firstVal<0 && secondVal>=0)) {   
+		   //We have a ZC
+		  //		  if(surf==0 && samp==254) 
+		  //		    cout << realEvent.eventNumber << "\t" << samp
+		  // << "\t" << firstVal << "\t" << secondVal << "\tB\n";
+
+		   countZC++;
+		   Double_t sum=TMath::Abs(firstVal)+TMath::Abs(secondVal);
+		   Double_t right=TMath::Abs(firstVal)/sum;
+		   Double_t left=TMath::Abs(firstVal)/sum;
+		   histZcSecondRco[surf][labChip]->Fill(samp,left);
+		   histZcSecondRco[surf][labChip]->Fill(samp+1,right);
+		   histZcChip[surf][labChip]->Fill(samp,left);
+		   histZcChip[surf][labChip]->Fill(samp+1,right);
+		   histZcAll->Fill(samp,left);
+		   histZcAll->Fill(samp+1,right);
+		   if(samp==254 || samp==255)
+		     got255++;
+	// 	   if(TMath::Abs(firstVal)<TMath::Abs(secondVal)) {
+// 		      histZcSecondRco[surf][labChip]->Fill(samp);
+// 		      histZcChip[surf][labChip]->Fill(samp);
+// 		      histZcAll->Fill(samp);
+// 		   }
+// 		   else if(TMath::Abs(firstVal)>TMath::Abs(secondVal)) {
+// 		      histZcSecondRco[surf][labChip]->Fill(samp+1);
+// 		      histZcChip[surf][labChip]->Fill(samp+1);
+// 		      histZcAll->Fill(samp+1);
+// 		   }
+// 		   else {
+// 		      histZcSecondRco[surf][labChip]->Fill(samp,0.5);
+// 		      histZcChip[surf][labChip]->Fill(samp,0.5);
+// 		      histZcSecondRco[surf][labChip]->Fill(samp+1,0.5);
+// 		      histZcChip[surf][labChip]->Fill(samp+1,0.5);
+// 		      histZcAll->Fill(samp,0.5);
+// 		      histZcAll->Fill(samp+1,0.5);
+// 		   }
+		}
+	     }
+	     zcPreHitbus=countZC;
+	     sampPreHitbus=latestSample+1;
+	  }
+	  
+	  
+       }
+       else {
+	  //Only one RCO
+	  Int_t countZC=0;
+	  for(int samp=earliestSample;samp<latestSample-1;samp++) {
+	     histSampAll->Fill(samp,0.5);
+	     histSampAll->Fill(samp+1,0.5);
+	     histSampChip[surf][labChip]->Fill(samp,0.5);
+	     histSampChip[surf][labChip]->Fill(samp+1,0.5);
+	     histSampFirstRco[surf][labChip]->Fill(samp,0.5);
+	     histSampFirstRco[surf][labChip]->Fill(samp+1,0.5);
+	     Double_t firstVal=adcs[samp]-offset;
+	     Double_t secondVal=adcs[samp+1]-offset;
+	     if((firstVal>=0 && secondVal<0) || (firstVal<0 && secondVal>=0)) {
+		//We have a ZC
+	       //	       if(surf==0 && samp==254) 
+	       //		 cout << realEvent.eventNumber << "\t" << samp
+	       //		      << "\t" << firstVal << "\t" << secondVal << "\tC\n";
+
+		countZC++;
+		Double_t sum=TMath::Abs(firstVal)+TMath::Abs(secondVal);
+		Double_t right=TMath::Abs(firstVal)/sum;
+		Double_t left=TMath::Abs(firstVal)/sum;
+		histZcFirstRco[surf][labChip]->Fill(samp,left);
+		histZcFirstRco[surf][labChip]->Fill(samp+1,right);
+		histZcChip[surf][labChip]->Fill(samp,left);
+		histZcChip[surf][labChip]->Fill(samp+1,right);
+		histZcAll->Fill(samp,left);
+		histZcAll->Fill(samp+1,right);
+		if(samp==254 || samp==255)
+		  got255++;
+// 		if(TMath::Abs(firstVal)<TMath::Abs(secondVal)) {
+// 		   histZcFirstRco[surf][labChip]->Fill(samp);
+// 		   histZcChip[surf][labChip]->Fill(samp);
+// 		   histZcAll->Fill(samp);
+// 		}
+// 		else if(TMath::Abs(firstVal)>TMath::Abs(secondVal)) {
+// 		   histZcFirstRco[surf][labChip]->Fill(samp+1);
+// 		   histZcChip[surf][labChip]->Fill(samp+1);
+// 		   histZcAll->Fill(samp+1);
+// 		}
+// 		else {
+// 		   histZcFirstRco[surf][labChip]->Fill(samp,0.5);
+// 		   histZcFirstRco[surf][labChip]->Fill(samp+1,0.5);
+// 		   histZcChip[surf][labChip]->Fill(samp,0.5);
+// 		   histZcChip[surf][labChip]->Fill(samp+1,0.5);
+// 		   histZcAll->Fill(samp,0.5);
+// 		   histZcAll->Fill(samp+1,0.5);
+// 		}
+	     }
+	  }
+	  zcPostHitbus=countZC;
+	  sampPostHitbus=(latestSample+1)-earliestSample;
+	  zcPreHitbus=0;
+	  sampPreHitbus=0;
+       }
+       zcTree->Fill();
+       delete gr;
+    }
 
     //    if((entry-startEntry)%100==0)
     //      cout << realEvent.eventNumber << endl;
