@@ -138,7 +138,7 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
   Long64_t starEvery=maxEntry/40;
   if(starEvery==0) starEvery++;
 
-  Int_t chan=1;
+  Int_t chan=0;
 
   for(Long64_t entry=startEntry;entry<maxEntry;entry++) {
     
@@ -156,13 +156,19 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
        TGraph *gr = realEvent.getGraphFromSurfAndChan(surf,chan);
        Int_t labChip=realEvent.getLabChip(surf*9 + chan);
        earliestSample=realEvent.getEarliestSample(surf*9 + chan);
+       //       earliestSample+=1; //To avoid HITBUS crosstalk
        latestSample=realEvent.getLatestSample(surf*9 + chan);
-
+       //       latestSample-=1; // To avoid HITBUS crosstalk
        Double_t offset=gr->GetMean(2);
        Double_t *adcs=gr->GetY();
        
        surfNum=surf;
        chipNum=labChip;
+
+       if(earliestSample>259) 
+	  earliestSample=0;
+       if(latestSample<0) 
+	  latestSample=259;
 
        //    cout << earliestSample << "\t" << latestSample << endl;
        got255=0;
@@ -218,10 +224,10 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
 	     }
 	  }
 	  zcPostHitbus=countZC;
-	  sampPostHitbus=261-earliestSample;
+	  sampPostHitbus=260-earliestSample;
 	  countZC=0;
 	  if(latestSample>0) {
-	     for(int samp=0;samp<latestSample-1;samp++) {
+	     for(int samp=0;samp<latestSample;samp++) {
 		histSampAll->Fill(samp,0.5);
 		histSampAll->Fill(samp+1,0.5);
 		histSampChip[surf][labChip]->Fill(samp,0.5);
@@ -278,7 +284,7 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
        else {
 	  //Only one RCO
 	  Int_t countZC=0;
-	  for(int samp=earliestSample;samp<latestSample-1;samp++) {
+	  for(int samp=earliestSample;samp<latestSample;samp++) {
 	     histSampAll->Fill(samp,0.5);
 	     histSampAll->Fill(samp+1,0.5);
 	     histSampChip[surf][labChip]->Fill(samp,0.5);
