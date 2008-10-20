@@ -13,6 +13,10 @@
 #include <TObject.h>
 #include "simpleStructs.h"
 
+//!  Adu5Pat -- The ADU5 Position and Attitude Data
+/*!
+  This is a class to hold the position and attitude data from the ADU5's.
+*/
 class Adu5Pat: public TObject
 {
  public:
@@ -23,22 +27,22 @@ class Adu5Pat: public TObject
 	  UInt_t          trealTime,
 	  GpsAdu5PatStruct_t *gpsStruct);
 
-   Int_t           run;
-   UInt_t          realTime;
-   UInt_t          readTime;
+  Int_t           run; 
+   UInt_t          realTime; ///<Time from the GPS unit
+   UInt_t          readTime; ///<Time of readout by the CPU
    UInt_t          payloadTime;
    UInt_t          payloadTimeUs;
-   UInt_t          timeOfDay;
-   Float_t         latitude;
-   Float_t         longitude;
-   Float_t         altitude;
-   Float_t         heading;
-   Float_t         pitch;
-   Float_t         roll;
-   Float_t         mrms;
-   Float_t         brms;
-   UInt_t          attFlag;
-   Int_t           intFlag;
+   UInt_t          timeOfDay; ///<in ms since the start of the day
+   Float_t         latitude; ///< In degrees
+   Float_t         longitude; ///<In degrees
+   Float_t         altitude; ///<In metres
+   Float_t         heading; ///< 0 is facing north, 180 is facing south
+   Float_t         pitch; ///< in degrees
+   Float_t         roll; /// in degrees
+   Float_t         mrms; ///<phase measurement rms error in metres
+   Float_t         brms; ///<Baseline rms error in metres
+   UInt_t          attFlag; ///< 0 is good attitude, 1 is bad attitude
+   Int_t           intFlag; ///< for raw data = 0, otherwise shows interpolation time
    
   ClassDef(Adu5Pat,10);
 };
