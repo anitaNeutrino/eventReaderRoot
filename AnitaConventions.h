@@ -7,6 +7,25 @@
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
 
+/*! \mainpage ANITA-II Event Reader
+ *
+ * \section intro_sec Introduction
+ *
+ * This is the somewhat skecthy documentation for the ANITA-II event reader.
+ *
+ * \section prereq_sec Prerequisites
+ *
+ *  -# <A HREF="http://root.cern.ch">ROOT</A>
+ *  
+ * \section optional_sec Optional Extras 
+ * -# <A HREF="http://www.fftw.org/">FFTW 3 -- Fastest Fourier Transform in the West</a>
+ * -# <A HREF="http://www.hep.ucl.ac.uk/uhen/anita/libRootFftwWrapper">libRootFftwWrapper -- a ROOT wrapper for FFTW 3</a>
+ * 
+ * \section install_sec Installation
+ * -# Checkout the code from the SVN repository, eg.: <BR><PRE>svn co https://delos.mps.ohio-state.edu/anitaGround/eventReaderRoot/trunk myEventReaderDir</PRE>
+ * -# Define the ANITA_UTIL_INSTALL_DIR to point to the location you want the library installed (the library files will end up in (ANITA_UTIL_INSTALL_DIR)/lib and the header files in (ANITA_UTIL_INSTALL_DIR)/include).
+ * -# Do <PRE>make/make install</PRE>
+ */
 
 #ifndef ANITACONVENTIONS_H
 #define ANITACONVENTIONS_H

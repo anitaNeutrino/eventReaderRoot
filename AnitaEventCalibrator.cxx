@@ -793,6 +793,13 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
       //2nd correction for RCO phase info. delay, RCO is determined by measuring clock period. 
       //to day CPU time, this method is used only if around the boundary of tcalRcoDelayBin.
       if (chan==8){
+	/** Check how many points we say we have.  Don't let it be more than the clock channel -
+	    that can cause problems.  SH **/
+	for (int chan_sub_index = 0; chan_sub_index < 8; ++chan_sub_index)
+	  if (numPointsArray[surf][chan_sub_index] > numPointsArray[surf][8])
+	    numPointsArray[surf][chan_sub_index] = numPointsArray[surf][8];
+
+
 	if (firstHitbus>tcalRcoDelayBin[surf][labChip][startRco] && 
 	    firstHitbus<=tcalRcoDelayBin[surf][labChip][startRco]+2 && !wrappedHitbus){
 	
@@ -849,9 +856,38 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr,float temp)
 	    }
 	  }
 	}
+      } //if chan==8
+    } //chan loop        
+    /** Make certain that time is monotonically increasing in this surf! **/
+    bool did_swap = false;
+    do {
+      did_swap = false;
+      for(int samp=1;samp<numPointsArray[surf][8];samp++) {
+     
+   //////////////////////////////////////////////
+   //swapping time and voltage for non-monotonic time.
+   if (samp>0 && surfTimeArray[surf][samp-1]>surfTimeArray[surf][samp]){
+     did_swap = true;
+     float tmp_time=surfTimeArray[surf][samp];
+     surfTimeArray[surf][samp]=surfTimeArray[surf][samp-1];
+     surfTimeArray[surf][samp-1]=tmp_time;
+     for (int chan=0; chan<NUM_CHAN; chan++){ 
+       if (samp >= numPointsArray[surf][chan]) continue;
+       float tmp_v=mvArray[surf][chan][samp];      
+       mvArray[surf][chan][samp]=mvArray[surf][chan][samp-1];
+       mvArray[surf][chan][samp-1]=tmp_v;
+       tmp_v=unwrappedArray[surf][chan][samp];      
+       unwrappedArray[surf][chan][samp]=unwrappedArray[surf][chan][samp-1];
+       unwrappedArray[surf][chan][samp-1]=(int)tmp_v;
+     }         
+   }
+   //end of time swapping
+   //////////////////////
       }
-    }        
-  }
+    } while (did_swap);
+
+    
+  } //SURF loop
 }
 
 
