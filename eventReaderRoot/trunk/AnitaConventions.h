@@ -24,7 +24,7 @@
  * \section install_sec Installation
  * -# Checkout the code from the SVN repository, eg.: <BR><PRE>svn co https://delos.mps.ohio-state.edu/anitaGround/eventReaderRoot/trunk myEventReaderDir</PRE>
  * -# Define the ANITA_UTIL_INSTALL_DIR to point to the location you want the library installed (the library files will end up in (ANITA_UTIL_INSTALL_DIR)/lib and the header files in (ANITA_UTIL_INSTALL_DIR)/include).
- * -# Do <PRE>make/make install</PRE>
+ * -# Do <PRE>make</PRE><PRE>make install</PRE>
  */
 
 #ifndef ANITACONVENTIONS_H
@@ -38,30 +38,35 @@
 
 #define ANITA_FLIGHT_H
 
+//!  WaveCalType -- The Calibration Type
+/*!
+  There are a number of calibration options available to create a UsefulAnitaEvent.
+  \ingroup rootclasses
+*/
 namespace WaveCalType {
   typedef enum EWaveCalType {
-    kNoCalib                        = 0x00, //The 260 samples straight from raw data
-    kJustUnwrap                     = 0x01, //The X good samples from raw data (260-hitbus)
-    kADC                            = 0x02, //Same as kNoCalib -- i.e. useless
-    kVoltageTime                    = 0x03, //Using 1 and 2.6
-    kVTLabRG                        = 0x04, //Using all the Ryan/Gary numbers from Antarctica
-    kVTFullRG                       = 0x05, //Same but also including cable delays
-    kVTLabJW                        = 0x06, //Using Jiwoos differential numbers but no voltage calib yet
-    kVTFullJW                       = 0x07, //Same but also including cable delays
-    kVTLabJWPlus                    = 0x08, // kVTLabJW + Voltage Correction
-    kVTFullJWPlus                   = 0x09, // kVTFullJW + Voltage Correction
-    kVTLabClockRG                   = 0x0a, // kVTLabRG + Clock Jitter Correction 
-    kVTFullClockRG                  = 0x0b, // kVTFullRG + Clock Jitter Correction 
-    kVTLabJWPlusClock               = 0x0c, // kVTLabJWPlus + Clock Jitter Correction 
-    kVTFullJWPlusClock              = 0x0d, // kVTFullJWPlus + Clock Jitter Correction 
-    kVTLabClockZeroRG               = 0x0e, // kVTLabClockRG + Zero Mean
-    kVTFullClockZeroRG              = 0x0f, // kVTFullClockRG + Zero Mean
-    kVTLabJWPlusClockZero           = 0x10, // kVTLabJWPlusClock + Zero Mean
-    kVTFullJWPlusClockZero          = 0x11,  // kVTFullJWPlusClock + Zero Mean
-    kVTLabJWPlusFastClockZero       = 0x12, // kVTLabJWPlusClock (but faster and worse) + Zero Mean
-    kVTFullJWPlusFastClockZero      = 0x13,  // kVTFullJWPlusClock (but faster and worse)  + Zero Mean
-    kVTFullJWPlusFancyClockZero     = 0x14, // Switching to using soemthing like Andres correlation method
-    kVTFullJWPlusFudge              = 0x15, // kVTFullJW + Voltage Correction +Fudge Factor
+    kNoCalib                        = 0x00, ///<The 260 samples straight from raw data
+    kJustUnwrap                     = 0x01, ///<The X good samples from raw data (260-hitbus)
+    kADC                            = 0x02, ///<Same as kNoCalib -- i.e. useless
+    kVoltageTime                    = 0x03, ///<Using 1 and 2.6
+    kVTLabRG                        = 0x04, ///<Using all the Ryan/Gary numbers from Antarctica
+    kVTFullRG                       = 0x05, ///<Same but also including cable delays
+    kVTLabJW                        = 0x06, ///<Using Jiwoos differential numbers but no voltage calib yet
+    kVTFullJW                       = 0x07, ///<Same but also including cable delays
+    kVTLabJWPlus                    = 0x08, ///< kVTLabJW + Voltage Correction
+    kVTFullJWPlus                   = 0x09, ///< kVTFullJW + Voltage Correction
+    kVTLabClockRG                   = 0x0a, ///< kVTLabRG + Clock Jitter Correction 
+    kVTFullClockRG                  = 0x0b, ///< kVTFullRG + Clock Jitter Correction 
+    kVTLabJWPlusClock               = 0x0c, ///< kVTLabJWPlus + Clock Jitter Correction 
+    kVTFullJWPlusClock              = 0x0d, ///< kVTFullJWPlus + Clock Jitter Correction 
+    kVTLabClockZeroRG               = 0x0e, ///< kVTLabClockRG + Zero Mean
+    kVTFullClockZeroRG              = 0x0f, ///< kVTFullClockRG + Zero Mean
+    kVTLabJWPlusClockZero           = 0x10, ///< kVTLabJWPlusClock + Zero Mean
+    kVTFullJWPlusClockZero          = 0x11,  ///< kVTFullJWPlusClock + Zero Mean
+    kVTLabJWPlusFastClockZero       = 0x12, ///< kVTLabJWPlusClock (but faster and worse) + Zero Mean
+    kVTFullJWPlusFastClockZero      = 0x13,  ///< kVTFullJWPlusClock (but faster and worse)  + Zero Mean
+    kVTFullJWPlusFancyClockZero     = 0x14, ///< Switching to using soemthing like Andres correlation method
+    kVTFullJWPlusFudge              = 0x15, ///< kVTFullJW + Voltage Correction +Fudge Factor
     kNotACalib
   } WaveCalType_t;
 
@@ -130,6 +135,12 @@ namespace WaveCalType {
 
 
 //Now some geometry and polarisation considerations
+
+//!  AnitaRing -- Enumeration for the three rings
+/*!
+  Really that's all there is to it.
+  \ingroup rootclasses
+*/
 namespace AnitaRing {
    typedef enum EAnitaRing {
       kUpperRing  = 0,
@@ -141,6 +152,11 @@ namespace AnitaRing {
    char *ringAsString(AnitaRing::AnitaRing_t ring);
 }
 
+//!  AnitaPol -- Enumeration for the two polarisations
+/*!
+  Really that's all there is to it.
+  \ingroup rootclasses
+*/
 namespace AnitaPol {
    typedef enum EAnitaPol {
       kHorizontal = 0,
@@ -150,6 +166,11 @@ namespace AnitaPol {
    char polAsChar(AnitaPol::AnitaPol_t pol);
 }
 
+//!  AnitaBand -- Enumeration for the four frequency bands
+/*!
+  Really that's all there is to it.
+  \ingroup rootclasses
+*/
 namespace AnitaBand {
    typedef enum EAnitaBand {
       kLow =0,
@@ -160,6 +181,11 @@ namespace AnitaBand {
    char *bandAsString(AnitaBand::AnitaBand_t band);
 }
 
+//!  AnitaLocations -- A selection of useful ANITA-I related locations
+/*!
+  Things like the calibration antennas, etc.
+  \ingroup rootclasses
+*/
 namespace AnitaLocations { 
    const double LONGITUDE_SURF_SEAVEY=167.06405555; // longitude, latitude and altitude of surface seavey
    const double LATITUDE_SURF_SEAVEY=-77.86177777;

@@ -12,11 +12,17 @@
 //Includes
 #include <TObject.h>
 
+
+//!  PrettyAnitaHk -- The prettified ANITA Hk
+/*!
+  The ROOT implementation of the Anita Hk
+  \ingroup rootclasses
+*/
 class PrettyAnitaHk: public TObject
 {
  public:
-  PrettyAnitaHk();		 
-  ~PrettyAnitaHk();
+   PrettyAnitaHk(); ///< Default constructor		 
+   ~PrettyAnitaHk(); ///< Destructor
 
   PrettyAnitaHk(Int_t           trun,
 		UInt_t          trealTime,
@@ -35,27 +41,27 @@ class PrettyAnitaHk: public TObject
 		Float_t         *tssAzimuth,
 		Float_t         *tssAzimuthAdu5,
 		Int_t           *tssGoodFlag,
-		Int_t           tintFlag);
+		Int_t           tintFlag); ///< Old assignment constructor
 
 //Declaration of leaves types
-   Int_t           run;
-   UInt_t          realTime;
-   UInt_t          payloadTime;
-   UInt_t          payloadTimeUs;
-   Float_t         intTemps[19]; //Includes extra sbsTemps
-   Float_t         extTemps[25];
-   Float_t         voltages[11];
-   Float_t         currents[12];
-   Float_t         magnetometer[3];
-   Float_t         pressures[2];
-   Float_t         accelerometer[2][4];
-   Float_t         rawSunSensor[4][5];
-   Float_t         ssMag[4][2];
-   Float_t         ssElevation[4];
-   Float_t         ssAzimuth[4];
-   Float_t         ssAzimuthAdu5[4];
-   Int_t           ssGoodFlag[4];   
-   Int_t           intFlag;
+  Int_t           run; ///< Run number, assigned offline
+  UInt_t          realTime; ///< Time in unixTime
+  UInt_t          payloadTime; ///< Time in unixTime
+  UInt_t          payloadTimeUs; ///< Subsecond time
+   Float_t         intTemps[19]; ///< Internal temperatures, includes extra sbsTemps
+   Float_t         extTemps[25]; ///< External temperatures
+   Float_t         voltages[11]; ///< voltages
+   Float_t         currents[12]; ///< currents
+   Float_t         magnetometer[3]; ///< magnetometer
+   Float_t         pressures[2]; ///< pressures
+   Float_t         accelerometer[2][4]; ///< accelerometer data
+   Float_t         rawSunSensor[4][5]; ///< raw SS data
+   Float_t         ssMag[4][2]; ///< Sunsensor magnitude data
+   Float_t         ssElevation[4]; ///< Sunsensor elevation data
+   Float_t         ssAzimuth[4]; ///< Sunsensor azimuth data
+   Float_t         ssAzimuthAdu5[4]; ///< Sunsensor azimuth relative to ADU5
+   Int_t           ssGoodFlag[4]; ///< Sunsensor goodness flag
+   Int_t           intFlag; ///< Interpolation flag -- zero for raw data
    
   ClassDef(PrettyAnitaHk,2);
 };

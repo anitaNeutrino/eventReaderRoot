@@ -18,6 +18,11 @@
 
 class UsefulAnitaEvent;
 
+//!  AnitaEventCalibrator -- The ANITA Event Calibrator
+/*!
+  Used to calibrate the raw ANITA data into voltage-time waveforms
+  \ingroup rootclasses
+*/
 class AnitaEventCalibrator : public TObject
 {
  public:
@@ -28,13 +33,18 @@ class AnitaEventCalibrator : public TObject
   //Instance generator
   static AnitaEventCalibrator*  Instance();
   
-  //Calibration Routine
+  
+  /*! \brief Calibration Routine
+   *         The routine that is used to calibrate the voltage time waveforms in a UsefulAnitaEvent
+   *
+   *  The routines to calibrate a RawAnitaEvent into an UsefulAnitaEvent. The exact type of calibration applied depends on the WaveCalType::WaveCalType_t selected.
+   */
   int calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 			   WaveCalType::WaveCalType_t calType);
 
-  //Generally useful function
+
   static int getChanIndex(int surf, int chan)
-     {return chan+(9*surf);}
+     {return chan+(9*surf);}   ///<Generally useful function
 
   //Some flags that do things
   Int_t fApplyClockFudge; //Should we use my silly clock fudge factor
@@ -76,12 +86,12 @@ class AnitaEventCalibrator : public TObject
 
   TF1 *fSquareWave;
 
-  void processEventRG(UsefulAnitaEvent *eventPtr);
-  void processEventJW(UsefulAnitaEvent *eventPtr,float temp);
-  void zeroMean();
-  void processClockJitter();
-  void processClockJitterFast();
-  void processClockJitterCorrelation();
+  void processEventRG(UsefulAnitaEvent *eventPtr); ///< Worker function for the RG (defunct) calibrations
+  void processEventJW(UsefulAnitaEvent *eventPtr,float temp); ///< Worker function for the JW calibrations
+  void zeroMean(); ///< Worker function for zero meaning the waveform
+  void processClockJitter(); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration
+  void processClockJitterFast(); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- fast method
+  void processClockJitterCorrelation(); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- using cross-correlation
 
  protected:
    static AnitaEventCalibrator *fgInstance;  

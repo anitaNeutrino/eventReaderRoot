@@ -13,14 +13,18 @@
 #include <TObject.h>
 #include "simpleStructs.h"
 
-
+//!  TurfRegContents -- The Turf Register Contents
+/*!
+  The ROOT implementation of the TURF Register Contents -- Unifinished
+  \ingroup rootclasses
+*/
 class TurfRegContents: public TObject
 {
  public:
-  TurfRegContents();		 
-  ~TurfRegContents();
+   TurfRegContents(); ///< Default constructor
+   ~TurfRegContents(); ////< Destructor
 
-  TurfRegContents(Int_t trun, Int_t trealTime, TurfRegContentsStruct_t *ratePtr);
+   TurfRegContents(Int_t trun, Int_t trealTime, TurfRegContentsStruct_t *ratePtr); ///< Assignment constructor
   
 
    
