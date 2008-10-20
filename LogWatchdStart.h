@@ -15,20 +15,26 @@
 #include "simpleStructs.h"
 
 
+
+//!  LogWatchdStart -- The start packet from LogWatchd
+/*!
+  The ROOT implementation of the start packet from LogWatchd
+  \ingroup rootclasses
+*/
 class LogWatchdStart: public TObject
 {
  public:
-  LogWatchdStart();		 
-  ~LogWatchdStart();
+   LogWatchdStart(); ///< Default constructor
+   ~LogWatchdStart(); ///< Destructor
 
-  LogWatchdStart(Int_t trun, Int_t trealTime, LogWatchdStart_t *startPtr);
+   LogWatchdStart(Int_t trun, Int_t trealTime, LogWatchdStart_t *startPtr); ///< Assignment constructor
 
-   Int_t           run;
-   UInt_t          realTime;
-   UInt_t          payloadTime; 
-   UInt_t          runReported;
-   Float_t         upTime;
-   Float_t         idleTime;
+   Int_t           run; ///< Run number assigned offline
+   UInt_t          realTime; ///< Time in unixTime
+   UInt_t          payloadTime; ///< Time in unixTime
+   UInt_t          runReported; ///< Run number from the payload
+   Float_t         upTime; ///< CPU uptime
+   Float_t         idleTime; ///< CPU idletime
 
   ClassDef(LogWatchdStart,10);
 };

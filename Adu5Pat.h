@@ -13,9 +13,15 @@
 #include <TObject.h>
 #include "simpleStructs.h"
 
+
+/** @defgroup rootclasses The ROOT Classes
+ * These are the ROOT clases that make up the event reader
+ */
+
 //!  Adu5Pat -- The ADU5 Position and Attitude Data
 /*!
   This is a class to hold the position and attitude data from the ADU5's.
+  \ingroup rootclasses
 */
 class Adu5Pat: public TObject
 {

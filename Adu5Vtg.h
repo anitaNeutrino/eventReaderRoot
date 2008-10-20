@@ -13,6 +13,11 @@
 #include <TObject.h>
 #include "simpleStructs.h"
 
+//!  Adu5Vtg -- The ADU5 Velocity and Course Information
+/*!
+  This is a class to hold the velocity and course information for the ADU5's
+  \ingroup rootclasses
+*/
 class Adu5Vtg: public TObject
 {
  public:
@@ -27,10 +32,10 @@ class Adu5Vtg: public TObject
    UInt_t          realTime;
    UInt_t          payloadTime;
    UInt_t          payloadTimeUs;
-   Float_t         trueCourse;
-   Float_t         magneticCourse;
-   Float_t         speedInKnots;
-   Float_t         speedInKPH;
+   Float_t         trueCourse; ///< Course relative to true north
+   Float_t         magneticCourse; ///< Course relative to magnetic north
+   Float_t         speedInKnots; ///< Speed over ground in knots
+   Float_t         speedInKPH; ///< Speed over ground in kph
    Int_t           intFlag;
 
    

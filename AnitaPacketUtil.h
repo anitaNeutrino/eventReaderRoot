@@ -19,17 +19,62 @@
 
 #include "simpleStructs.h"
 
+/** @defgroup packetutil The Packet Utilities
+ * These are utilities for analysing the packetised telemetry data.
+ */
+
 //Generic Header Stuff
+//!  fillGenericHeader -- utility function
+/*!
+  Utility function useful when reconstituting raw data.
+  \ingroup packetutil
+*/
 void fillGenericHeader(void *thePtr, PacketCode_t code, unsigned short numBytes);
+
+//!  checkPacket -- utility function
+/*!
+  Utility function useful when looking at telemetry data
+  \ingroup packetutil
+*/
 int checkPacket(void *thePtr);
+//!  simpleIntCrc -- utility function
+/*!
+  Utility function useful when looking at telemetry data
+  \ingroup packetutil
+*/
 unsigned int simpleIntCrc(unsigned int *p, unsigned int n);
+//!  packetCodeAsString -- utility function
+/*!
+  Converts packet code enumeration to char string
+  \ingroup packetutil
+*/
 char *packetCodeAsString(PacketCode_t code);
+//!  unzipZippedPacket -- utility function
+/*!
+  Utility function useful when looking at zipped telemetry data
+  \ingroup packetutil
+*/
 int unzipZippedPacket(ZippedPacket_t *zipPacket, char *output, unsigned int numBytesOut);
+//!  zipBuffer -- utility function
+/*!
+  Utility function useful when looking at telemetry data
+  \ingroup packetutil
+*/
 int zipBuffer(char *input, char *output, unsigned int inputBytes, unsigned int *outputBytes);
+//!  unzipBuffer -- utility function
+/*!
+  Utility function useful when looking at telemetry data
+  \ingroup packetutil
+*/
 int unzipBuffer(char *input, char *output, unsigned int inputBytes, unsigned int *outputBytes);
 //Compressed Waveform Stuff
 
 
+//!  CompressErrorCode_t -- Enumeration for compression errors
+/*!
+  Enumeration for compression errors
+  \ingroup packetutil
+*/
 typedef enum {
     COMPRESS_E_OK = 0,
     COMPRESS_E_PACK = 0x100,
@@ -42,6 +87,11 @@ typedef enum {
     COMPRESS_E_BAD_CODE
 } CompressErrorCode_t ;
 
+//!  AnitaCompress -- Tools to unpack compressed waveform data
+/*!
+  Tools to uncompress compressed waveform data. Can't be bothered to comment on all the functions. Mainly becasue I don't really remember how most of them work.
+  \ingroup packetutil
+*/
 namespace AnitaCompress {
 
 #define MAX_WAVE_BUFFER NUM_DIGITZED_CHANNELS*MAX_NUMBER_SAMPLES*4

@@ -15,6 +15,11 @@
 
 class TPad;
 
+//!  Adu5Sat -- The ADU5 Satellite Information
+/*!
+  This is a class to hold the satellite visibilty information for the ADU5's
+  \ingroup rootclasses
+*/
 class Adu5Sat: public TObject
 {
  public:
@@ -28,14 +33,14 @@ class Adu5Sat: public TObject
    Int_t           run;
    UInt_t          realTime;
    UInt_t          payloadTime;
-   UInt_t          numSats[4];
-   UChar_t         prn[4][MAX_SATS];
-   UChar_t         elevation[4][MAX_SATS];
-   UChar_t         snr[4][MAX_SATS];
-   UChar_t         flag[4][MAX_SATS];
-   UShort_t        azimuth[4][MAX_SATS];
+   UInt_t          numSats[4]; ///< The number of satellites each of the antennas can see
+   UChar_t         prn[4][MAX_SATS]; ///< The PRN of each visible satellite
+   UChar_t         elevation[4][MAX_SATS];  ///< The elevation of each visible satellite
+   UChar_t         snr[4][MAX_SATS]; ///< The SNR of each visible satellite
+   UChar_t         flag[4][MAX_SATS]; ///< The usability flag of each visible satellite
+   UShort_t        azimuth[4][MAX_SATS]; ///< The azimuth of each visible satellite
    
-   void getCirclePlot(TPad *padSat);
+   void getCirclePlot(TPad *padSat); ///< Creates a 2D elevation-azimuth plot
 
   ClassDef(Adu5Sat,10);
 };

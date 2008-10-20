@@ -14,6 +14,11 @@
 ///First up we'll add some definitions of the raw data
 #include "AnitaConventions.h"
 
+/** @defgroup rawdata The Raw Data Structs 
+ * These are the raw data structures from the fligth software
+ * @{
+ */
+
 #ifdef SLAC_DATA06
 //SLAC data definitions
 #define VER_EVENT_BODY 7
@@ -1810,5 +1815,7 @@ typedef struct {
 
 
 #endif
+/*\@}*/
+
 
 #endif //SIMPLESTRUCTS_H

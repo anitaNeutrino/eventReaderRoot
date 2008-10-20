@@ -19,24 +19,29 @@
 #include "TTree.h"
 
 
+//!  RawDataReader -- Raw data reader
+/*!
+  RawDataReader -- not sure if this is still 100% functional
+  \ingroup rootclasses
+*/
 class RawDataReader 
 {
  public: 
-  RawDataReader();
-  ~RawDataReader();
+   RawDataReader(); ///<Default constructor
+   ~RawDataReader(); ///< Destructor
 
-  int openFile(char *psevName);
-  UsefulAnitaEvent *getNextEvent(WaveCalType::WaveCalType_t calType=WaveCalType::kNoCalib);
+   int openFile(char *psevName); ///< Open this psev file
+   UsefulAnitaEvent *getNextEvent(WaveCalType::WaveCalType_t calType=WaveCalType::kNoCalib); ///< Get the next event from the file
 
 
  private: 
 
   //Data Reading Thingies 
-  PedSubbedEventBody_t psBody; 
-  gzFile eventFile;
-  TFile *fpSurf;
-  TTree *surfTempTree;
-  Float_t surfTemp;
+   PedSubbedEventBody_t psBody; ///< Raw data
+   gzFile eventFile; ///< File ptr
+   TFile *fpSurf; ///< Who knows
+   TTree *surfTempTree; ///< Who knows
+   Float_t surfTemp; ///< Who knows
 };
 
 
