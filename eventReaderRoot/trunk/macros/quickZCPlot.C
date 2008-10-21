@@ -176,51 +176,19 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
 	  //We have two RCO's	  
 	  Int_t countZC=0;
 	  for(int samp=earliestSample;samp<259;samp++) {
-	     histSampAll->Fill(samp,0.5);
-	     histSampAll->Fill(samp+1,0.5);
-	     histSampChip[surf][labChip]->Fill(samp,0.5);
-	     histSampChip[surf][labChip]->Fill(samp+1,0.5);
-	     histSampFirstRco[surf][labChip]->Fill(samp,0.5);
-	     histSampFirstRco[surf][labChip]->Fill(samp+1,0.5);
+	     histSampAll->Fill(samp,1);
+	     histSampChip[surf][labChip]->Fill(samp,1);
+	     histSampFirstRco[surf][labChip]->Fill(samp,1);
 	     Double_t firstVal=adcs[samp]-offset;
 	     Double_t secondVal=adcs[samp+1]-offset;
-	     //	if(firstVal>=0 && secondVal<0) {
-	     if((firstVal>=0 && secondVal<0) || (firstVal<0 && secondVal>=0)) {  
-
-	       //	       if(surf==0 && samp==254) 
-	       //		 cout << realEvent.eventNumber << "\t" << samp
-	       //		      << "\t" << firstVal << "\t" << secondVal << "\tA\n";
+	     if((firstVal>=0 && secondVal<=0) || (firstVal<=0 && secondVal>=0)) {  
 		//We have a ZC
 		countZC++;
-		Double_t sum=TMath::Abs(firstVal)+TMath::Abs(secondVal);
-		Double_t right=TMath::Abs(firstVal)/sum;
-		Double_t left=TMath::Abs(firstVal)/sum;
-		histZcFirstRco[surf][labChip]->Fill(samp,left);
-		histZcFirstRco[surf][labChip]->Fill(samp+1,right);
-		histZcChip[surf][labChip]->Fill(samp,left);
-		histZcChip[surf][labChip]->Fill(samp+1,right);
-		histZcAll->Fill(samp,left);
-		histZcAll->Fill(samp+1,right);
+		histZcFirstRco[surf][labChip]->Fill(samp,1);
+		histZcChip[surf][labChip]->Fill(samp,1);
+		histZcAll->Fill(samp,1);
 		if(samp==254 || samp==255)
 		  got255++;
-	// 	if(TMath::Abs(firstVal)<TMath::Abs(secondVal)) {
-// 		   histZcFirstRco[surf][labChip]->Fill(samp);
-// 		   histZcChip[surf][labChip]->Fill(samp);
-// 		   histZcAll->Fill(samp);
-// 		}
-// 		else if(TMath::Abs(firstVal)>TMath::Abs(secondVal)) {
-// 		   histZcFirstRco[surf][labChip]->Fill(samp+1);
-// 		   histZcChip[surf][labChip]->Fill(samp+1);
-// 		   histZcAll->Fill(samp+1);
-// 		}
-// 		else {
-// 		   histZcFirstRco[surf][labChip]->Fill(samp,0.5);
-// 		   histZcFirstRco[surf][labChip]->Fill(samp+1,0.5);
-// 		   histZcChip[surf][labChip]->Fill(samp,0.5);
-// 		   histZcChip[surf][labChip]->Fill(samp+1,0.5);
-// 		   histZcAll->Fill(samp,0.5);
-// 		   histZcAll->Fill(samp+1,0.5);
-// 		}
 	     }
 	  }
 	  zcPostHitbus=countZC;
@@ -228,51 +196,19 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
 	  countZC=0;
 	  if(latestSample>0) {
 	     for(int samp=0;samp<latestSample;samp++) {
-		histSampAll->Fill(samp,0.5);
-		histSampAll->Fill(samp+1,0.5);
-		histSampChip[surf][labChip]->Fill(samp,0.5);
-		histSampChip[surf][labChip]->Fill(samp+1,0.5);
-		histSampSecondRco[surf][labChip]->Fill(samp,0.5);
-		histSampSecondRco[surf][labChip]->Fill(samp+1,0.5);
+		histSampAll->Fill(samp,1);
+		histSampChip[surf][labChip]->Fill(samp,1);
+		histSampSecondRco[surf][labChip]->Fill(samp,1);
 		Double_t firstVal=adcs[samp]-offset;
 		Double_t secondVal=adcs[samp+1]-offset;
 		//	  if(firstVal>=0 && secondVal<0) {
-		if((firstVal>=0 && secondVal<0) || (firstVal<0 && secondVal>=0)) {   
-		   //We have a ZC
-		  //		  if(surf==0 && samp==254) 
-		  //		    cout << realEvent.eventNumber << "\t" << samp
-		  // << "\t" << firstVal << "\t" << secondVal << "\tB\n";
-
+		if((firstVal>=0 && secondVal<=0) || (firstVal<=0 && secondVal>=0)) {   
 		   countZC++;
-		   Double_t sum=TMath::Abs(firstVal)+TMath::Abs(secondVal);
-		   Double_t right=TMath::Abs(firstVal)/sum;
-		   Double_t left=TMath::Abs(firstVal)/sum;
-		   histZcSecondRco[surf][labChip]->Fill(samp,left);
-		   histZcSecondRco[surf][labChip]->Fill(samp+1,right);
-		   histZcChip[surf][labChip]->Fill(samp,left);
-		   histZcChip[surf][labChip]->Fill(samp+1,right);
-		   histZcAll->Fill(samp,left);
-		   histZcAll->Fill(samp+1,right);
+		   histZcSecondRco[surf][labChip]->Fill(samp,1);
+		   histZcChip[surf][labChip]->Fill(samp,1);
+		   histZcAll->Fill(samp,1);
 		   if(samp==254 || samp==255)
 		     got255++;
-	// 	   if(TMath::Abs(firstVal)<TMath::Abs(secondVal)) {
-// 		      histZcSecondRco[surf][labChip]->Fill(samp);
-// 		      histZcChip[surf][labChip]->Fill(samp);
-// 		      histZcAll->Fill(samp);
-// 		   }
-// 		   else if(TMath::Abs(firstVal)>TMath::Abs(secondVal)) {
-// 		      histZcSecondRco[surf][labChip]->Fill(samp+1);
-// 		      histZcChip[surf][labChip]->Fill(samp+1);
-// 		      histZcAll->Fill(samp+1);
-// 		   }
-// 		   else {
-// 		      histZcSecondRco[surf][labChip]->Fill(samp,0.5);
-// 		      histZcChip[surf][labChip]->Fill(samp,0.5);
-// 		      histZcSecondRco[surf][labChip]->Fill(samp+1,0.5);
-// 		      histZcChip[surf][labChip]->Fill(samp+1,0.5);
-// 		      histZcAll->Fill(samp,0.5);
-// 		      histZcAll->Fill(samp+1,0.5);
-// 		   }
 		}
 	     }
 	     zcPreHitbus=countZC;
@@ -285,50 +221,23 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
 	  //Only one RCO
 	  Int_t countZC=0;
 	  for(int samp=earliestSample;samp<latestSample;samp++) {
-	     histSampAll->Fill(samp,0.5);
-	     histSampAll->Fill(samp+1,0.5);
-	     histSampChip[surf][labChip]->Fill(samp,0.5);
-	     histSampChip[surf][labChip]->Fill(samp+1,0.5);
-	     histSampFirstRco[surf][labChip]->Fill(samp,0.5);
-	     histSampFirstRco[surf][labChip]->Fill(samp+1,0.5);
+	     histSampAll->Fill(samp,1);
+	     histSampChip[surf][labChip]->Fill(samp,1);
+	     histSampFirstRco[surf][labChip]->Fill(samp,1);
 	     Double_t firstVal=adcs[samp]-offset;
 	     Double_t secondVal=adcs[samp+1]-offset;
-	     if((firstVal>=0 && secondVal<0) || (firstVal<0 && secondVal>=0)) {
+	     if((firstVal>=0 && secondVal<=0) || (firstVal<=0 && secondVal>=0)) {
 		//We have a ZC
 	       //	       if(surf==0 && samp==254) 
 	       //		 cout << realEvent.eventNumber << "\t" << samp
 	       //		      << "\t" << firstVal << "\t" << secondVal << "\tC\n";
 
 		countZC++;
-		Double_t sum=TMath::Abs(firstVal)+TMath::Abs(secondVal);
-		Double_t right=TMath::Abs(firstVal)/sum;
-		Double_t left=TMath::Abs(firstVal)/sum;
-		histZcFirstRco[surf][labChip]->Fill(samp,left);
-		histZcFirstRco[surf][labChip]->Fill(samp+1,right);
-		histZcChip[surf][labChip]->Fill(samp,left);
-		histZcChip[surf][labChip]->Fill(samp+1,right);
-		histZcAll->Fill(samp,left);
-		histZcAll->Fill(samp+1,right);
+		histZcFirstRco[surf][labChip]->Fill(samp,1);
+		histZcChip[surf][labChip]->Fill(samp,1);
+		histZcAll->Fill(samp,1);
 		if(samp==254 || samp==255)
 		  got255++;
-// 		if(TMath::Abs(firstVal)<TMath::Abs(secondVal)) {
-// 		   histZcFirstRco[surf][labChip]->Fill(samp);
-// 		   histZcChip[surf][labChip]->Fill(samp);
-// 		   histZcAll->Fill(samp);
-// 		}
-// 		else if(TMath::Abs(firstVal)>TMath::Abs(secondVal)) {
-// 		   histZcFirstRco[surf][labChip]->Fill(samp+1);
-// 		   histZcChip[surf][labChip]->Fill(samp+1);
-// 		   histZcAll->Fill(samp+1);
-// 		}
-// 		else {
-// 		   histZcFirstRco[surf][labChip]->Fill(samp,0.5);
-// 		   histZcFirstRco[surf][labChip]->Fill(samp+1,0.5);
-// 		   histZcChip[surf][labChip]->Fill(samp,0.5);
-// 		   histZcChip[surf][labChip]->Fill(samp+1,0.5);
-// 		   histZcAll->Fill(samp,0.5);
-// 		   histZcAll->Fill(samp+1,0.5);
-// 		}
 	     }
 	  }
 	  zcPostHitbus=countZC;

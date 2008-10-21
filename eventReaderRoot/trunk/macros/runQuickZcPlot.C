@@ -14,5 +14,5 @@ void runQuickZcPlot() {
 
   gSystem->CompileMacro("quickZCPlot.C","k");
   //  quickPulserSearch();
-  quickZCPlot("/unix/anita2/palestine08/root/",3451,0,10000000);
+  quickZCPlot("/unix/anita2/palestine08/root/",3871,0,10000000);
 }
