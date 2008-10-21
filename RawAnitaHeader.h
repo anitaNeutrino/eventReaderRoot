@@ -42,16 +42,46 @@ class RawAnitaHeader: public TObject
   UInt_t          gpsSubTime; ///< sub second time from GPS (if matched)
   UInt_t          turfEventId; ///< TURF Event Id (12-bit run + 20-bit event)
   UInt_t          eventNumber; ///< Software event number
-  UShort_t        calibStatus; ///< Bit mask for the various relays
+  //!  Calib/Relay Status
+  /*!
+Here we are coutning bits from 1 to 16
+    -  "Bit 1" 1st RFCM relay on/off
+    -  "Bit 2" 2nd RFCM relay on/off
+    -  "Bit 3" 3rd RFCM relay on/off
+    -  "Bit 4" 4th RFCM relay on/off
+    -  "Bit 5" Naidr RFCM relay on/off
+    -  "Bit 6" GPS relay on/off
+    -  "Bit 7" Cal Pulser relay on/off
+    -  "Bit 8" Unused
+    -  "Bit 9" RFCM Switch Port D
+    -  "Bit 10" RFCM Switch Port C
+    -  "Bit 11" RFCM Switch Port B
+    -  "Bit 12" RFCM Switch Port A
+    -  "Bit 13:16" Attenuator Setting
+
+For the attenuator setting take (calibStatus&0xf000)>>12 and:
+
+    -  "Value 7" 0th Attenuator setting (0dB)
+    -  "Value 3" 1st Attenuator setting (3dB)
+    -  "Value 5" 2nd Attenuator setting (8dB)
+    -  "Value 1" 3rd Attenuator setting (12dB)
+    -  "Value 6" 4th Attenuator setting (18dB)
+    -  "Value 2" 5th Attenuator setting (22dB)
+    -  "Value 4" 6th Attenuator setting (28dB)
+    -  "Value 0" 7th Attenuator setting (33dB)
+    
+  */
+  UShort_t        calibStatus; 
   UChar_t         priority; ///< Queue (lower 4-bits) and priority (upper 4-bits)
   UChar_t         turfUpperWord; ///< Upper word from TURF, useful for debugging
   UChar_t         otherFlag; ///< Currently the first two surf evNums 
  //!  Error Flag
   /*!
-    Bit 1 means sync slip between TURF and software
-    Bit 2 is sync slip between SURF 1 and software
-    Bit 3 is sync slip between SURF 10 and SURF 1
-    Bit 4 is non matching TURF test pattern
+    Here we are coutning bits from 1 to 8
+    -  "Bit 1" means sync slip between TURF and software
+    -  "Bit 2" is sync slip between SURF 1 and software
+    -  "Bit 3" is sync slip between SURF 10 and SURF 1
+    -  "Bit 4" is non matching TURF test pattern
   */
   UChar_t         errorFlag;
   UChar_t         surfSlipFlag; ///< Sync Slip between SURF 2-9 and SURF 1
