@@ -68,6 +68,9 @@ class AnitaEventCalibrator : public TObject
   float fastClockJitterOffset[NUM_SURF][NUM_CHIP];
   float fancyClockJitterOffset[NUM_SURF][NUM_CHIP];
 
+  //Calibration constants for first pass bin-by-bin
+  float justBinByBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
+
   //Cable Length Calib
   float groupDelayCalib[NUM_SURF][NUM_CHAN];
 
@@ -84,8 +87,9 @@ class AnitaEventCalibrator : public TObject
   double clockPhiArray[NUM_SURF];
   double timeArray[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
 
-  TF1 *fSquareWave;
 
+  TF1 *fSquareWave;
+  int justBinByBinTimebase(UsefulAnitaEvent *eventPtr);
   void processEventRG(UsefulAnitaEvent *eventPtr); ///< Worker function for the RG (defunct) calibrations
   void processEventJW(UsefulAnitaEvent *eventPtr,float temp); ///< Worker function for the JW calibrations
   void zeroMean(); ///< Worker function for zero meaning the waveform

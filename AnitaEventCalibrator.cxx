@@ -153,6 +153,9 @@ AnitaEventCalibrator*  AnitaEventCalibrator::Instance()
 int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveCalType::WaveCalType_t calType)
 {
  
+   if(calType==WaveCalType::kJustTimeNoUnwrap)
+      return justBinByBinTimebase(eventPtr);
+
    fApplyClockFudge=0;
    if(calType==WaveCalType::kVTFullJWPlusFudge || calType==WaveCalType::kVTFullJWPlusFancyClockZero)
       fApplyClockFudge=1;
@@ -534,6 +537,24 @@ void AnitaEventCalibrator::zeroMean() {
 
 }
 
+int AnitaEventCalibrator::justBinByBinTimebase(UsefulAnitaEvent *eventPtr)
+{
+  for(int surf=0;surf<NUM_SURF;surf++) {
+    for(int chan=0;chan<NUM_CHAN;chan++) {	 	 
+      int chanIndex=getChanIndex(surf,chan);
+      int labChip=eventPtr->getLabChip(chanIndex);
+      int rco=eventPtr->getRCO(chanIndex);
+      
+      float time=0;
+      for(int samp=0;samp<NUM_SAMP;samp++) {
+	rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
+	timeArray[surf][chan][samp]=time;
+	time+=justBinByBin[surf][labChip][rco][samp];
+      }
+    }
+  }  
+  return 0;
+}
 
 
 void AnitaEventCalibrator::processEventRG(UsefulAnitaEvent *eventPtr) {
@@ -925,12 +946,14 @@ void AnitaEventCalibrator::loadCalib() {
 	  for(int rco=0;rco<NUM_RCO;rco++) {
 	     timeBaseCalib[surf][chip][rco]=2.6;
 	     epsilonCalib[surf][chip][rco]=1.2;
+	     for(int samp=0;samp<NUM_SAMP;samp++)
+	       justBinByBin[surf][chip][rco][samp]=1./2.6;
 	  }
        }
     }
     
    
-    int surf,chan,chip,rco;
+    int surf,chan,chip,rco,samp;
     int ant;
     char pol;
     float mean,rms,calib;
@@ -952,6 +975,15 @@ void AnitaEventCalibrator::loadCalib() {
     while(TimeCalibFile >> surf >> chip >> rco >> calib) {
 	timeBaseCalib[surf][chip][rco]=calib;
 	//	std::cout << surf << " " << chip << " " << rco << " " << timeBaseCalib[surf][chip][rco] << std::endl;
+    }
+
+    
+    sprintf(fileName,"%s/justBinByBin.dat",calibDir);
+    std::ifstream BinByBinCalibFile(fileName);
+    BinByBinCalibFile.getline(firstLine,179);
+    while(BinByBinCalibFile >> surf >> chip >> rco >> samp >> calib) {
+	justBinByBin[surf][chip][rco][samp]=calib;
+	//	std::cout << surf << " " << chip << " " << rco << " " << samp << " " << justBinByBin[surf][chip][rco][samp] << std::endl;
     }
 
     sprintf(fileName,"%s/rcoLatchCalibWidth.txt",calibDir);

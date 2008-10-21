@@ -27,6 +27,7 @@ const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
    case kVTFullJWPlusClockZero: return "kVTFullJWPlusClockZero -- kVTFullJWPlusClock + Zero Mean"; break;
    case kVTLabJWPlusFastClockZero: return "kVTLabJWPlusFastClockZero -- kVTLabJWPlusClock (no fit)+ Zero Mean"; break;
    case kVTFullJWPlusFastClockZero: return "kVTFullJWPlusFastClockZero -- kVTFullJWPlusClock (no fit)+ Zero Mean"; break;
+   case kJustTimeNoUnwrap: return "kJustTimeNoUnwrap -- Only applies the bin-by-bin time calibration" ; break;
    default:
       return "Unknown Calibration Type";
 	 break;

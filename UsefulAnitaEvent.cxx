@@ -85,6 +85,28 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
       }
       
       break;
+   case WaveCalType::kJustTimeNoUnwrap:
+      //      std::cout << "WaveCalType::kJustUnwrap" << std::endl;
+      //Fill struct with unwrapped raw values;      
+      for(int surf=0;surf<NUM_SURF;surf++) {
+	 for(int chan=0;chan<NUM_CHAN;chan++) {
+	    int chanIndex=getChanIndex(surf,chan); 
+	    //	    std::cout << "chanIndex: " << chanIndex << std::endl;
+
+	    this->fNumPoints[chanIndex]=NUM_SAMP;
+	    //	    std::cout << "chanIndex: " << chanIndex << std::endl;
+	    memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
+	    memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
+	    //	    std::cout << "chanIndex: " << chanIndex << std::endl;
+	    for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
+	       this->fVolts[chanIndex][samp]=fCalibrator->rawArray[surf][chan][samp];
+	       this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp];
+	    }	 
+	    //	    std::cout << "chanIndex: " << chanIndex << std::endl;
+
+	 }
+      }      
+      break;
    case WaveCalType::kVoltageTime:
       //Just use the nominal 1mv per count, and 2.6GSamps/sec numbers     
       for(int surf=0;surf<NUM_SURF;surf++) {
