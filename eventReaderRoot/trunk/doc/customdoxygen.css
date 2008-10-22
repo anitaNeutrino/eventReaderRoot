@@ -2,17 +2,7 @@ BODY,H1,H2,H3,H4,H5,H6,P,CENTER,TD,TH,UL,DL,DIV {
 	font-family: Geneva, Arial, Helvetica, sans-serif;
 }
 
-H1 {
-text-align: center;
-padding-top:1em; 
-padding-bottom:1em; 
-/*background-image:	 url("head-background.png");*/
-background: url(http://www.hep.ucl.ac.uk/~rjn/images/anitaLaunchSmaller.jpg)  ;
-background-repeat: repeat-y;		
-background-position: center;            
 
-
-}
 CAPTION { font-weight: bold }
 DIV.qindex {
 	width: 100%;
@@ -343,11 +333,11 @@ IMG.valid {
 
 H1 {
    font-family: sans-serif;
-
-   font-weight: 900;
+   font-weight: 600;
    margin-bottom:0;
    margin-top:0;
    text-align: center;
+   font-size: large;
 }
 
 H2 {
@@ -794,11 +784,11 @@ DIV.vertical {
 DIV.content {
    position: absolute;
    top: 14ex;
-   left: 14em;
+   left: 12em;
    right: 0;
    margin-top: 1ex;
 
-  width:36em;
+  width:40em;
   float:left;
 /*  padding-right:20px;
   padding-left:10px;*/
@@ -816,3 +806,34 @@ DIV.content {
 /*   min-width: 10em;*/
    z-index: 2;
 }
+
+
+  DIV.heading {
+                 /*background-image: url("head-background.png");*/
+                 background: url(/uhen/images/anitaLaunchSmaller.jpg)  ;
+                 background-repeat: repeat-y;
+                 background-position: center;
+   }
+  DIV.heading H1 {
+                  padding-top:1em;    
+                  font-size: xx-large;         
+                   }
+
+
+DIV.heading {
+   position: absolute;
+   top: 1em;
+   left:3em;
+   right: 0;
+
+   width:700px;
+   height:12ex;
+/*  margin:10px auto 10px;*/
+                 
+/*   height: 10ex;*/
+   float: left;    /* Don't really want float but netscape 4 works better */
+/*   background-color: #c0c0f0;*/
+   background-color: white;
+   z-index:5;
+}
+
