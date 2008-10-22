@@ -22,6 +22,56 @@ PrettyAnitaHk::~PrettyAnitaHk() {
    //Default Destructor
 }
 
+PrettyAnitaHk::PrettyAnitaHk(CalibratedHk *calHk, Int_t tintFlag)
+{
+  run=calHk->run;
+  realTime=calHk->realTime;
+  payloadTime=calHk->payloadTime;
+  payloadTimeUs=calHk->payloadTimeUs;
+  magnetometer[0]=calHk->magX;
+  magnetometer[1]=calHk->magY;
+  magnetometer[2]=calHk->magZ;
+
+  for(int i=0;i<NUM_INT_TEMPS;i++) {
+    intTemps[i]=calHk->getInternalTemp(i);
+  }
+  for(int i=0;i<NUM_SBS_TEMPS;i++) {
+    intTemps[NUM_INT_TEMPS+i]=calHk->getSBSTemp(i);
+  }
+  for(int i=0;i<NUM_EXT_TEMPS;i++) {
+    extTemps[i]=calHk->getExternalTemp(i);
+  }
+  for(int i=0;i<NUM_VOLTAGES;i++) {
+    voltages[i]=calHk->getVoltage(i);
+  }
+  for(int i=0;i<NUM_CURRENTS;i++) {
+    currents[i]=calHk->getCurrent(i);
+  }
+  for(int i=0;i<NUM_PRESSURES;i++) {
+    pressures[i]=calHk->getPressure(i);
+  }
+  for(int i=0;i<NUM_ACCELEROMETERS;i++) {
+    for(int j=0;j<4;j++) {
+      accelerometer[i][j]=calHk->getAccelerometer(i,j);
+    }
+  }
+  for(int i=0;i<NUM_SUNSENSORS;i++) {
+    for(int j=0;j<5;j++) {
+      rawSunSensor[i][j]=calHk->getRawSunsensor(i,j);
+    }
+    Float_t tempSS=0,tempSSX=0,tempSSY=0;
+    calHk->getSSMagnitude(i,&tempSS,&tempSSX,&tempSSY);
+    ssMag[i][0]=tempSSX;
+    ssMag[i][1]=tempSSY;
+
+    Float_t tempSSAz=0,tempSSAzRel=0,tempSSEl=0,tempSSPos[3]={0};
+    ssGoodFlag[i]=calHk->getFancySS(i,tempSSPos,&tempSSAz,&tempSSEl,&tempSSAzRel);
+    ssElevation[i]=tempSSEl;
+    ssAzimuth[i]=tempSSAz;
+    ssAzimuthAdu5[i]=tempSSAzRel;
+  }
+  intFlag=tintFlag;
+}
 
 
 PrettyAnitaHk::PrettyAnitaHk(Int_t           trun,
