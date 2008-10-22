@@ -34,7 +34,18 @@
 #define NUM_POWERS 6
 #endif
 
+#ifndef NUM_ATTITUDE
 #define NUM_ATTITUDE 13
+#endif
+#ifndef NUM_PRESSURES
+#define NUM_PRESSURES 2
+#endif
+#ifndef NUM_SUNSENSORS
+#define NUM_SUNSENSORS 4
+#endif
+#ifndef NUM_ACCELEROMETERS
+#define NUM_ACCELEROMETERS 2
+#endif
 
 class RawHk;
 
@@ -71,7 +82,11 @@ class CalibratedHk: public TObject
    Float_t   getCurrent(int index); ///< Returns current (0:11)
    Float_t   getPower(int index); ///< Returns power (0:5)
    Float_t   getAttitude(int index); ///< Returns attitude (0:12)
+   Float_t   getPressure(int index); ///< Returns pressure (0:1)
+   Float_t   getAccelerometer(int acInd, int type); ///< Returns accelerometer stuff
+   Float_t   getRawSunsensor(int ssInd, int type); ///< Returns raw sunsensor stuff, here type goes x1,x2,y1,y2,T
    
+
    //Sunsensor Stuff
    void getSSMagnitude(int ssInd, Float_t *magnitude,Float_t *magX, Float_t *magY); ///< Get sunsensor magnitude
    Float_t getSSTemp(int ssInd); ///< Get sunsensor temperature

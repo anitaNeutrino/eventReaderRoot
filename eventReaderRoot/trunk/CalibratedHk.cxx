@@ -396,3 +396,46 @@ Int_t CalibratedHk::getFancySS(int ssInd, Float_t pos[3], Float_t *azimuth,
   
   return goodVals;
 }
+
+
+Float_t   CalibratedHk::getPressure(int index)
+{
+   int presChans[2]={51,71};
+   if(index>=0 && index<2) {
+      return useful[presChans[index]/40][presChans[index]%40];
+   }
+   return -1;
+}
+
+Float_t   CalibratedHk::getAccelerometer(int acInd, int type)
+{
+   int accelChans[2][4]={{70,50,69,49},{68,58,67,57}};
+   if((acInd>=0 && acInd<2) && (type>=0 && type<4)) {
+      return useful[accelChans[acInd][type]/40][accelChans[acInd][type]%40];
+   }
+   return -1;
+
+}
+
+Float_t   CalibratedHk::getRawSunsensor(int ssInd, int type)
+{
+   if((ssInd>=0 && ssInd<4) && (type>=0 && type<5)) {
+      switch(type) {
+      case 0:
+	 return useful[ssXInds[ssInd][0]/40][ssXInds[ssInd][0]%40];
+      case 1:
+	 return useful[ssXInds[ssInd][1]/40][ssXInds[ssInd][1]%40];
+      case 2:
+	 return useful[ssYInds[ssInd][0]/40][ssYInds[ssInd][0]%40];
+      case 3:
+	 return useful[ssYInds[ssInd][1]/40][ssYInds[ssInd][1]%40];
+      case 4:
+	 return useful[ssTemp[ssInd]/40][ssTemp[ssInd]%40];
+      default:
+	 return -1;
+
+      }
+   }
+   return -1;
+
+}
