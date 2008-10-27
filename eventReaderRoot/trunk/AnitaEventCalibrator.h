@@ -89,7 +89,8 @@ class AnitaEventCalibrator : public TObject
 
 
   TF1 *fSquareWave;
-  int justBinByBinTimebase(UsefulAnitaEvent *eventPtr);
+  TF1 *fFakeTemp;
+  int justBinByBinTimebase(UsefulAnitaEvent *eventPtr, Int_t doFakeTemp);
   void processEventRG(UsefulAnitaEvent *eventPtr); ///< Worker function for the RG (defunct) calibrations
   void processEventJW(UsefulAnitaEvent *eventPtr,float temp); ///< Worker function for the JW calibrations
   void zeroMean(); ///< Worker function for zero meaning the waveform

@@ -14,9 +14,11 @@ ANITA_UTIL_LIB_DIR=${ANITA_UTIL_INSTALL_DIR}/lib
 ANITA_UTIL_INC_DIR=${ANITA_UTIL_INSTALL_DIR}/include
 LD_ANITA_UTIL=-L$(ANITA_UTIL_LIB_DIR)
 INC_ANITA_UTIL=-I$(ANITA_UTIL_INC_DIR)
+ANITA_UTIL_CALIB_DIR=$(ANITA_UTIL_INSTALL_DIR)/share/anitaCalib
 else
 ANITA_UTIL_LIB_DIR=/usr/local/lib
 ANITA_UTIL_INC_DIR=/usr/local/include
+ANITA_UTIL_CALIB_DIR=/usr/local/share/anitaCalib
 ifdef EVENT_READER_DIR
 LD_ANITA_UTIL=-L$(EVENT_READER_DIR)
 INC_ANITA_UTIL=-I$(EVENT_READER_DIR)
@@ -94,11 +96,15 @@ eventDict.C: $(CLASS_HEADERS)
 
 install: $(ROOT_LIBRARY)
 ifeq ($(PLATFORM),macosx)
-	cp $(ROOT_LIBRARY) $(subst .$(DLLSUF),.so,$(ROOT_LIBRARY)) $(ANITA_UTIL_LIB_DIR)
+	install -c -m 755 $(ROOT_LIBRARY) $(subst .$(DLLSUF),.so,$(ROOT_LIBRARY)) $(ANITA_UTIL_LIB_DIR)
 else
-	cp $(ROOT_LIBRARY) $(ANITA_UTIL_LIB_DIR)
+	install -c -m 755 $(ROOT_LIBRARY) $(ANITA_UTIL_LIB_DIR)
 endif
-	cp  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
+	install -c -m 644  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
+	install -d $(ANITA_UTIL_CALIB_DIR)
+	for file in calib/*.dat calib/*.csv calib/*.txt; do install -c -m 644 "$${file}" $(ANITA_UTIL_CALIB_DIR); done
+	install -d $(ANITA_UTIL_CALIB_DIR)/jiwoo_timecode
+	for file in calib/jiwoo_timecode/*.txt; do install -c -m 644 "$${file}" $(ANITA_UTIL_CALIB_DIR)/jiwoo_timecode ; done
 
 clean:
 	@rm -f *Dict*

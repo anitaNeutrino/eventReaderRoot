@@ -122,6 +122,7 @@ AnitaEventCalibrator::AnitaEventCalibrator()
    : TObject()
 {
    fSquareWave=0;
+   fFakeTemp=0;
    //Default constructor
    std::cout << "AnitaEventCalibrator::AnitaEventCalibrator()" << std::endl;
    loadCalib();
@@ -154,7 +155,9 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
 {
  
    if(calType==WaveCalType::kJustTimeNoUnwrap)
-      return justBinByBinTimebase(eventPtr);
+      return justBinByBinTimebase(eventPtr,0);
+   if(calType==WaveCalType::kJustTimeNoUnwrapFakeTemp)
+      return justBinByBinTimebase(eventPtr,1);
 
    fApplyClockFudge=0;
    if(calType==WaveCalType::kVTFullJWPlusFudge || calType==WaveCalType::kVTFullJWPlusFancyClockZero)
@@ -537,22 +540,33 @@ void AnitaEventCalibrator::zeroMean() {
 
 }
 
-int AnitaEventCalibrator::justBinByBinTimebase(UsefulAnitaEvent *eventPtr)
+int AnitaEventCalibrator::justBinByBinTimebase(UsefulAnitaEvent *eventPtr,Int_t doFakeTemp)
 {
-  for(int surf=0;surf<NUM_SURF;surf++) {
-    for(int chan=0;chan<NUM_CHAN;chan++) {	 	 
-      int chanIndex=getChanIndex(surf,chan);
-      int labChip=eventPtr->getLabChip(chanIndex);
-      int rco=eventPtr->getRCO(chanIndex);
+   Int_t refEvNum=31853801;
+   if(!fFakeTemp) {
+      fFakeTemp= new TF1("fFakeTemp","[0] + [1]*exp(-x*[2])",0,100000);
+      fFakeTemp->SetParameters(8.07,0.13,1./30000);
+   }
+   Double_t tempFactor=1;
+   if(doFakeTemp) {
+      tempFactor=fFakeTemp->Eval(100000)/fFakeTemp->Eval(eventPtr->eventNumber-refEvNum);
+   }
       
-      float time=0;
-      for(int samp=0;samp<NUM_SAMP;samp++) {
-	rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
-	timeArray[surf][chan][samp]=time;
-	time+=justBinByBin[surf][labChip][rco][samp];
+
+   for(int surf=0;surf<NUM_SURF;surf++) {
+      for(int chan=0;chan<NUM_CHAN;chan++) {	 	 
+	 int chanIndex=getChanIndex(surf,chan);
+	 int labChip=eventPtr->getLabChip(chanIndex);
+	 int rco=eventPtr->getRCO(chanIndex);
+	 
+	 float time=0;
+	 for(int samp=0;samp<NUM_SAMP;samp++) {
+	    rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
+	    timeArray[surf][chan][samp]=time;
+	    time+=justBinByBin[surf][labChip][rco][samp]*tempFactor;
+	 }
       }
-    }
-  }  
+   }  
   return 0;
 }
 
@@ -920,7 +934,11 @@ void AnitaEventCalibrator::loadCalib() {
   char fileName[FILENAME_MAX];
   char *calibEnv=getenv("ANITA_CALIB_DIR");
   if(!calibEnv) {
-    sprintf(calibDir,"calib");
+     char *utilEnv=getenv("ANITA_UTIL_INSTALL_DIR");
+     if(!utilEnv)
+	sprintf(calibDir,"calib");
+     else
+	sprintf(calibDir,"%s/share/anitaCalib",utilEnv);
   }
   else {
     strncpy(calibDir,calibEnv,FILENAME_MAX);

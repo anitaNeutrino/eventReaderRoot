@@ -17,6 +17,15 @@
 
 ClassImp(UsefulAnitaEvent);
 
+
+Double_t getZeroCrossingPoint(Double_t x1, Double_t y1, Double_t x2, Double_t y2)
+{
+  Double_t m=(y1-y2)/(x1-x2);
+  Double_t c=y1-m*x1;
+  return (-1*c/m);
+}
+
+
 UsefulAnitaEvent::UsefulAnitaEvent() 
    : RawAnitaEvent()
 {
@@ -86,6 +95,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
       
       break;
    case WaveCalType::kJustTimeNoUnwrap:
+   case WaveCalType::kJustTimeNoUnwrapFakeTemp:
       //      std::cout << "WaveCalType::kJustUnwrap" << std::endl;
       //Fill struct with unwrapped raw values;      
       for(int surf=0;surf<NUM_SURF;surf++) {
@@ -116,7 +126,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	    memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
 	    memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
 	    for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
-	      this->fVolts[chanIndex][samp]=fCalibrator->unwrappedArray[surf][chan][samp]*2; //*2 for the bit shifting
+	       this->fVolts[chanIndex][samp]=fCalibrator->unwrappedArray[surf][chan][samp]*2; //*2 for the bit shifting
 	       this->fTimes[chanIndex][samp]=float(samp)/2.6;
 	    }
 	 }
@@ -178,13 +188,13 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	    memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
 	    memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
 	    for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
-		this->fVolts[chanIndex][samp]=fCalibrator->unwrappedArray[surf][chan][samp];
-		this->fTimes[chanIndex][samp]=fCalibrator->surfTimeArray[surf][samp]+
-		    fCalibrator->groupDelayCalib[surf][chan];
-		//		if(chan==0) {
-		   //		   std::cout << surf << "\t" << chan << "\t" << samp << "\t"
-		   //			     << fCalibrator->surfTimeArray[surf][samp] << std::endl;
-		//		}
+	       this->fVolts[chanIndex][samp]=fCalibrator->unwrappedArray[surf][chan][samp];
+	       this->fTimes[chanIndex][samp]=fCalibrator->surfTimeArray[surf][samp]+
+		  fCalibrator->groupDelayCalib[surf][chan];
+	       //		if(chan==0) {
+	       //		   std::cout << surf << "\t" << chan << "\t" << samp << "\t"
+	       //			     << fCalibrator->surfTimeArray[surf][samp] << std::endl;
+	       //		}
 	    }
 	 }
       }
@@ -216,17 +226,17 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	    for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
 	       //	       std::cout << fCalibrator->surfTimeArray[surf][samp] << "\t" 
 	       //		    << fCalibrator->mvArray[surf][chan][samp] << std::endl;
-		this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
-		this->fTimes[chanIndex][samp]=fCalibrator->surfTimeArray[surf][samp]+
-		    fCalibrator->groupDelayCalib[surf][chan];
+	       this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
+	       this->fTimes[chanIndex][samp]=fCalibrator->surfTimeArray[surf][samp]+
+		  fCalibrator->groupDelayCalib[surf][chan];
 	    }
 	 }
       }
       break;
        
-    case WaveCalType::kVTLabClockRG:
-    case WaveCalType::kVTLabClockZeroRG:
-       // kVTLabRG + Clock Jitter Correction (+ Zero Mean)
+   case WaveCalType::kVTLabClockRG:
+   case WaveCalType::kVTLabClockZeroRG:
+      // kVTLabRG + Clock Jitter Correction (+ Zero Mean)
       for(int surf=0;surf<NUM_SURF;surf++) {
 	 for(int chan=0;chan<NUM_CHAN;chan++) {
 	    int chanIndex=getChanIndex(surf,chan);
@@ -241,9 +251,9 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
       }      
       break;
 
-    case WaveCalType::kVTFullClockRG:
-    case WaveCalType::kVTFullClockZeroRG:
-       // kVTFullRG + Clock Jitter Correction (+ Zero Mean)
+   case WaveCalType::kVTFullClockRG:
+   case WaveCalType::kVTFullClockZeroRG:
+      // kVTFullRG + Clock Jitter Correction (+ Zero Mean)
       for(int surf=0;surf<NUM_SURF;surf++) {
 	 for(int chan=0;chan<NUM_CHAN;chan++) {
 	    int chanIndex=getChanIndex(surf,chan);
@@ -253,7 +263,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	    for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
 	       this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
 	       this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp]+
-		    fCalibrator->groupDelayCalib[surf][chan];
+		  fCalibrator->groupDelayCalib[surf][chan];
 	    }
 	 }
       }      
@@ -283,8 +293,8 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
    case WaveCalType::kVTFullJWPlusClockZero:  
    case WaveCalType::kVTFullJWPlusFastClockZero:
    case WaveCalType::kVTFullJWPlusFancyClockZero:        
-       // kVTFullJWPlus + Clock Jitter Correction (+ Zero Mean)
-       for(int surf=0;surf<NUM_SURF;surf++) {
+      // kVTFullJWPlus + Clock Jitter Correction (+ Zero Mean)
+      for(int surf=0;surf<NUM_SURF;surf++) {
 	 for(int chan=0;chan<NUM_CHAN;chan++) {
 	    int chanIndex=getChanIndex(surf,chan);
 	    this->fNumPoints[chanIndex]=fCalibrator->numPointsArray[surf][chan];
@@ -293,7 +303,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	    for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
 	       this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
 	       this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp]+
-		    fCalibrator->groupDelayCalib[surf][chan];
+		  fCalibrator->groupDelayCalib[surf][chan];
 	    }
 	 }
       }      
@@ -323,7 +333,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 
 TGraph *UsefulAnitaEvent::getGraphFromSurfAndChan(int surf, int chan) 
 {
-  return getGraph(getChanIndex(surf,chan));
+   return getGraph(getChanIndex(surf,chan));
 }
 
 TGraph *UsefulAnitaEvent::getGraph(int chanIndex)
@@ -333,8 +343,8 @@ TGraph *UsefulAnitaEvent::getGraph(int chanIndex)
    //   std::cout << chanIndex << std::endl;
    
    TGraph *grPtr=new TGraph(fNumPoints[chanIndex],
-				fTimes[chanIndex],
-				fVolts[chanIndex]);
+			    fTimes[chanIndex],
+			    fVolts[chanIndex]);
    return grPtr;
 }
 
@@ -354,3 +364,256 @@ TGraph *UsefulAnitaEvent::getGraph(AnitaRing::AnitaRing_t ring,
 
 }
 
+
+Int_t UsefulAnitaEvent::guessRcoRun3871(int chanIndex)
+{
+#define MAGIC_DELTAT 8
+#define START_EVENT 31853801
+   static UInt_t lastEvent=0;
+   static Int_t rcoArray[NUM_SURF];   
+   static TF1 *myFakeTemp=0;
+   if(lastEvent!=this->eventNumber) {
+      AnitaEventCalibrator *myCally = AnitaEventCalibrator::Instance();
+      Double_t timeVals[NUM_SURF][NUM_SAMP]={0};
+      Int_t labChip=this->getLabChip(chanIndex);
+      
+      if(!myFakeTemp) {	 
+	 myFakeTemp= new TF1("myFakeTemp","[0] + [1]*exp(-x*[2])",0,100000);
+	 myFakeTemp->SetParameters(8.07,0.13,1./30000);
+      }
+      
+      Double_t tempFactor=myFakeTemp->Eval(100000)/myFakeTemp->Eval(this->eventNumber-START_EVENT);
+      
+
+      for(int surf=0;surf<NUM_SURF;surf++) {
+	 //Fill in timebase
+	 Double_t time=0;
+	 for(int samp=0;samp<NUM_SAMP;samp++) {
+	    timeVals[surf][samp]=time;
+	    time+=myCally->justBinByBin[surf][labChip][0][samp]*tempFactor;
+	 }
+
+	 //Now we can try and find the zero crossings and periods.
+	 Int_t clockIndex=9*surf + 8;
+	 Int_t earliestSample=this->getEarliestSample(clockIndex);
+	 Int_t latestSample=this->getLatestSample(clockIndex);
+	 Double_t offset=TMath::Mean(NUM_SAMP,this->data[clockIndex]);
+	 
+	 Double_t deltaTFirstRco=0;
+	 Int_t numDeltaTFirstRco=0;
+	 Double_t deltaTSecondRco=0;
+	 Int_t numDeltaTSecondRco=0;
+
+	 if(latestSample<earliestSample) {
+	    //We have two RCOs
+	    {
+	       //Here is the first RCO
+	       Double_t posZcUp[100]={0};
+	       Double_t posZcDown[100]={0};
+	       Int_t numZcUp=0;
+	       Int_t numZcDown=0;	    
+	       for(int samp=earliestSample;samp<259;samp++) {
+		  Double_t firstVal=this->data[clockIndex][samp]-offset;
+		  Double_t secondVal=this->data[clockIndex][samp+1]-offset;
+		  if((firstVal>=0 && secondVal<=0)) {  
+		     //We have a ZC down
+		     posZcDown[numZcDown]=getZeroCrossingPoint(timeVals[surf][samp],firstVal,timeVals[surf][samp+1],secondVal);
+		     numZcDown++;
+		  }
+		  if((firstVal<=0 && secondVal>=0)) {  
+		     //We have a ZC up
+		     posZcUp[numZcUp]=getZeroCrossingPoint(timeVals[surf][samp],firstVal,timeVals[surf][samp+1],secondVal);
+		     numZcUp++;
+		  }
+	       }
+	    
+	       deltaTFirstRco=0;
+	       if(numZcDown>1) {	       
+		  for(int i=1;i<numZcDown;i++) {
+		     if((posZcDown[i]-posZcDown[i-1])>(MAGIC_DELTAT-0.5) && (posZcDown[i]-posZcDown[i-1])<(MAGIC_DELTAT+0.5)) {
+			deltaTFirstRco+=(posZcDown[i]-posZcDown[i-1]);
+			numDeltaTFirstRco++;
+		     }
+		  }
+	       }
+	       if(numZcUp>1) {	       
+		  for(int i=1;i<numZcUp;i++) {
+		     if((posZcUp[i]-posZcUp[i-1])>(MAGIC_DELTAT-0.5) && (posZcUp[i]-posZcUp[i-1])<(MAGIC_DELTAT+0.5)) {
+			deltaTFirstRco+=(posZcUp[i]-posZcUp[i-1]);
+			numDeltaTFirstRco++;
+		     }
+		  }
+	       }
+	       if(numDeltaTFirstRco>0) {
+		  deltaTFirstRco/=numDeltaTFirstRco;
+	       }
+	       else {
+		  deltaTFirstRco=0;
+	       }
+	    }
+
+	    {
+	       //Now lets do the second RCO
+	       
+	       Double_t posZcUp[100]={0};
+	       Double_t posZcDown[100]={0};
+	       Int_t numZcUp=0;
+	       Int_t numZcDown=0;
+	       if(latestSample>0) {
+		  for(int samp=0;samp<latestSample;samp++) {
+		     Double_t firstVal=this->data[clockIndex][samp]-offset;
+		     Double_t secondVal=this->data[clockIndex][samp+1]-offset;
+		     if((firstVal>=0 && secondVal<=0)) {  
+			//We have a ZC down
+			posZcDown[numZcDown]=getZeroCrossingPoint(timeVals[surf][samp],firstVal,timeVals[surf][samp+1],secondVal);
+			numZcDown++;
+		     }
+		     if((firstVal<=0 && secondVal>=0)) {  
+			//We have a ZC up
+			posZcUp[numZcUp]=getZeroCrossingPoint(timeVals[surf][samp],firstVal,timeVals[surf][samp+1],secondVal);
+			numZcUp++;
+		     }
+		  }
+
+		  deltaTSecondRco=0;
+		  if(numZcDown>1) {	       
+		     for(int i=1;i<numZcDown;i++) {
+			if((posZcDown[i]-posZcDown[i-1])>(MAGIC_DELTAT-0.5) && (posZcDown[i]-posZcDown[i-1])<(MAGIC_DELTAT+0.5)) {
+			   deltaTSecondRco+=(posZcDown[i]-posZcDown[i-1]);
+			   numDeltaTSecondRco++;
+			}
+		     }
+		  }
+		  if(numZcUp>1) {	       
+		     for(int i=1;i<numZcUp;i++) {
+			if((posZcUp[i]-posZcUp[i-1])>(MAGIC_DELTAT-0.5) && (posZcUp[i]-posZcUp[i-1])<(MAGIC_DELTAT+0.5)) {
+			   deltaTSecondRco+=(posZcUp[i]-posZcUp[i-1]);
+			   numDeltaTSecondRco++;
+			}
+		     }
+		  }
+		  if(numDeltaTSecondRco>0) {
+		     deltaTSecondRco/=numDeltaTSecondRco;
+		  }
+		  else {
+		     deltaTSecondRco=0;
+		  }		  		  
+	       }
+	    }
+	 }
+	 else {
+	    //Only one RCO
+
+	    Double_t posZcUp[100]={0};
+	    Double_t posZcDown[100]={0};
+	    Int_t numZcUp=0;
+	    Int_t numZcDown=0;
+	    for(int samp=earliestSample;samp<latestSample;samp++) {
+	       Double_t firstVal=this->data[clockIndex][samp]-offset;
+	       Double_t secondVal=this->data[clockIndex][samp+1]-offset;
+	       if((firstVal>=0 && secondVal<=0)) {  
+		  //We have a ZC down
+		  posZcDown[numZcDown]=getZeroCrossingPoint(timeVals[surf][samp],firstVal,timeVals[surf][samp+1],secondVal);
+		  numZcDown++;
+	       }
+	       if((firstVal<=0 && secondVal>=0)) {  
+		  //We have a ZC up
+		  posZcUp[numZcUp]=getZeroCrossingPoint(timeVals[surf][samp],firstVal,timeVals[surf][samp+1],secondVal);
+		  numZcUp++;
+	       }
+	    }
+
+	    deltaTFirstRco=0;
+	    if(numZcDown>1) {	       
+	       for(int i=1;i<numZcDown;i++) {
+		  if((posZcDown[i]-posZcDown[i-1])>(MAGIC_DELTAT-0.5) && (posZcDown[i]-posZcDown[i-1])<(MAGIC_DELTAT+0.5)) {
+		     deltaTFirstRco+=(posZcDown[i]-posZcDown[i-1]);
+		     numDeltaTFirstRco++;
+		  }
+	       }
+	    }
+	    if(numZcUp>1) {	       
+	       for(int i=1;i<numZcUp;i++) {
+		  if((posZcUp[i]-posZcUp[i-1])>(MAGIC_DELTAT-0.5) && (posZcUp[i]-posZcUp[i-1])<(MAGIC_DELTAT+0.5)) {
+		     deltaTFirstRco+=(posZcUp[i]-posZcUp[i-1]);
+		     numDeltaTFirstRco++;
+		  }
+	       }
+	    }
+	    if(numDeltaTFirstRco>0) {
+	       deltaTFirstRco/=numDeltaTFirstRco;
+	    }
+	    else {
+	       deltaTFirstRco=0;
+	    }
+	    
+	 }
+	 
+	 //Okay lets turn to the magic prognosticator
+	 if(numDeltaTFirstRco>0 && numDeltaTSecondRco>0) {
+	    //Now we can see if one is high and one is low
+	    if(deltaTFirstRco>MAGIC_DELTAT && deltaTSecondRco<MAGIC_DELTAT) {
+	       //Wahoo lets celebrate
+	       rcoArray[surf]=1; //Arbitrarily define the faster phase as 1
+	    }
+	    else if(deltaTFirstRco<MAGIC_DELTAT && deltaTFirstRco>MAGIC_DELTAT) {
+	       //Wahoo lets celebrate
+	       rcoArray[surf]=0; //Arbitrarily define the faster phase as 1
+	    }
+	    else if(numDeltaTFirstRco > numDeltaTSecondRco) {
+	       //Then well just assume the first one is correct
+	       if(deltaTFirstRco<MAGIC_DELTAT)
+		  rcoArray[surf]=0;
+	       else 
+		  rcoArray[surf]=1;
+	    }
+	    else if(numDeltaTFirstRco < numDeltaTSecondRco) {
+	       //Then well just assume the second one is correct
+	       if(deltaTSecondRco<MAGIC_DELTAT)
+		  rcoArray[surf]=1;
+	       else 
+		  rcoArray[surf]=0;
+	    }
+	    else { 
+	       if(numDeltaTFirstRco>5) {
+		  if(deltaTFirstRco>deltaTSecondRco)
+		     rcoArray[surf]=1;
+		  else
+		     rcoArray[surf]=0;
+	       }
+	       else {
+		  rcoArray[surf]=0;
+		  std::cerr << "Event " << this->eventNumber << " has broken RCO for SURF " << surf << "\t" << numDeltaTFirstRco << "\t" << numDeltaTSecondRco << "\t" << deltaTFirstRco << "\t" << deltaTSecondRco << "\n";
+	       }
+	    }
+	 }
+	 else if(numDeltaTFirstRco>0) {
+	    //Then well just assume the first one is correct
+	    if(deltaTFirstRco<MAGIC_DELTAT)
+	       rcoArray[surf]=0;
+	    else 
+	       rcoArray[surf]=1;	    
+	 }
+	 else if(numDeltaTSecondRco>0) {
+	    //Then well just assume the second one is correct
+	    if(deltaTSecondRco<MAGIC_DELTAT)
+	       rcoArray[surf]=1;
+	    else 
+	       rcoArray[surf]=0;
+	 }
+	 else {
+	    rcoArray[surf]=0;
+	    //We are right up the smelly stuff
+	    std::cerr << "Event " << this->eventNumber << " has broken RCO for SURF " << surf << "\n";
+	    std::cerr << "Event " << this->eventNumber << " has broken RCO for SURF " << surf << "\t" << numDeltaTFirstRco << "\t" << numDeltaTSecondRco << "\t" << deltaTFirstRco << "\t" << deltaTSecondRco << "\n";
+	 }  
+	 //	 if(surf==1) {
+	 //	  std::cout << rcoArray[surf] << "\t" << deltaTFirstRco << "\t" << deltaTSecondRco << "\n";
+	 //	 }
+      }
+      lastEvent=this->eventNumber;
+   }
+   int surf=chanIndex/9;
+   //   std::cout << surf << "\t" << chanIndex << "\t" << rcoArray[surf] << std::endl;
+   return rcoArray[surf];
+}
