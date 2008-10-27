@@ -28,7 +28,6 @@
  * \section manual_sec Manual
  * If you are averse to reading web pages (and who wouldn't be) you can download a <a href="manual/anitaEventReader.pdf">pdf copy of the reference material</a> but be warned it won't be a thrilling read as it was written by a computer program.
  */
- */
 
 #ifndef ANITACONVENTIONS_H
 #define ANITACONVENTIONS_H
@@ -71,6 +70,7 @@ namespace WaveCalType {
     kVTFullJWPlusFancyClockZero     = 0x14, ///< Switching to using soemthing like Andres correlation method
     kVTFullJWPlusFudge              = 0x15, ///< kVTFullJW + Voltage Correction +Fudge Factor
     kJustTimeNoUnwrap             = 0x16, ///< Only applies the timebase calibrations, for use in calibration testing
+    kJustTimeNoUnwrapFakeTemp             = 0x17, ///< Only applies the timebase calibrations, for use in calibration testing (fakes a temperature correction)
     kNotACalib
   } WaveCalType_t;
 

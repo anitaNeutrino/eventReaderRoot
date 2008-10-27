@@ -87,17 +87,17 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
   TFile *fpOut = new TFile(outName,"RECREATE");
   TH1F *histZcFirstRco[10][4];
   TH1F *histZcSecondRco[10][4];
-  TH1F *histZcChip[10][4];
+  TH1F *histZcChip[10][4][2];
   TH1F *histZcAll = new TH1F("histZcAll","histZcAll",260,-0.5,259.5); 
   TH1F *histSampFirstRco[10][4];
   TH1F *histSampSecondRco[10][4];
-  TH1F *histSampChip[10][4];
+  TH1F *histSampChip[10][4][2];
   TH1F *histSampAll = new TH1F("histSampAll","histSampAll",260,-0.5,259.5); 
   TTree *zcTree = new TTree("zcTree","Tree of ZC stuff");
   Int_t zcPreHitbus,zcPostHitbus;
   Int_t sampPreHitbus,sampPostHitbus;
   Int_t earliestSample,latestSample;
-  Int_t surfNum,chipNum;
+  Int_t surfNum,chipNum,rcoNum;
   Int_t got255;
   zcTree->Branch("sampPreHitbus",&sampPreHitbus,"sampPreHitbus/I");
   zcTree->Branch("sampPostHitbus",&sampPostHitbus,"sampPostHitbus/I");
@@ -107,6 +107,7 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
   zcTree->Branch("latestSample",&latestSample,"latestSample/I");
   zcTree->Branch("surf",&surfNum,"surf/I");
   zcTree->Branch("chip",&chipNum,"chip/I");
+  zcTree->Branch("rco",&rcoNum,"rco/I");
   zcTree->Branch("got255",&got255,"got255/I");
 
   char histName[180];
@@ -119,9 +120,6 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
 	sprintf(histName,"histZcSecondRco_%d_%d",surf,lab);
 	sprintf(histTitle,"Zero Crossings Second RCO (SURF %d , Chip %d)",surf,lab);
 	histZcSecondRco[surf][lab] = new TH1F(histName,histTitle,260,-0.5,259.5);
-	sprintf(histName,"histZcChip_%d_%d",surf,lab);
-	sprintf(histTitle,"Zero Crossings Both RCO (SURF %d, Chip %d)",surf,lab);
-	histZcChip[surf][lab] = new TH1F(histName,histTitle,260,-0.5,259.5);
 
 	sprintf(histName,"histSampFirstRco_%d_%d",surf,lab);
 	sprintf(histTitle,"Zero Crossings First RCO (SURF %d, Chip %d)",surf,lab);
@@ -129,9 +127,15 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
 	sprintf(histName,"histSampSecondRco_%d_%d",surf,lab);
 	sprintf(histTitle,"Zero Crossings Second RCO (SURF %d , Chip %d)",surf,lab);
 	histSampSecondRco[surf][lab] = new TH1F(histName,histTitle,260,-0.5,259.5);
-	sprintf(histName,"histSampChip_%d_%d",surf,lab);
-	sprintf(histTitle,"Zero Crossings Both RCO (SURF %d, Chip %d)",surf,lab);
-	histSampChip[surf][lab] = new TH1F(histName,histTitle,260,-0.5,259.5);
+
+	for(int rco=0;rco<2;rco++) {
+	   sprintf(histName,"histZcChip_%d_%d_%d",surf,lab,rco);
+	   sprintf(histTitle,"Zero Crossings Both RCO (SURF %d, Chip %d, RCO %d)",surf,lab,rco);
+	   histZcChip[surf][lab][rco] = new TH1F(histName,histTitle,260,-0.5,259.5);
+	   sprintf(histName,"histSampChip_%d_%d_%d",surf,lab,rco);
+	   sprintf(histTitle,"Zero Crossings Both RCO (SURF %d, Chip %d, RCO %d)",surf,lab,rco);
+	   histSampChip[surf][lab][rco] = new TH1F(histName,histTitle,260,-0.5,259.5);
+	}
      }
   }
 
@@ -164,7 +168,8 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
        
        surfNum=surf;
        chipNum=labChip;
-
+       rcoNum=realEvent.guessRcoRun3871(surf*9 + chan);
+       
        if(earliestSample>259) 
 	  earliestSample=0;
        if(latestSample<0) 
@@ -174,10 +179,11 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
        got255=0;
        if(latestSample<earliestSample) {
 	  //We have two RCO's	  
+	  Int_t firstRco=1-rcoNum;
 	  Int_t countZC=0;
 	  for(int samp=earliestSample;samp<259;samp++) {
 	     histSampAll->Fill(samp,1);
-	     histSampChip[surf][labChip]->Fill(samp,1);
+	     histSampChip[surf][labChip][firstRco]->Fill(samp,1);
 	     histSampFirstRco[surf][labChip]->Fill(samp,1);
 	     Double_t firstVal=adcs[samp]-offset;
 	     Double_t secondVal=adcs[samp+1]-offset;
@@ -185,7 +191,7 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
 		//We have a ZC
 		countZC++;
 		histZcFirstRco[surf][labChip]->Fill(samp,1);
-		histZcChip[surf][labChip]->Fill(samp,1);
+		histZcChip[surf][labChip][firstRco]->Fill(samp,1);
 		histZcAll->Fill(samp,1);
 		if(samp==254 || samp==255)
 		  got255++;
@@ -195,9 +201,10 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
 	  sampPostHitbus=260-earliestSample;
 	  countZC=0;
 	  if(latestSample>0) {
+	     int secondRco=rcoNum;
 	     for(int samp=0;samp<latestSample;samp++) {
 		histSampAll->Fill(samp,1);
-		histSampChip[surf][labChip]->Fill(samp,1);
+		histSampChip[surf][labChip][secondRco]->Fill(samp,1);
 		histSampSecondRco[surf][labChip]->Fill(samp,1);
 		Double_t firstVal=adcs[samp]-offset;
 		Double_t secondVal=adcs[samp+1]-offset;
@@ -205,7 +212,7 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
 		if((firstVal>=0 && secondVal<=0) || (firstVal<=0 && secondVal>=0)) {   
 		   countZC++;
 		   histZcSecondRco[surf][labChip]->Fill(samp,1);
-		   histZcChip[surf][labChip]->Fill(samp,1);
+		   histZcChip[surf][labChip][secondRco]->Fill(samp,1);
 		   histZcAll->Fill(samp,1);
 		   if(samp==254 || samp==255)
 		     got255++;
@@ -222,7 +229,7 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
 	  Int_t countZC=0;
 	  for(int samp=earliestSample;samp<latestSample;samp++) {
 	     histSampAll->Fill(samp,1);
-	     histSampChip[surf][labChip]->Fill(samp,1);
+	     histSampChip[surf][labChip][rcoNum]->Fill(samp,1);
 	     histSampFirstRco[surf][labChip]->Fill(samp,1);
 	     Double_t firstVal=adcs[samp]-offset;
 	     Double_t secondVal=adcs[samp+1]-offset;
@@ -234,7 +241,7 @@ void quickZCPlot(char *baseName, int run, int startEntry, int numEntries) {
 
 		countZC++;
 		histZcFirstRco[surf][labChip]->Fill(samp,1);
-		histZcChip[surf][labChip]->Fill(samp,1);
+		histZcChip[surf][labChip][rcoNum]->Fill(samp,1);
 		histZcAll->Fill(samp,1);
 		if(samp==254 || samp==255)
 		  got255++;

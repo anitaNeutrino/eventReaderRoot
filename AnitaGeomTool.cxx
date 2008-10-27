@@ -353,7 +353,11 @@ void AnitaGeomTool::readPhotogrammetry()
   char fileName[FILENAME_MAX];
   char *calibEnv=getenv("ANITA_CALIB_DIR");
   if(!calibEnv) {
-    sprintf(calibDir,"calib");
+    char *utilEnv=getenv("ANITA_UTIL_INSTALL_DIR");
+    if(!utilEnv)
+      sprintf(calibDir,"calib");
+    else
+      sprintf(calibDir,"%s/share/anitaCalib",utilEnv);    
   }
   else {
     strncpy(calibDir,calibEnv,FILENAME_MAX);
