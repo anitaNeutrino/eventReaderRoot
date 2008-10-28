@@ -155,9 +155,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
 {
  
    if(calType==WaveCalType::kJustTimeNoUnwrap)
-      return justBinByBinTimebase(eventPtr,0);
-   if(calType==WaveCalType::kJustTimeNoUnwrapFakeTemp)
-      return justBinByBinTimebase(eventPtr,1);
+      return justBinByBinTimebase(eventPtr);
 
    fApplyClockFudge=0;
    if(calType==WaveCalType::kVTFullJWPlusFudge || calType==WaveCalType::kVTFullJWPlusFancyClockZero)
@@ -540,30 +538,43 @@ void AnitaEventCalibrator::zeroMean() {
 
 }
 
-int AnitaEventCalibrator::justBinByBinTimebase(UsefulAnitaEvent *eventPtr,Int_t doFakeTemp)
+int AnitaEventCalibrator::justBinByBinTimebase(UsefulAnitaEvent *eventPtr)
 {
-   Int_t refEvNum=31853801;
-   if(!fFakeTemp) {
-      fFakeTemp= new TF1("fFakeTemp","[0] + [1]*exp(-x*[2])",0,100000);
-      fFakeTemp->SetParameters(8.07,0.13,1./30000);
-   }
-   Double_t tempFactor=1;
-   if(doFakeTemp) {
-      tempFactor=fFakeTemp->Eval(100000)/fFakeTemp->Eval(eventPtr->eventNumber-refEvNum);
-   }
-      
+//    Int_t refEvNum=31853801;
+//    if(!fFakeTemp) {
+//       fFakeTemp= new TF1("fFakeTemp","[0] + [1]*exp(-x*[2])",0,100000);
+//       fFakeTemp->SetParameters(8.07,0.13,1./30000);
+//    }
+//    Double_t tempFactor=1;
+//    if(doFakeTemp) {
+//       tempFactor=fFakeTemp->Eval(100000)/fFakeTemp->Eval(eventPtr->eventNumber-refEvNum);
+//    }
+  Double_t tempFactor=eventPtr->getTempCorrectionFactor();
+        
 
    for(int surf=0;surf<NUM_SURF;surf++) {
       for(int chan=0;chan<NUM_CHAN;chan++) {	 	 
 	 int chanIndex=getChanIndex(surf,chan);
 	 int labChip=eventPtr->getLabChip(chanIndex);
-	 int rco=eventPtr->getRCO(chanIndex);
+	 int rco=eventPtr->guessRco(chanIndex); ///< Is this the right thing to do??
 	 
+	 Int_t earliestSample=eventPtr->getEarliestSample(chanIndex);
+	 Int_t latestSample=eventPtr->getLatestSample(chanIndex);
+	 
+
 	 float time=0;
 	 for(int samp=0;samp<NUM_SAMP;samp++) {
-	    rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
-	    timeArray[surf][chan][samp]=time;
-	    time+=justBinByBin[surf][labChip][rco][samp]*tempFactor;
+	   int binRco=rco;
+	   rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
+	   timeArray[surf][chan][samp]=time;
+	   if(latestSample<earliestSample) {
+	     //We have two rcos
+	     if(samp>=earliestSample)
+	       binRco=1-rco;
+	     else 
+	       binRco=rco;
+	   }
+	   time+=justBinByBin[surf][labChip][binRco][samp]*tempFactor;
 	 }
       }
    }  
