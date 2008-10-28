@@ -69,8 +69,7 @@ namespace WaveCalType {
     kVTFullJWPlusFastClockZero      = 0x13,  ///< kVTFullJWPlusClock (but faster and worse)  + Zero Mean
     kVTFullJWPlusFancyClockZero     = 0x14, ///< Switching to using soemthing like Andres correlation method
     kVTFullJWPlusFudge              = 0x15, ///< kVTFullJW + Voltage Correction +Fudge Factor
-    kJustTimeNoUnwrap             = 0x16, ///< Only applies the timebase calibrations, for use in calibration testing
-    kJustTimeNoUnwrapFakeTemp             = 0x17, ///< Only applies the timebase calibrations, for use in calibration testing (fakes a temperature correction)
+    kJustTimeNoUnwrap             = 0x16, ///< Only applies the timebase calibrations, for use in calibration testing.
     kNotACalib
   } WaveCalType_t;
 

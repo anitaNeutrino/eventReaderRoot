@@ -13,5 +13,5 @@ void runGetClockPeriod() {
   gSystem->Load("libAnitaEvent.so");
 
   gSystem->CompileMacro("getClockPeriod.C","k");
-  getClockPeriod("/unix/anita2/palestine08/root/",3871,0,10000000);
+  getClockPeriod("/unix/anita2/palestine08/root/",3871,0,100000);
 }
