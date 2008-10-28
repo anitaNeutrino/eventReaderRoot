@@ -82,13 +82,27 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
     -  "Bit 2" is sync slip between SURF 1 and software
     -  "Bit 3" is sync slip between SURF 10 and SURF 1
     -  "Bit 4" is non matching TURF test pattern
+    -  "Bits 5-8" reserved (currently zero)
   */
   UChar_t         errorFlag;
   UChar_t         surfSlipFlag; ///< Sync Slip between SURF 2-9 and SURF 1
   UChar_t         nadirAntTrigMask; ///< 8-bit nadir phi mask (from TURF)
   UInt_t          antTrigMask; ///< 2x 16-bit phi ant mask (from TURF)
   UShort_t        phiTrigMask; ///< 16-bit phi mask (from TURF)
-  UChar_t         reserved[2]; ///< [0]&0xf is TURF hold for this trigger, [0]&0xf0 is active TURF holds
+  //!  Reserved bytes
+  /*!
+    The lower four bits of the first byte (reserved[0]&0xf) show the TURF hold issued for this trigger. There should be only one buffer held per trigger and it should match the SURF labrador readout for the event.
+    Here we are coutning bits from 1 to 4
+    -  "Bit 1" is hold 1 (buffer A)
+    -  "Bit 2" is hold 2 (buffer B)
+    -  "Bit 3" is hold 3 (buffer C)
+    -  "Bit 4" is hold 4 (buffer D)
+
+The upper four bits of the first byte (reserved[0]&0xf0)>>4 show which TURF holds were acitve when the trigger was formed. The bits have the same meaning as above. It is possible to have all holds active (in which case there are no free buffers and the trigger is dead until a buffer becomes available).
+
+The second byte (reserved[1]) is currently reserved.
+  */
+  UChar_t         reserved[2]; // [0]&0xf is TURF hold for this trigger, [0]&0xf0 is active TURF holds
   UChar_t         trigType; ///< Bit 0 is RF, 1 is ADU5, 2 is G12, 3 is software/external
   UChar_t         l3Type1Count; ///< Count of l3 type 1 triggers
   UShort_t        trigNum; ///< Trigger number (since last clear all)
@@ -96,16 +110,22 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
   UInt_t          c3poNum; ///< Number of TURF clock ticks between GPS pulse per seconds
   UShort_t        ppsNum; ///< Number of GPS PPS since last clear all
   UShort_t        deadTime; ///< Deadtime as measured as a fraction of a second that all buffers were full (65535 means 100% dead)
-  UChar_t         bufferDepth; ///< Buffer depth 
+  //!  Buffer depth
+  /*!
+    The lowest two bits (bufferDepth&0x3) are a two-bit number (with range 0-3) that count the number of held buffers at the time of the trigger.
+
+    The next lowest two bits (bufferDepth&0xc)>>2 are a two-bit number (with range 0-3) that count the number of held buffers at the time of readout.
+  */
+  UChar_t         bufferDepth; // Buffer depth 
   UChar_t         turfioReserved; ///< Reserved
-  UShort_t        upperL1TrigPattern; ///< Bit mask for upper ring l1 antenna triggers
-  UShort_t        lowerL1TrigPattern; ///< Bit mask for lower ring l1 antenna triggers
-  UShort_t        upperL2TrigPattern; ///< Bit mask for upper ring l2 cluster triggers
-  UShort_t        lowerL2TrigPattern; ///< Bit mask for lower ring l2 cluster triggers
-  UShort_t        l3TrigPattern; ///< Bit mask for l3 global triggers
+  UShort_t        upperL1TrigPattern; ///< Bit mask for upper ring l1 antenna triggers. eg. if the bit 1 (the lowest bit) is active it means the upper ring antenna in phi sector 1 contributes an L1 trigger to the event.
+  UShort_t        lowerL1TrigPattern; ///< Bit mask for lower ring l1 antenna triggers. eg. if the bit 1 (the lowest bit) is active it means the lower ring antenna in phi sector 1 contributes an L1 trigger to the event.
+  UShort_t        upperL2TrigPattern; ///< Bit mask for upper ring l2 cluster triggers. eg. if the bit 1 (the lowest bit) is active it means the three antenna cluster centred on the upper ring antenna in phi sector 1 contributes an L2 trigger to the event.
+  UShort_t        lowerL2TrigPattern; ///< Bit mask for lower ring l2 cluster triggers. eg. if the bit 1 (the lowest bit) is active it means the three antenna cluster centred on the lower ring antenna in phi sector 1 contributes an L2 trigger to the event.
+  UShort_t        l3TrigPattern; ///< Bit mask for l3 global triggers. eg. if the bit 1 (the lowest bit) is active it means that phi sector 1 contributed an L3 trigger to the event.
   UShort_t        otherTrigPattern[3]; ///< Other trig patterns -- currently reserved
-  UChar_t         nadirL1TrigPattern; ///< 8-bit trigger mask for L1 nadir triggers
-  UChar_t         nadirL2TrigPattern; ///< 8-bit trigger mask for L2 nadir triggers
+  UChar_t         nadirL1TrigPattern; ///< 8-bit trigger mask for L1 nadir triggers. Here bit 1 is antenna 33 (phi 1), bit 2 is antenna 34 (phi 3), bit 3 is antenna 35 (phi 5), bit 4 is antenna 36 (phi 7), bit 5 is antenna 37 (phi 9), bit 6 is antenna 38 (phi 11), bit 7 is antenna 39 (phi 13) and bit 8 is antenna 40 (phi 15).
+  UChar_t         nadirL2TrigPattern; ///< 8-bit trigger mask for L2 nadir triggers. Nadir L2 triggers are for the even phi sectors and are just the OR of the neighbouring antennas. So bit 1 is phi sector 2 (the OR of phi 1 and phi 3), through to bit 8 is phi sector 16 (the OR of phi's 15 and 1).
   UInt_t          triggerTime; ///< Trigger time from TURF converted to unixTime
   UInt_t          triggerTimeNs; ///< Trigger time in ns from TURF
   Int_t           goodTimeFlag; ///< 1 is good trigger time, 0 is bad trigger time
