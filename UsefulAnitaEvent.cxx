@@ -136,7 +136,8 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
     }
     break;
   case WaveCalType::kVTLabRG:
-    //All my lovely numbers    
+  case WaveCalType::kVTLabAG:
+    //All Abby's lovely numbers    
     for(int surf=0;surf<NUM_SURF;surf++) {
       for(int chan=0;chan<NUM_CHAN;chan++) {
 	int chanIndex=getChanIndex(surf,chan);

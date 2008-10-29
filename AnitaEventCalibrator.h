@@ -70,6 +70,7 @@ class AnitaEventCalibrator : public TObject
 
   //Calibration constants for first pass bin-by-bin
   float justBinByBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
+  float epsilonFromAbby[NUM_SURF][NUM_CHIP][NUM_RCO]; ///< Note the rco here is the rco which the event reports (ie. 1-->0 goes in [0] and 0-->1 goes in [1]
 
   //Cable Length Calib
   float groupDelayCalib[NUM_SURF][NUM_CHAN];
@@ -92,12 +93,13 @@ class AnitaEventCalibrator : public TObject
   TF1 *fFakeTemp;
   int justBinByBinTimebase(UsefulAnitaEvent *eventPtr);
   void processEventRG(UsefulAnitaEvent *eventPtr); ///< Worker function for the RG (defunct) calibrations
-  void processEventJW(UsefulAnitaEvent *eventPtr,float temp); ///< Worker function for the JW calibrations
+  void processEventJW(UsefulAnitaEvent *eventPtr); ///< Worker function for the JW calibrations
   void zeroMean(); ///< Worker function for zero meaning the waveform
   void processClockJitter(); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration
   void processClockJitterFast(); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- fast method
   void processClockJitterCorrelation(); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- using cross-correlation
-
+  void processEventAG(UsefulAnitaEvent *eventPtr);
+  
  protected:
    static AnitaEventCalibrator *fgInstance;  
    // protect against multiple instances
