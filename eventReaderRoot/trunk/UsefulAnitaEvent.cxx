@@ -39,13 +39,13 @@ UsefulAnitaEvent::UsefulAnitaEvent()
 UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, PrettyAnitaHk *theHk) 
   : RawAnitaEvent(*eventPtr)
 {
-   fLastEventGuessed=0;
-   if(theHk) {
-      gotCalibTemp=1;
-      calibTemp=theHk->intTemps[2];
-   }
-   else 
-      gotCalibTemp=0;
+  fLastEventGuessed=0;
+  if(theHk) {
+    gotCalibTemp=1;
+    calibTemp=theHk->intTemps[2];
+  }
+  else 
+    gotCalibTemp=0;
    
   //Default Constructor
   calibrateEvent(calType);
@@ -371,184 +371,86 @@ TGraph *UsefulAnitaEvent::getGraph(AnitaRing::AnitaRing_t ring,
 Int_t UsefulAnitaEvent::guessRco(int chanIndex)
 {
  
-   if(fLastEventGuessed!=this->eventNumber) 
-      analyseClocksForGuesses();
-   return fRcoArray[chanIndex/9];
+  if(fLastEventGuessed!=this->eventNumber) 
+    analyseClocksForGuesses();
+  return fRcoArray[chanIndex/9];
 }
 
 Double_t UsefulAnitaEvent::getTempCorrectionFactor()
 {
-   if(gotCalibTemp) {
-      float tempScale=29.938/(31.7225-0.054*calibTemp);
-      return tempScale;
-   }
-   else {
-      if(fLastEventGuessed!=this->eventNumber) 
-	 analyseClocksForGuesses();
-      return fTempFactorGuess;
-   }
+  if(gotCalibTemp) {
+    float tempScale=29.938/(31.7225-0.054*calibTemp);
+    return tempScale;
+  }
+  else {
+    if(fLastEventGuessed!=this->eventNumber) 
+      analyseClocksForGuesses();
+    return fTempFactorGuess;
+  }
 }
 
 void UsefulAnitaEvent::analyseClocksForGuesses() 
 {
-    AnitaEventCalibrator *myCally = AnitaEventCalibrator::Instance();
-    Double_t timeVals[NUM_SURF][NUM_SAMP][2]={0};
-    Int_t labChip=this->getLabChip(8);
+  AnitaEventCalibrator *myCally = AnitaEventCalibrator::Instance();
+  Double_t timeVals[NUM_SURF][NUM_SAMP][2]={0};
+  Int_t labChip=this->getLabChip(8);
   
-    Double_t tempFactor=1;
-    if(gotCalibTemp)
-       tempFactor=getTempCorrectionFactor();
-    //Somehow are going to try and fudge things so that we can guess the
-    //temperature correction
+  Double_t tempFactor=1;
+  if(gotCalibTemp)
+    tempFactor=getTempCorrectionFactor();
+  //Somehow are going to try and fudge things so that we can guess the
+  //temperature correction
     
-    Double_t deltaTFirstRco[NUM_SURF][2]={0};
-    Int_t numDeltaTFirstRco[NUM_SURF][2]={0};
-    Double_t deltaTSecondRco[NUM_SURF][2]={0};
-    Int_t numDeltaTSecondRco[NUM_SURF][2]={0};
+  Double_t deltaTFirstRco[NUM_SURF][2]={0};
+  Int_t numDeltaTFirstRco[NUM_SURF][2]={0};
+  Double_t deltaTSecondRco[NUM_SURF][2]={0};
+  Int_t numDeltaTSecondRco[NUM_SURF][2]={0};
       
-    for(int surf=0;surf<NUM_SURF;surf++) {
-      //Fill in timebase
+  for(int surf=0;surf<NUM_SURF;surf++) {
+    //Fill in timebase
 
 
-      Double_t timeRco[2]={0};
-      for(int samp=0;samp<NUM_SAMP;samp++) {
-	 for(int rco=0;rco<2;rco++) {
-	    timeVals[surf][samp][rco]=timeRco[rco];
-	    timeRco[rco]+=myCally->justBinByBin[surf][labChip][rco][samp]*tempFactor;
-	 }
+    Double_t timeRco[2]={0};
+    for(int samp=0;samp<NUM_SAMP;samp++) {
+      for(int rco=0;rco<2;rco++) {
+	timeVals[surf][samp][rco]=timeRco[rco];
+	timeRco[rco]+=myCally->justBinByBin[surf][labChip][rco][samp]*tempFactor;
       }
+    }
 
-      //Now we can try and find the zero crossings and periods.
-      Int_t clockIndex=9*surf + 8;
-      Int_t earliestSample=this->getEarliestSample(clockIndex);
-      Int_t latestSample=this->getLatestSample(clockIndex);
-      Double_t offset=TMath::Mean(NUM_SAMP,this->data[clockIndex]);
+    //Now we can try and find the zero crossings and periods.
+    Int_t clockIndex=9*surf + 8;
+    Int_t earliestSample=this->getEarliestSample(clockIndex);
+    Int_t latestSample=this->getLatestSample(clockIndex);
+    Double_t offset=TMath::Mean(NUM_SAMP,this->data[clockIndex]);
 	 
 
-      for(int rcoGuess=0;rcoGuess<2;rcoGuess++) {
-	//	   rcoGuess==0  means first rco is 1
-	//      rcoGuess==1 means first rco is 0
-	if(latestSample<earliestSample) {
-	  //We have two RCOs
-	  {
-	    //Here is the first RCO
-	    Double_t posZcUp[100]={0};
-	    Double_t posZcDown[100]={0};
-	    Int_t numZcUp=0;
-	    Int_t numZcDown=0;	    
-	    for(int samp=earliestSample;samp<259;samp++) {
-	      Double_t firstVal=this->data[clockIndex][samp]-offset;
-	      Double_t secondVal=this->data[clockIndex][samp+1]-offset;
-	      if((firstVal>=0 && secondVal<=0)) {  
-		//We have a ZC down
-		posZcDown[numZcDown]=getZeroCrossingPoint(timeVals[surf][samp][1-rcoGuess],firstVal,timeVals[surf][samp+1][1-rcoGuess],secondVal);
-		numZcDown++;
-	      }
-	      if((firstVal<=0 && secondVal>=0)) {  
-		//We have a ZC up
-		posZcUp[numZcUp]=getZeroCrossingPoint(timeVals[surf][samp][1-rcoGuess],firstVal,timeVals[surf][samp+1][1-rcoGuess],secondVal);
-		numZcUp++;
-	      }
-	    }
-	       
-	    deltaTFirstRco[surf][rcoGuess]=0;
-	    if(numZcDown>1) {	       
-	      for(int i=1;i<numZcDown;i++) {
-		if((posZcDown[i]-posZcDown[i-1])>(MAGIC_DELTAT-0.5) && (posZcDown[i]-posZcDown[i-1])<(MAGIC_DELTAT+0.5)) {
-		  deltaTFirstRco[surf][rcoGuess]+=(posZcDown[i]-posZcDown[i-1]);
-		  numDeltaTFirstRco[surf][rcoGuess]++;
-		}
-	      }
-	    }
-	    if(numZcUp>1) {	       
-	      for(int i=1;i<numZcUp;i++) {
-		if((posZcUp[i]-posZcUp[i-1])>(MAGIC_DELTAT-0.5) && (posZcUp[i]-posZcUp[i-1])<(MAGIC_DELTAT+0.5)) {
-		  deltaTFirstRco[surf][rcoGuess]+=(posZcUp[i]-posZcUp[i-1]);
-		  numDeltaTFirstRco[surf][rcoGuess]++;
-		}
-	      }
-	    }
-	    if(numDeltaTFirstRco[surf][rcoGuess]>0) {
-	      deltaTFirstRco[surf][rcoGuess]/=numDeltaTFirstRco[surf][rcoGuess];
-	    }
-	    else {
-	      deltaTFirstRco[surf][rcoGuess]=0;
-	    }
-	  }
-
-	  {
-	    //Now lets do the second RCO
-	       
-	    Double_t posZcUp[100]={0};
-	    Double_t posZcDown[100]={0};
-	    Int_t numZcUp=0;
-	    Int_t numZcDown=0;
-	    if(latestSample>0) {
-	      for(int samp=0;samp<latestSample;samp++) {
-		Double_t firstVal=this->data[clockIndex][samp]-offset;
-		Double_t secondVal=this->data[clockIndex][samp+1]-offset;
-		if((firstVal>=0 && secondVal<=0)) {  
-		  //We have a ZC down
-		  posZcDown[numZcDown]=getZeroCrossingPoint(timeVals[surf][samp][rcoGuess],firstVal,timeVals[surf][samp+1][rcoGuess],secondVal);
-		  numZcDown++;
-		}
-		if((firstVal<=0 && secondVal>=0)) {  
-		  //We have a ZC up
-		  posZcUp[numZcUp]=getZeroCrossingPoint(timeVals[surf][samp][rcoGuess],firstVal,timeVals[surf][samp+1][rcoGuess],secondVal);
-		  numZcUp++;
-		}
-	      }
-
-	      deltaTSecondRco[surf][rcoGuess]=0;
-	      numDeltaTSecondRco[surf][rcoGuess]=0;
-	      if(numZcDown>1) {	       
-		for(int i=1;i<numZcDown;i++) {
-		  if((posZcDown[i]-posZcDown[i-1])>(MAGIC_DELTAT-0.5) && (posZcDown[i]-posZcDown[i-1])<(MAGIC_DELTAT+0.5)) {
-		    deltaTSecondRco[surf][rcoGuess]+=(posZcDown[i]-posZcDown[i-1]);
-		    numDeltaTSecondRco[surf][rcoGuess]++;
-		  }
-		}
-	      }
-	      if(numZcUp>1) {	       
-		for(int i=1;i<numZcUp;i++) {
-		  if((posZcUp[i]-posZcUp[i-1])>(MAGIC_DELTAT-0.5) && (posZcUp[i]-posZcUp[i-1])<(MAGIC_DELTAT+0.5)) {
-		    deltaTSecondRco[surf][rcoGuess]+=(posZcUp[i]-posZcUp[i-1]);
-		    numDeltaTSecondRco[surf][rcoGuess]++;
-		  }
-		}
-	      }
-	      if(numDeltaTSecondRco[surf][rcoGuess]>0) {
-		deltaTSecondRco[surf][rcoGuess]/=numDeltaTSecondRco[surf][rcoGuess];
-	      }
-	      else {
-		deltaTSecondRco[surf][rcoGuess]=0;
-	      }		  		  
-	    }
-	  }
-	}
-	else {
-	  //Only one RCO
-	  //	   In this case rcoGuess==0 means that the rco for the whole segment is zero
-	  //	   In this case rcoGuess==1 means that the rco for the whole segment is one
+    for(int rcoGuess=0;rcoGuess<2;rcoGuess++) {
+      //	   rcoGuess==0  means first rco is 1
+      //      rcoGuess==1 means first rco is 0
+      if(latestSample<earliestSample) {
+	//We have two RCOs
+	{
+	  //Here is the first RCO
 	  Double_t posZcUp[100]={0};
 	  Double_t posZcDown[100]={0};
 	  Int_t numZcUp=0;
-	  Int_t numZcDown=0;
-	  for(int samp=earliestSample;samp<latestSample;samp++) {
+	  Int_t numZcDown=0;	    
+	  for(int samp=earliestSample;samp<259;samp++) {
 	    Double_t firstVal=this->data[clockIndex][samp]-offset;
 	    Double_t secondVal=this->data[clockIndex][samp+1]-offset;
 	    if((firstVal>=0 && secondVal<=0)) {  
 	      //We have a ZC down
-	      posZcDown[numZcDown]=getZeroCrossingPoint(timeVals[surf][samp][rcoGuess],firstVal,timeVals[surf][samp+1][rcoGuess],secondVal);
+	      posZcDown[numZcDown]=getZeroCrossingPoint(timeVals[surf][samp][1-rcoGuess],firstVal,timeVals[surf][samp+1][1-rcoGuess],secondVal);
 	      numZcDown++;
 	    }
 	    if((firstVal<=0 && secondVal>=0)) {  
 	      //We have a ZC up
-	      posZcUp[numZcUp]=getZeroCrossingPoint(timeVals[surf][samp][rcoGuess],firstVal,timeVals[surf][samp+1][rcoGuess],secondVal);
+	      posZcUp[numZcUp]=getZeroCrossingPoint(timeVals[surf][samp][1-rcoGuess],firstVal,timeVals[surf][samp+1][1-rcoGuess],secondVal);
 	      numZcUp++;
 	    }
 	  }
-
+	       
 	  deltaTFirstRco[surf][rcoGuess]=0;
 	  if(numZcDown>1) {	       
 	    for(int i=1;i<numZcDown;i++) {
@@ -572,49 +474,223 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	  else {
 	    deltaTFirstRco[surf][rcoGuess]=0;
 	  }
-	    
+	}
+
+	{
+	  //Now lets do the second RCO
+	       
+	  Double_t posZcUp[100]={0};
+	  Double_t posZcDown[100]={0};
+	  Int_t numZcUp=0;
+	  Int_t numZcDown=0;
+	  if(latestSample>0) {
+	    for(int samp=0;samp<latestSample;samp++) {
+	      Double_t firstVal=this->data[clockIndex][samp]-offset;
+	      Double_t secondVal=this->data[clockIndex][samp+1]-offset;
+	      if((firstVal>=0 && secondVal<=0)) {  
+		//We have a ZC down
+		posZcDown[numZcDown]=getZeroCrossingPoint(timeVals[surf][samp][rcoGuess],firstVal,timeVals[surf][samp+1][rcoGuess],secondVal);
+		numZcDown++;
+	      }
+	      if((firstVal<=0 && secondVal>=0)) {  
+		//We have a ZC up
+		posZcUp[numZcUp]=getZeroCrossingPoint(timeVals[surf][samp][rcoGuess],firstVal,timeVals[surf][samp+1][rcoGuess],secondVal);
+		numZcUp++;
+	      }
+	    }
+
+	    deltaTSecondRco[surf][rcoGuess]=0;
+	    numDeltaTSecondRco[surf][rcoGuess]=0;
+	    if(numZcDown>1) {	       
+	      for(int i=1;i<numZcDown;i++) {
+		if((posZcDown[i]-posZcDown[i-1])>(MAGIC_DELTAT-0.5) && (posZcDown[i]-posZcDown[i-1])<(MAGIC_DELTAT+0.5)) {
+		  deltaTSecondRco[surf][rcoGuess]+=(posZcDown[i]-posZcDown[i-1]);
+		  numDeltaTSecondRco[surf][rcoGuess]++;
+		}
+	      }
+	    }
+	    if(numZcUp>1) {	       
+	      for(int i=1;i<numZcUp;i++) {
+		if((posZcUp[i]-posZcUp[i-1])>(MAGIC_DELTAT-0.5) && (posZcUp[i]-posZcUp[i-1])<(MAGIC_DELTAT+0.5)) {
+		  deltaTSecondRco[surf][rcoGuess]+=(posZcUp[i]-posZcUp[i-1]);
+		  numDeltaTSecondRco[surf][rcoGuess]++;
+		}
+	      }
+	    }
+	    if(numDeltaTSecondRco[surf][rcoGuess]>0) {
+	      deltaTSecondRco[surf][rcoGuess]/=numDeltaTSecondRco[surf][rcoGuess];
+	    }
+	    else {
+	      deltaTSecondRco[surf][rcoGuess]=0;
+	    }		  		  
+	  }
 	}
       }
-    }
+      else {
+	//Only one RCO
+	//	   In this case rcoGuess==0 means that the rco for the whole segment is zero
+	//	   In this case rcoGuess==1 means that the rco for the whole segment is one
+	Double_t posZcUp[100]={0};
+	Double_t posZcDown[100]={0};
+	Int_t numZcUp=0;
+	Int_t numZcDown=0;
+	for(int samp=earliestSample;samp<latestSample;samp++) {
+	  Double_t firstVal=this->data[clockIndex][samp]-offset;
+	  Double_t secondVal=this->data[clockIndex][samp+1]-offset;
+	  if((firstVal>=0 && secondVal<=0)) {  
+	    //We have a ZC down
+	    posZcDown[numZcDown]=getZeroCrossingPoint(timeVals[surf][samp][rcoGuess],firstVal,timeVals[surf][samp+1][rcoGuess],secondVal);
+	    numZcDown++;
+	  }
+	  if((firstVal<=0 && secondVal>=0)) {  
+	    //We have a ZC up
+	    posZcUp[numZcUp]=getZeroCrossingPoint(timeVals[surf][samp][rcoGuess],firstVal,timeVals[surf][samp+1][rcoGuess],secondVal);
+	    numZcUp++;
+	  }
+	}
 
-    if(!gotCalibTemp) {
-       //Somehow need to guess at the temperature calibration
-       //Found deltaT's now need to think about what to do
-       Double_t avgDelta[2]={0};
-       Int_t numDeltaT[2]={0};
-       for(int surf=0;surf<NUM_SURF;surf++) {
-	  for(int rco=0;rco<2;rco++) {
-	     avgDelta[rco]+=deltaTFirstRco[surf][rco]*numDeltaTFirstRco[surf][rco];
-	     numDeltaT[rco]+=numDeltaTFirstRco[surf][rco];
-	     avgDelta[rco]+=deltaTSecondRco[surf][rco]*numDeltaTSecondRco[surf][rco];
-	     numDeltaT[rco]+=numDeltaTSecondRco[surf][rco];
+	deltaTFirstRco[surf][rcoGuess]=0;
+	if(numZcDown>1) {	       
+	  for(int i=1;i<numZcDown;i++) {
+	    if((posZcDown[i]-posZcDown[i-1])>(MAGIC_DELTAT-0.5) && (posZcDown[i]-posZcDown[i-1])<(MAGIC_DELTAT+0.5)) {
+	      deltaTFirstRco[surf][rcoGuess]+=(posZcDown[i]-posZcDown[i-1]);
+	      numDeltaTFirstRco[surf][rcoGuess]++;
+	    }
 	  }
-       }
-       avgDelta[0]/=numDeltaT[0];
-       avgDelta[1]/=numDeltaT[1];
-       //    std::cout << avgDelta[0] << "\t" << avgDelta[1] << "\t" 
-       //	      << 0.5*(avgDelta[0]+avgDelta[1]) << "\n";
-       Double_t fullAvgDt=0.5*(avgDelta[0]+avgDelta[1]);
-       tempFactor=8.0/fullAvgDt;
-       for(int surf=0;surf<NUM_SURF;surf++) {
-	  for(int rco=0;rco<2;rco++) {
-	     deltaTFirstRco[surf][rco]*=tempFactor;
-	     deltaTSecondRco[surf][rco]*=tempFactor;
+	}
+	if(numZcUp>1) {	       
+	  for(int i=1;i<numZcUp;i++) {
+	    if((posZcUp[i]-posZcUp[i-1])>(MAGIC_DELTAT-0.5) && (posZcUp[i]-posZcUp[i-1])<(MAGIC_DELTAT+0.5)) {
+	      deltaTFirstRco[surf][rcoGuess]+=(posZcUp[i]-posZcUp[i-1]);
+	      numDeltaTFirstRco[surf][rcoGuess]++;
+	    }
 	  }
-       }
+	}
+	if(numDeltaTFirstRco[surf][rcoGuess]>0) {
+	  deltaTFirstRco[surf][rcoGuess]/=numDeltaTFirstRco[surf][rcoGuess];
+	}
+	else {
+	  deltaTFirstRco[surf][rcoGuess]=0;
+	}
+	    
+      }
     }
-    
+  }
+
+  if(!gotCalibTemp) {
+    //Somehow need to guess at the temperature calibration
+    //Found deltaT's now need to think about what to do
+    Double_t avgDelta[2]={0};
+    Int_t numDeltaT[2]={0};
+    for(int surf=0;surf<NUM_SURF;surf++) {
+      for(int rco=0;rco<2;rco++) {
+	avgDelta[rco]+=deltaTFirstRco[surf][rco]*numDeltaTFirstRco[surf][rco];
+	numDeltaT[rco]+=numDeltaTFirstRco[surf][rco];
+	avgDelta[rco]+=deltaTSecondRco[surf][rco]*numDeltaTSecondRco[surf][rco];
+	numDeltaT[rco]+=numDeltaTSecondRco[surf][rco];
+      }
+    }
+    avgDelta[0]/=numDeltaT[0];
+    avgDelta[1]/=numDeltaT[1];
+    //    std::cout << avgDelta[0] << "\t" << avgDelta[1] << "\t" 
+    //	      << 0.5*(avgDelta[0]+avgDelta[1]) << "\n";
+    Double_t fullAvgDt=0.5*(avgDelta[0]+avgDelta[1]);
+    tempFactor=MAGIC_DELTAT/fullAvgDt;
+    for(int surf=0;surf<NUM_SURF;surf++) {
+      for(int rco=0;rco<2;rco++) {
+	deltaTFirstRco[surf][rco]*=tempFactor;
+	deltaTSecondRco[surf][rco]*=tempFactor;
+      }
+    }
+  }
+
+  Double_t finalDt=0;   
+  Int_t numFinalDt=0;
+  for(int surf=0;surf<NUM_SURF;surf++) {	
+    if(numDeltaTFirstRco[surf][0]>0 && numDeltaTFirstRco[surf][1]>0 && numDeltaTSecondRco[surf][0]>0 && numDeltaTSecondRco[surf][1]>0) {
+      //Okay now we should just be able to compare the values;
+      if(TMath::Abs(deltaTFirstRco[surf][0]-deltaTSecondRco[surf][0])<
+	 TMath::Abs(deltaTFirstRco[surf][1]-deltaTSecondRco[surf][1])) {
+	fRcoArray[surf]=0;
+      }
+      else {
+	fRcoArray[surf]=1;
+      }
+
+      //Okay now lets check we haven't messed up
+      if(numDeltaTFirstRco[surf][0]>15 && numDeltaTFirstRco[surf][0]>15 && numDeltaTSecondRco[surf][0]<3 && numDeltaTSecondRco[surf][1]<3) {
+	if(
+	   (numDeltaTFirstRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][1-fRcoArray[surf]]+numDeltaTSecondRco[surf][1-fRcoArray[surf]]) 
+	   <
+	   (numDeltaTFirstRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][fRcoArray[surf]]+numDeltaTSecondRco[surf][fRcoArray[surf]])
+	   ) { 
+	  //Oops	      
+	  fRcoArray[surf]=1-fRcoArray[surf];
+	}
+      }
+
+      //Okay now lets check we haven't messed up
+      if(numDeltaTSecondRco[surf][0]>15 && numDeltaTSecondRco[surf][0]>15 && numDeltaTFirstRco[surf][0]<3 && numDeltaTFirstRco[surf][1]<3) {
+	if(
+	   (numDeltaTFirstRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][1-fRcoArray[surf]]+numDeltaTSecondRco[surf][1-fRcoArray[surf]]) 
+	   <
+	   (numDeltaTFirstRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][fRcoArray[surf]]+numDeltaTSecondRco[surf][fRcoArray[surf]])
+	   ) {
+	  //Oops	      
+	  fRcoArray[surf]=1-fRcoArray[surf];
+	}
+      }
+
+    }
+    else if(numDeltaTFirstRco[surf][0]>0 && numDeltaTFirstRco[surf][1]>0) {
+      //We only have one trace segment so we'll compare the period to MAGIC_DELTAT
+      if(TMath::Abs(deltaTFirstRco[surf][0]-MAGIC_DELTAT)<
+	 TMath::Abs(deltaTFirstRco[surf][1]-MAGIC_DELTAT)) {
+	fRcoArray[surf]=0;
+      }
+      else {
+	fRcoArray[surf]=1;
+      }	
+    }
+    else if(numDeltaTSecondRco[surf][0]>0 && numDeltaTSecondRco[surf][1]>0) {
+      //We only have one trace segment so we'll compare the period to MAGIC_DELTAT
+      if(TMath::Abs(deltaTSecondRco[surf][0]-MAGIC_DELTAT)<
+	 TMath::Abs(deltaTSecondRco[surf][1]-MAGIC_DELTAT)) {
+	fRcoArray[surf]=0;
+      }
+      else {
+	fRcoArray[surf]=1;
+      }
+	
+    }
+    else {	   
+      fRcoArray[surf]=0;
+      //We are right up the smelly stuff
+      std::cerr << "Event " << this->eventNumber << " has broken RCO for SURF " << surf << "\n";
+      std::cerr << "Event " << this->eventNumber << " has broken RCO for SURF " << surf << "\t" << numDeltaTFirstRco << "\t" << numDeltaTSecondRco << "\t" << deltaTFirstRco << "\t" << deltaTSecondRco << "\n";
+    }  
+
+    finalDt+=deltaTFirstRco[surf][fRcoArray[surf]]*numDeltaTFirstRco[surf][fRcoArray[surf]]/tempFactor;
+    numFinalDt+=numDeltaTFirstRco[surf][fRcoArray[surf]];
+    finalDt+=deltaTSecondRco[surf][fRcoArray[surf]]*numDeltaTSecondRco[surf][fRcoArray[surf]]/tempFactor;
+    numFinalDt+=numDeltaTSecondRco[surf][fRcoArray[surf]];
+  }
+  finalDt/=numFinalDt;
+  fTempFactorGuess=MAGIC_DELTAT/finalDt;
+  //    std::cout << fTempFactorGuess << "\n";
+
+  if(!gotCalibTemp) {
+    //Now we'll have another stab at the RCO's just for fun.  
+    finalDt=0;
+    numFinalDt=0;
+    for(int surf=0;surf<NUM_SURF;surf++) {
+      for(int rco=0;rco<2;rco++) {
+	deltaTFirstRco[surf][rco]*=fTempFactorGuess/tempFactor;
+	deltaTSecondRco[surf][rco]*=fTempFactorGuess/tempFactor;
+      }
+
+
 	  
-    //      for(int rcoGuess=0;rcoGuess<2;rcoGuess++) {
-    //	std::cout << rcoGuess << "\t" << numDeltaTFirstRco[surf][rcoGuess] 
-    //		  << "\t" << numDeltaTSecondRco[surf][rcoGuess] << "\t" 
-    //		  << deltaTFirstRco[surf][rcoGuess] << "\t"
-    //		  << deltaTSecondRco[surf][rcoGuess] << "\n";
-    //      }
-
-    Double_t finalDt=0;   
-    Int_t numFinalDt=0;
-    for(int surf=0;surf<NUM_SURF;surf++) {	
       if(numDeltaTFirstRco[surf][0]>0 && numDeltaTFirstRco[surf][1]>0 && numDeltaTSecondRco[surf][0]>0 && numDeltaTSecondRco[surf][1]>0) {
 	//Okay now we should just be able to compare the values;
 	if(TMath::Abs(deltaTFirstRco[surf][0]-deltaTSecondRco[surf][0])<
@@ -627,20 +703,26 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 
 	//Okay now lets check we haven't messed up
 	if(numDeltaTFirstRco[surf][0]>15 && numDeltaTFirstRco[surf][0]>15 && numDeltaTSecondRco[surf][0]<3 && numDeltaTSecondRco[surf][1]<3) {
-	   if(TMath::Abs(deltaTFirstRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT)<
-	      TMath::Abs(deltaTFirstRco[surf][fRcoArray[surf]]-MAGIC_DELTAT)) {
-	      //Oops	      
-	      fRcoArray[surf]=1-fRcoArray[surf];
-	   }
+	  if(
+	     (numDeltaTFirstRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][1-fRcoArray[surf]]+numDeltaTSecondRco[surf][1-fRcoArray[surf]]) 
+	     <
+	     (numDeltaTFirstRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][fRcoArray[surf]]+numDeltaTSecondRco[surf][fRcoArray[surf]])
+	     ) { 
+	    //Oops	      
+	    fRcoArray[surf]=1-fRcoArray[surf];
+	  }
 	}
 
 	//Okay now lets check we haven't messed up
 	if(numDeltaTSecondRco[surf][0]>15 && numDeltaTSecondRco[surf][0]>15 && numDeltaTFirstRco[surf][0]<3 && numDeltaTFirstRco[surf][1]<3) {
-	   if(TMath::Abs(deltaTSecondRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT)<
-	      TMath::Abs(deltaTSecondRco[surf][fRcoArray[surf]]-MAGIC_DELTAT)) {
-	      //Oops	      
-	      fRcoArray[surf]=1-fRcoArray[surf];
-	   }
+	  if(
+	     (numDeltaTFirstRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][1-fRcoArray[surf]]+numDeltaTSecondRco[surf][1-fRcoArray[surf]]) 
+	     <
+	     (numDeltaTFirstRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][fRcoArray[surf]]+numDeltaTSecondRco[surf][fRcoArray[surf]])
+	     ) {
+	    //Oops	      
+	    fRcoArray[surf]=1-fRcoArray[surf];
+	  }
 	}
 
       }
@@ -672,15 +754,20 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	std::cerr << "Event " << this->eventNumber << " has broken RCO for SURF " << surf << "\t" << numDeltaTFirstRco << "\t" << numDeltaTSecondRco << "\t" << deltaTFirstRco << "\t" << deltaTSecondRco << "\n";
       }  
 
-      finalDt+=deltaTFirstRco[surf][fRcoArray[surf]]*numDeltaTFirstRco[surf][fRcoArray[surf]]/tempFactor;
+      finalDt+=deltaTFirstRco[surf][fRcoArray[surf]]*numDeltaTFirstRco[surf][fRcoArray[surf]]/fTempFactorGuess;
       numFinalDt+=numDeltaTFirstRco[surf][fRcoArray[surf]];
-      finalDt+=deltaTSecondRco[surf][fRcoArray[surf]]*numDeltaTSecondRco[surf][fRcoArray[surf]]/tempFactor;
+      finalDt+=deltaTSecondRco[surf][fRcoArray[surf]]*numDeltaTSecondRco[surf][fRcoArray[surf]]/fTempFactorGuess;
       numFinalDt+=numDeltaTSecondRco[surf][fRcoArray[surf]];
+	  
+
     }
+
     finalDt/=numFinalDt;
-    fTempFactorGuess=8.0/finalDt;
-    //    std::cout << fTempFactorGuess << "\n";
-    fLastEventGuessed=this->eventNumber;
+    fTempFactorGuess=MAGIC_DELTAT/finalDt;
+  }
+       
+
+  fLastEventGuessed=this->eventNumber;
 }
 
 
