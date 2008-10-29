@@ -69,6 +69,7 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
 
   TFile *fpOut = new TFile(outName,"RECREATE");
   TTree *clockTree = new TTree("clockTree","Tree of ZC stuff");
+  UInt_t eventNum;
   Double_t deltaTUpPreHitbus;
   Double_t deltaTUpPostHitbus;
   Double_t deltaTDownPreHitbus;
@@ -78,6 +79,7 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
   Int_t sampPreHitbus,sampPostHitbus;
   Int_t earliestSample,latestSample;
   Int_t surfNum,chipNum,rcoNum;
+  clockTree->Branch("event",&eventNum,"event/i");
   clockTree->Branch("sampPreHitbus",&sampPreHitbus,"sampPreHitbus/I");
   clockTree->Branch("sampPostHitbus",&sampPostHitbus,"sampPostHitbus/I");
   clockTree->Branch("deltaTUpPreHitbus",&deltaTUpPreHitbus,"deltaTUpPreHitbus/D");
@@ -96,9 +98,11 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
   Double_t avgDeltaT;
   Double_t rmsDeltaT;
   Int_t numDeltaT;
+  Double_t surfDeltaT[10];
   tempTree->Branch("avgDeltaT",&avgDeltaT,"avgDeltaT/D");
   tempTree->Branch("rmsDeltaT",&rmsDeltaT,"rmsDeltaT/D");
   tempTree->Branch("numDeltaT",&numDeltaT,"numDeltaT/I");
+  tempTree->Branch("surfDeltaT",surfDeltaT,"surfDeltaT[10]/D");
 
   Long64_t starEvery=maxEntry/40;
   if(starEvery==0) starEvery++;
@@ -116,13 +120,16 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
     //    prettyHkTree->GetEntry(entry);
    
     UsefulAnitaEvent realEvent(event,WaveCalType::kJustTimeNoUnwrap);
+    eventNum=realEvent.eventNumber;
     numDeltaT=0;
     avgDeltaT=0;
     rmsDeltaT=0;
     Double_t avgDeltaTSq=0;
     for(int surf=0;surf<10;surf++) {
-       TGraph *gr = realEvent.getGraphFromSurfAndChan(surf,chan);
-       Int_t labChip=realEvent.getLabChip(surf*9 + chan);
+      surfDeltaT[surf]=0;
+      Int_t numDtSurf=0;
+      TGraph *gr = realEvent.getGraphFromSurfAndChan(surf,chan);
+      Int_t labChip=realEvent.getLabChip(surf*9 + chan);
        earliestSample=realEvent.getEarliestSample(surf*9 + chan);
        //       earliestSample+=1; //To avoid HITBUS crosstalk
        latestSample=realEvent.getLatestSample(surf*9 + chan);
@@ -130,6 +137,11 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
        Double_t offset=gr->GetMean(2);
        Double_t *adcs=gr->GetY();
        Double_t *times=gr->GetX();
+       //       Double_t times[260];
+       //       Double_t tempFactor=realEvent.getTempCorrectionFactor();
+       //       for(int samp=0;samp<260;samp++) {
+       //	 times[samp]=timesRaw[samp]/tempFactor;
+       //       }
        
        //       cout << times[0] << "\t" << times[1] << endl;
        surfNum=surf;
@@ -181,8 +193,10 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
 		 deltaTDownPostHitbus+=(posZcDown[i]-posZcDown[i-1]);
 		 countDowns++;
 		 avgDeltaT+=(posZcDown[i]-posZcDown[i-1]);
+		 surfDeltaT[surf]+=(posZcDown[i]-posZcDown[i-1]);
 		 avgDeltaTSq+=(posZcDown[i]-posZcDown[i-1])*(posZcDown[i]-posZcDown[i-1]);
 		 numDeltaT++;
+		 numDtSurf++;
 	       }
 	     }
 	     if(countDowns>0) { 
@@ -199,8 +213,11 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
 		 deltaTUpPostHitbus+=(posZcUp[i]-posZcUp[i-1]);
 		 countUps++;
 		 avgDeltaT+=(posZcUp[i]-posZcUp[i-1]);
+		 surfDeltaT[surf]+=(posZcUp[i]-posZcUp[i-1]);
+		 
 		 avgDeltaTSq+=(posZcUp[i]-posZcUp[i-1])*(posZcUp[i]-posZcUp[i-1]);
 		 numDeltaT++;
+		 numDtSurf++;
 	       }
 	     }
 	     if(countUps>0) {
@@ -245,8 +262,10 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
 		   deltaTDownPreHitbus+=(posZcDown[i]-posZcDown[i-1]);
 		   countDowns++;
 		   avgDeltaT+=(posZcDown[i]-posZcDown[i-1]);
+		   surfDeltaT[surf]+=(posZcDown[i]-posZcDown[i-1]);
 		   avgDeltaTSq+=(posZcDown[i]-posZcDown[i-1])*(posZcDown[i]-posZcDown[i-1]);
 		   numDeltaT++;
+		   numDtSurf++;
 		 }
 	       }
 	       if(countDowns>0) {
@@ -263,8 +282,10 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
 		   deltaTUpPreHitbus+=(posZcUp[i]-posZcUp[i-1]);
 		   countUps++;
 		   avgDeltaT+=(posZcUp[i]-posZcUp[i-1]);
+		   surfDeltaT[surf]+=(posZcUp[i]-posZcUp[i-1]);
 		   avgDeltaTSq+=(posZcUp[i]-posZcUp[i-1])*(posZcUp[i]-posZcUp[i-1]);
 		   numDeltaT++;
+		   numDtSurf++;
 		 }
 	       }
 	       if(countUps>0) {
@@ -312,8 +333,10 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
 		 deltaTDownPostHitbus+=(posZcDown[i]-posZcDown[i-1]);
 		 countDowns++;
 		 avgDeltaT+=(posZcDown[i]-posZcDown[i-1]);
+		 surfDeltaT[surf]+=(posZcDown[i]-posZcDown[i-1]);
 		 avgDeltaTSq+=(posZcDown[i]-posZcDown[i-1])*(posZcDown[i]-posZcDown[i-1]);
 		 numDeltaT++;
+		 numDtSurf++;
 	       }
 	     }
 	     if(countDowns>0) {
@@ -331,8 +354,10 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
 		 deltaTUpPostHitbus+=(posZcUp[i]-posZcUp[i-1]);
 		 countUps++;
 		 avgDeltaT+=(posZcUp[i]-posZcUp[i-1]);
+		 surfDeltaT[surf]+=(posZcUp[i]-posZcUp[i-1]);
 		 avgDeltaTSq+=(posZcUp[i]-posZcUp[i-1])*(posZcUp[i]-posZcUp[i-1]);
 		 numDeltaT++;
+		 numDtSurf++;
 	       }
 	     }
 	     if(countUps>0) {
@@ -346,6 +371,9 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
        }
        clockTree->Fill();
        delete gr;
+       
+       surfDeltaT[surf]/=numDtSurf;
+
     }
     avgDeltaT/=numDeltaT;
     avgDeltaTSq/=numDeltaT;

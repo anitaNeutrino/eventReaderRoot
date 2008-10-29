@@ -36,11 +36,31 @@ class OtherMonitorHk: public TObject
    UInt_t          runNumber; ///< Current run number
    UShort_t        dirFiles[3]; ///< Number of files in /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
    UShort_t        dirLinks[3]; ///< Number of links in /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
+   //!  A bit mask of the flight software processes currently running.
+   /*!
+     A bit mask of the flight software processes currently running. If the bit is set that process is running. The bits are:
+     <ol>
+     <li>Acqd</li>
+     <li>Archived</li>
+     <li>Calibd</li>
+     <li>Cmmd</li>
+     <li>Eventd</li>
+     <li>GPSd</li>
+     <li>Hkd</li>
+     <li>LOSd</li>
+     <li>Prioritizerd</li>
+     <li>SIPd</li>
+     <li>Monitord</li>
+     <li>Playbackd</li>
+     <li>Logwatchd</li>
+     <li>Neobrickd</li>
+     </ol>
+*/
    UShort_t        processBitMask; ///< Bit mask of currently running processes
    UShort_t        reserved; ///< Reserved
 
    char *getDirName(int dirInd); ///< Returns dir name
-
+   char *getProcName(int procInd); ///< Returns process name (using 0 as the index of the first bit).
   ClassDef(OtherMonitorHk,10);
 };
 
