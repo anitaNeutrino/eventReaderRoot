@@ -17,6 +17,7 @@
 class TGraph;
 class AnitaEventCalibrator;
 class PrettyAnitaHk;
+class RawAnitaHeader;
 
 //!  UsefulAnitaEvent -- The Calibrated Useful Anita Event object
 /*!
@@ -29,6 +30,7 @@ class UsefulAnitaEvent: public RawAnitaEvent
  public:
    UsefulAnitaEvent(); ///< Default constructor
    UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, PrettyAnitaHk *theHk=0); ///< Assignment constructor using PrettyAnitaHk for the temperature calibration. See WaveCalType for calibration options
+   UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, RawAnitaHeader *theHd); ///< Assignment constructor using RawAnitaHeader for the c3p0Num to do the temperature calibration using the 125MHz clock. See WaveCalType for calibration options
    UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, Float_t surfTemp); ///< Assignment constructor using surfTemp for the temperature calibration.  See WaveCalType for calibration options
    ~UsefulAnitaEvent(); ///< Destructor
    int calibrateEvent(WaveCalType::WaveCalType_t calType); ///< Work horse member function called by constructor
@@ -51,6 +53,7 @@ class UsefulAnitaEvent: public RawAnitaEvent
 
 
   //The calibrated numbers
+  UInt_t fC3poNum; ///< Used to monitor the clock period.
   Int_t gotCalibTemp; ///< Flag to check if we are using the temperature calibration
   Float_t calibTemp; ///< Value for the temperature calibration
   WaveCalType::WaveCalType_t fCalType; ///< The calibration type requested
