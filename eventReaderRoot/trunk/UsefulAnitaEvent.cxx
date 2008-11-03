@@ -10,6 +10,7 @@
 #include "UsefulAnitaEvent.h"
 #include "AnitaGeomTool.h"
 #include "PrettyAnitaHk.h"
+#include "RawAnitaHeader.h"
 #include "AnitaEventCalibrator.h"
 #include <TGraph.h>
 #include <iostream>
@@ -33,12 +34,14 @@ UsefulAnitaEvent::UsefulAnitaEvent()
 {
   gotCalibTemp=0;
   fLastEventGuessed=0;
+  fC3poNum=0;
   //Default Constructor
 }
 
 UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, PrettyAnitaHk *theHk) 
   : RawAnitaEvent(*eventPtr)
 {
+  fC3poNum=0;
   fLastEventGuessed=0;
   if(theHk) {
     gotCalibTemp=1;
@@ -51,10 +54,21 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   calibrateEvent(calType);
 }
 
+UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, RawAnitaHeader *theHd) 
+  : RawAnitaEvent(*eventPtr)
+{
+  fC3poNum=theHd->c3poNum;
+  fLastEventGuessed=0;
+  gotCalibTemp=0;
+   
+  //Default Constructor
+  calibrateEvent(calType);
+}
+
 UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, Float_t surfTemp) 
   : RawAnitaEvent(*eventPtr)
 {
-
+  fC3poNum=0;
   gotCalibTemp=1;
   calibTemp=surfTemp;
      
@@ -395,7 +409,10 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
   AnitaEventCalibrator *myCally = AnitaEventCalibrator::Instance();
   Double_t timeVals[NUM_SURF][NUM_SAMP][2]={0};
   Int_t labChip=this->getLabChip(8);
-  
+  Double_t clockPeriod=MAGIC_DELTAT;
+  if(fC3poNum>0) {
+    clockPeriod=1e9/Double_t(fC3poNum);
+  }
   Double_t tempFactor=1;
   if(gotCalibTemp)
     tempFactor=getTempCorrectionFactor();
@@ -455,7 +472,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	  deltaTFirstRco[surf][rcoGuess]=0;
 	  if(numZcDown>1) {	       
 	    for(int i=1;i<numZcDown;i++) {
-	      if((posZcDown[i]-posZcDown[i-1])>(MAGIC_DELTAT-0.5) && (posZcDown[i]-posZcDown[i-1])<(MAGIC_DELTAT+0.5)) {
+	      if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-0.5) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+0.5)) {
 		deltaTFirstRco[surf][rcoGuess]+=(posZcDown[i]-posZcDown[i-1]);
 		numDeltaTFirstRco[surf][rcoGuess]++;
 	      }
@@ -463,7 +480,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	  }
 	  if(numZcUp>1) {	       
 	    for(int i=1;i<numZcUp;i++) {
-	      if((posZcUp[i]-posZcUp[i-1])>(MAGIC_DELTAT-0.5) && (posZcUp[i]-posZcUp[i-1])<(MAGIC_DELTAT+0.5)) {
+	      if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-0.5) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+0.5)) {
 		deltaTFirstRco[surf][rcoGuess]+=(posZcUp[i]-posZcUp[i-1]);
 		numDeltaTFirstRco[surf][rcoGuess]++;
 	      }
@@ -504,7 +521,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	    numDeltaTSecondRco[surf][rcoGuess]=0;
 	    if(numZcDown>1) {	       
 	      for(int i=1;i<numZcDown;i++) {
-		if((posZcDown[i]-posZcDown[i-1])>(MAGIC_DELTAT-0.5) && (posZcDown[i]-posZcDown[i-1])<(MAGIC_DELTAT+0.5)) {
+		if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-0.5) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+0.5)) {
 		  deltaTSecondRco[surf][rcoGuess]+=(posZcDown[i]-posZcDown[i-1]);
 		  numDeltaTSecondRco[surf][rcoGuess]++;
 		}
@@ -512,7 +529,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	    }
 	    if(numZcUp>1) {	       
 	      for(int i=1;i<numZcUp;i++) {
-		if((posZcUp[i]-posZcUp[i-1])>(MAGIC_DELTAT-0.5) && (posZcUp[i]-posZcUp[i-1])<(MAGIC_DELTAT+0.5)) {
+		if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-0.5) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+0.5)) {
 		  deltaTSecondRco[surf][rcoGuess]+=(posZcUp[i]-posZcUp[i-1]);
 		  numDeltaTSecondRco[surf][rcoGuess]++;
 		}
@@ -553,7 +570,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	deltaTFirstRco[surf][rcoGuess]=0;
 	if(numZcDown>1) {	       
 	  for(int i=1;i<numZcDown;i++) {
-	    if((posZcDown[i]-posZcDown[i-1])>(MAGIC_DELTAT-0.5) && (posZcDown[i]-posZcDown[i-1])<(MAGIC_DELTAT+0.5)) {
+	    if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-0.5) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+0.5)) {
 	      deltaTFirstRco[surf][rcoGuess]+=(posZcDown[i]-posZcDown[i-1]);
 	      numDeltaTFirstRco[surf][rcoGuess]++;
 	    }
@@ -561,7 +578,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	}
 	if(numZcUp>1) {	       
 	  for(int i=1;i<numZcUp;i++) {
-	    if((posZcUp[i]-posZcUp[i-1])>(MAGIC_DELTAT-0.5) && (posZcUp[i]-posZcUp[i-1])<(MAGIC_DELTAT+0.5)) {
+	    if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-0.5) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+0.5)) {
 	      deltaTFirstRco[surf][rcoGuess]+=(posZcUp[i]-posZcUp[i-1]);
 	      numDeltaTFirstRco[surf][rcoGuess]++;
 	    }
@@ -596,7 +613,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
     //    std::cout << avgDelta[0] << "\t" << avgDelta[1] << "\t" 
     //	      << 0.5*(avgDelta[0]+avgDelta[1]) << "\n";
     Double_t fullAvgDt=0.5*(avgDelta[0]+avgDelta[1]);
-    tempFactor=MAGIC_DELTAT/fullAvgDt;
+    tempFactor=clockPeriod/fullAvgDt;
     for(int surf=0;surf<NUM_SURF;surf++) {
       for(int rco=0;rco<2;rco++) {
 	deltaTFirstRco[surf][rco]*=tempFactor;
@@ -621,9 +638,9 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
       //Okay now lets check we haven't messed up
       if(numDeltaTFirstRco[surf][0]>15 && numDeltaTFirstRco[surf][0]>15 && numDeltaTSecondRco[surf][0]<3 && numDeltaTSecondRco[surf][1]<3) {
 	if(
-	   (numDeltaTFirstRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][1-fRcoArray[surf]]+numDeltaTSecondRco[surf][1-fRcoArray[surf]]) 
+	   (numDeltaTFirstRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][1-fRcoArray[surf]]-clockPeriod)+numDeltaTSecondRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][1-fRcoArray[surf]]-clockPeriod))/(numDeltaTFirstRco[surf][1-fRcoArray[surf]]+numDeltaTSecondRco[surf][1-fRcoArray[surf]]) 
 	   <
-	   (numDeltaTFirstRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][fRcoArray[surf]]+numDeltaTSecondRco[surf][fRcoArray[surf]])
+	   (numDeltaTFirstRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][fRcoArray[surf]]-clockPeriod)+numDeltaTSecondRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][fRcoArray[surf]]-clockPeriod))/(numDeltaTFirstRco[surf][fRcoArray[surf]]+numDeltaTSecondRco[surf][fRcoArray[surf]])
 	   ) { 
 	  //Oops	      
 	  fRcoArray[surf]=1-fRcoArray[surf];
@@ -633,9 +650,9 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
       //Okay now lets check we haven't messed up
       if(numDeltaTSecondRco[surf][0]>15 && numDeltaTSecondRco[surf][0]>15 && numDeltaTFirstRco[surf][0]<3 && numDeltaTFirstRco[surf][1]<3) {
 	if(
-	   (numDeltaTFirstRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][1-fRcoArray[surf]]+numDeltaTSecondRco[surf][1-fRcoArray[surf]]) 
+	   (numDeltaTFirstRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][1-fRcoArray[surf]]-clockPeriod)+numDeltaTSecondRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][1-fRcoArray[surf]]-clockPeriod))/(numDeltaTFirstRco[surf][1-fRcoArray[surf]]+numDeltaTSecondRco[surf][1-fRcoArray[surf]]) 
 	   <
-	   (numDeltaTFirstRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][fRcoArray[surf]]+numDeltaTSecondRco[surf][fRcoArray[surf]])
+	   (numDeltaTFirstRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][fRcoArray[surf]]-clockPeriod)+numDeltaTSecondRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][fRcoArray[surf]]-clockPeriod))/(numDeltaTFirstRco[surf][fRcoArray[surf]]+numDeltaTSecondRco[surf][fRcoArray[surf]])
 	   ) {
 	  //Oops	      
 	  fRcoArray[surf]=1-fRcoArray[surf];
@@ -644,9 +661,9 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 
     }
     else if(numDeltaTFirstRco[surf][0]>0 && numDeltaTFirstRco[surf][1]>0) {
-      //We only have one trace segment so we'll compare the period to MAGIC_DELTAT
-      if(TMath::Abs(deltaTFirstRco[surf][0]-MAGIC_DELTAT)<
-	 TMath::Abs(deltaTFirstRco[surf][1]-MAGIC_DELTAT)) {
+      //We only have one trace segment so we'll compare the period to clockPeriod
+      if(TMath::Abs(deltaTFirstRco[surf][0]-clockPeriod)<
+	 TMath::Abs(deltaTFirstRco[surf][1]-clockPeriod)) {
 	fRcoArray[surf]=0;
       }
       else {
@@ -654,9 +671,9 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
       }	
     }
     else if(numDeltaTSecondRco[surf][0]>0 && numDeltaTSecondRco[surf][1]>0) {
-      //We only have one trace segment so we'll compare the period to MAGIC_DELTAT
-      if(TMath::Abs(deltaTSecondRco[surf][0]-MAGIC_DELTAT)<
-	 TMath::Abs(deltaTSecondRco[surf][1]-MAGIC_DELTAT)) {
+      //We only have one trace segment so we'll compare the period to clockPeriod
+      if(TMath::Abs(deltaTSecondRco[surf][0]-clockPeriod)<
+	 TMath::Abs(deltaTSecondRco[surf][1]-clockPeriod)) {
 	fRcoArray[surf]=0;
       }
       else {
@@ -677,7 +694,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
     numFinalDt+=numDeltaTSecondRco[surf][fRcoArray[surf]];
   }
   finalDt/=numFinalDt;
-  fTempFactorGuess=MAGIC_DELTAT/finalDt;
+  fTempFactorGuess=clockPeriod/finalDt;
   //    std::cout << fTempFactorGuess << "\n";
 
   if(!gotCalibTemp) {
@@ -705,9 +722,9 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	//Okay now lets check we haven't messed up
 	if(numDeltaTFirstRco[surf][0]>15 && numDeltaTFirstRco[surf][0]>15 && numDeltaTSecondRco[surf][0]<3 && numDeltaTSecondRco[surf][1]<3) {
 	  if(
-	     (numDeltaTFirstRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][1-fRcoArray[surf]]+numDeltaTSecondRco[surf][1-fRcoArray[surf]]) 
+	     (numDeltaTFirstRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][1-fRcoArray[surf]]-clockPeriod)+numDeltaTSecondRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][1-fRcoArray[surf]]-clockPeriod))/(numDeltaTFirstRco[surf][1-fRcoArray[surf]]+numDeltaTSecondRco[surf][1-fRcoArray[surf]]) 
 	     <
-	     (numDeltaTFirstRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][fRcoArray[surf]]+numDeltaTSecondRco[surf][fRcoArray[surf]])
+	     (numDeltaTFirstRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][fRcoArray[surf]]-clockPeriod)+numDeltaTSecondRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][fRcoArray[surf]]-clockPeriod))/(numDeltaTFirstRco[surf][fRcoArray[surf]]+numDeltaTSecondRco[surf][fRcoArray[surf]])
 	     ) { 
 	    //Oops	      
 	    fRcoArray[surf]=1-fRcoArray[surf];
@@ -717,9 +734,9 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	//Okay now lets check we haven't messed up
 	if(numDeltaTSecondRco[surf][0]>15 && numDeltaTSecondRco[surf][0]>15 && numDeltaTFirstRco[surf][0]<3 && numDeltaTFirstRco[surf][1]<3) {
 	  if(
-	     (numDeltaTFirstRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][1-fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][1-fRcoArray[surf]]+numDeltaTSecondRco[surf][1-fRcoArray[surf]]) 
+	     (numDeltaTFirstRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][1-fRcoArray[surf]]-clockPeriod)+numDeltaTSecondRco[surf][1-fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][1-fRcoArray[surf]]-clockPeriod))/(numDeltaTFirstRco[surf][1-fRcoArray[surf]]+numDeltaTSecondRco[surf][1-fRcoArray[surf]]) 
 	     <
-	     (numDeltaTFirstRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][fRcoArray[surf]]-MAGIC_DELTAT)+numDeltaTSecondRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][fRcoArray[surf]]-MAGIC_DELTAT))/(numDeltaTFirstRco[surf][fRcoArray[surf]]+numDeltaTSecondRco[surf][fRcoArray[surf]])
+	     (numDeltaTFirstRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTFirstRco[surf][fRcoArray[surf]]-clockPeriod)+numDeltaTSecondRco[surf][fRcoArray[surf]]*TMath::Abs(deltaTSecondRco[surf][fRcoArray[surf]]-clockPeriod))/(numDeltaTFirstRco[surf][fRcoArray[surf]]+numDeltaTSecondRco[surf][fRcoArray[surf]])
 	     ) {
 	    //Oops	      
 	    fRcoArray[surf]=1-fRcoArray[surf];
@@ -728,9 +745,9 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 
       }
       else if(numDeltaTFirstRco[surf][0]>0 && numDeltaTFirstRco[surf][1]>0) {
-	//We only have one trace segment so we'll compare the period to MAGIC_DELTAT
-	if(TMath::Abs(deltaTFirstRco[surf][0]-MAGIC_DELTAT)<
-	   TMath::Abs(deltaTFirstRco[surf][1]-MAGIC_DELTAT)) {
+	//We only have one trace segment so we'll compare the period to clockPeriod
+	if(TMath::Abs(deltaTFirstRco[surf][0]-clockPeriod)<
+	   TMath::Abs(deltaTFirstRco[surf][1]-clockPeriod)) {
 	  fRcoArray[surf]=0;
 	}
 	else {
@@ -738,9 +755,9 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	}	
       }
       else if(numDeltaTSecondRco[surf][0]>0 && numDeltaTSecondRco[surf][1]>0) {
-	//We only have one trace segment so we'll compare the period to MAGIC_DELTAT
-	if(TMath::Abs(deltaTSecondRco[surf][0]-MAGIC_DELTAT)<
-	   TMath::Abs(deltaTSecondRco[surf][1]-MAGIC_DELTAT)) {
+	//We only have one trace segment so we'll compare the period to clockPeriod
+	if(TMath::Abs(deltaTSecondRco[surf][0]-clockPeriod)<
+	   TMath::Abs(deltaTSecondRco[surf][1]-clockPeriod)) {
 	  fRcoArray[surf]=0;
 	}
 	else {
@@ -764,7 +781,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
     }
 
     finalDt/=numFinalDt;
-    fTempFactorGuess=MAGIC_DELTAT/finalDt;
+    fTempFactorGuess=clockPeriod/finalDt;
   }
        
 
@@ -838,7 +855,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 // 	  deltaTFirstRco=0;
 // 	  if(numZcDown>1) {	       
 // 	    for(int i=1;i<numZcDown;i++) {
-// 	      if((posZcDown[i]-posZcDown[i-1])>(MAGIC_DELTAT-0.5) && (posZcDown[i]-posZcDown[i-1])<(MAGIC_DELTAT+0.5)) {
+// 	      if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-0.5) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+0.5)) {
 // 		deltaTFirstRco+=(posZcDown[i]-posZcDown[i-1]);
 // 		numDeltaTFirstRco++;
 // 	      }
@@ -846,7 +863,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 // 	  }
 // 	  if(numZcUp>1) {	       
 // 	    for(int i=1;i<numZcUp;i++) {
-// 	      if((posZcUp[i]-posZcUp[i-1])>(MAGIC_DELTAT-0.5) && (posZcUp[i]-posZcUp[i-1])<(MAGIC_DELTAT+0.5)) {
+// 	      if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-0.5) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+0.5)) {
 // 		deltaTFirstRco+=(posZcUp[i]-posZcUp[i-1]);
 // 		numDeltaTFirstRco++;
 // 	      }
@@ -886,7 +903,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 // 	    deltaTSecondRco=0;
 // 	    if(numZcDown>1) {	       
 // 	      for(int i=1;i<numZcDown;i++) {
-// 		if((posZcDown[i]-posZcDown[i-1])>(MAGIC_DELTAT-0.5) && (posZcDown[i]-posZcDown[i-1])<(MAGIC_DELTAT+0.5)) {
+// 		if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-0.5) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+0.5)) {
 // 		  deltaTSecondRco+=(posZcDown[i]-posZcDown[i-1]);
 // 		  numDeltaTSecondRco++;
 // 		}
@@ -894,7 +911,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 // 	    }
 // 	    if(numZcUp>1) {	       
 // 	      for(int i=1;i<numZcUp;i++) {
-// 		if((posZcUp[i]-posZcUp[i-1])>(MAGIC_DELTAT-0.5) && (posZcUp[i]-posZcUp[i-1])<(MAGIC_DELTAT+0.5)) {
+// 		if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-0.5) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+0.5)) {
 // 		  deltaTSecondRco+=(posZcUp[i]-posZcUp[i-1]);
 // 		  numDeltaTSecondRco++;
 // 		}
@@ -934,7 +951,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 // 	deltaTFirstRco=0;
 // 	if(numZcDown>1) {	       
 // 	  for(int i=1;i<numZcDown;i++) {
-// 	    if((posZcDown[i]-posZcDown[i-1])>(MAGIC_DELTAT-0.5) && (posZcDown[i]-posZcDown[i-1])<(MAGIC_DELTAT+0.5)) {
+// 	    if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-0.5) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+0.5)) {
 // 	      deltaTFirstRco+=(posZcDown[i]-posZcDown[i-1]);
 // 	      numDeltaTFirstRco++;
 // 	    }
@@ -942,7 +959,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 // 	}
 // 	if(numZcUp>1) {	       
 // 	  for(int i=1;i<numZcUp;i++) {
-// 	    if((posZcUp[i]-posZcUp[i-1])>(MAGIC_DELTAT-0.5) && (posZcUp[i]-posZcUp[i-1])<(MAGIC_DELTAT+0.5)) {
+// 	    if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-0.5) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+0.5)) {
 // 	      deltaTFirstRco+=(posZcUp[i]-posZcUp[i-1]);
 // 	      numDeltaTFirstRco++;
 // 	    }
@@ -960,24 +977,24 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 //       //Okay lets turn to the magic prognosticator
 //       if(numDeltaTFirstRco>0 && numDeltaTSecondRco>0) {
 // 	//Now we can see if one is high and one is low
-// 	if(deltaTFirstRco>MAGIC_DELTAT && deltaTSecondRco<MAGIC_DELTAT) {
+// 	if(deltaTFirstRco>clockPeriod && deltaTSecondRco<clockPeriod) {
 // 	  //Wahoo lets celebrate
 // 	  fRcoArray[surf]=1; //Arbitrarily define the faster phase as 1
 // 	}
-// 	else if(deltaTFirstRco<MAGIC_DELTAT && deltaTFirstRco>MAGIC_DELTAT) {
+// 	else if(deltaTFirstRco<clockPeriod && deltaTFirstRco>clockPeriod) {
 // 	  //Wahoo lets celebrate
 // 	  fRcoArray[surf]=0; //Arbitrarily define the faster phase as 1
 // 	}
 // 	else if(numDeltaTFirstRco > numDeltaTSecondRco) {
 // 	  //Then well just assume the first one is correct
-// 	  if(deltaTFirstRco<MAGIC_DELTAT)
+// 	  if(deltaTFirstRco<clockPeriod)
 // 	    fRcoArray[surf]=0;
 // 	  else 
 // 	    fRcoArray[surf]=1;
 // 	}
 // 	else if(numDeltaTFirstRco < numDeltaTSecondRco) {
 // 	  //Then well just assume the second one is correct
-// 	  if(deltaTSecondRco<MAGIC_DELTAT)
+// 	  if(deltaTSecondRco<clockPeriod)
 // 	    fRcoArray[surf]=1;
 // 	  else 
 // 	    fRcoArray[surf]=0;
@@ -997,14 +1014,14 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 //       }
 //       else if(numDeltaTFirstRco>0) {
 // 	//Then well just assume the first one is correct
-// 	if(deltaTFirstRco<MAGIC_DELTAT)
+// 	if(deltaTFirstRco<clockPeriod)
 // 	  fRcoArray[surf]=0;
 // 	else 
 // 	  fRcoArray[surf]=1;	    
 //       }
 //       else if(numDeltaTSecondRco>0) {
 // 	//Then well just assume the second one is correct
-// 	if(deltaTSecondRco<MAGIC_DELTAT)
+// 	if(deltaTSecondRco<clockPeriod)
 // 	  fRcoArray[surf]=1;
 // 	else 
 // 	  fRcoArray[surf]=0;
