@@ -407,7 +407,7 @@ Double_t UsefulAnitaEvent::getTempCorrectionFactor()
 void UsefulAnitaEvent::analyseClocksForGuesses() 
 {
   AnitaEventCalibrator *myCally = AnitaEventCalibrator::Instance();
-  Double_t timeVals[NUM_SURF][NUM_SAMP][2]={0};
+  Double_t timeVals[NUM_SURF][NUM_SAMP][2]={{{0}}};
   Int_t labChip=this->getLabChip(8);
   Double_t clockPeriod=MAGIC_DELTAT;
   if(fC3poNum>0) {
@@ -419,10 +419,10 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
   //Somehow are going to try and fudge things so that we can guess the
   //temperature correction
     
-  Double_t deltaTFirstRco[NUM_SURF][2]={0};
-  Int_t numDeltaTFirstRco[NUM_SURF][2]={0};
-  Double_t deltaTSecondRco[NUM_SURF][2]={0};
-  Int_t numDeltaTSecondRco[NUM_SURF][2]={0};
+  Double_t deltaTFirstRco[NUM_SURF][2]={{0}};
+  Int_t numDeltaTFirstRco[NUM_SURF][2]={{0}};
+  Double_t deltaTSecondRco[NUM_SURF][2]={{0}};
+  Int_t numDeltaTSecondRco[NUM_SURF][2]={{0}};
       
   for(int surf=0;surf<NUM_SURF;surf++) {
     //Fill in timebase
