@@ -134,7 +134,14 @@ The second byte (reserved[1]) is currently reserved.
   int isInL3Pattern(int phi); ///< Returns 1 if phi sector had l3 trigger
   int isInL2Pattern(int phi, AnitaRing::AnitaRing_t ring); ///< Returns 1 if given phi-ring had l2 trigger
   int isInL1Pattern(int phi, AnitaRing::AnitaRing_t ring); ///< Returns 1 if given phi-ring had l1 trigger
-   
+  int getCurrentTurfBuffer(); ///< Returns the current TURF buffer number (0, 1, 2 or 3);
+  unsigned int getCurrentTurfHolds(); ///< Returns a 4-bit bitmask corresponding to the currently held buffers.
+  int getNumberOfCurrentTurfHolds(); ///< Returns the number of currently held TURF buffers (0-4)
+  int getTurfRunNumber() 
+  { return (((turfEventId&0xfff00000)>>20));} ///< Returns the run number portion of the TURF event id
+  int getTurfEventNumber()
+  { return (turfEventId&0xfffff);} ///< Returns the event number portion of the TURF event id.
+
   ClassDef(RawAnitaHeader,13);
 };
 

@@ -359,3 +359,36 @@ int RawAnitaHeader::isInL1Pattern(int phi, AnitaRing::AnitaRing_t ring)
   return -1;
   
 }
+
+int RawAnitaHeader::getCurrentTurfBuffer()
+///< Returns the current TURF buffer number (0, 1, 2 or 3);
+{
+  int curBuf=reserved[0]&0xf;
+  switch(curBuf) {
+  case 1: return 0;
+  case 2: return 1;
+  case 4: return 2;
+  case 8: return 3;
+  default: return -1;
+  }
+}
+
+unsigned int RawAnitaHeader::getCurrentTurfHolds()
+///< Returns a 4-bit bitmask corresponding to the currently held buffers.
+{
+
+  unsigned int curHolds=(reserved[0]&0xf)>>4;
+  return curHolds;
+}
+
+int RawAnitaHeader::getNumberOfCurrentTurfHolds()
+///< Returns the number of currently held TURF buffers (0-4)
+{
+  int countHolds=0;
+  unsigned int curHolds=(reserved[0]&0xf)>>4;
+  for(int buffer=0;buffer<4;buffer++) {
+    if(curHolds & (1<<buffer))
+      countHolds++;
+  }
+  return countHolds;  
+}
