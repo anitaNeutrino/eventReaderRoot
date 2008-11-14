@@ -79,6 +79,7 @@ namespace WaveCalType {
     kVTFullJWPlusFudge              = 0x15, ///< kVTFullJW + Voltage Correction +Fudge Factor
     kJustTimeNoUnwrap               = 0x16, ///< Only applies the timebase calibrations, for use in calibration testing.
     kVTLabAG                        = 0x17, ///< Applies the bin-by-bin and epsilon corrections
+    kVTLabAGFastClock               = 0x18, ///< Applies the bin-by-bin and epsilon corrections and tries to do a clock calibration
     kNotACalib ///< Useful for looping over all calibrations
   } WaveCalType_t; ///< The calibration enumeration type
 

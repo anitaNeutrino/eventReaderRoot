@@ -20,7 +20,7 @@
 #endif
 
 //Clock Period Hard Coded
-const float clockPeriod=29.970;
+Double_t clockPeriod=8;
 
 //Fitting function
 Double_t funcSquareWave(Double_t *x, Double_t *par)
@@ -163,7 +163,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
    if(calType==WaveCalType::kVTFullJWPlusFudge || calType==WaveCalType::kVTFullJWPlusFancyClockZero)
       fApplyClockFudge=1;
    //   std::cout << "AnitaEventCalibrator::calibrateUsefulEvent():" << calType << std::endl;
-   if(calType==WaveCalType::kVTLabAG) {
+   if(calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTLabAGFastClock) {
      processEventAG(eventPtr);
    }
    else if(calType==WaveCalType::kVTFullJW || calType==WaveCalType::kVTLabJW ||
@@ -192,7 +192,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
       processClockJitter();
    }
 
-   if(calType==WaveCalType::kVTLabJWPlusFastClockZero || calType==WaveCalType::kVTFullJWPlusFastClockZero) {
+   if(calType==WaveCalType::kVTLabJWPlusFastClockZero || calType==WaveCalType::kVTFullJWPlusFastClockZero || calType==WaveCalType::kVTLabAGFastClock) {
      processClockJitterFast();
    }
 
@@ -294,9 +294,9 @@ void AnitaEventCalibrator::processClockJitter() {
       
       
       float phi=fSquareWave->GetParameter(0);
-      if((phi-phi0)>15)
+      if((phi-phi0)>(clockPeriod/2))
 	 phi-=clockPeriod;
-      if((phi-phi0)<-15)
+      if((phi-phi0)<-1*(clockPeriod/2))
 	 phi+=clockPeriod;
       
       Double_t clockCor=phi-phi0;
@@ -329,58 +329,56 @@ void AnitaEventCalibrator::processClockJitterFast() {
   Double_t fLowArray[NUM_SAMP];
   Double_t fHighArray[NUM_SAMP];
 
-
-
-   Double_t phi0=0;
-   Double_t times[NUM_SAMP];
-   Double_t volts[NUM_SAMP];
-
-   for(int surf=0;surf<NUM_SURF;surf++) {
-      //First fill temp arrays
-      Int_t numPoints=numPointsArray[surf][8];
-      Int_t numHigh=0;
-      Int_t numLow=0;
-      for(int samp=0;samp<numPoints;samp++) {
-	 if(mvArray[surf][8][samp]>0) {
+  Double_t phi0=0;
+  Double_t times[NUM_SAMP];
+  Double_t volts[NUM_SAMP];
+  
+  for(int surf=0;surf<NUM_SURF;surf++) {
+    //First fill temp arrays
+    Int_t numPoints=numPointsArray[surf][8];
+    Int_t numHigh=0;
+    Int_t numLow=0;
+    for(int samp=0;samp<numPoints;samp++) {
+      if(mvArray[surf][8][samp]>0) {
 	    fHighArray[numHigh]=mvArray[surf][8][samp];
 	    numHigh++;
-	 }
-	  else {
-	    fLowArray[numLow]=mvArray[surf][8][samp];
-	    numLow++;
-	  }
       }
-      Double_t meanHigh=TMath::Mean(numHigh,fHighArray);
-      Double_t meanLow=TMath::Mean(numLow,fLowArray);
-       Double_t offset=(meanHigh+meanLow)/2;
-       Double_t maxVal=meanHigh-offset;
-       //       Double_t minVal=meanLow-offset;
-       //       cout << maxVal << "\t" << minVal << endl;
-       //       std::cout << offset << "\t" << maxVal << "\t" << minVal << std::endl;
-
-       for(int i=0;i<numPoints;i++) {
-	  times[i]=surfTimeArray[surf][i];
-	 Double_t tempV=mvArray[surf][8][i]-offset;	
-	 //	 if(tempV>maxVal*0.9)
-	 //	   volts[i]=1;
-	 //	 else if(tempV<minVal*0.9)
-	 //	   volts[i]=-1;
-	 //	 else {
-	   volts[i]=tempV/maxVal;
-	   //	 }
-	 
-       }
+      else {
+	fLowArray[numLow]=mvArray[surf][8][samp];
+	numLow++;
+      }
+    }
+    Double_t meanHigh=TMath::Mean(numHigh,fHighArray);
+    Double_t meanLow=TMath::Mean(numLow,fLowArray);
+    Double_t offset=(meanHigh+meanLow)/2;
+    Double_t maxVal=meanHigh-offset;
+    //       Double_t minVal=meanLow-offset;
+    //       cout << maxVal << "\t" << minVal << endl;
+    //       std::cout << offset << "\t" << maxVal << "\t" << minVal << std::endl;
+    
+    for(int i=0;i<numPoints;i++) {
+      times[i]=surfTimeArray[surf][i];
+      Double_t tempV=mvArray[surf][8][i]-offset;	
+      //	 if(tempV>maxVal*0.9)
+      //	   volts[i]=1;
+      //	 else if(tempV<minVal*0.9)
+      //	   volts[i]=-1;
+      //	 else {
+      volts[i]=tempV/maxVal;
+      //	 }
       
-
-       Double_t phiGuess=0;
-       for(int i=0;i<numPoints-1;i++) {
-	  if(volts[i]>=0 &&
-	     volts[i+1]<0) {
-	     phiGuess=Get_Interpolation_X(times[i],volts[i],times[i+1],volts[i+1],0);
-	     //	     	     std::cout << surf << "\t" << 8 << "\t" << times[i] << "\t" << times[i+1] 
-	     //	     		       << "\t" << volts[i] << "\t" << volts[i+1] << "\t" << phiGuess << std::endl;
-	     if(i>3)
-	       break;
+    }
+    
+    
+    Double_t phiGuess=0;
+    for(int i=0;i<numPoints-1;i++) {
+      if(volts[i]>=0 &&
+	 volts[i+1]<0) {
+	phiGuess=Get_Interpolation_X(times[i],volts[i],times[i+1],volts[i+1],0);
+	//	     	     std::cout << surf << "\t" << 8 << "\t" << times[i] << "\t" << times[i+1] 
+	//	     		       << "\t" << volts[i] << "\t" << volts[i+1] << "\t" << phiGuess << std::endl;
+	if(i>3)
+	  break;
 	  }
        }
        
@@ -388,10 +386,10 @@ void AnitaEventCalibrator::processClockJitterFast() {
 	  phi0=phiGuess;
        
        double phi=phiGuess;
-       if((phi-phi0)>15)
-	  phi-=clockPeriod;
-       if((phi-phi0)<-15)
-	  phi+=clockPeriod;
+       if((phi-phi0)>(clockPeriod/2))
+	 phi-=clockPeriod;
+       if((phi-phi0)<-1*(clockPeriod/2))
+	 phi+=clockPeriod;
        
        
        Double_t clockCor=phi-phi0;
@@ -545,6 +543,10 @@ void AnitaEventCalibrator::zeroMean() {
 
 void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 {  
+  //  std::cout << "processEventAG\n";
+  if(eventPtr->fC3poNum) {
+    clockPeriod=1e9/eventPtr->fC3poNum;
+  }
   Double_t tempFactor=eventPtr->getTempCorrectionFactor();
   for(Int_t surf=0;surf<NUM_SURF;surf++) {
     for(Int_t chan=0;chan<NUM_CHAN;chan++) {
@@ -1175,8 +1177,8 @@ void AnitaEventCalibrator::loadCalib() {
     std::ifstream FastClockCalibFile(fileName);
     FastClockCalibFile.getline(firstLine,179);
     while(FastClockCalibFile >> surf >> chip >> calib) {
-       fastClockJitterOffset[surf][chip]=calib;
-       //       fastClockJitterOffset[surf][chip]=0; //RJN hack for test
+      fastClockJitterOffset[surf][chip]=calib;
+      //      fastClockJitterOffset[surf][chip]=0; //RJN hack for test
        //       std::cout << "fastClockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
     }
 
