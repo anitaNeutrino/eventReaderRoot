@@ -119,7 +119,7 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
     headTree->GetEntry(entry);
     //    prettyHkTree->GetEntry(entry);
    
-    UsefulAnitaEvent realEvent(event,WaveCalType::kJustTimeNoUnwrap);
+    UsefulAnitaEvent realEvent(event,WaveCalType::kJustTimeNoUnwrap,header);
     eventNum=realEvent.eventNumber;
     numDeltaT=0;
     avgDeltaT=0;
