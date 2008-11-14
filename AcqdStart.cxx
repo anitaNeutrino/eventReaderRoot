@@ -9,6 +9,7 @@
 #include "AcqdStart.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(AcqdStart);
 

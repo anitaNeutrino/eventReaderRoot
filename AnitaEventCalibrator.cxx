@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <fstream>
 #include <iostream>
+#include <cstring>
 
 #include <TMath.h>
 #include <TGraph.h>

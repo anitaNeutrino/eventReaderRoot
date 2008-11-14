@@ -9,6 +9,7 @@
 #include "Adu5Vtg.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(Adu5Vtg);
 

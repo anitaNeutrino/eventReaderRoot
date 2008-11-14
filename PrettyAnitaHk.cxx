@@ -10,6 +10,7 @@
 #include "PrettyAnitaHk.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(PrettyAnitaHk);
 

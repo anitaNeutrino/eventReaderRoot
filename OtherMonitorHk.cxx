@@ -9,6 +9,7 @@
 #include "OtherMonitorHk.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(OtherMonitorHk);
 

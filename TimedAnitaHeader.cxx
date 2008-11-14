@@ -10,6 +10,7 @@
 #include "TimedAnitaHeader.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(TimedAnitaHeader);
 

@@ -7,6 +7,7 @@
 #include "compress/mulawTables.h"
 #include <iostream>
 #include <zlib.h>
+#include <cstring>
 
 
 

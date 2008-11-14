@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <fstream>
 #include <iostream>
+#include <cstring>
 #include "AnitaGeomTool.h"
 #include "AnitaConventions.h"
 

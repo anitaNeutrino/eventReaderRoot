@@ -9,6 +9,7 @@
 #include "G12Pos.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(G12Pos);
 

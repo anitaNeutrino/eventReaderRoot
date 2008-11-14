@@ -9,6 +9,7 @@
 #include "CommandEcho.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(CommandEcho);
 

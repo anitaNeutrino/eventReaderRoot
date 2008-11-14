@@ -9,6 +9,7 @@
 #include "GpsGga.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(GpsGga);
 
@@ -26,7 +27,7 @@ GpsGga::GpsGga(Int_t           trun,
 	 GpsGgaStruct_t *gpsStruct)
 {
 
- if(gpsStruct->gHdr.code&BASE_PACKET_MASK!=PACKET_GPS_GGA ||
+  if((gpsStruct->gHdr.code&BASE_PACKET_MASK)!=PACKET_GPS_GGA ||
      gpsStruct->gHdr.verId!=VER_GPS_GGA ||
      gpsStruct->gHdr.numBytes!=sizeof(GpsGgaStruct_t)) {
     std::cerr << "Mismatched packet\n" 

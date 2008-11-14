@@ -10,6 +10,7 @@
 #include "RawHk.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 #include <TMath.h>
 

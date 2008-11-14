@@ -11,7 +11,7 @@
 #include "AnitaPacketUtil.h"
 #include <iostream>
 #include <fstream>
-
+#include <cstring>
 ClassImp(RawAnitaHeader);
 
 RawAnitaHeader::RawAnitaHeader() 
