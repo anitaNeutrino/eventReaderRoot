@@ -10,6 +10,7 @@
 #include "RawAnitaEvent.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(RawAnitaEvent);
 

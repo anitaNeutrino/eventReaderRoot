@@ -9,6 +9,7 @@
 #include "Adu5Pat.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(Adu5Pat);
 
@@ -27,7 +28,7 @@ Adu5Pat::Adu5Pat(Int_t           trun,
 		 UInt_t          trealTime,
 		 GpsAdu5PatStruct_t *gpsStruct)
 {
-if(gpsStruct->gHdr.code&BASE_PACKET_MASK!=PACKET_GPS_ADU5_PAT ||
+  if((gpsStruct->gHdr.code&BASE_PACKET_MASK)!=PACKET_GPS_ADU5_PAT ||
      gpsStruct->gHdr.verId!=VER_ADU5_PAT ||
      gpsStruct->gHdr.numBytes!=sizeof(GpsAdu5PatStruct_t)) {
     std::cerr << "Mismatched packet\n" 

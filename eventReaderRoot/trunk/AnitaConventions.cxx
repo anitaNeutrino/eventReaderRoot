@@ -3,6 +3,7 @@
 //
 #include "AnitaConventions.h"
 #include <iostream>
+#include <cstring>
 
 const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
 {

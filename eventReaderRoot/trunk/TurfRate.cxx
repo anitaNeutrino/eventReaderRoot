@@ -10,6 +10,7 @@
 #include "AnitaPacketUtil.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(TurfRate);
 
@@ -301,9 +302,9 @@ Int_t TurfRate::isAntMasked(int phi, int ring)
   if(phi<0 || phi>15) return -1;
    switch(ring) {
    case AnitaRing::kUpperRing:
-      return  (antTrigMask&(1<<(phi)));
+     return  (antTrigMask&(1<<(phi)));
    case AnitaRing::kLowerRing:
-      return  (antTrigMask&(1<<phi+16));
+     return  (antTrigMask&(1<<(phi+16)));
    case AnitaRing::kNadirRing:
       phi/=2;
       return nadirAntTrigMask&(1<<phi);

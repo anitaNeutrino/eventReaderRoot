@@ -9,7 +9,7 @@
 #include "Adu5Sat.h"
 #include <iostream>
 #include <fstream>
-
+#include <cstring>
 #include "TPad.h"
 #include "TEllipse.h"
 #include "TMath.h"
@@ -77,12 +77,12 @@ void Adu5Sat::getCirclePlot(TPad *padSat)
 
   TMarker *satty = new TMarker();
   for(int ant=0;ant<4;ant++) {
-    for(int i=0;i<numSats[ant];i++) {
+    for(int i=0;i<(int)numSats[ant];i++) {
       if(snr[ant][i]<30)
 	satty->SetMarkerColor(kRed);
       else
 	satty->SetMarkerColor(kGreen);
-      satty->SetMarkerStyle(29);
+      satty->SetMarkerStyle(markers[ant]);
       satty->SetMarkerSize(3);
       Double_t r=0.45*TMath::Cos(TMath::DegToRad()*elevation[ant][i]);
       Double_t x=0.5+r*TMath::Cos(TMath::DegToRad()*azimuth[ant][i]);

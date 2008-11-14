@@ -9,6 +9,7 @@
 #include "LogWatchdStart.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(LogWatchdStart);
 

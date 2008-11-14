@@ -9,6 +9,7 @@
 #include "GpsdStart.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(GpsdStart);
 

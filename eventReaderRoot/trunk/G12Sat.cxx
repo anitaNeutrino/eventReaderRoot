@@ -9,6 +9,7 @@
 #include "G12Sat.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 #include "TPad.h"
 #include "TEllipse.h"
@@ -72,7 +73,7 @@ void G12Sat::getCirclePlot(TPad *padSat)
   lippy->DrawEllipse(0.5,0.5,0.45*TMath::Cos(TMath::DegToRad()*90),0,0,360,0);
 
   TMarker *satty = new TMarker();
-  for(int i=0;i<numSats;i++) {
+  for(int i=0;i<(int)numSats;i++) {
     if(snr[i]<30)
        satty->SetMarkerColor(kRed);
     else

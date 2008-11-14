@@ -15,6 +15,7 @@
 #include <TGraph.h>
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 ClassImp(UsefulAnitaEvent);
 
