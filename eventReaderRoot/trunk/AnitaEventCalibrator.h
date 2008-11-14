@@ -107,7 +107,6 @@ class AnitaEventCalibrator : public TObject
  private:
   void loadCalib();
   float Get_Interpolation_X(float x1, float y1, float x2, float y2, float y);
-   
   
 
   ClassDef(AnitaEventCalibrator,1);
