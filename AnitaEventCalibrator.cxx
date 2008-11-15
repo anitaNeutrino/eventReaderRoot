@@ -597,7 +597,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	for(Int_t samp=0;samp<=latestSample;samp++) {
 	  int binRco=rco;
 	  if(nextExtra<260 && samp==0) {
-	    if(extraTime<time) {
+	    if(extraTime<time-0.22) { ///This is Andres's 220ps minimum sample separation
 	      //Then insert the next extra capacitor
 	      binRco=1-rco;
 	      scaArray[surf][chan][index]=nextExtra;
