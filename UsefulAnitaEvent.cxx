@@ -162,6 +162,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
 	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
 	  this->fTimes[chanIndex][samp]=fCalibrator->surfTimeArray[surf][samp];
+	  this->fCapacitorNum[chanIndex][samp]=fCalibrator->scaArray[surf][chan][samp];
 	}
       }
     }
@@ -179,6 +180,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
 	  this->fTimes[chanIndex][samp]=fCalibrator->surfTimeArray[surf][samp]+
 	    fCalibrator->groupDelayCalib[surf][chan];
+
 	}
       }
     }
@@ -266,6 +268,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
 	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
 	  this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp];
+	  this->fCapacitorNum[chanIndex][samp]=fCalibrator->scaArray[surf][chan][samp];
 	}
       }
     }      
