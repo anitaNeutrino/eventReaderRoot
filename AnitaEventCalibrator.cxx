@@ -594,11 +594,14 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	}
 	
 	
-	for(Int_t samp=0;samp<=latestSample;samp++) {
-	  int binRco=rco;
-	  if(nextExtra<260 && samp==0) {
-	    if(extraTime<time-0.22) { ///This is Andres's 220ps minimum sample separation
-	      //Then insert the next extra capacitor
+	if(latestSample>=1) {
+	  //We are going to ignore sample zero for now
+	  time+=0.5*(justBinByBin[surf][labChip][rco][0]+justBinByBin[surf][labChip][rco][1])*tempFactor;
+	  for(Int_t samp=1;samp<=latestSample;samp++) {
+	    int binRco=rco;
+	    if(nextExtra<260 && samp==1) {
+	      if(extraTime<time-0.22) { ///This is Andres's 220ps minimum sample separation
+		//Then insert the next extra capacitor
 	      binRco=1-rco;
 	      scaArray[surf][chan][index]=nextExtra;
 	      unwrappedArray[surf][chan][index]=rawArray[surf][chan][nextExtra];
@@ -610,15 +613,16 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	      index++;	 
    	      samp--;
 	      continue;
+	      }
 	    }
+	    scaArray[surf][chan][index]=samp;
+	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
+	    mvArray[surf][chan][index]=rawArray[surf][chan][samp]*2; //Need to add mv calibration at some point
+	    timeArray[surf][chan][index]=time;
+	    if(samp<259) 
+	      time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
+	    index++;
 	  }
-	  scaArray[surf][chan][index]=samp;
-	  unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-	  mvArray[surf][chan][index]=rawArray[surf][chan][samp]*2; //Need to add mv calibration at some point
-	  timeArray[surf][chan][index]=time;
-	  if(samp<259) 
-	    time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
-	  index++;
 	}
       }
       else {
