@@ -580,9 +580,9 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	    mvArray[surf][chan][index]=rawArray[surf][chan][samp]*2; //Need to add mv calibration at some point
 	    timeArray[surf][chan][index]=time;
 	    if(samp==255)
-	      extraTime=time+justBinByBin[surf][labChip][binRco][samp]*tempFactor;
+	      extraTime=time+0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
 	    else
-	      time+=justBinByBin[surf][labChip][binRco][samp]*tempFactor;
+	      time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
 	    index++;
 	  }
 	  time+=epsilonFromAbby[surf][labChip][rco]; ///<This is the time of the first capacitor.
@@ -604,7 +604,8 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	      unwrappedArray[surf][chan][index]=rawArray[surf][chan][nextExtra];
 	      mvArray[surf][chan][index]=rawArray[surf][chan][nextExtra]*2; //Need to add mv calibration at some point
 	      timeArray[surf][chan][index]=extraTime;
-	      extraTime+=justBinByBin[surf][labChip][binRco][nextExtra]*tempFactor;
+	      if(nextExtra<259)
+		extraTime+=0.5*(justBinByBin[surf][labChip][binRco][nextExtra]+justBinByBin[surf][labChip][binRco][nextExtra+1])*tempFactor;
 	      nextExtra++;
 	      index++;	 
    	      samp--;
@@ -615,7 +616,8 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	  unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
 	  mvArray[surf][chan][index]=rawArray[surf][chan][samp]*2; //Need to add mv calibration at some point
 	  timeArray[surf][chan][index]=time;
-	  time+=justBinByBin[surf][labChip][binRco][samp]*tempFactor;
+	  if(samp<259) 
+	    time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
 	  index++;
 	}
       }
@@ -627,7 +629,8 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	  unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
 	  mvArray[surf][chan][index]=rawArray[surf][chan][samp]*2; //Need to add mv calibration at some point
 	  timeArray[surf][chan][index]=time;
-	  time+=justBinByBin[surf][labChip][binRco][samp]*tempFactor;
+	  if(samp<259)
+	    time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp])*tempFactor;
 	  index++;
 	}
       }
