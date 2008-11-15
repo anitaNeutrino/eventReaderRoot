@@ -95,6 +95,8 @@ eventDict.C: $(CLASS_HEADERS)
 	rootcint $@ -c $(CLASS_HEADERS) LinkDef.h
 
 install: $(ROOT_LIBRARY)
+	install -d $(ANITA_UTIL_LIB_DIR)
+	install -d $(ANITA_UTIL_INC_DIR)
 ifeq ($(PLATFORM),macosx)
 	install -c -m 755 $(ROOT_LIBRARY) $(subst .$(DLLSUF),.so,$(ROOT_LIBRARY)) $(ANITA_UTIL_LIB_DIR)
 else
