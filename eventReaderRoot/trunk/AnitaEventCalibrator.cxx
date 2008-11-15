@@ -596,7 +596,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	
 	for(Int_t samp=0;samp<=latestSample;samp++) {
 	  int binRco=rco;
-	  if(nextExtra<260) {
+	  if(nextExtra<260 && samp==0) {
 	    if(extraTime<time) {
 	      //Then insert the next extra capacitor
 	      binRco=1-rco;
