@@ -415,7 +415,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
   Double_t timeVals[NUM_SURF][NUM_SAMP][2]={{{0}}};
   Int_t labChip=this->getLabChip(8);
   Double_t clockPeriod=MAGIC_DELTAT;
-  if(fC3poNum>0) {
+  if(fC3poNum>120e6 && fC3poNum<130e6) {
     clockPeriod=1e9/Double_t(fC3poNum);
   }
   Double_t tempFactor=1;
@@ -447,7 +447,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
     Int_t latestSample=this->getLatestSample(clockIndex);
     Double_t offset=TMath::Mean(NUM_SAMP,this->data[clockIndex]);
 	 
-
+    //    std::cout << latestSample << "\t" << earliestSample << "\t" << clockIndex << "\n";
     for(int rcoGuess=0;rcoGuess<2;rcoGuess++) {
       //	   rcoGuess==0  means first rco is 1
       //      rcoGuess==1 means first rco is 0
@@ -460,8 +460,12 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	  Int_t numZcUp=0;
 	  Int_t numZcDown=0;	    
 	  for(int samp=earliestSample;samp<259;samp++) {
+	      
 	    Double_t firstVal=this->data[clockIndex][samp]-offset;
 	    Double_t secondVal=this->data[clockIndex][samp+1]-offset;
+	    //	    std::cout << surf << "\t" << clockIndex << "\t" << samp << "\t" 
+	    //		      << firstVal << "\t" << secondVal << "\n";
+
 	    if((firstVal>=0 && secondVal<=0)) {  
 	      //We have a ZC down
 	      posZcDown[numZcDown]=getZeroCrossingPoint(timeVals[surf][samp][1-rcoGuess],firstVal,timeVals[surf][samp+1][1-rcoGuess],secondVal);
@@ -473,10 +477,12 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	      numZcUp++;
 	    }
 	  }
+	  //	  std::cout << numZcDown << "\t" << numZcUp << "\n";
 	       
 	  deltaTFirstRco[surf][rcoGuess]=0;
 	  if(numZcDown>1) {	       
 	    for(int i=1;i<numZcDown;i++) {
+	      //	      std::cout << (posZcDown[i]-posZcDown[i-1]) << "\t" << clockPeriod << std::endl;
 	      if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-0.5) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+0.5)) {
 		deltaTFirstRco[surf][rcoGuess]+=(posZcDown[i]-posZcDown[i-1]);
 		numDeltaTFirstRco[surf][rcoGuess]++;
@@ -498,7 +504,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	    deltaTFirstRco[surf][rcoGuess]=0;
 	  }
 	}
-
+	//	std::cout << surf << "\t" << rcoGuess << "\t" << numDeltaTFirstRco[surf][rcoGuess] << "\t" << deltaTFirstRco[surf][rcoGuess] << "\n";
 	{
 	  //Now lets do the second RCO
 	       
@@ -690,7 +696,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
       fRcoArray[surf]=0;
       //We are right up the smelly stuff
       std::cerr << "Event " << this->eventNumber << " has broken RCO for SURF " << surf << "\n";
-      std::cerr << "Event " << this->eventNumber << " has broken RCO for SURF " << surf << "\t" << numDeltaTFirstRco << "\t" << numDeltaTSecondRco << "\t" << deltaTFirstRco << "\t" << deltaTSecondRco << "\n";
+      std::cerr << "Event " << this->eventNumber << " has broken RCO for SURF " << surf << "\t" << numDeltaTFirstRco[surf][fRcoArray[surf]] << "\t" << numDeltaTSecondRco[surf][fRcoArray[surf]] << "\t" << deltaTFirstRco[surf][fRcoArray[surf]] << "\t" << deltaTSecondRco[surf][fRcoArray[surf]] << "\n";
     }  
 
     finalDt+=deltaTFirstRco[surf][fRcoArray[surf]]*numDeltaTFirstRco[surf][fRcoArray[surf]]/tempFactor;
@@ -774,7 +780,8 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	fRcoArray[surf]=0;
 	//We are right up the smelly stuff
 	std::cerr << "Event " << this->eventNumber << " has broken RCO for SURF " << surf << "\n";
-	std::cerr << "Event " << this->eventNumber << " has broken RCO for SURF " << surf << "\t" << numDeltaTFirstRco << "\t" << numDeltaTSecondRco << "\t" << deltaTFirstRco << "\t" << deltaTSecondRco << "\n";
+	//	std::cerr << "Event " << this->eventNumber << " has broken RCO for SURF " << surf << "\t" << numDeltaTFirstRco << "\t" << numDeltaTSecondRco << "\t" << deltaTFirstRco << "\t" << deltaTSecondRco << "\n";
+	std::cerr << "Event " << this->eventNumber << " has broken RCO for SURF " << surf << "\t" << numDeltaTFirstRco[surf][fRcoArray[surf]] << "\t" << numDeltaTSecondRco[surf][fRcoArray[surf]] << "\t" << deltaTFirstRco[surf][fRcoArray[surf]] << "\t" << deltaTSecondRco[surf][fRcoArray[surf]] << "\n";
       }  
 
       finalDt+=deltaTFirstRco[surf][fRcoArray[surf]]*numDeltaTFirstRco[surf][fRcoArray[surf]]/fTempFactorGuess;
