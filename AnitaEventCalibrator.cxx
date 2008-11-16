@@ -559,6 +559,16 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
       Int_t earliestSample=eventPtr->getEarliestSample(chanIndex);
       Int_t latestSample=eventPtr->getLatestSample(chanIndex);
 
+      if(earliestSample==0)
+	earliestSample++;
+
+      if(latestSample==0)
+	latestSample=259;
+      
+      //      if(surf==7) 
+      //	std::cout << chan << "\t" << earliestSample << "\t" << latestSample 
+      //		  << "\n";
+
       //Raw array
       for(Int_t samp=0;samp<NUM_SAMP;samp++) {
 	rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
@@ -568,6 +578,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
       Int_t index=0;
       Double_t time=0;
       if(latestSample<earliestSample) {
+	//	std::cout << "Two RCO's\t" << surf << "\t" << chan << "\n";
 	//We have two RCOs
 	Int_t nextExtra=256;
 	Double_t extraTime=0;	
@@ -626,7 +637,9 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	}
       }
       else {
+	//	std::cout << "One RCO\t" << surf << "\t" << chan << "\n";
 	//Only one rco
+	time=0;
 	for(Int_t samp=earliestSample;samp<=latestSample;samp++) {
 	  int binRco=rco;
 	  scaArray[surf][chan][index]=samp;
