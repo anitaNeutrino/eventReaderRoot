@@ -135,8 +135,9 @@ Int_t RawAnitaEvent::getEarliestSample(Int_t chanIndex)
  else {
    earliestSample=firstHitbus+1;
  }
+ if(earliestSample==0) earliestSample=1;
  if(earliestSample<260) return earliestSample;
- return 0;
+ return 1;
 }
 
 Int_t RawAnitaEvent::getLatestSample(Int_t chanIndex)
@@ -144,14 +145,14 @@ Int_t RawAnitaEvent::getLatestSample(Int_t chanIndex)
  Int_t lastHitBus=this->getLastHitBus(chanIndex);
  Int_t firstHitbus=this->getFirstHitBus(chanIndex);
  Int_t wrappedHitBus=this->getWrappedHitBus(chanIndex);
- Int_t latestSample=260;
+ Int_t latestSample=259;
  if(!wrappedHitBus) {
    latestSample=firstHitbus-1;
  }
  else {
    latestSample=lastHitBus-1;
  }
- if(latestSample>=0) return latestSample;
+ if(latestSample>0) return latestSample;
  return 259;
 }
 
