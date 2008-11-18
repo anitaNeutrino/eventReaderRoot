@@ -256,6 +256,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
     break;
        
   case WaveCalType::kVTLabAGFastClock:
+  case WaveCalType::kVTLabAGCrossCorClock:
   case WaveCalType::kVTLabClockRG:
   case WaveCalType::kVTLabClockZeroRG:
     // kVTLabRG + Clock Jitter Correction (+ Zero Mean)

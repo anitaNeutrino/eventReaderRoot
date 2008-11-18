@@ -71,6 +71,7 @@ class AnitaEventCalibrator : public TObject
   //Calibration constants for first pass bin-by-bin
   float justBinByBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
   float epsilonFromAbby[NUM_SURF][NUM_CHIP][NUM_RCO]; ///< Note the rco here is the rco which the event reports (ie. 1-->0 goes in [0] and 0-->1 goes in [1]
+  float clockCrossCorr[NUM_SURF][NUM_CHIP];
 
   //Cable Length Calib
   float groupDelayCalib[NUM_SURF][NUM_CHAN];
