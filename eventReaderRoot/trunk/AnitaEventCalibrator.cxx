@@ -497,7 +497,7 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
 
 	 if(TMath::Abs(clockCor-clockCrossCorr[surf][fLabChip[surf][8]])>clockPeriod/2) {
 	   //Need to try again
-	   if(clockCor<clockCrossCorr[surf][fLabChip[surf][8]]) {
+	   if(clockCor>clockCrossCorr[surf][fLabChip[surf][8]]) {
 	     if(dtInt>128) {
 	       Int_t dt2ndInt=FFTtools::getPeakBin(grCor,0,dtInt-128);
 	       grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
