@@ -26,7 +26,7 @@ endif
 endif
 
 #Toggles the FFT functions on and off
-#USE_FFT_TOOLS=1
+USE_FFT_TOOLS=1
 
 ifdef USE_FFT_TOOLS
 FFTLIBS = -lRootFftwWrapper -lfftw3

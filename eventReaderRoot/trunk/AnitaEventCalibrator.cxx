@@ -163,7 +163,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
    if(calType==WaveCalType::kVTFullJWPlusFudge || calType==WaveCalType::kVTFullJWPlusFancyClockZero)
       fApplyClockFudge=1;
    //   std::cout << "AnitaEventCalibrator::calibrateUsefulEvent():" << calType << std::endl;
-   if(calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTLabAGFastClock) {
+   if(calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock) {
      processEventAG(eventPtr);
    }
    else if(calType==WaveCalType::kVTFullJW || calType==WaveCalType::kVTLabJW ||
@@ -196,7 +196,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
      processClockJitterFast();
    }
 
-   if(calType==WaveCalType::kVTFullJWPlusFancyClockZero) {
+   if(calType==WaveCalType::kVTFullJWPlusFancyClockZero || calType==WaveCalType::kVTLabAGCrossCorClock) {
       processClockJitterCorrelation();
    }
 	 
@@ -206,7 +206,8 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
       calType==WaveCalType::kVTLabJWPlusClockZero || calType==WaveCalType::kVTFullJWPlusClockZero ||
       calType==WaveCalType::kVTLabJWPlusFastClockZero || 
       calType==WaveCalType::kVTFullJWPlusFastClockZero || 
-      calType==WaveCalType::kVTFullJWPlusFancyClockZero ) {
+      calType==WaveCalType::kVTFullJWPlusFancyClockZero || 
+      calType==WaveCalType::kVTLabAGCrossCorClock ) {
 
       zeroMean();
    }
@@ -430,7 +431,6 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
    // then calculates the cross-correlation between SURF 0 and the other SURFs
    // the peak of the cross-corrleation is taken as the time offset between
    // the channels.
-   
 
    Double_t fLowArray[NUM_SAMP];
    Double_t fHighArray[NUM_SAMP];
@@ -475,7 +475,7 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
 // 	 else if(tempV<minVal*0.9)
 // 	    volts[surf][i]=-1;
 // 	 else {
-	    volts[surf][i]=tempV/maxVal;
+	 volts[surf][i]=tempV/maxVal;
 	    //	 }	 
       }
       grClock[surf] = new TGraph(numPoints,times[surf],volts[surf]);
@@ -483,7 +483,7 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
 
    // At this point we have filled the normalised voltage arrays and created TGraphs
    // we can now correlate  and extract the offsets
-   Double_t deltaT=1./(2.6*16);
+   Double_t deltaT=1./(2.6*64);
 
    for(int surf=0;surf<NUM_SURF;surf++) {
       Double_t clockCor=0;
@@ -494,6 +494,31 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
 	 Double_t peakVal,phiDiff;
 	 grCor->GetPoint(dtInt,phiDiff,peakVal);
 	 clockCor=phiDiff;
+
+	 if(TMath::Abs(clockCor-clockCrossCorr[surf][fLabChip[surf][8]])>clockPeriod/2) {
+	   //Need to try again
+	   if(clockCor<clockCrossCorr[surf][fLabChip[surf][8]]) {
+	     if(dtInt>128) {
+	       Int_t dt2ndInt=FFTtools::getPeakBin(grCor,0,dtInt-128);
+	       grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
+	       clockCor=phiDiff;		 
+	     }
+	     else {
+	       std::cerr << "What's going on here then??\n";
+	     }
+	   }
+	   else {
+	     if(dtInt<(grCor->GetN()-128)) {
+	       Int_t dt2ndInt=FFTtools::getPeakBin(grCor,dtInt+128,grCor->GetN());
+	       grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
+	       clockCor=phiDiff;
+	     }
+	     else {
+	       std::cerr << "What's going on here then??\n";
+	     }
+	   }	     	       	   	    	   
+	 }
+
 	 delete grCor;
       }
 	 
@@ -590,10 +615,14 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
 	    mvArray[surf][chan][index]=rawArray[surf][chan][samp]*2; //Need to add mv calibration at some point
 	    timeArray[surf][chan][index]=time;
-	    if(samp==255)
-	      extraTime=time+0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
-	    else
-	      time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
+	    if(samp==255) {
+	      extraTime=time+(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
+	      //	      extraTime=time+0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
+	    }
+	    else {
+	      time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
+	      //	      time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
+	    }
 	    index++;
 	  }
 	  time+=epsilonFromAbby[surf][labChip][rco]; ///<This is the time of the first capacitor.
@@ -607,7 +636,8 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	
 	if(latestSample>=1) {
 	  //We are going to ignore sample zero for now
-	  time+=0.5*(justBinByBin[surf][labChip][rco][0]+justBinByBin[surf][labChip][rco][1])*tempFactor;
+	  time+=(justBinByBin[surf][labChip][rco][0])*tempFactor;
+	  //	  time+=0.5*(justBinByBin[surf][labChip][rco][0]+justBinByBin[surf][labChip][rco][1])*tempFactor;
 	  for(Int_t samp=1;samp<=latestSample;samp++) {
 	    int binRco=rco;
 	    if(nextExtra<260 && samp==1) {
@@ -618,8 +648,10 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	      unwrappedArray[surf][chan][index]=rawArray[surf][chan][nextExtra];
 	      mvArray[surf][chan][index]=rawArray[surf][chan][nextExtra]*2; //Need to add mv calibration at some point
 	      timeArray[surf][chan][index]=extraTime;
-	      if(nextExtra<259)
-		extraTime+=0.5*(justBinByBin[surf][labChip][binRco][nextExtra]+justBinByBin[surf][labChip][binRco][nextExtra+1])*tempFactor;
+	      if(nextExtra<259) {
+		extraTime+=(justBinByBin[surf][labChip][binRco][nextExtra])*tempFactor;
+		//		extraTime+=0.5*(justBinByBin[surf][labChip][binRco][nextExtra]+justBinByBin[surf][labChip][binRco][nextExtra+1])*tempFactor;
+	      }
 	      nextExtra++;
 	      index++;	 
    	      samp--;
@@ -630,8 +662,10 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
 	    mvArray[surf][chan][index]=rawArray[surf][chan][samp]*2; //Need to add mv calibration at some point
 	    timeArray[surf][chan][index]=time;
-	    if(samp<259) 
-	      time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
+	    if(samp<259) {
+	      time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
+	      //	      time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
+	    }
 	    index++;
 	  }
 	}
@@ -646,8 +680,10 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	  unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
 	  mvArray[surf][chan][index]=rawArray[surf][chan][samp]*2; //Need to add mv calibration at some point
 	  timeArray[surf][chan][index]=time;
-	  if(samp<259)
-	    time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp])*tempFactor;
+	  if(samp<259) {
+	    time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
+	    //	    time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
+	  }
 	  index++;
 	}
       }
@@ -1090,6 +1126,7 @@ void AnitaEventCalibrator::loadCalib() {
   for(int surf=0;surf<NUM_SURF;surf++) {
      for(int chip=0;chip<NUM_CHIP;chip++) {
 	fancyClockJitterOffset[surf][chip]=0;
+	clockCrossCorr[surf][chip]=0;
      }
   }
    //Set up some default numbers
@@ -1206,9 +1243,16 @@ void AnitaEventCalibrator::loadCalib() {
     std::ifstream FancyClockCalibFile(fileName);
     FancyClockCalibFile.getline(firstLine,179);
     while(FancyClockCalibFile >> surf >> chip >> calib) {
-       fancyClockJitterOffset[surf][chip]=calib;
-       //       fancyClockJitterOffset[surf][chip]=0; //RJN hack for test
+      //       fancyClockJitterOffset[surf][chip]=calib;
+       fancyClockJitterOffset[surf][chip]=0; //RJN hack for test
        //       std::cout << "fancyClockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
+    }
+
+    sprintf(fileName,"%s/crossCorrClocksPeakPhi.dat",calibDir);
+    std::ifstream CrossCorrClockCalibFile(fileName);
+    CrossCorrClockCalibFile.getline(firstLine,179);
+    while(CrossCorrClockCalibFile >> surf >> chip >> calib) {
+      clockCrossCorr[surf][chip]=calib;
     }
 
     //Load Jiwoo calibrations
