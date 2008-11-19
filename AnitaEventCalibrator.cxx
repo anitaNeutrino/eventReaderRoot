@@ -125,6 +125,7 @@ AnitaEventCalibrator::AnitaEventCalibrator()
    fSquareWave=0;
    fFakeTemp=0;
    fClockUpSampleFactor=16;
+   fEpsilonTempScale=1;
    //Default constructor
    std::cout << "AnitaEventCalibrator::AnitaEventCalibrator()" << std::endl;
    loadCalib();
@@ -629,7 +630,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	    }
 	    index++;
 	  }
-	  time+=epsilonFromAbby[surf][labChip][rco]; ///<This is the time of the first capacitor.
+	  time+=epsilonFromAbby[surf][labChip][rco]*tempFactor*fEpsilonTempScale; ///<This is the time of the first capacitor.
 	}
 	else {
 	  //Will just ignore the first couple of samples.
