@@ -128,7 +128,9 @@ AnitaEventCalibrator::AnitaEventCalibrator()
    std::cout << "AnitaEventCalibrator::AnitaEventCalibrator()" << std::endl;
    loadCalib();
    //   std::cout << "AnitaEventCalibrator::AnitaEventCalibrator() end" << std::endl;
-
+   for(int surf=1;surf<NUM_SURF;surf++) {
+     grCorClock[surf-1]=0;
+   }
 }
 
 AnitaEventCalibrator::~AnitaEventCalibrator()
@@ -484,20 +486,21 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
    // At this point we have filled the normalised voltage arrays and created TGraphs
    // we can now correlate  and extract the offsets
    Double_t deltaT=1./(2.6*64);
+   correlateTenClocks(grClock,deltaT);
+
 
    for(int surf=0;surf<NUM_SURF;surf++) {
       Double_t clockCor=0;
       if(surf>0) {
-	 //Use the FFTtools package to interpolate and correlate the clock channels
-	 TGraph *grCor = FFTtools::getInterpolatedCorrelationGraph(grClock[surf],grClock[0],deltaT);
-	 Int_t dtInt=FFTtools::getPeakBin(grCor);
-	 Double_t peakVal,phiDiff;
-	 grCor->GetPoint(dtInt,phiDiff,peakVal);
-	 clockCor=phiDiff;
-
-	 if(TMath::Abs(clockCor-clockCrossCorr[surf][fLabChip[surf][8]])>clockPeriod/2) {
-	   //Need to try again
-	   if(clockCor>clockCrossCorr[surf][fLabChip[surf][8]]) {
+	TGraph *grCor = grCorClock[surf-1];
+	Int_t dtInt=FFTtools::getPeakBin(grCor);
+	Double_t peakVal,phiDiff;
+	grCor->GetPoint(dtInt,phiDiff,peakVal);
+	clockCor=phiDiff;
+	
+	if(TMath::Abs(clockCor-clockCrossCorr[surf][fLabChip[surf][8]])>clockPeriod/2) {
+	  //Need to try again
+	  if(clockCor>clockCrossCorr[surf][fLabChip[surf][8]]) {
 	     if(dtInt>128) {
 	       Int_t dt2ndInt=FFTtools::getPeakBin(grCor,0,dtInt-128);
 	       grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
@@ -519,7 +522,7 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
 	   }	     	       	   	    	   
 	 }
 
-	 delete grCor;
+	 //	 delete grCor;
       }
 	 
       clockPhiArray[surf]=clockCor-fancyClockJitterOffset[surf][fLabChip[surf][8]];
@@ -1294,4 +1297,129 @@ void AnitaEventCalibrator::loadCalib() {
 float AnitaEventCalibrator::Get_Interpolation_X(float x1, float y1, float x2, float y2, float y){
   float x=(x2-x1)/(y2-y1)*(y-y1)+x1;
   return x;
+}
+
+
+void AnitaEventCalibrator::correlateTenClocks(TGraph *grClock[NUM_SURF], Double_t deltaT)
+{
+#ifdef USE_FFT_TOOLS
+  for(int surf=1;surf<NUM_SURF;surf++) {
+    if(grCorClock[surf-1])
+      delete grCorClock[surf-1];
+  }
+
+//   TGraph *grDeriv[NUM_SURF]={0};
+//   TGraph *grInt[NUM_SURF]={0};
+//   Int_t maxLength=0;
+//   Int_t lengths[10]={0};
+//   for(int surf=0;surf<NUM_SURF;surf++) {
+//     //    grDeriv[surf]=FFTtools::getDerviative(grClock[surf]);
+//         grInt[surf]=FFTtools::getInterpolatedGraph(grClock[surf],deltaT);
+//     //    grInt[surf]=FFTtools::getInterpolatedGraph(grDeriv[surf],deltaT);
+//     lengths[surf]=grInt[surf]->GetN();
+//     if(lengths[surf]>maxLength)
+//       maxLength=lengths[surf];
+
+//     //    delete grDeriv[surf];
+//   }
+  
+//   Int_t paddedLength=int(TMath::Power(2,int(TMath::Log2(maxLength))+2));
+//   FFTWComplex *theFFT[NUM_SURF]={0};
+//   Double_t *oldY[NUM_SURF] = {0};
+//   Double_t *corVals[NUM_SURF] = {0};
+
+//   Double_t *outputX[NUM_SURF] = {0};
+//   Double_t *outputY[NUM_SURF] = {0};
+
+//   Double_t firstX,firstY;
+//   Double_t secondX,secondY;
+//   grInt[0]->GetPoint(0,firstX,firstY);
+//   grInt[0]->GetPoint(1,secondX,secondY);
+//   Double_t actualDt=secondX-firstX;
+
+//   int tempLength=(paddedLength/2)+1;
+//   int firstRealSamp=(paddedLength-lengths[0])/2;
+//   for(int surf=0;surf<NUM_SURF;surf++) {
+//     Double_t thisX,thisY;
+//     grInt[surf]->GetPoint(0,thisX,thisY);
+//     Double_t waveOffset=firstX-thisX;
+
+//     oldY[surf]= new Double_t [paddedLength];
+
+//     for(int i=0;i<paddedLength;i++) {
+//       if(i<firstRealSamp || i>=firstRealSamp+lengths[surf])
+// 	thisY=0;
+//        else {
+// 	  grInt[surf]->GetPoint(i-firstRealSamp,thisX,thisY);
+//        }
+//        oldY[surf][i]=thisY;
+//     }
+//     theFFT[surf]=FFTtools::doFFT(paddedLength,oldY[surf]);    
+
+//     //Now do the correlation
+//     if(surf>0) {
+//       FFTWComplex *tempStep = new FFTWComplex [tempLength];
+//       Int_t no2=paddedLength>>1;
+//       for(int i=0;i<tempLength;i++) {
+// 	double reFFT1=theFFT[surf][i].re;
+// 	double imFFT1=theFFT[surf][i].im;
+// 	double reFFT2=theFFT[0][i].re;
+// 	double imFFT2=theFFT[0][i].im;
+// 	//Real part of output 
+// 	tempStep[i].re=(reFFT1*reFFT2+imFFT1*imFFT2)/double(no2);
+// 	//Imaginary part of output 
+// 	tempStep[i].im=(imFFT1*reFFT2-reFFT1*imFFT2)/double(no2);
+//       }
+//       corVals[surf] = FFTtools::doInvFFT(paddedLength,tempStep);
+//       delete [] tempStep;
+      
+//       outputX[surf] = new Double_t [paddedLength];
+//       outputY[surf] = new Double_t [paddedLength];
+//       for(int i=0;i<paddedLength;i++) {
+// 	if(i<paddedLength/2) {
+// 	  //Positive	  
+// 	  outputX[surf][i+(paddedLength/2)]=(i*actualDt)+waveOffset;
+// 	  outputY[surf][i+(paddedLength/2)]=corVals[surf][i];
+// 	}
+// 	else {
+// 	  //Negative
+// 	  outputX[surf][i-(paddedLength/2)]=((i-paddedLength)*actualDt)+waveOffset;
+// 	  outputY[surf][i-(paddedLength/2)]=corVals[surf][i];	
+// 	}  
+//       }
+      
+//       grCorClock[surf-1]= new TGraph(paddedLength,outputX[surf],outputY[surf]);
+//       delete [] outputX[surf];
+//       delete [] outputY[surf];
+//       delete [] corVals[surf];
+//     }
+//   }
+    
+//   for(int surf=0;surf<NUM_SURF;surf++) {
+//     delete [] oldY[surf];
+//     delete [] theFFT[surf];
+//     delete grInt[surf];
+//   }
+  
+
+  //Use the FFTtools package to interpolate and correlate the clock channels
+
+  //  TGraph *grDeriv[NUM_SURF];
+  //  TGraph *grInt[NUM_SURF];
+  //  for(int surf=0;surf<NUM_SURF;surf++) {
+  //    grInt[surf] = FFTtools::getInterpolatedGraph(grClock[surf],deltaT);
+  //    grDeriv[surf] = FFTtools::getDerviative(grInt[surf]);
+  //    if(surf>0) {
+  //      grCorClock[surf-1] = FFTtools::getCorrelationGraph(grDeriv[surf],grDeriv[0]);
+  //    }
+  //  }
+  //  for(int surf=0;surf<NUM_SURF;surf++) {
+  //    delete grDeriv[surf];
+  //    delete grInt[surf];
+  //  }
+  for(int surf=1;surf<NUM_SURF;surf++) {
+    grCorClock[surf-1]= FFTtools::getInterpolatedCorrelationGraph(grClock[surf],grClock[0],deltaT);
+  }
+    
+#endif
 }
