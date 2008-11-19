@@ -109,6 +109,12 @@ class AnitaEventCalibrator : public TObject
   { return fClockUpSampleFactor;} ///< Returns the factor by which the clock is upsampled in the correlation calibration.
   void setClockUpSampleFactor(Int_t factor)
   { fClockUpSampleFactor=factor;} ///< Sets the factor by which the clock is upsampled in the correlation calibration.
+  
+  Double_t getEpsilonTempScale() 
+  { return fEpsilonTempScale;} ///< Returns the factor by which we multiply the temperature scale for the epsilon part
+  void setEpsilonTempScale(Double_t scale)
+  { fEpsilonTempScale=scale;} ///< Sets the factor by which we multiply the temperature scale for the epsilon part
+
 
  protected:
    static AnitaEventCalibrator *fgInstance;  
@@ -119,6 +125,7 @@ class AnitaEventCalibrator : public TObject
   float Get_Interpolation_X(float x1, float y1, float x2, float y2, float y);
   void correlateTenClocks(TGraph *grClock[NUM_SURF], Double_t deltaT);
   Int_t fClockUpSampleFactor;
+  Double_t fEpsilonTempScale;
 
   ClassDef(AnitaEventCalibrator,1);
   
