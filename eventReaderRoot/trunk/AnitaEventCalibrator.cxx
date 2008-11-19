@@ -124,6 +124,7 @@ AnitaEventCalibrator::AnitaEventCalibrator()
 {
    fSquareWave=0;
    fFakeTemp=0;
+   fClockUpSampleFactor=16;
    //Default constructor
    std::cout << "AnitaEventCalibrator::AnitaEventCalibrator()" << std::endl;
    loadCalib();
@@ -485,7 +486,7 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
 
    // At this point we have filled the normalised voltage arrays and created TGraphs
    // we can now correlate  and extract the offsets
-   Double_t deltaT=1./(2.6*64);
+   Double_t deltaT=1./(2.6*fClockUpSampleFactor);
    correlateTenClocks(grClock,deltaT);
 
 
@@ -501,8 +502,8 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
 	if(TMath::Abs(clockCor-clockCrossCorr[surf][fLabChip[surf][8]])>clockPeriod/2) {
 	  //Need to try again
 	  if(clockCor>clockCrossCorr[surf][fLabChip[surf][8]]) {
-	     if(dtInt>128) {
-	       Int_t dt2ndInt=FFTtools::getPeakBin(grCor,0,dtInt-128);
+	     if(dtInt>2*fClockUpSampleFactor) {
+	       Int_t dt2ndInt=FFTtools::getPeakBin(grCor,0,dtInt-(2*fClockUpSampleFactor));
 	       grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
 	       clockCor=phiDiff;		 
 	     }
@@ -511,8 +512,8 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
 	     }
 	   }
 	   else {
-	     if(dtInt<(grCor->GetN()-128)) {
-	       Int_t dt2ndInt=FFTtools::getPeakBin(grCor,dtInt+128,grCor->GetN());
+	     if(dtInt<(grCor->GetN()-2*fClockUpSampleFactor)) {
+	       Int_t dt2ndInt=FFTtools::getPeakBin(grCor,dtInt+(2*fClockUpSampleFactor),grCor->GetN());
 	       grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
 	       clockCor=phiDiff;
 	     }
