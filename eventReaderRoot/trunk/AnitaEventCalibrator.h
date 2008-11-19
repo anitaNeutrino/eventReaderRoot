@@ -15,7 +15,7 @@
 #include <TH1.h>
 #include "AnitaConventions.h"
 
-
+class TGraph;
 class UsefulAnitaEvent;
 
 //!  AnitaEventCalibrator -- The ANITA Event Calibrator
@@ -92,6 +92,9 @@ class AnitaEventCalibrator : public TObject
 
   TF1 *fSquareWave;
   TF1 *fFakeTemp;
+
+  TGraph *grCorClock[NUM_SURF-1];
+
   int justBinByBinTimebase(UsefulAnitaEvent *eventPtr);
   void processEventRG(UsefulAnitaEvent *eventPtr); ///< Worker function for the RG (defunct) calibrations
   void processEventJW(UsefulAnitaEvent *eventPtr); ///< Worker function for the JW calibrations
@@ -108,7 +111,7 @@ class AnitaEventCalibrator : public TObject
  private:
   void loadCalib();
   float Get_Interpolation_X(float x1, float y1, float x2, float y2, float y);
-  
+  void correlateTenClocks(TGraph *grClock[NUM_SURF], Double_t deltaT);
 
   ClassDef(AnitaEventCalibrator,1);
   
