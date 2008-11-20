@@ -30,6 +30,7 @@
 #pragma link C++ class OtherMonitorHk+;
 #pragma link C++ class RawHk+;
 #pragma link C++ class CalibratedHk+;
+#pragma link C++ class SlowRate+;
 
 #pragma link C++ namespace     WaveCalType;
 #pragma link C++ enum          WaveCalType::EWaveCalType;
