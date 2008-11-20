@@ -7,7 +7,7 @@ include Makefile.arch
 
 #Site Specific  Flags
 SYSINCLUDES	=
-SYSLIBS         = 
+SYSLIBS         = -L/sw/lib
 
 ifdef ANITA_UTIL_INSTALL_DIR
 ANITA_UTIL_LIB_DIR=${ANITA_UTIL_INSTALL_DIR}/lib
@@ -57,6 +57,11 @@ tests: printStructSizes
 readRawData : $(ROOT_LIBRARY) readRawData.$(SRCSUF)
 	@echo "<**Compiling**> "  
 	$(LD)  $(CXXFLAGS) $(LDFLAGS) readRawData.$(SRCSUF) $(ROOT_LIBRARY) $(LIBS) -o $@
+
+
+exampleDumpHk : $(ROOT_LIBRARY) exampleDumpHk.$(SRCSUF)
+	@echo "<**Compiling**> "  
+	$(LD)  $(CXXFLAGS) $(LDFLAGS) exampleDumpHk.$(SRCSUF) $(ROOT_LIBRARY) $(LIBS) -o $@
 
 
 printStructSizes : $(ROOT_LIBRARY) printStructSizes.$(SRCSUF)

@@ -1195,7 +1195,7 @@ void AnitaEventCalibrator::loadCalib() {
     std::ifstream EpsilonAbbyFile(fileName);
     EpsilonAbbyFile.getline(firstLine,179);
     while(EpsilonAbbyFile >> surf >> chip >> rco >> calib) {
-	epsilonFromAbby[surf][chip][rco]=calib;
+      epsilonFromAbby[surf][chip][rco]=calib; 
 	//	cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
     }
 
