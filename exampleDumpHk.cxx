@@ -35,7 +35,8 @@ int main(int argc, char **argv)
    
    CalibratedHk *calHk=0;
    char fileName[FILENAME_MAX];
-   
+   strcpy(fileName,argv[1]);
+
    TFile *fp = new TFile(fileName);
    if(!fp) {
      std::cerr << "Couldn't open: " << fileName << "\n";
