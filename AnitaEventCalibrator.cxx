@@ -442,6 +442,7 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
    Double_t times[NUM_SURF][NUM_SAMP];
    Double_t volts[NUM_SURF][NUM_SAMP];
    TGraph *grClock[NUM_SURF];
+   TGraph *grClockFiltered[NUM_SURF];
    for(int surf=0;surf<NUM_SURF;surf++) {
       //First up we normalise the signals
 
@@ -483,12 +484,15 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
 	    //	 }	 
       }
       grClock[surf] = new TGraph(numPoints,times[surf],volts[surf]);
+      TGraph *grTemp = FFTtools::getInterpolatedGraph(grClock[surf],1./2.6);
+      grClockFiltered[surf]=FFTtools::simplePassBandFilter(grTemp,0,400);
+      delete grTemp;
    }
 
    // At this point we have filled the normalised voltage arrays and created TGraphs
    // we can now correlate  and extract the offsets
    Double_t deltaT=1./(2.6*fClockUpSampleFactor);
-   correlateTenClocks(grClock,deltaT);
+   correlateTenClocks(grClockFiltered,deltaT);
 
 
    for(int surf=0;surf<NUM_SURF;surf++) {
@@ -549,7 +553,8 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
    }
 
    for(int surf=0;surf<NUM_SURF;surf++) {
-      delete grClock[surf];
+     if(grClock[surf]) delete grClock[surf];
+     if(grClockFiltered[surf]) delete grClockFiltered[surf];
    }
 #else 
    printf("FFTTools currently disabled\n");
