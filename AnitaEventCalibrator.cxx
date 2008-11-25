@@ -398,14 +398,15 @@ void AnitaEventCalibrator::processClockJitterFast() {
        
        
        Double_t clockCor=phi-phi0;
-       clockPhiArray[surf]=clockCor-fastClockJitterOffset[surf][fLabChip[surf][8]];
-       //       std::cout << phi << "\t"  << phi0 << "\t" << fastClockJitterOffset[surf][fLabChip[surf][8]]
-       //		 << std::endl;
        
-       
-       //       std::cout << surf << "\t" << 8 <<  "\t" << phiGuess << "\t" << phi << "\t" << phi0 
-       //       		 << "\t" << clockCor << std::endl;
+       while((clockCor-fastClockPeakOffset[surf][fLabChip[surf][8]])>(clockPeriod/2)) {
+	 clockCor-=clockPeriod;
+       }
+        while((clockCor-fastClockPeakOffset[surf][fLabChip[surf][8]])<(-1*clockPeriod/2)) {
+	 clockCor+=clockPeriod;
+       }
 
+       clockPhiArray[surf]=clockCor;
 
 
        
@@ -1240,13 +1241,11 @@ void AnitaEventCalibrator::loadCalib() {
       //      std::cout << "clockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
     }
 
-    sprintf(fileName,"%s/newFastClockCalibNums.dat",calibDir);
+    sprintf(fileName,"%s/fastClocksPeakPhi.dat",calibDir);
     std::ifstream FastClockCalibFile(fileName);
     FastClockCalibFile.getline(firstLine,179);
     while(FastClockCalibFile >> surf >> chip >> calib) {
-      fastClockJitterOffset[surf][chip]=calib;
-      //      fastClockJitterOffset[surf][chip]=0; //RJN hack for test
-       //       std::cout << "fastClockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
+      fastClockPeakOffset[surf][chip]=calib;
     }
 
     sprintf(fileName,"%s/newFancyClockCalibNums.dat",calibDir);

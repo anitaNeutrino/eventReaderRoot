@@ -65,7 +65,7 @@ class AnitaEventCalibrator : public TObject
   
   //Variables for clock-based trigger jitter correction
   float clockJitterOffset[NUM_SURF][NUM_CHIP];
-  float fastClockJitterOffset[NUM_SURF][NUM_CHIP];
+  float fastClockPeakOffset[NUM_SURF][NUM_CHIP];
   float fancyClockJitterOffset[NUM_SURF][NUM_CHIP];
 
   //Calibration constants for first pass bin-by-bin
