@@ -66,7 +66,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   calibrateEvent(calType);
 }
 
-UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, Float_t surfTemp) 
+UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, Double_t surfTemp) 
   : RawAnitaEvent(*eventPtr)
 {
   fC3poNum=0;
@@ -145,7 +145,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
 	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
 	  this->fVolts[chanIndex][samp]=fCalibrator->unwrappedArray[surf][chan][samp]*2; //*2 for the bit shifting
-	  this->fTimes[chanIndex][samp]=float(samp)/2.6;
+	  this->fTimes[chanIndex][samp]=double(samp)/2.6;
 	}
       }
     }
@@ -400,7 +400,7 @@ Int_t UsefulAnitaEvent::guessRco(int chanIndex)
 Double_t UsefulAnitaEvent::getTempCorrectionFactor()
 {
   if(gotCalibTemp) {
-    float tempScale=29.938/(31.7225-0.054*calibTemp);
+    double tempScale=29.938/(31.7225-0.054*calibTemp);
     return tempScale;
   }
   else {

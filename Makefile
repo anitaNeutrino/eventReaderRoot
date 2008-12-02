@@ -7,7 +7,7 @@ include Makefile.arch
 
 #Site Specific  Flags
 SYSINCLUDES	=
-SYSLIBS         = -L/sw/lib
+SYSLIBS         = 
 
 ifdef ANITA_UTIL_INSTALL_DIR
 ANITA_UTIL_LIB_DIR=${ANITA_UTIL_INSTALL_DIR}/lib
@@ -34,6 +34,10 @@ FFTFLAG = -DUSE_FFT_TOOLS
 else
 FFTLIBS =
 FFTFLAG =
+endif
+
+ifdef USE_GOOGLE_PROFILER
+SYSLIBS +=-lprofiler
 endif
 
 #Generic and Site Specific Flags

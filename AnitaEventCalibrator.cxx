@@ -238,7 +238,7 @@ void AnitaEventCalibrator::processClockJitter() {
 
   Double_t fLowArray[NUM_SAMP];
   Double_t fHighArray[NUM_SAMP];
-   Float_t phi0=0;
+   Double_t phi0=0;
    Double_t times[NUM_SAMP];
    Double_t volts[NUM_SAMP];
 
@@ -265,7 +265,7 @@ void AnitaEventCalibrator::processClockJitter() {
        //       Double_t minVal=meanLow-offset;
 
        Int_t gotPhiGuess=0;
-       Float_t phiGuess=0;
+       Double_t phiGuess=0;
        for(int i=0;i<numPoints;i++) {
 	  times[i]=surfTimeArray[surf][i];
 	 Double_t tempV=mvArray[surf][8][i]-offset;	
@@ -298,7 +298,7 @@ void AnitaEventCalibrator::processClockJitter() {
 	 phi0=fSquareWave->GetParameter(0);
       
       
-      float phi=fSquareWave->GetParameter(0);
+      double phi=fSquareWave->GetParameter(0);
       if((phi-phi0)>(clockPeriod/2))
 	 phi-=clockPeriod;
       if((phi-phi0)<-1*(clockPeriod/2))
@@ -738,7 +738,7 @@ Int_t AnitaEventCalibrator::justBinByBinTimebase(UsefulAnitaEvent *eventPtr)
 	 Int_t latestSample=eventPtr->getLatestSample(chanIndex);
 	 
 
-	 float time=0;
+	 double time=0;
 	 for(int samp=0;samp<NUM_SAMP;samp++) {
 	   int binRco=rco;
 	   rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
@@ -806,7 +806,7 @@ void AnitaEventCalibrator::processEventRG(UsefulAnitaEvent *eventPtr) {
 
 
 	    //Timebase calib
-	    float timeVal=0;
+	    double timeVal=0;
 
 	    //First we have to work out which phase we are in
 	    int startRco=rcoBit;
@@ -817,7 +817,7 @@ void AnitaEventCalibrator::processEventRG(UsefulAnitaEvent *eventPtr) {
 
 
 	    //Now we do the calibration
-	    float time255=0;
+	    double time255=0;
 	    for(int samp=firstSamp;samp<lastSamp;samp++) {
 		int currentRco=startRco;
 		int index=samp;
@@ -863,7 +863,7 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr)
    //  int word;
   int chanIndex=0;
   int labChip=0;    
-  float temp_scale=29.938/(31.7225-0.054*33.046);
+  double temp_scale=29.938/(31.7225-0.054*33.046);
   if(eventPtr->gotCalibTemp) {
      temp_scale=eventPtr->getTempCorrectionFactor();
   }
@@ -891,7 +891,7 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr)
       int rcoBit=((eventPtr->chipIdFlag[chanIndex])&0x4)>>2;
 
       //Ryans dodgy-ness
-      float fudgeScale=1;
+      double fudgeScale=1;
       if(fApplyClockFudge)
 	 fudgeScale=tcalFudgeFactor[surf][labChip][rcoBit];
       //      std::cout << surf << "\t" << labChip << "\t" << rcoBit << "\t" << fudgeScale << "\n";
@@ -975,27 +975,27 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr)
 	rcobit[surf][chan][ibin]=irco;
 
 	if (chan==8){//timing calibraion
-	   float dt_bin=tcalTBin[surf][labChip][irco][index]*temp_scale*fudgeScale;	  
+	   double dt_bin=tcalTBin[surf][labChip][irco][index]*temp_scale*fudgeScale;	  
 	  int index_prev=index-1;
 	  if (index_prev==-1) index_prev=259;
-//	  float dt_bin_prev=tcalTBin[surf][labChip][irco][index_prev];
+//	  double dt_bin_prev=tcalTBin[surf][labChip][irco][index_prev];
 
 	  if (ibin==0) surfTimeArray[surf][ibin]=dt_bin;       
 	  else surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin-1]+dt_bin;	
 
 	  if (index==1) {	  
-	    float epsilon_eff=tcalEpsilon[surf][labChip][irco];
+	    double epsilon_eff=tcalEpsilon[surf][labChip][irco];
 	    surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin]-epsilon_eff;
 	    //	    std::cout << surf << "\t" << chan << "\t" << labChip << "\t" << irco << "\t" << epsilon_eff << "\n";
 	    
 	    //////////////////////////////////////////////
 	    //swapping time and voltage for non-monotonic time.
 	    if (ibin>0 && surfTimeArray[surf][ibin-1]>surfTimeArray[surf][ibin]){
-	       float tmp_time=surfTimeArray[surf][ibin];
+	       double tmp_time=surfTimeArray[surf][ibin];
 	       surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin-1];
 	       surfTimeArray[surf][ibin-1]=tmp_time;
 	       for (int chan=0; chan<NUM_CHAN; chan++){ 
-		  float tmp_v=mvArray[surf][chan][ibin];		
+		  double tmp_v=mvArray[surf][chan][ibin];		
 		  mvArray[surf][chan][ibin]=mvArray[surf][chan][ibin-1];
 		  mvArray[surf][chan][ibin-1]=tmp_v;
 		  tmp_v=unwrappedArray[surf][chan][ibin];		
@@ -1028,23 +1028,23 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr)
 	if (firstHitbus>tcalRcoDelayBin[surf][labChip][startRco] && 
 	    firstHitbus<=tcalRcoDelayBin[surf][labChip][startRco]+2 && !wrappedHitbus){
 	
-	float t_LE[3];
-	float t_TE[3];
+	double t_LE[3];
+	double t_TE[3];
 	int LE_count=0;
 	int TE_count=0;
 	int ibin=0;
 	for (ibin=0;ibin<goodPoints-1;ibin++){
-	  float mv1=unwrappedArray[surf][chan][ibin];
-	  float mv2=unwrappedArray[surf][chan][ibin+1];
+	  double mv1=unwrappedArray[surf][chan][ibin];
+	  double mv2=unwrappedArray[surf][chan][ibin+1];
 	  if (LE_count<3 && mv1<0 && mv2>=0){
-	    float t1=surfTimeArray[surf][ibin];
-	    float t2=surfTimeArray[surf][ibin+1];
+	    double t1=surfTimeArray[surf][ibin];
+	    double t2=surfTimeArray[surf][ibin+1];
 	    t_LE[LE_count]=Get_Interpolation_X(t1, mv1, t2, mv2, 0);
 	    LE_count++;
 	  }	    
 	  if (TE_count<3 && mv1>0 && mv2<=0){
-	    float t1=surfTimeArray[surf][ibin];
-	    float t2=surfTimeArray[surf][ibin+1];
+	    double t1=surfTimeArray[surf][ibin];
+	    double t2=surfTimeArray[surf][ibin+1];
 	    t_TE[TE_count]=Get_Interpolation_X(t1, mv1, t2, mv2, 0);
 	    TE_count++;
 	  }	    
@@ -1052,13 +1052,13 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr)
 	
 	if (LE_count>2 && TE_count>2){	    
 
-	  float clock_pulse_width_LE=0;
+	  double clock_pulse_width_LE=0;
 	  if (LE_count==2) clock_pulse_width_LE=t_LE[1]-t_LE[0];
 	  if (LE_count==3) clock_pulse_width_LE=(t_LE[2]-t_LE[0])/2.;
-	  float clock_pulse_width_TE=0;
+	  double clock_pulse_width_TE=0;
 	  if (TE_count==2) clock_pulse_width_TE=t_TE[1]-t_TE[0];
 	  if (TE_count==3) clock_pulse_width_TE=(t_TE[2]-t_TE[0])/2.;
-	  float clock_pulse_width=(clock_pulse_width_LE+clock_pulse_width_TE)/2.;
+	  double clock_pulse_width=(clock_pulse_width_LE+clock_pulse_width_TE)/2.;
 
 	  if (clock_pulse_width<29.75 || clock_pulse_width>30.2){
 	      for (int ibin=0;ibin<goodPoints;ibin++){
@@ -1069,11 +1069,11 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr)
 		  //may be one rcobit array per board might be enough, need to modify later./jwnam
 		int irco=rcobit[surf][chan][ibin];
 		int index=scaArray[surf][chan][ibin];
-		float dt_bin=tcalTBin[surf][labChip][irco][index]*temp_scale*fudgeScale;	  
+		double dt_bin=tcalTBin[surf][labChip][irco][index]*temp_scale*fudgeScale;	  
 		if (ibin==0) surfTimeArray[surf][ibin]=dt_bin;       
 		else surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin-1]+dt_bin;	
 		if (index==1) {	  
-		  float epsilon_eff=tcalEpsilon[surf][labChip][irco];
+		  double epsilon_eff=tcalEpsilon[surf][labChip][irco];
 		  surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin]-epsilon_eff;
 		}
 		
@@ -1093,12 +1093,12 @@ void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr)
    //swapping time and voltage for non-monotonic time.
    if (samp>0 && surfTimeArray[surf][samp-1]>surfTimeArray[surf][samp]){
      did_swap = true;
-     float tmp_time=surfTimeArray[surf][samp];
+     double tmp_time=surfTimeArray[surf][samp];
      surfTimeArray[surf][samp]=surfTimeArray[surf][samp-1];
      surfTimeArray[surf][samp-1]=tmp_time;
      for (int chan=0; chan<NUM_CHAN; chan++){ 
        if (samp >= numPointsArray[surf][chan]) continue;
-       float tmp_v=mvArray[surf][chan][samp];      
+       double tmp_v=mvArray[surf][chan][samp];      
        mvArray[surf][chan][samp]=mvArray[surf][chan][samp-1];
        mvArray[surf][chan][samp-1]=tmp_v;
        tmp_v=unwrappedArray[surf][chan][samp];      
@@ -1166,7 +1166,7 @@ void AnitaEventCalibrator::loadCalib() {
     int surf,chan,chip,rco,samp;
     int ant;
     char pol;
-    float mean,rms,calib;
+    double mean,rms,calib;
     int icalib;
     //    sprintf(fileName,"%s/rfcmCalibFile.txt",calibDir);
     sprintf(fileName,"%s/mattsFirstGainCalib.dat",calibDir);
@@ -1301,8 +1301,8 @@ void AnitaEventCalibrator::loadCalib() {
 }
 
 
-float AnitaEventCalibrator::Get_Interpolation_X(float x1, float y1, float x2, float y2, float y){
-  float x=(x2-x1)/(y2-y1)*(y-y1)+x1;
+double AnitaEventCalibrator::Get_Interpolation_X(double x1, double y1, double x2, double y2, double y){
+  double x=(x2-x1)/(y2-y1)*(y-y1)+x1;
   return x;
 }
 
