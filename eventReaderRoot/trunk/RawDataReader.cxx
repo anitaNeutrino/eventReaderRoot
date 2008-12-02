@@ -9,6 +9,7 @@
 
 #include "RawDataReader.h"
 #include "RawAnitaEvent.h"
+#include "RawAnitaHeader.h"
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -21,36 +22,23 @@ RawDataReader::RawDataReader()
 {
    //Default Constructor
 
-   //Try to open surfTemp.root file
-   char *surfTempDir=getenv("EVENT_READER_DIR");
-   if(!surfTempDir) {
-      std::cerr << "EVENT_READER_DIR not set defaulting to current dir" << std::endl;
-      surfTempDir=".";
-   }
-   char surfTempName[FILENAME_MAX];
-   sprintf(surfTempName,"%s/surfTemp.root",surfTempDir);
-   fpSurf = new TFile(surfTempName);
-   surfTempTree=0;
-   if(fpSurf->IsOpen()) {
-      surfTempTree=(TTree*)fpSurf->Get("surfTempTree");
-      if(surfTempTree) {
-	 surfTempTree->SetBranchAddress("surfTemp",&surfTemp);
-      }
-   }
-   if(!surfTempTree) {
-      std::cerr << "Couldn't open surfTemp.root -- no temperature correction" << std::endl;
-   }
+   
 }
 
 RawDataReader::~RawDataReader() {
    //Default Destructor
 }
 
-int RawDataReader::openFile(char *psevName)
+int RawDataReader::openFile(char *psevName, char *headName)
 {
    eventFile=gzopen(psevName,"rb");
    if(!eventFile) {
       std::cerr << "Error opening: " << psevName << std::endl;
+      return -1;
+   }
+   headFile=gzopen(headName,"rb");
+   if(!headFile) {
+      std::cerr << "Error opening: " << headName << std::endl;
       return -1;
    }
    return 0;
@@ -59,7 +47,7 @@ int RawDataReader::openFile(char *psevName)
 UsefulAnitaEvent *RawDataReader::getNextEvent(WaveCalType::WaveCalType_t calType)
 {
    //First check if file is open
-   if(!eventFile) {
+   if(!eventFile || ! headFile) {
       std::cerr << "File not open, must call RawDataReader::openFile first" << std::endl;
       return NULL;
    }
@@ -72,17 +60,20 @@ UsefulAnitaEvent *RawDataReader::getNextEvent(WaveCalType::WaveCalType_t calType
       gzclose(eventFile);
       return NULL;
    }
-   
-   surfTemp=33.046;
-   if(surfTempTree) {
-      Long64_t entry=surfTempTree->GetEntryNumberWithBestIndex(psBody.eventNumber,psBody.eventNumber);
-      if(entry>0) 
-	 surfTempTree->GetEntry(entry);
-      //      std::cout << entry << "\t" << surfTemp << std::endl;
+
+   //Now try to read in raw data
+   numBytes=gzread(headFile,&theHeader,sizeof(AnitaEventHeader_t));
+   if(numBytes!=sizeof(AnitaEventHeader_t)) {
+     //Will change this later to work
+      std::cerr << "Only read " << numBytes << " bytes from file" << std::endl;
+      gzclose(headFile);
+      return NULL;
    }
+   
 
    RawAnitaEvent rawEv(&psBody);
-   UsefulAnitaEvent *evPtr = new UsefulAnitaEvent(&rawEv,calType,surfTemp);      
+   RawAnitaHeader rawHead(&theHeader,0,0,0,0,0);
+   UsefulAnitaEvent *evPtr = new UsefulAnitaEvent(&rawEv,calType,&rawHead);      
    return evPtr;
 }
 

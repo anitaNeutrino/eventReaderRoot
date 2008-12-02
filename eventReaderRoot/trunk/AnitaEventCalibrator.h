@@ -52,29 +52,29 @@ class AnitaEventCalibrator : public TObject
 
 
   //Variables for RG Calib
-  float mvCalibVals[NUM_SURF][NUM_CHAN][NUM_CHIP];
-  float timeBaseCalib[NUM_SURF][NUM_CHIP][NUM_RCO];
+  double mvCalibVals[NUM_SURF][NUM_CHAN][NUM_CHIP];
+  double timeBaseCalib[NUM_SURF][NUM_CHIP][NUM_RCO];
   int rcoLatchCalib[NUM_SURF][NUM_CHIP];
-  float epsilonCalib[NUM_SURF][NUM_CHIP][NUM_RCO]; //Note the rco is the end rco
+  double epsilonCalib[NUM_SURF][NUM_CHIP][NUM_RCO]; //Note the rco is the end rco
 
   //Variables Jiwoo Calib
-  float tcalTBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
-  float tcalEpsilon[NUM_SURF][NUM_CHIP][NUM_RCO];
-  float tcalRcoDelayBin[NUM_SURF][NUM_CHIP][NUM_RCO];
-  float tcalFudgeFactor[NUM_SURF][NUM_CHIP][NUM_RCO];
+  double tcalTBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
+  double tcalEpsilon[NUM_SURF][NUM_CHIP][NUM_RCO];
+  double tcalRcoDelayBin[NUM_SURF][NUM_CHIP][NUM_RCO];
+  double tcalFudgeFactor[NUM_SURF][NUM_CHIP][NUM_RCO];
   
   //Variables for clock-based trigger jitter correction
-  float clockJitterOffset[NUM_SURF][NUM_CHIP];
-  float fastClockPeakOffset[NUM_SURF][NUM_CHIP];
-  float fancyClockJitterOffset[NUM_SURF][NUM_CHIP];
+  double clockJitterOffset[NUM_SURF][NUM_CHIP];
+  double fastClockPeakOffset[NUM_SURF][NUM_CHIP];
+  double fancyClockJitterOffset[NUM_SURF][NUM_CHIP];
 
   //Calibration constants for first pass bin-by-bin
-  float justBinByBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
-  float epsilonFromAbby[NUM_SURF][NUM_CHIP][NUM_RCO]; ///< Note the rco here is the rco which the event reports (ie. 1-->0 goes in [0] and 0-->1 goes in [1]
-  float clockCrossCorr[NUM_SURF][NUM_CHIP];
+  double justBinByBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
+  double epsilonFromAbby[NUM_SURF][NUM_CHIP][NUM_RCO]; ///< Note the rco here is the rco which the event reports (ie. 1-->0 goes in [0] and 0-->1 goes in [1]
+  double clockCrossCorr[NUM_SURF][NUM_CHIP];
 
   //Cable Length Calib
-  float groupDelayCalib[NUM_SURF][NUM_CHAN];
+  double groupDelayCalib[NUM_SURF][NUM_CHAN];
 
   //Temporary variables that don't really need to be part of the class
   int rawArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
@@ -122,7 +122,7 @@ class AnitaEventCalibrator : public TObject
 
  private:
   void loadCalib();
-  float Get_Interpolation_X(float x1, float y1, float x2, float y2, float y);
+  double Get_Interpolation_X(double x1, double y1, double x2, double y2, double y);
   void correlateTenClocks(TGraph *grClock[NUM_SURF], Double_t deltaT);
   Int_t fClockUpSampleFactor;
   Double_t fEpsilonTempScale;
