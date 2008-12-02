@@ -1174,8 +1174,10 @@ void AnitaEventCalibrator::loadCalib() {
     char firstLine[180];
     CalibFile.getline(firstLine,179);
     while(CalibFile >> surf >> chan >> chip >> ant >> pol >> mean >> rms >> calib) {      
-	mvCalibVals[surf-1][chan-1][chip-1]=calib;
-//	cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
+      if(pol=='H') 
+	calib*=-1;
+      mvCalibVals[surf-1][chan-1][chip-1]=calib;
+      //	cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
     }
 //    cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
 //    exit(0);
