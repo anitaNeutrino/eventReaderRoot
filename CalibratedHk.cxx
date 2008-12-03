@@ -241,7 +241,7 @@ char *CalibratedHk::getAttitudeName(int index) {
 }
 
 char *CalibratedHk::getPowerName(int index) {
-  char *powerNames[NUM_POWERS]={"RF1","RF2","+24","PV","+5S","Batt"};
+  char *powerNames[NUM_POWERS]={"RF1","RF2","+24","PV","+5M","Batt"};
   if(index>=0 && index<NUM_POWERS) 
     return powerNames[index];
   return "None";
@@ -251,7 +251,7 @@ char *CalibratedHk::getPowerName(int index) {
 char *CalibratedHk::getCurrentName(int index)
 {
 //char *currentNames[NUM_CURRENTS]={"RF1","RF2","Batt","+24","PV","+1.5","+5S","-12","+12","+3.3","+5","-5"};
-char *currentNames[NUM_CURRENTS]={"RF1","RF2","+24","PV","+5S","+3.3","+1.5","+12","+5NB","-12","+5","Batt"};
+char *currentNames[NUM_CURRENTS]={"RF1","RF2","+24","PV","+5M","+3.3","+1.5","+12","+5NB","-12","+5","Batt"};
  if(index>=0 && index<NUM_CURRENTS) 
     return currentNames[index];
   return "None";
@@ -262,7 +262,7 @@ char *currentNames[NUM_CURRENTS]={"RF1","RF2","+24","PV","+5S","+3.3","+1.5","+1
 char *CalibratedHk::getVoltageName(int index)
 {
 
-char *voltageNames[NUM_VOLTAGES]={"RF1","RF2","+12","+24","PV","+5","+5S","+3.3","+1.5","-12","-5"};
+char *voltageNames[NUM_VOLTAGES]={"RF1","RF2","+12","+24","PV","+5","+5M","+3.3","+1.5","-12","-5"};
  if(index>=0 && index<NUM_VOLTAGES) 
     return voltageNames[index];
   return "None";
@@ -271,7 +271,7 @@ char *voltageNames[NUM_VOLTAGES]={"RF1","RF2","+12","+24","PV","+5","+5S","+3.3"
 char *CalibratedHk::getExternalTempName(int index)
 {
 
-char *extTempNames[NUM_EXT_TEMPS]={"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25"};
+char *extTempNames[NUM_EXT_TEMPS]={"PV ??","PV ??","A01V (RFCM02)","A10V (RFCM07)","A03V (RFCM08)","A12V (RFCM12)","A05V (RFCM13)","A14V (RFCM14)","A07V (RFCM15)","A16V (RFCM16)","A17V (RFCM10)","A19V (RFCM03)","A21V (RFCM05)","A23V (RFCM06)","A25V (RFCM09)","A27V (RFCM11)","A29V (RFCM04)","A31V (RFCM01)","A??V (RFCM 17)","A??V (RFCM18)","A??V (RFCM19)","A??V (RFCM20)","Radiator Plate","PV ??","PV ??"};
  if(index>=0 && index<NUM_EXT_TEMPS) 
     return extTempNames[index];
   return "None";
@@ -279,7 +279,7 @@ char *extTempNames[NUM_EXT_TEMPS]={"1","2","3","4","5","6","7","8","9","10","11"
 
 char *CalibratedHk::getInternalTempName(int index)
 {
-char *intTempNames[NUM_INT_TEMPS]={"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"}; 
+char *intTempNames[NUM_INT_TEMPS]={"SURF 10","SURF 8","SURF 3","Top of CPU fcaeplate","Bottom of CPU faceplate","MTRON Box","125MHz Clock","Radiator Plate (near SURF 7)","Radiator Plate (near SURF 2)","SHORT 02","SHORT 24","SHORT 28","SHORT 31","IP Box","DC-DC Box"}; 
  if(index>=0 && index<NUM_INT_TEMPS) 
     return intTempNames[index];
  return "None";
