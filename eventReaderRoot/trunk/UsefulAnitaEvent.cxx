@@ -275,6 +275,25 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
     }      
     break;
 
+  case WaveCalType::kVTFullAGFastClock:
+  case WaveCalType::kVTFullAGCrossCorClock:
+    // kVTLabAG + Clock Jitter Correction (+ Zero Mean)
+    for(int surf=0;surf<NUM_SURF;surf++) {
+      for(int chan=0;chan<NUM_CHAN;chan++) {
+	int chanIndex=getChanIndex(surf,chan);
+	this->fNumPoints[chanIndex]=fCalibrator->numPointsArray[surf][chan];
+	memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
+	memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
+	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
+	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
+	  this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp]-fCalibrator->chipByChipDeltats[surf][chan][getLabChip(chanIndex)];
+	  //	  std::cout << surf << "\t" << chan << "\t" << fCalibrator->chipByChipDeltats[surf][chan][getLabChip(chanIndex)] <<"\n";
+	  this->fCapacitorNum[chanIndex][samp]=fCalibrator->scaArray[surf][chan][samp];
+	}
+      }
+    }      
+    break;
+
   case WaveCalType::kVTFullClockRG:
   case WaveCalType::kVTFullClockZeroRG:
     // kVTFullRG + Clock Jitter Correction (+ Zero Mean)

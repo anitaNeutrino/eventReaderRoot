@@ -81,7 +81,9 @@ namespace WaveCalType {
     kVTLabAG                        = 0x17, ///< Applies the bin-by-bin and epsilon corrections
     kVTLabAGFastClock               = 0x18, ///< Applies the bin-by-bin and epsilon corrections and tries to do a clock calibration
     kVTLabAGCrossCorClock           = 0x19, ///< Applies the bin-by-bin and epsilon corrections and tries to do a clock calibration using corrections
-    kNotACalib ///< Useful for looping over all calibrations
+    kVTFullAGFastClock               = 0x1a, ///< Applies the bin-by-bin and epsilon corrections and tries to do a clock calibration + chip and cable delays
+    kVTFullAGCrossCorClock           = 0x1b, ///< Applies the bin-by-bin and epsilon corrections and tries to do a clock calibration using corrections + chip and cable delays
+    kNotACalib ///< Useful for looping over all calibrations 
   } WaveCalType_t; ///< The calibration enumeration type
 
   const char *calTypeAsString(WaveCalType::WaveCalType_t calType); ///< Returns the calibration type as a string
