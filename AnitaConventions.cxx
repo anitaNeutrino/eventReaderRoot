@@ -32,6 +32,8 @@ const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
    case kVTLabAG: return "kVTLabAG --- Applies Abby's bin-by-bin and epsilon corrections"; break;
    case kVTLabAGFastClock: return "kVTLabAGFastClock -- Applies Abby's bin-by-bin and epsilon corrections and tries to align the clocks"; break;
    case kVTLabAGCrossCorClock: return "kVTLabAGCrossCorClock -- Applies Abby's bin-by-bin and epsilon corrections and tries to align the clocks using cross-correlations"; break;
+   case kVTFullAGFastClock: return "kVTFullAGFastClock -- Applies Abby's bin-by-bin and epsilon corrections and tries to align the clocks + delays"; break;
+   case kVTFullAGCrossCorClock: return "kVTFullAGCrossCorClock -- Applies Abby's bin-by-bin and epsilon corrections and tries to align the clocks using cross-correlations+ delays"; break;
    default:
       return "Unknown Calibration Type";
 	 break;

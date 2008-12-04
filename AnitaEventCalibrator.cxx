@@ -167,7 +167,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
    if(calType==WaveCalType::kVTFullJWPlusFudge || calType==WaveCalType::kVTFullJWPlusFancyClockZero)
       fApplyClockFudge=1;
    //   std::cout << "AnitaEventCalibrator::calibrateUsefulEvent():" << calType << std::endl;
-   if(calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock) {
+   if(calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGFastClock || calType==WaveCalType::kVTFullAGCrossCorClock) {
      processEventAG(eventPtr);
    }
    else if(calType==WaveCalType::kVTFullJW || calType==WaveCalType::kVTLabJW ||
@@ -196,11 +196,11 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
       processClockJitter();
    }
 
-   if(calType==WaveCalType::kVTLabJWPlusFastClockZero || calType==WaveCalType::kVTFullJWPlusFastClockZero || calType==WaveCalType::kVTLabAGFastClock) {
+   if(calType==WaveCalType::kVTLabJWPlusFastClockZero || calType==WaveCalType::kVTFullJWPlusFastClockZero || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTFullAGFastClock) {
      processClockJitterFast();
    }
 
-   if(calType==WaveCalType::kVTFullJWPlusFancyClockZero || calType==WaveCalType::kVTLabAGCrossCorClock) {
+   if(calType==WaveCalType::kVTFullJWPlusFancyClockZero || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGCrossCorClock) {
       processClockJitterCorrelation();
    }
 	 
@@ -211,7 +211,8 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
       calType==WaveCalType::kVTLabJWPlusFastClockZero || 
       calType==WaveCalType::kVTFullJWPlusFastClockZero || 
       calType==WaveCalType::kVTFullJWPlusFancyClockZero || 
-      calType==WaveCalType::kVTLabAGCrossCorClock ) {
+      calType==WaveCalType::kVTLabAGCrossCorClock ||
+      calType==WaveCalType::kVTFullAGCrossCorClock) {
 
       zeroMean();
    }
@@ -1145,6 +1146,7 @@ void AnitaEventCalibrator::loadCalib() {
 	for(int chan=0;chan<NUM_CHAN;chan++) {
 	    for(int chip=0;chip<NUM_CHIP;chip++) {
 		mvCalibVals[surf][chan][chip]=1;
+		chipByChipDeltats[surf][chan][chip]=0;
 	    }
 	}
     }
@@ -1167,6 +1169,7 @@ void AnitaEventCalibrator::loadCalib() {
     int ant;
     char pol;
     double mean,rms,calib;
+    int numEnts;
     int icalib;
     //    sprintf(fileName,"%s/rfcmCalibFile.txt",calibDir);
     sprintf(fileName,"%s/mattsFirstGainCalib.dat",calibDir);
@@ -1181,6 +1184,14 @@ void AnitaEventCalibrator::loadCalib() {
     }
 //    cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
 //    exit(0);
+
+    sprintf(fileName,"%s/firstPassDeltaT.dat",calibDir);
+    std::ifstream DeltaTCalibFile(fileName);
+    DeltaTCalibFile.getline(firstLine,179);
+    while(DeltaTCalibFile >> surf >> chan >> chip >> calib >> rms >> numEnts) {      
+      chipByChipDeltats[surf][chan][chip]=calib;
+      //	cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
+    }
     
     sprintf(fileName,"%s/timeBaseCalib.dat",calibDir);
     std::ifstream TimeCalibFile(fileName);

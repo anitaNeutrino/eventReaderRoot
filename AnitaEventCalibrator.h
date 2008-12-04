@@ -72,6 +72,8 @@ class AnitaEventCalibrator : public TObject
   double justBinByBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
   double epsilonFromAbby[NUM_SURF][NUM_CHIP][NUM_RCO]; ///< Note the rco here is the rco which the event reports (ie. 1-->0 goes in [0] and 0-->1 goes in [1]
   double clockCrossCorr[NUM_SURF][NUM_CHIP];
+  double chipByChipDeltats[NUM_SURF][NUM_CHAN][NUM_CHIP]; ///< Cable + chip-to-chip delays
+
 
   //Cable Length Calib
   double groupDelayCalib[NUM_SURF][NUM_CHAN];
