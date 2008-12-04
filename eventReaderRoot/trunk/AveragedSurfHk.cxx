@@ -8,6 +8,7 @@
 
 #include "AveragedSurfHk.h"
 #include "AnitaPacketUtil.h"
+#include "AnitaGeomTool.h"
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -250,4 +251,56 @@ Int_t AveragedSurfHk::getScalerGoal(int surf, int scl)
     return scalerGoalsNadir[band];
   }
   return -1;
+}
+
+
+Double_t AveragedSurfHk::getRFPowerInK(int surf, int chan)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  if(chan<0 || chan>=RFCHAN_PER_SURF)
+    return -1;
+  Int_t adc=avgRFPower[surf][chan];
+
+  AnitaPol::AnitaPol_t thePol;
+  Int_t ant;
+  AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,thePol);
+  
+  Int_t ped=736;
+  if(thePol==AnitaPol::kHorizontal)
+    ped=900;
+  
+  Double_t a=0.0439;
+  Double_t DA=adc-ped;
+  Double_t kelvin=290*TMath::Power(10,(a*DA/10.));
+  return kelvin;
+
+}
+
+
+Double_t AveragedSurfHk::getRMSRFPowerInK(int surf, int chan)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  if(chan<0 || chan>=RFCHAN_PER_SURF)
+    return -1;
+  Int_t adcLow=avgRFPower[surf][chan]-rmsRFPower[surf][chan];
+  Int_t adcHigh=avgRFPower[surf][chan]+rmsRFPower[surf][chan];
+
+  AnitaPol::AnitaPol_t thePol;
+  Int_t ant;
+  AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,thePol);
+  
+  Int_t ped=736;
+  if(thePol==AnitaPol::kHorizontal)
+    ped=900;
+  
+  Double_t a=0.0439;
+  Double_t DAlow=adcLow-ped;
+  Double_t kelvinLow=290*TMath::Power(10,(a*DAlow/10.));
+  Double_t DAhigh=adcHigh-ped;
+  Double_t kelvinHigh=290*TMath::Power(10,(a*DAhigh/10.));
+  
+  return (kelvinHigh-kelvinLow)/2;
+
 }
