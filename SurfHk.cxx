@@ -8,6 +8,7 @@
 
 #include "SurfHk.h"
 #include "AnitaPacketUtil.h"
+#include "AnitaGeomTool.h"
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -306,4 +307,27 @@ Int_t SurfHk::getScalerGoal(int surf, int scl)
     return scalerGoalsNadir[band];
   }
   return -1;
+}
+
+Double_t SurfHk::getRFPowerInK(int surf, int chan)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  if(chan<0 || chan>=RFCHAN_PER_SURF)
+    return -1;
+  Int_t adc=rfPower[surf][chan];
+
+  AnitaPol::AnitaPol_t thePol;
+  Int_t ant;
+  AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,thePol);
+  
+  Int_t ped=736;
+  if(thePol==AnitaPol::kHorizontal)
+    ped=900;
+  
+  Double_t a=0.0439;
+  Double_t DA=adc-ped;
+  Double_t kelvin=290*TMath::Power(10,(a*DA/10.));
+  return kelvin;
+
 }

@@ -61,6 +61,8 @@ class AveragedSurfHk: public TObject
    Int_t getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band); ///< Get logical index for phi-ring-band
    int getSurfScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band, Int_t &surf, Int_t &scl); ///< Get surf and scaler for  phi-ring-band
    Int_t getScalerGoal(int surf, int scl); ///< Get scaler goal for given surf-scaler
+   Double_t getRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
+   Double_t getRMSRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
   ClassDef(AveragedSurfHk,13);
 };
 
