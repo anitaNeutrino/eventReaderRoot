@@ -91,6 +91,8 @@ class AnitaEventCalibrator : public TObject
   double clockPhiArray[NUM_SURF];
   double timeArray[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
 
+  //  Double_t garyRFPowerPed[NUM_SEAVEYS][NUM_POLS];
+
 
   TF1 *fSquareWave;
   TF1 *fFakeTemp;
