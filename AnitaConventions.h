@@ -92,6 +92,7 @@ namespace WaveCalType {
 
 ///First up we'll add some definitions of the raw data
 #define NUM_SEAVEYS 40 ///< The number of Seavey antennas.
+#define NUM_POLS 2 ///< The number of polarisations per Seavey
 #define ACTIVE_SURFS 10 ///< The number of SURF digitizer cards.
 #define SCALERS_PER_SURF 16 ///< The number of active trigger channels per SURF.
 #define RFCHAN_PER_SURF 8 ///< The number of RF input channels per SURF.
