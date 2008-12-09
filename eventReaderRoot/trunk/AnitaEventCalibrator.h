@@ -80,6 +80,8 @@ class AnitaEventCalibrator : public TObject
   //Cable Length Calib
   double groupDelayCalib[NUM_SURF][NUM_CHAN];
 
+  Double_t rfPowPed[NUM_SURF][NUM_CHAN];
+
   //Temporary variables that don't really need to be part of the class
   int rawArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
   int fLabChip[NUM_SURF][NUM_CHAN];
@@ -93,7 +95,6 @@ class AnitaEventCalibrator : public TObject
   double clockPhiArray[NUM_SURF];
   double timeArray[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
 
-  Double_t rfPowPed[NUM_SEAVEYS][NUM_POLS];
 
 
   TF1 *fSquareWave;
