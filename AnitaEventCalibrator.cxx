@@ -1310,6 +1310,12 @@ void AnitaEventCalibrator::loadCalib() {
 	//	std::cout << surf << " " << chip << " " << rco << "\t" << calib << std::endl;
 	   
     }
+    
+    sprintf(fileName,"%s/rfPowPeds.dat",calibDir);
+    std::ifstream GaryRfPowPeds(fileName);
+    while(GaryRfPowPeds >> surf >> chan >> calib) {
+      rfPowPed[surf][chan]=calib;
+    }
 
 }
 
@@ -1442,4 +1448,15 @@ void AnitaEventCalibrator::correlateTenClocks(TGraph *grClock[NUM_SURF], Double_
   }
     
 #endif
+}
+
+Double_t AnitaEventCalibrator::convertRfPowToKelvin(int surf, int chan, int adc) 
+{
+  
+  Double_t ped=rfPowPed[surf][chan]; 
+  Double_t a=0.0439;
+  Double_t DA=adc-ped;
+  Double_t kelvin=290*TMath::Power(10,(a*DA/10.));
+  return kelvin;
+  
 }
