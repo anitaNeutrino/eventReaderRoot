@@ -57,7 +57,7 @@ namespace AnitaGeom {
   //and the inverse (using ANT-1 and ANT-17 and ANT-32 with the arrays)
   int upperPhiNums[NUM_PHI]={1,3,5,7,9,11,13,15,0,2,4,6,8,10,12,14};
   int lowerPhiNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-  int nadirPhiNums[NUM_NADIRS]={0,1,2,3,4,5,6,7};
+  int nadirPhiNums[NUM_NADIRS]={0,2,4,6,8,10,12,14};
    
 }
 
@@ -249,8 +249,11 @@ int AnitaGeomTool::getPhiSector(int rx)
 {
   if (rx<16)
     return AnitaGeom::upperPhiNums[rx];
-  else
+  else if(rx<32)
     return AnitaGeom::lowerPhiNums[rx-16];
+  else if(rx<40) {
+    return AnitaGeom::nadirPhiNums[rx-32];
+  }
 
   return 0;
 }
@@ -1095,6 +1098,8 @@ int AnitaGeomTool::getAntFromPhiRing(int phi, AnitaRing::AnitaRing_t ring)
     return AnitaGeom::upperAntNums[phi];
    case AnitaRing::kLowerRing:
       return AnitaGeom::lowerAntNums[phi];
+   case AnitaRing::kNadirRing:
+      return AnitaGeom::nadirAntNums[phi];
   default:
     return -1;
   }
