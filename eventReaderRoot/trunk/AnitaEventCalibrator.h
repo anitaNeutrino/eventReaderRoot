@@ -46,6 +46,8 @@ class AnitaEventCalibrator : public TObject
   static int getChanIndex(int surf, int chan)
      {return chan+(9*surf);}   ///<Generally useful function
 
+  Double_t convertRfPowToKelvin(int surf, int chan, int adc);
+
   //Some flags that do things
   Int_t fApplyClockFudge; //Should we use my silly clock fudge factor
   
@@ -91,7 +93,7 @@ class AnitaEventCalibrator : public TObject
   double clockPhiArray[NUM_SURF];
   double timeArray[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
 
-  //  Double_t garyRFPowerPed[NUM_SEAVEYS][NUM_POLS];
+  Double_t rfPowPed[NUM_SEAVEYS][NUM_POLS];
 
 
   TF1 *fSquareWave;

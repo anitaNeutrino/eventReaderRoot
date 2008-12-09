@@ -9,6 +9,7 @@
 #include "AveragedSurfHk.h"
 #include "AnitaPacketUtil.h"
 #include "AnitaGeomTool.h"
+#include "AnitaEventCalibrator.h"
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -262,21 +263,7 @@ Double_t AveragedSurfHk::getRFPowerInK(int surf, int chan)
     return -1;
   Int_t adc=avgRFPower[surf][chan];
 
-  AnitaPol::AnitaPol_t thePol;
-  Int_t ant;
-  AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,thePol);
-
-  
-Double_t rfPowPedestals[40][2]={{878.25,733.25},{916,747.5},{881.25,739.5},{885.75,760.5},{891.75,726},{837.5,732.5},{833.25,715.5},{907,760},{863.75,730.25},{899.25,728.25},{903.5,734.5},{896.5,745.25},{882.5,753.25},{898.5,721.25},{888.75,722.75},{897,724.5},{934,725.5},{843,727.5},{916.75,747.5},{902.25,728.25},{908,728},{907.75,724.75},{944.25,717.5},{926.25,742},{952.75,731.5},{936,725.5},{930.5,733.5},{910,735.5},{943.75,742.5},{946,775.75},{934.5,713.75},{933.25,785.5},{846.75,722.5},{917.5,695.25},{879.25,703.25},{857,691},{816,702.5},{863.75,790.75},{861,709.5},{929.75,732}};
-    Double_t ped=rfPowPedestals[ant][thePol];  
-
-    //  Int_t ped=736;
-    //  if(thePol==AnitaPol::kHorizontal)
-    //    ped=900;
-  
-  Double_t a=0.0439;
-  Double_t DA=adc-ped;
-  Double_t kelvin=290*TMath::Power(10,(a*DA/10.));
+  Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvin(surf,chan,adc);
   return kelvin;
 
 }
@@ -290,25 +277,8 @@ Double_t AveragedSurfHk::getRMSRFPowerInK(int surf, int chan)
     return -1;
   Int_t adcLow=avgRFPower[surf][chan]-rmsRFPower[surf][chan];
   Int_t adcHigh=avgRFPower[surf][chan]+rmsRFPower[surf][chan];
-
-  AnitaPol::AnitaPol_t thePol;
-  Int_t ant;
-  AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,thePol);
-
-  
-Double_t rfPowPedestals[40][2]={{878.25,733.25},{916,747.5},{881.25,739.5},{885.75,760.5},{891.75,726},{837.5,732.5},{833.25,715.5},{907,760},{863.75,730.25},{899.25,728.25},{903.5,734.5},{896.5,745.25},{882.5,753.25},{898.5,721.25},{888.75,722.75},{897,724.5},{934,725.5},{843,727.5},{916.75,747.5},{902.25,728.25},{908,728},{907.75,724.75},{944.25,717.5},{926.25,742},{952.75,731.5},{936,725.5},{930.5,733.5},{910,735.5},{943.75,742.5},{946,775.75},{934.5,713.75},{933.25,785.5},{846.75,722.5},{917.5,695.25},{879.25,703.25},{857,691},{816,702.5},{863.75,790.75},{861,709.5},{929.75,732}};
-  Double_t ped=rfPowPedestals[ant][thePol];  
-
-  //  Int_t ped=736;
-  //  if(thePol==AnitaPol::kHorizontal)
-  //    ped=900;
-  
-  Double_t a=0.0439;
-  Double_t DAlow=adcLow-ped;
-  Double_t kelvinLow=290*TMath::Power(10,(a*DAlow/10.));
-  Double_t DAhigh=adcHigh-ped;
-  Double_t kelvinHigh=290*TMath::Power(10,(a*DAhigh/10.));
-  
+  Double_t kelvinHigh=AnitaEventCalibrator::Instance()->convertRfPowToKelvin(surf,chan,adcHigh);
+  Double_t kelvinLow=AnitaEventCalibrator::Instance()->convertRfPowToKelvin(surf,chan,adcLow);  
   return (kelvinHigh-kelvinLow)/2;
 
 }
