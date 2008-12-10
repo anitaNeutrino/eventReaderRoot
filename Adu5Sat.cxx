@@ -12,6 +12,8 @@
 #include <cstring>
 #include "TPad.h"
 #include "TEllipse.h"
+#include "TLine.h"
+#include "TLatex.h"
 #include "TMath.h"
 #include "TMarker.h"
 
@@ -57,7 +59,7 @@ Adu5Sat::Adu5Sat(Int_t           trun,
 }
 
 
-void Adu5Sat::getCirclePlot(TPad *padSat)
+void Adu5Sat::getCirclePlot(TPad *padSat, char *title)
 {
   padSat->cd();
   TEllipse *lippy = new TEllipse();
@@ -73,6 +75,19 @@ void Adu5Sat::getCirclePlot(TPad *padSat)
   lippy->DrawEllipse(0.5,0.5,0.45*TMath::Cos(TMath::DegToRad()*80),0,0,360,0);
   lippy->DrawEllipse(0.5,0.5,0.45*TMath::Cos(TMath::DegToRad()*90),0,0,360,0);
 
+
+  TLine *liney = new TLine();
+  liney->SetLineStyle(1);
+  liney->DrawLineNDC(0.03,0.5,0.97,0.5);
+  liney->DrawLineNDC(0.5,0.03,0.5,0.97);
+
+  TLatex *texy = new TLatex();
+  texy->SetTextSize(0.08);
+  if(title)
+    texy->DrawTextNDC(0.02,0.93,title);
+  else
+    texy->DrawTextNDC(0.02,0.93,"ADU5");
+
   Int_t markers[4]={29,23,26,28};
 
   TMarker *satty = new TMarker();
@@ -80,14 +95,16 @@ void Adu5Sat::getCirclePlot(TPad *padSat)
     for(int i=0;i<(int)numSats[ant];i++) {
       if(snr[ant][i]<30)
 	satty->SetMarkerColor(kRed);
+      else if(snr[ant][i]<40)
+	satty->SetMarkerColor(kOrange);
       else
 	satty->SetMarkerColor(kGreen);
       satty->SetMarkerStyle(markers[ant]);
-      satty->SetMarkerSize(3);
+      satty->SetMarkerSize(2.5);
       Double_t r=0.45*TMath::Cos(TMath::DegToRad()*elevation[ant][i]);
       Double_t x=0.5+r*TMath::Cos(TMath::DegToRad()*azimuth[ant][i]);
       Double_t y=0.5+r*TMath::Sin(TMath::DegToRad()*azimuth[ant][i]);
-      std::cout << x << "\t" << y << std::endl;
+      //      std::cout << x << "\t" << y << std::endl;
       satty->DrawMarker(x,y);
     }
   }

@@ -40,7 +40,7 @@ class Adu5Sat: public TObject
    UChar_t         flag[4][MAX_SATS]; ///< The usability flag of each visible satellite
    UShort_t        azimuth[4][MAX_SATS]; ///< The azimuth of each visible satellite
    
-   void getCirclePlot(TPad *padSat); ///< Creates a 2D elevation-azimuth plot
+   void getCirclePlot(TPad *padSat,char *title=0); ///< Creates a 2D elevation-azimuth plot
 
   ClassDef(Adu5Sat,10);
 };

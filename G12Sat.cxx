@@ -13,6 +13,8 @@
 
 #include "TPad.h"
 #include "TEllipse.h"
+#include "TLine.h"
+#include "TLatex.h"
 #include "TMath.h"
 #include "TMarker.h"
 
@@ -72,18 +74,29 @@ void G12Sat::getCirclePlot(TPad *padSat)
   lippy->DrawEllipse(0.5,0.5,0.45*TMath::Cos(TMath::DegToRad()*80),0,0,360,0);
   lippy->DrawEllipse(0.5,0.5,0.45*TMath::Cos(TMath::DegToRad()*90),0,0,360,0);
 
+  TLine *liney = new TLine();
+  liney->SetLineStyle(1);
+  liney->DrawLineNDC(0.03,0.5,0.97,0.5);
+  liney->DrawLineNDC(0.5,0.03,0.5,0.97);
+
+  TLatex *texy = new TLatex();
+  texy->SetTextSize(0.08);
+  texy->DrawTextNDC(0.02,0.93,"G12");
+
   TMarker *satty = new TMarker();
   for(int i=0;i<(int)numSats;i++) {
     if(snr[i]<30)
        satty->SetMarkerColor(kRed);
+    else if(snr[i]<40)
+       satty->SetMarkerColor(kOrange);
     else
        satty->SetMarkerColor(kGreen);
     satty->SetMarkerStyle(29);
-    satty->SetMarkerSize(3);
+    satty->SetMarkerSize(2.5);
     Double_t r=0.45*TMath::Cos(TMath::DegToRad()*elevation[i]);
     Double_t x=0.5+r*TMath::Cos(TMath::DegToRad()*azimuth[i]);
     Double_t y=0.5+r*TMath::Sin(TMath::DegToRad()*azimuth[i]);
-    std::cout << x << "\t" << y << std::endl;
+    //    std::cout << x << "\t" << y << std::endl;
     satty->DrawMarker(x,y);
   }
   
