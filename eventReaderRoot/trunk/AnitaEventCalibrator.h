@@ -47,6 +47,7 @@ class AnitaEventCalibrator : public TObject
      {return chan+(9*surf);}   ///<Generally useful function
 
   Double_t convertRfPowToKelvin(int surf, int chan, int adc);
+  Double_t convertRfPowToKelvinMeasured(int surf, int chan, int adc);
 
   //Some flags that do things
   Int_t fApplyClockFudge; //Should we use my silly clock fudge factor
@@ -80,7 +81,12 @@ class AnitaEventCalibrator : public TObject
   //Cable Length Calib
   double groupDelayCalib[NUM_SURF][NUM_CHAN];
 
+  //RF power calibration
   Double_t rfPowPed[NUM_SURF][NUM_CHAN];
+  Double_t garysRfPowT300K[NUM_SURF][NUM_CHAN];
+  Double_t garysRfPowTSys[NUM_SURF][NUM_CHAN];
+  Double_t garysRfPowSlope[NUM_SURF][NUM_CHAN];
+
 
   //Temporary variables that don't really need to be part of the class
   int rawArray[NUM_SURF][NUM_CHAN][NUM_SAMP];

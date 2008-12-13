@@ -73,6 +73,7 @@ class SurfHk: public TObject
    Int_t getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band); ///< Returns logical band index
    Int_t getScalerGoal(int surf, int scl); ///< Returns scaler goal of surf-scaler
    Double_t getRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
+   Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
 
   ClassDef(SurfHk,14);
 };

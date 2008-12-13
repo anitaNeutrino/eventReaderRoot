@@ -282,3 +282,33 @@ Double_t AveragedSurfHk::getRMSRFPowerInK(int surf, int chan)
   return (kelvinHigh-kelvinLow)/2;
 
 }
+
+
+
+Double_t AveragedSurfHk::getMeasuredRFPowerInK(int surf, int chan)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  if(chan<0 || chan>=RFCHAN_PER_SURF)
+    return -1;
+  Int_t adc=avgRFPower[surf][chan];
+
+  Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adc);
+  return kelvin;
+
+}
+
+
+Double_t AveragedSurfHk::getMeasuredRMSRFPowerInK(int surf, int chan)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  if(chan<0 || chan>=RFCHAN_PER_SURF)
+    return -1;
+  Int_t adcLow=avgRFPower[surf][chan]-rmsRFPower[surf][chan];
+  Int_t adcHigh=avgRFPower[surf][chan]+rmsRFPower[surf][chan];
+  Double_t kelvinHigh=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adcHigh);
+  Double_t kelvinLow=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adcLow);  
+  return (kelvinHigh-kelvinLow)/2;
+
+}
