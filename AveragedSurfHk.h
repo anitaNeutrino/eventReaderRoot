@@ -63,6 +63,8 @@ class AveragedSurfHk: public TObject
    Int_t getScalerGoal(int surf, int scl); ///< Get scaler goal for given surf-scaler
    Double_t getRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
    Double_t getRMSRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
+   Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
+   Double_t getMeasuredRMSRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
   ClassDef(AveragedSurfHk,13);
 };
 

@@ -320,3 +320,15 @@ Double_t SurfHk::getRFPowerInK(int surf, int chan)
   Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvin(surf,chan,adc);
   return kelvin;
 }
+
+
+Double_t SurfHk::getMeasuredRFPowerInK(int surf, int chan)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  if(chan<0 || chan>=RFCHAN_PER_SURF)
+    return -1;
+  Int_t adc=rfPower[surf][chan];
+  Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adc);
+  return kelvin;
+}
