@@ -63,7 +63,7 @@ char *MonitorHk::getDriveName(int driveInd)
 
 int MonitorHk::getDriveCapacity(int driveInd) 
 {
-  int diskMax[NUM_DISK_SPACES]={2000,8000,2000,9000,125000,125000,32000,1000000};
+  int diskMax[NUM_DISK_SPACES]={2000,8000,8000,9000,125000,125000,8000,1000000};
   if(driveInd<0 || driveInd>7)
     return -1;
   return diskMax[driveInd];
