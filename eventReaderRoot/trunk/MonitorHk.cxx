@@ -55,7 +55,7 @@ MonitorHk::MonitorHk(Int_t trun, Int_t trealTime, MonitorStruct_t *monPtr)
 
 char *MonitorHk::getDriveName(int driveInd) 
 {
-  char *diskNames[8]={"Ramdisk","Var","Home","PMC",satabladeLabel,sataminiLabel,usbLabel,"Neobrick"};
+  char *diskNames[NUM_DISK_SPACES]={"Ramdisk","Var","Home","PMC",satabladeLabel,sataminiLabel,"Home","Neobrick"};
   if(driveInd<0 || driveInd>7)
     return "Invalid";
   return diskNames[driveInd];
@@ -63,11 +63,19 @@ char *MonitorHk::getDriveName(int driveInd)
 
 int MonitorHk::getDriveCapacity(int driveInd) 
 {
-  int diskMax[8]={2000,2000,2000,9000,125000,125000,32000,1000000};
+  int diskMax[NUM_DISK_SPACES]={2000,8000,2000,9000,125000,125000,32000,1000000};
   if(driveInd<0 || driveInd>7)
     return -1;
   return diskMax[driveInd];
+}
 
+int MonitorHk::getDiskSpaceAvailable(int driveInd)
+{
+
+ int multiplier[NUM_DISK_SPACES]={1,1,1,1,2,2,1,16};
+ if(driveInd<0 || driveInd>7)
+   return -1;
+ return (diskSpace[driveInd]*multiplier[driveInd]);
 }
 
 char *MonitorHk::getHkQueueName(int hkInd)
