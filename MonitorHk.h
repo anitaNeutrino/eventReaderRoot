@@ -15,6 +15,13 @@
 #include "simpleStructs.h"
 
 
+#ifndef NUM_TELEM_QUEUES
+#define NUM_TELEM_QUEUES 31
+#endif
+#ifndef NUM_DISK_SPACES
+#define NUM_DISK_SPACES 8
+#endif
+
 //!  MonitorHk -- The CPU Monitor data
 /*!
   The ROOT implementation of the CPU monitoring data
@@ -80,6 +87,7 @@ class MonitorHk: public TObject
 
    char *getDriveName(int driveInd); ///< Returns drive name by index
    int getDriveCapacity(int driveInd); ///< Returns drive capacity by index
+   int getDiskSpaceAvailable(int driveInd); ///< Returns drive capacity by index
    char *getHkQueueName(int hkInd); ///< Returns Hk Queue name
    char *getProcName(int procInd); ///< Returns process name
 
