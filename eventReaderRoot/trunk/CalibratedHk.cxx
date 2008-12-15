@@ -271,7 +271,7 @@ char *voltageNames[NUM_VOLTAGES]={"RF1","RF2","+12","+24","PV","+5","+5M","+3.3"
 char *CalibratedHk::getExternalTempName(int index)
 {
 
-char *extTempNames[NUM_EXT_TEMPS]={"PV ??","PV ??","A01V (RFCM02)","A10V (RFCM07)","A03V (RFCM08)","A12V (RFCM12)","A05V (RFCM13)","A14V (RFCM14)","A07V (RFCM15)","A16V (RFCM16)","A17V (RFCM10)","A19V (RFCM03)","A21V (RFCM05)","A23V (RFCM06)","A25V (RFCM09)","A27V (RFCM11)","A29V (RFCM04)","A31V (RFCM01)","A??V (RFCM 17)","A??V (RFCM18)","A??V (RFCM19)","A??V (RFCM20)","Radiator Plate","PV ??","PV ??"};
+char *extTempNames[NUM_EXT_TEMPS]={"PV 1 (phi 4)","PV 3 (phi 8)","A01V (RFCM02)","A10V (RFCM07)","A03V (RFCM08)","A12V (RFCM12)","A05V (RFCM13)","A14V (RFCM14)","A07V (RFCM15)","A16V (RFCM16)","A17V (RFCM10)","A19V (RFCM03)","A21V (RFCM05)","A23V (RFCM06)","A25V (RFCM09)","A27V (RFCM11)","A29V (RFCM04)","A31V (RFCM01)","A??V (RFCM 17)","A??V (RFCM18)","A??V (RFCM19)","A??V (RFCM20)","Radiator Plate","PV 5 (phi 12)","PV 7 (phi 16)"};
  if(index>=0 && index<NUM_EXT_TEMPS) 
     return extTempNames[index];
   return "None";
