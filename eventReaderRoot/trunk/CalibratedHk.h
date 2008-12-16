@@ -85,7 +85,8 @@ class CalibratedHk: public TObject
    Float_t   getPressure(int index); ///< Returns pressure (0:1)
    Float_t   getAccelerometer(int acInd, int type); ///< Returns accelerometer stuff
    Float_t   getRawSunsensor(int ssInd, int type); ///< Returns raw sunsensor stuff, here type goes x1,x2,y1,y2,T
-   
+   Float_t getNeobrickTemp(); ///< Returns the neobrick temperature.
+   Float_t getNeobrickPres(); ///< Returns the neobrick pressure.
 
    //Sunsensor Stuff
    void getSSMagnitude(int ssInd, Float_t *magnitude,Float_t *magX, Float_t *magY); ///< Get sunsensor magnitude
