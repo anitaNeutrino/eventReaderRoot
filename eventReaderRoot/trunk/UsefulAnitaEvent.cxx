@@ -448,21 +448,29 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
   Int_t numDeltaTFirstRco[NUM_SURF][2]={{0}};
   Double_t deltaTSecondRco[NUM_SURF][2]={{0}};
   Int_t numDeltaTSecondRco[NUM_SURF][2]={{0}};
+
+  Int_t skipSurf[NUM_SURF]={0};
       
   for(int surf=0;surf<NUM_SURF;surf++) {
     //Fill in timebase
-
-
+    
+    Int_t countZeros=0;
     Double_t timeRco[2]={0};
+    Int_t clockIndex=9*surf + 8;
     for(int samp=0;samp<NUM_SAMP;samp++) {
+      if(this->data[clockIndex][samp]==0) 
+	countZeros++;
       for(int rco=0;rco<2;rco++) {
 	timeVals[surf][samp][rco]=timeRco[rco];
 	timeRco[rco]+=myCally->justBinByBin[surf][labChip][rco][samp]*tempFactor;
       }
     }
+    if(countZeros>200) {
+      skipSurf[surf]=1;
+      continue;
+    }
 
     //Now we can try and find the zero crossings and periods.
-    Int_t clockIndex=9*surf + 8;
     Int_t earliestSample=this->getEarliestSample(clockIndex);
     Int_t latestSample=this->getLatestSample(clockIndex);
     Double_t offset=TMath::Mean(NUM_SAMP,this->data[clockIndex]);
@@ -632,6 +640,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
     Double_t avgDelta[2]={0};
     Int_t numDeltaT[2]={0};
     for(int surf=0;surf<NUM_SURF;surf++) {
+      if(skipSurf[surf]) continue;
       for(int rco=0;rco<2;rco++) {
 	avgDelta[rco]+=deltaTFirstRco[surf][rco]*numDeltaTFirstRco[surf][rco];
 	numDeltaT[rco]+=numDeltaTFirstRco[surf][rco];
@@ -655,7 +664,8 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 
   Double_t finalDt=0;   
   Int_t numFinalDt=0;
-  for(int surf=0;surf<NUM_SURF;surf++) {	
+  for(int surf=0;surf<NUM_SURF;surf++) {
+    if(skipSurf[surf]) continue;
     if(numDeltaTFirstRco[surf][0]>0 && numDeltaTFirstRco[surf][1]>0 && numDeltaTSecondRco[surf][0]>0 && numDeltaTSecondRco[surf][1]>0) {
       //Okay now we should just be able to compare the values;
       if(TMath::Abs(deltaTFirstRco[surf][0]-deltaTSecondRco[surf][0])<
@@ -733,6 +743,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
     finalDt=0;
     numFinalDt=0;
     for(int surf=0;surf<NUM_SURF;surf++) {
+      if(skipSurf[surf]) continue;
       for(int rco=0;rco<2;rco++) {
 	deltaTFirstRco[surf][rco]*=fTempFactorGuess/tempFactor;
 	deltaTSecondRco[surf][rco]*=fTempFactorGuess/tempFactor;
