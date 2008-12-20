@@ -68,7 +68,8 @@ Double_t SlowRate::getRFPowerInK(int surf, int chan)
     return -1;
   if(chan<0 || chan>=RFCHAN_PER_SURF)
     return -1;
-  Int_t adc=rfPwrAvg[surf][chan]*4;
+  Int_t adc=rfPwrAvg[surf][chan];
+  adc*=4;
   Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvin(surf,chan,adc);
   return kelvin;
 }
@@ -80,7 +81,51 @@ Double_t SlowRate::getMeasuredRFPowerInK(int surf, int chan)
     return -1;
   if(chan<0 || chan>=RFCHAN_PER_SURF)
     return -1;
-  Int_t adc=rfPwrAvg[surf][chan]*4;
+  Int_t adc=rfPwrAvg[surf][chan];
+  adc*=4;
   Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adc);
   return kelvin;
+}
+
+Int_t SlowRate::getAvgScaler(int surf, int ant)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  if(ant<0 || ant>=ANTS_PER_SURF) 
+    return -1; 
+  return Int_t(avgScalerRates[surf][ant])*128;
+
+}
+
+Int_t SlowRate::getRmsScaler(int surf, int ant)
+{
+
+ if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+ if(ant<0 || ant>=ANTS_PER_SURF) 
+   return -1; 
+ return Int_t(rmsScalerRates[surf][ant])*32;
+}
+
+Int_t SlowRate::getL1Rate(int surf)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  return Int_t(avgL1Rates[surf])*256*16;
+}
+ 
+Int_t SlowRate::getL2Rate(int phi)
+{
+  if(phi<0 || phi>=PHI_SECTORS)
+    return -1;
+  return Int_t(avgL2Rates[phi])*64;
+}
+
+Float_t SlowRate::getL3Rate(int phi)
+{
+  if(phi<0 || phi>=PHI_SECTORS)
+    return -1;
+  Float_t val=avgL3Rates[phi];
+  val/=32;
+  return val;
 }

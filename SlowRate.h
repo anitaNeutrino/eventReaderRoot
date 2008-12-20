@@ -49,6 +49,11 @@ class SlowRate: public TObject
 
    Double_t getRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
    Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
+   Int_t getAvgScaler(int surf, int ant); ///< Returns the averaged scaler value
+   Int_t getRmsScaler(int surf, int ant); ///< Returns the rms scaler value
+   Int_t getL1Rate(int surf); ///< Returns the average L1 rate in the SURF
+   Int_t getL2Rate(int phi); ///< Returns the average L2 rate for the sector.
+   Float_t getL3Rate(int phi); ///< Returns the average L3 rate for the sector.
    
    ClassDef(SlowRate,10);
 };
