@@ -46,7 +46,9 @@ class SlowRate: public TObject
 
    UChar_t temps[4];  ///<{SBS,SURF,TURF,RAD}
    UChar_t powers[4]; ///<{PV V, +24V, BAT I, 24 I}
-   
+
+   Double_t getRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
+   Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
    
    ClassDef(SlowRate,10);
 };
