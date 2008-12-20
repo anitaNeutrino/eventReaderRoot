@@ -9,6 +9,7 @@
 
 #include "SlowRate.h"
 #include "AnitaPacketUtil.h"
+#include "AnitaEventCalibrator.h"
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -59,4 +60,27 @@ SlowRate::SlowRate(Int_t trun, UInt_t trealTime, SlowRateFull_t *slowPtr)
 
    memcpy(temps,&(slowPtr->hk.temps[0]),sizeof(UChar_t)*4);
    memcpy(powers,&(slowPtr->hk.powers[0]),sizeof(UChar_t)*4);
+}
+
+Double_t SlowRate::getRFPowerInK(int surf, int chan)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  if(chan<0 || chan>=RFCHAN_PER_SURF)
+    return -1;
+  Int_t adc=rfPwrAvg[surf][chan]*4;
+  Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvin(surf,chan,adc);
+  return kelvin;
+}
+
+
+Double_t SlowRate::getMeasuredRFPowerInK(int surf, int chan)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  if(chan<0 || chan>=RFCHAN_PER_SURF)
+    return -1;
+  Int_t adc=rfPwrAvg[surf][chan]*4;
+  Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adc);
+  return kelvin;
 }
