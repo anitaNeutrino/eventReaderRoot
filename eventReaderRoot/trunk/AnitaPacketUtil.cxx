@@ -253,17 +253,36 @@ int zipBuffer(char *input, char *output, unsigned int inputBytes, unsigned int *
 
 int unzipBuffer(char *input, char *output, unsigned int inputBytes, unsigned int *outputBytes)
 {
-    static int errorCounter=0;
-    int retVal=uncompress((unsigned char*)output,(unsigned long*)outputBytes,(unsigned char*)input,(unsigned long)inputBytes);
-    if(retVal==Z_OK)
-	return 0;
-    else {
-	if(errorCounter<100) {
-	    fprintf(stderr,"zlib compress returned %d  (%d of 100)\n",retVal,errorCounter);
-	    errorCounter++;
-	}
-	return -1;
-    }	
+
+  unsigned long outputBytesLong;
+  static int errorCounter=0;
+  //    int retVal=uncompress((unsigned char*)output,(unsigned long*)outputBytes,(unsigned char*)input,(unsigned long)inputBytes);
+  //    if(retVal==Z_OK)
+  outputBytesLong = *outputBytes;
+  int retVal=uncompress((unsigned char*)output,&outputBytesLong,(unsigned char*)input,(unsigned long)inputBytes);
+  if(retVal==Z_OK) 
+    {
+      *outputBytes = outputBytesLong;
+ 	return 0;
+	//    else {
+    }
+  else {
+    if(errorCounter<100) {
+      fprintf(stderr,"zlib compress returned %d  (%d of 100)\n",retVal,errorCounter);
+      errorCounter++;
+      
+      
+	    //    static int errorCounter=0;
+	    //int retVal=uncompress((unsigned char*)output,(unsigned long*)outputBytes,(unsigned char*)input,(unsigned long)inputBytes);
+	    //if(retVal==Z_OK)
+	    //	return 0;
+	    //else {
+	    //if(errorCounter<100) {
+	    // fprintf(stderr,"zlib compress returned %d  (%d of 100)\n",retVal,errorCounter);
+	    // errorCounter++;
+    }
+    return -1;
+  }	
 }
 
 
