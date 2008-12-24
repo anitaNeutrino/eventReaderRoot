@@ -134,7 +134,7 @@ Float_t SlowRate::getAltitude()
 {
   Float_t alt=altitude;
   if(altitude<-5000) {
-    alt=65536-alt;
+    alt=65536+alt;
   }
   return alt;
 }
