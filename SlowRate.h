@@ -54,7 +54,15 @@ class SlowRate: public TObject
    Int_t getL1Rate(int surf); ///< Returns the average L1 rate in the SURF
    Int_t getL2Rate(int phi); ///< Returns the average L2 rate for the sector.
    Float_t getL3Rate(int phi); ///< Returns the average L3 rate for the sector.
-   
+
+   Float_t getLatitude() {return latitude;} ///< Returns the latitude
+   Float_t getLongitude() {return longitude;} ///< Returns the longitude
+   Float_t getAltitude(); ///< Returns the altitude correct for negative crazziness
+   Float_t getPower(int powerInd); ///< Returns the actual power value
+   Float_t getTemp(int tempInd); ///< Returns the actual temp
+
+   char *getPowerName(int powerInd); ///< Returns the name of the power reading
+   char *getTempName(int tempInd); ///< Returns the name of temp sensor
    ClassDef(SlowRate,10);
 };
 

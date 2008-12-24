@@ -129,3 +129,51 @@ Float_t SlowRate::getL3Rate(int phi)
   val/=32;
   return val;
 }
+
+Float_t SlowRate::getAltitude()
+{
+  Float_t alt=altitude;
+  if(altitude<-5000) {
+    alt=65536-alt;
+  }
+  return alt;
+}
+
+Float_t SlowRate::getPower(int powerInd)
+{
+  float powerCal[4]={18.252,10.1377,20,20};
+  if(powerInd<0 || powerInd>3)
+    return 0;
+
+  float adc=powers[powerInd];
+  float reading=((10*adc)/255.)-5;
+  float value=reading*powerCal[powerInd];
+  return value;
+}
+
+Float_t SlowRate::getTemp(int tempInd)
+{
+  if(tempInd<0 || tempInd>3)
+    return -273.15;
+  float adc=temps[tempInd];
+  float reading=((10*adc)/255.)-5;
+  float value=(reading*100)-273.15;
+  return value;
+}
+
+char *SlowRate::getPowerName(int powerInd)
+{
+  char *slowPowerNames[4]={"PV V","24 V","Batt I","24 I"};
+  if(powerInd<0 || powerInd>3)
+    return NULL;
+  return slowPowerNames[powerInd];
+
+}
+
+char *SlowRate::getTempName(int tempInd) 
+{
+  char *slowTempNames[4]={"SBS","SURF","SHORT","Rad. Plate"};
+  if(tempInd<0 || tempInd>3)
+    return NULL;
+  return slowTempNames[tempInd];
+}
