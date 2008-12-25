@@ -45,7 +45,7 @@ MonitorHk::MonitorHk(Int_t trun, Int_t trealTime, MonitorStruct_t *monPtr)
   memcpy(satabladeLabel,monPtr->diskInfo.satabladeLabel,sizeof(Char_t)*12);
   memcpy(usbLabel,monPtr->diskInfo.usbLabel,sizeof(Char_t)*12);
   memcpy(eventLinks,monPtr->queueInfo.eventLinks,sizeof(UShort_t)*NUM_PRIORITIES);
-  memcpy(hkLinks,monPtr->queueInfo.hkLinks,sizeof(UShort_t)*12);
+  memcpy(hkLinks,monPtr->queueInfo.hkLinks,sizeof(UShort_t)*21);
   memcpy(utime,monPtr->procInfo.utime,sizeof(UInt_t)*NUM_PROCESSES);
   memcpy(stime,monPtr->procInfo.stime,sizeof(UInt_t)*NUM_PROCESSES);
   memcpy(vsize,monPtr->procInfo.vsize,sizeof(UInt_t)*NUM_PROCESSES);
