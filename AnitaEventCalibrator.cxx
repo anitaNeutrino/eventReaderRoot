@@ -705,6 +705,9 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
     for(int chan=0;chan<8;chan++) {
       if(numPointsArray[surf][chan]<numPointsArray[surf][8]) {
 	numPointsArray[surf][chan]=numPointsArray[surf][8];
+	for(int samp=0;samp<numPointsArray[surf][8];samp++) {
+	  timeArray[surf][chan][samp]=timeArray[surf][8][samp];
+	}    	
       }
     }
     
