@@ -181,7 +181,7 @@ class AnitaGeomTool
 
   static int getPhiFromAnt(int ant); ///< get phi from ant
   static int getAntFromPhiRing(int phi, AnitaRing::AnitaRing_t ring); ///< get antenna number from phi and ring
-
+  static int getAntOrientation(int ant); ///< Some of the antennas have their orientation reversed relative to nominal. The effect of this is to switch the sign the of the signal (as up is down and left is right). Returns 1 for nominal orientation and -1 for flipped.
 
   //Non static thingies
   void getPhiWave(Double_t balloonLon, Double_t balloonLat, Double_t ballonAlt, Double_t balloonHeading, Double_t sourceLon, Double_t sourceLat, Double_t sourceAlt, Double_t &thetaWave, Double_t &phiWave); ///< Calculates phi and theta for a plane wave hypothesis given a balloon and source location. thetaWave and phiWave are relative to the balloon coordinate system
