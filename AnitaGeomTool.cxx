@@ -34,9 +34,12 @@ namespace AnitaGeom {
 			       2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,
 			       0,0,1,1,2,2,3,3};
    
-   // Note that this array uses antenna number 1-32 as it needs
+  int antOrientationMap[NUM_SEAVEYS]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+				      1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,
+				      1,1,1,1,1,1,1,1};
+
+   // Note that this array uses antenna number 1-42 as it needs
    // the negative sign to indicate polarization
-  //Need to update this with the ANITA-II numbers
   int surfToAntMap[ACTIVE_SURFS][RFCHAN_PER_SURF]=
     {{-9,-13,-17,-25,9,13,17,25},
      {-4,-8,-24,-32,4,8,24,32},
@@ -302,6 +305,13 @@ int AnitaGeomTool::getAntPolFromSurfChan(int surf,int chan,int &ant, AnitaPol::A
 
   return 1;
 }
+
+int AnitaGeomTool::getAntOrientation(int ant) {
+  if(ant<0 || ant>=NUM_SEAVEYS)
+    return 0;
+  return AnitaGeom::antOrientationMap[ant];
+}
+
 int AnitaGeomTool::getLayer(int irx) 
 {
   if (irx<8)

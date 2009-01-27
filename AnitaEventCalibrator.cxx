@@ -13,6 +13,7 @@
 #include <TGraph.h>
 
 #include "AnitaEventCalibrator.h"
+#include "AnitaGeomTool.h"
 #include "UsefulAnitaEvent.h"
 
 #ifdef USE_FFT_TOOLS
@@ -1193,7 +1194,9 @@ void AnitaEventCalibrator::loadCalib() {
     while(CalibFile >> surf >> chan >> chip >> ant >> pol >> mean >> rms >> calib) {      
       if(pol=='H') 
 	calib*=-1;
-      mvCalibVals[surf-1][chan-1][chip-1]=calib;
+
+      //The bastards switched the antenna orientation
+      mvCalibVals[surf-1][chan-1][chip-1]=calib*AnitaGeomTool::getAntOrientation(ant-1);
       //	cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
     }
 //    cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
