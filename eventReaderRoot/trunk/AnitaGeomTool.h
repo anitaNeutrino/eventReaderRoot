@@ -201,7 +201,7 @@ class AnitaGeomTool
   Double_t getAntFacePhiPositionRelToAftFore(int ant); ///< get phi position relative to ADU5 AFT-FORE direction
   Int_t getUpperAntFaceNearestPhiWave(Double_t phiWave); ///< get upper antenna closest to given plane wave direction
 
-  Float_t feedToAntFront; //m
+  Float_t phaseCentreToAntFront; //m
   
   
   Float_t xAntFromDeckHorn[NUM_SEAVEYS]; //m
@@ -213,11 +213,11 @@ class AnitaGeomTool
   Float_t apertureElFromDeckHorn[NUM_SEAVEYS]; //radians
   
    
-   Float_t xFeedFromDeckHorn[NUM_SEAVEYS]; //m
-   Float_t yFeedFromDeckHorn[NUM_SEAVEYS]; //m
-   Float_t zFeedFromDeckHorn[NUM_SEAVEYS]; //m
-   Float_t rFeedFromDeckHorn[NUM_SEAVEYS]; //m
-   Float_t azFeedFromDeckHorn[NUM_SEAVEYS]; //radians
+   Float_t xPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
+   Float_t yPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
+   Float_t zPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
+   Float_t rPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
+   Float_t azPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //radians
 
    
    Float_t xAntFromDeckBicone[NUM_BICONES]; //m
@@ -250,11 +250,11 @@ class AnitaGeomTool
    Float_t apertureAzFromVerticalHorn[NUM_SEAVEYS]; //radians
    Float_t apertureElFromVerticalHorn[NUM_SEAVEYS]; //radians
   
-   Float_t xFeedFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t yFeedFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t zFeedFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t rFeedFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t azFeedFromVerticalHorn[NUM_SEAVEYS]; //radians
+   Float_t xPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
+   Float_t yPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
+   Float_t zPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
+   Float_t rPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
+   Float_t azPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //radians
 
    
    Float_t xAntFromVerticalBicone[NUM_BICONES]; //m
@@ -278,6 +278,10 @@ class AnitaGeomTool
    Float_t gpsPlaneFromVertical[3];
    Float_t gpsHeadingFromVertical[3];
    Float_t aftForeOffsetAngleVertical;
+
+   TVector3 fHeadingRotationAxis;
+   TVector3 fPitchRotationAxis;
+   TVector3 fRollRotationAxis;
 
  protected:
    static AnitaGeomTool *fgInstance;  
