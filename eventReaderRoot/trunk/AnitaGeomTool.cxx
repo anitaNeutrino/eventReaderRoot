@@ -70,7 +70,7 @@ AnitaGeomTool*  AnitaGeomTool::fgInstance = 0;
 AnitaGeomTool::AnitaGeomTool()
 {
    //Default constructor
-  phaseCentreToAntFront=0.2; //Arbitrary value selected to minimise the timing residuals.
+  phaseCentreToAntFront=0.2+0.0852; //Arbitrary value selected to minimise the timing residuals.
   readPhotogrammetry();
    //   std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
    //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
