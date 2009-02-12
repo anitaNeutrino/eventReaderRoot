@@ -34,9 +34,10 @@ namespace AnitaGeom {
 			       2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,
 			       0,0,1,1,2,2,3,3};
    
+  ///< 1 is normal orientation, -1 is 180 degree flip, -2 is 90 degree flip (so only H-channels need flipping).
   int antOrientationMap[NUM_SEAVEYS]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 				      1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,
-				      -1,-1,-1,-1,-1,-1,-1,-1};
+				      -2,-2,-2,-2,-2,-2,-2,-2}; 
 
    // Note that this array uses antenna number 1-42 as it needs
    // the negative sign to indicate polarization
