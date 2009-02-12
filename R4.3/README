@@ -1,0 +1,116 @@
+##############################################################################
+###### Event Reader --- A Prototype ANITA Event Reader in ROOT format   ######
+######                                                                  ######
+###### Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                          ######
+##############################################################################
+
+Website
+========
+http://www.hep.ucl.ac.uk/uhen/anita/eventReader/
+
+Introduction
+============
+This is version 4 of the ANITA Event Reader for ROOT Data and Raw Data, and is the first designed for ANITA II data. At present backwards compatibility is broken this will hoepfully be restored at some point once I work out how to do it. It is meant to be a simple class that will read in the raw event data (in ROOT file or raw psev_ format ) and convert it into UsefulAnitaEvent calibrated objects (the raw data reader actually creates text files of times and voltages).
+
+Setup Script
+============
+Whilst not strictly speaking necessary it is recommended to use the setup script provided. There are two versions:
+bash and sh variants:
+source eventReaderSetup.sh
+csh and its variants:
+source eventReaderSetup.csh
+
+These scripts needed to be edited to point at the correct ROOT location (or you can comment out this part if you setup ROOT elsewhere) and the new EVENT_READER_DIR. The purpose of these setup files is to allow you to more easily use the eventReader from other directories.
+
+Compiling libAnitaEvent.so
+===========================
+a) Ensure you have a vald ROOT installation (http://root.cern.ch) and the ROOTSYS environmental variable is correctly set
+b) Type make
+
+Installing
+===========
+The new recommended way of installing the eventReader is to create a directory for all ANITA software to be installed at and point the ANITA_UTIL_INSTALL_DIR enviromental variable at the directory. For instance
+mkdir /home/rjn/install
+export ANITA_UTIL_INSTALL_DIR=/home/rjn/install
+
+Then after making libAnitaEvent.so type make install to install it in ANITA_UTIL_INSTALL_DIR. Make sure to add ANITA_UTIL_INSTALL_DIR/lib your LD_LIBRARY_PATH if it isn't there already. You can also point ANITA_UTIL_INSTALL_DIR to /usr/local or similar if you want to have a system wide installation.
+
+
+Running the example scripts
+==========================
+There are four example root scripts. In order to run them you need to download the new run sized ROOT trees from eg:
+http://www.physics.ohio-state.edu/anita/private/flightData/firstDay/ 
+(click on the Event (ROOT) link on the lefthand side).
+
+The first script illustrates how you can use friend trees to plot variables from different trees against each other. After editing the script to point at the approprite data location on your machine, you should be able to run the script by:
+root sillyFriendExample.C
+
+The second script illustrates how you can use friend trees to get a properly calibrated (including temperature calibration) voltage/time data from the data. Once again after making the neccesary local adjustments to point at the data on your machine, you should be able to run the script by:
+root newExamplePlotter.C
+
+Then there are two scripts, sillyFriendChainExample.C and newExampleChainPlotter.C, that do the same as the first two scripts but are for the more general case where there can be multiple event files in a run (ROOT files are subject to a 2GB file limit). You could extend these examples to form a TChain of multiple runs. 
+
+There are also other macros in the macros directory. Of particular interest are the
+plotOneSurfCompile.C
+runPlotOneSurf.C
+macros which illustrate how it is possible to compile macros for faster execution. This will be almost essential for those who wish to use the new clock trigger jitter calibration modes which are rather CPU intensive.
+
+
+Compiling the Raw Data Reader
+==============================
+a) Ensure you have successfully followed the above steps and have libAnitaEvent.so
+i) Note if you are following recommendations libAnitaEvent.so will be in the EVENT_READER_DIR
+b) Type: make raw
+
+Running the Raw Data Reader
+===========================
+a) If you want the temperature correction download:
+http://www.hep.ucl.ac.uk/uhen/anita/private/flightData/surfTemp/surfTemp.root
+and place (or link) it in the directory pointed to by EVENT_READER_DIR  (as defined in the setup script)
+b) For usage instructions type:
+./readRawData
+<<<<<output
+Usage:
+        ./readRawData <psev filename> <calib type>
+
+Calibration Options
+==============================================================================
+
+0       kNoCalib -- No Calibration
+1       kJustUnwrap -- Unwrap Data, No Calibration
+2       kADC -- No Calibration
+3       kVoltageTime -- Default 2GSa/s 1mv/ADC
+4       kVTLabRG -- Voltage + Timing from Willy Field
+5       kVTFullRG -- V+T + CableDelay
+6       kVTLabJW -- Jiwoo timing nums - No Voltage Calib
+7       kVTFullJW -- Jiwoo timing nums + CableDelay - No Voltage Calib
+8       kVTLabJWPlus -- Jiwoo  With Voltage
+9       kVTFullJWPlus -- Jiwoo + Cable Delay - With Voltage
+10      kVTLabClockRG -- kVTLabRG + Trigger Jitter (from clock)
+11      kVTFullClockRG -- kVTFullRG + TJ
+12      kVTLabJWPlusClock -- kVTLabJW + TJ
+13      kVTFullJWPlusClock -- kVTFullJW + TJ
+14      kVTLabClockZeroRG -- kVTLabClockRG + Zero Mean
+15      kVTFullClockZeroRG -- kVTFullClockRG + Zero Mean
+16      kVTLabJWPlusClockZero -- kVTLabJWPlusClock + Zero Mean
+17      kVTFullJWPlusClockZero -- kVTFullJWPlusClock + Zero Mean
+18      kVTLabJWPlusFastClockZero -- kVTLabJWPlusClock (no fit)+ Zero Mean
+19      kVTFullJWPlusFastClockZero -- kVTFullJWPlusClock (no fit)+ Zero Mean
+
+<<<<< end output
+b) New in this version is the feature that all channel waveforms are now zero padded out to 260 samples.
+
+Notes
+======
+As of version 2.0 the implementation of the data interface is frozen. If people have comments, complaints or requests they shouldn't hesitate to contact me. 
+
+In AnitaGeomTool and therefore in the rest of the code it should be noted that a 'C' style numbering convention is used. Therefore antennas are numbered 0-31 and phi sectors numbered 0-15. 
+
+You can set the environmental variable ANITA_CALIB_DIR to point to the location of the calib sub directory which contains the calibration constants used to calibrate the data. If ANITA_CALIB_DIR is not set it defaults to 'calib'. See the setup scripts for more details.
+
+As of version 3.2.0 AnitaGeomTool has an interface to Kurt's photogrammetry data.In particular through the following family of functions:
+a)  Double_t getAntZ(int ant);    // along with x,y,z,r and phi	
+b)  Double_t getAntFaceZ(int ant) // along with x,y,z,r and phi	
+The positions of the centre of the antenna face (the numbers from Kurt) are given by the b) family of functions. The a) family of functions return a position 20cm behind the face of the antenna, this position is meant to approximate teh timing centre of the antenna.
+
+The clock calib numbers were derived by looking at Seavey calibration pulses from Willy Field, using baselines given by the locations of the antenna timing centres. Clearly those using their own clock calibrations (namely Andres and Jiwoo) wouldn't want to use this option.
