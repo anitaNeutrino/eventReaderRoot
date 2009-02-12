@@ -42,7 +42,6 @@ class MonitorHk: public TObject
    //!  The free space left on the disks in units of 10 Megabytes
    /*!
      The free space left on the disks in units of 10 Megabytes. The eight disks  and their capacities are:
-
     -  "[0]" The ramdisk (2GB)
     -  "[1]" The var partition (8GB)
     -  "[2]" The home partition (2GB)
@@ -63,7 +62,7 @@ class MonitorHk: public TObject
      <ol><li>LosCmd</li><li>SipCmd</li><li>Monitor</li><li>Header</li><li>Acromag</li>
      <li>Adu5aSat</li><li>Adu5bSat</li><li>G12Sat</li><li>Adu5aPat</li><li>Adu5bPat</li><li>G12Pos</li>
      <li>Adu5aVtg</li><li>Adu5bVtg</li><li>G12Gga</li><li>Adu5aGga</li><li>Adu5bGga</li><li>SurfHk</li>
-     <li>TurfHk</li><li>Other</li><li>Pedestal</li><li>Request</li><ol>
+     <li>TurfHk</li><li>Other</li><li>Pedestal</li><li>Request</li></ol>
    */
    UShort_t        hkLinks[21]; // Links in the 21 hk telemetry queues
    //!  The user space CPU time used by the flight software processes.
