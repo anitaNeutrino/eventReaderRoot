@@ -1196,7 +1196,15 @@ void AnitaEventCalibrator::loadCalib() {
 	calib*=-1;
 
       //The bastards switched the antenna orientation
-      mvCalibVals[surf-1][chan-1][chip-1]=calib*AnitaGeomTool::getAntOrientation(ant-1);
+      Double_t orient=AnitaGeomTool::getAntOrientation(ant-1);
+      if(orient==-1) 
+	calib*=-1;
+      if(orient==-2 && pol=='V') //Even Orient have never scored -2 goals
+	calib*=-1;
+      
+
+
+      mvCalibVals[surf-1][chan-1][chip-1]=calib;
       //	cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
     }
 //    cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
