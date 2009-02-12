@@ -6,7 +6,7 @@
 
 Website
 ========
-http://www.physics.ohio-state.edu/anita/private/flightData/eventReaderRoot
+http://www.hep.ucl.ac.uk/uhen/anita/eventReader/
 
 Introduction
 ============
@@ -31,13 +31,10 @@ Installing
 ===========
 The new recommended way of installing the eventReader is to create a directory for all ANITA software to be installed at and point the ANITA_UTIL_INSTALL_DIR enviromental variable at the directory. For instance
 mkdir /home/rjn/install
-mkdir /home/rjn/install/lib  
-mkdir /home/rjn/install/include
 export ANITA_UTIL_INSTALL_DIR=/home/rjn/install
 
 Then after making libAnitaEvent.so type make install to install it in ANITA_UTIL_INSTALL_DIR. Make sure to add ANITA_UTIL_INSTALL_DIR/lib your LD_LIBRARY_PATH if it isn't there already. You can also point ANITA_UTIL_INSTALL_DIR to /usr/local or similar if you want to have a system wide installation.
 
-NB. ANITA_CALIB_DIR still has to point to the calib directory in order to pick up the calibration constants.
 
 Running the example scripts
 ==========================
