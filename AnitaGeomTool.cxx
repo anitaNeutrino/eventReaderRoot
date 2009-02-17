@@ -973,8 +973,12 @@ void AnitaGeomTool::readPhotogrammetry()
      tokens->Delete();
   }  
   aftForeOffsetAngleVertical=TMath::ATan(gpsHeadingFromVertical[1]/gpsHeadingFromVertical[0]);
-  fHeadingRotationAxis.SetXYZ(gpsPlaneFromVertical[0],gpsPlaneFromVertical[1],gpsPlaneFromVertical[2]);
-  fRollRotationAxis.SetXYZ(gpsHeadingFromVertical[0],gpsHeadingFromVertical[1],gpsHeadingFromVertical[2]);
+  //  fHeadingRotationAxis.SetXYZ(gpsPlaneFromVertical[0],gpsPlaneFromVertical[1],gpsPlaneFromVertical[2]);
+  //  fRollRotationAxis.SetXYZ(gpsHeadingFromVertical[0],gpsHeadingFromVertical[1],gpsHeadingFromVertical[2]);
+
+  //Fix the heading and other axes to be 'ideal'
+  fHeadingRotationAxis.SetXYZ(0.,0.,1.);
+  fRollRotationAxis.SetXYZ(1./TMath::Sqrt(2),-1./TMath::Sqrt(2),0.);
   fPitchRotationAxis=fRollRotationAxis.Cross(fHeadingRotationAxis);
 
 
