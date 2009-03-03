@@ -112,9 +112,10 @@ class AnitaEventCalibrator : public TObject
   void processEventRG(UsefulAnitaEvent *eventPtr); ///< Worker function for the RG (defunct) calibrations
   void processEventJW(UsefulAnitaEvent *eventPtr); ///< Worker function for the JW calibrations
   void zeroMean(); ///< Worker function for zero meaning the waveform
-  void processClockJitter(); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration
-  void processClockJitterFast(); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- fast method
-  void processClockJitterCorrelation(); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- using cross-correlation
+  void processClockJitter(UsefulAnitaEvent *eventPtr); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration
+  void processClockJitterFast(UsefulAnitaEvent *eventPtr); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- fast method
+  void processClockJitterCorrelation(UsefulAnitaEvent *eventPtr); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- using cross-correlation
+  void applyClockPhiCorrection(UsefulAnitaEvent *eventPtr); ///< Worker fucntion if we are dealing with CalibratedAnitaEvent
   void processEventAG(UsefulAnitaEvent *eventPtr);
   
 
@@ -140,7 +141,7 @@ class AnitaEventCalibrator : public TObject
   Int_t fClockUpSampleFactor;
   Double_t fEpsilonTempScale;
 
-  ClassDef(AnitaEventCalibrator,1);
+  ClassDef(AnitaEventCalibrator,2);
   
 };
 
