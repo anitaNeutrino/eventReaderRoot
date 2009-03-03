@@ -9,6 +9,7 @@
 #pragma link C++ class RawAnitaHeader+;
 #pragma link C++ class TimedAnitaHeader+;
 #pragma link C++ class UsefulAnitaEvent+;
+#pragma link C++ class CalibratedAnitaEvent+;
 #pragma link C++ class Adu5Pat+;
 #pragma link C++ class Adu5Vtg+;
 #pragma link C++ class G12Pos+;

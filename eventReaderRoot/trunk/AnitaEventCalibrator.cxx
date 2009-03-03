@@ -159,14 +159,15 @@ AnitaEventCalibrator*  AnitaEventCalibrator::Instance()
 
 int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveCalType::WaveCalType_t calType)
 {
- 
-   if(calType==WaveCalType::kJustTimeNoUnwrap)
-      return justBinByBinTimebase(eventPtr);
 
-
+  
+  if(calType==WaveCalType::kJustTimeNoUnwrap)
+    return justBinByBinTimebase(eventPtr);
+  
+  
    fApplyClockFudge=0;
    if(calType==WaveCalType::kVTFullJWPlusFudge || calType==WaveCalType::kVTFullJWPlusFancyClockZero)
-      fApplyClockFudge=1;
+     fApplyClockFudge=1;
    //   std::cout << "AnitaEventCalibrator::calibrateUsefulEvent():" << calType << std::endl;
    if(calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGFastClock || calType==WaveCalType::kVTFullAGCrossCorClock) {
      processEventAG(eventPtr);
@@ -189,22 +190,27 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
       processEventRG(eventPtr);
    }
 
-
+   
+   if(calType==WaveCalType::kDefault && eventPtr->fFromCalibratedAnitaEvent==1) {
+     applyClockPhiCorrection(eventPtr);
+     
+  }
+   else { 
    //Clock Jitter correction
    if(calType==WaveCalType::kVTLabJWPlusClock || calType==WaveCalType::kVTFullJWPlusClock ||
       calType==WaveCalType::kVTLabClockRG || calType==WaveCalType::kVTFullClockRG ||
       calType==WaveCalType::kVTLabJWPlusClockZero || calType==WaveCalType::kVTFullJWPlusClockZero) {
-      processClockJitter();
+      processClockJitter(eventPtr);
    }
 
    if(calType==WaveCalType::kVTLabJWPlusFastClockZero || calType==WaveCalType::kVTFullJWPlusFastClockZero || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTFullAGFastClock) {
-     processClockJitterFast();
+     processClockJitterFast(eventPtr);
    }
-
+   
    if(calType==WaveCalType::kVTFullJWPlusFancyClockZero || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGCrossCorClock) {
-      processClockJitterCorrelation();
+     processClockJitterCorrelation(eventPtr);
    }
-	 
+   } 
 
    //Zero Mean
    if(calType==WaveCalType::kVTLabClockZeroRG || calType==WaveCalType::kVTFullClockZeroRG ||
@@ -226,7 +232,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
    return 0;
 }
 
-void AnitaEventCalibrator::processClockJitter() {
+void AnitaEventCalibrator::processClockJitter(UsefulAnitaEvent *eventPtr) {
    if(!fSquareWave) {
       fSquareWave = new TF1("fSquareWave",newFuncSquareWave,5,90,5);
       fSquareWave->SetParameters(25,1,-1,0.439,0.33);
@@ -308,6 +314,7 @@ void AnitaEventCalibrator::processClockJitter() {
       
       Double_t clockCor=phi-phi0;
       clockPhiArray[surf]=(phi-phi0)-clockJitterOffset[surf][fLabChip[surf][8]];
+      eventPtr->fClockPhiArray[surf]=clockPhiArray[surf];
       //      std::cout << phi << "\t"  << phi0 << "\t" << clockJitterOffset[surf][fLabChip[surf][8]]
       //		<< std::endl;
 
@@ -331,7 +338,7 @@ void AnitaEventCalibrator::processClockJitter() {
 }
 
 
-void AnitaEventCalibrator::processClockJitterFast() {
+void AnitaEventCalibrator::processClockJitterFast(UsefulAnitaEvent *eventPtr) {
  
   Double_t fLowArray[NUM_SAMP];
   Double_t fHighArray[NUM_SAMP];
@@ -409,6 +416,8 @@ void AnitaEventCalibrator::processClockJitterFast() {
        }
 
        clockPhiArray[surf]=clockCor;
+       eventPtr->fClockPhiArray[surf]=clockPhiArray[surf];
+      
 
 
        
@@ -432,7 +441,7 @@ void AnitaEventCalibrator::processClockJitterFast() {
 
 
 
-void AnitaEventCalibrator::processClockJitterCorrelation() {
+void AnitaEventCalibrator::processClockJitterCorrelation(UsefulAnitaEvent *eventPtr) {
 #ifdef USE_FFT_TOOLS
    // This calibration works by first normalising the clock to be between -1 and 1
    // then calculates the cross-correlation between SURF 0 and the other SURFs
@@ -535,7 +544,7 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
       }
 	 
       clockPhiArray[surf]=clockCor-fancyClockJitterOffset[surf][fLabChip[surf][8]];
-      
+      eventPtr->fClockPhiArray[surf]=clockPhiArray[surf];
       
       //Now can actually shift times
       // Normal channels are corrected by DeltaPhi - <DeltaPhi>
@@ -564,6 +573,18 @@ void AnitaEventCalibrator::processClockJitterCorrelation() {
 #endif
 }
 
+
+void AnitaEventCalibrator::applyClockPhiCorrection(UsefulAnitaEvent *eventPtr)
+{ 
+  for(int surf=0;surf<NUM_SURF;surf++) {
+    Int_t numPoints=numPointsArray[surf][8];
+    for(int chan=0;chan<NUM_CHAN;chan++) {
+      for(int samp=0;samp<numPoints;samp++) {
+	timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-eventPtr->fClockPhiArray[surf];	
+      }
+    }   
+  }
+}
 
 
 void AnitaEventCalibrator::zeroMean() {

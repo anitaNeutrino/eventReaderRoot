@@ -8,6 +8,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "UsefulAnitaEvent.h"
+#include "CalibratedAnitaEvent.h"
 #include "AnitaGeomTool.h"
 #include "PrettyAnitaHk.h"
 #include "RawAnitaHeader.h"
@@ -36,7 +37,25 @@ UsefulAnitaEvent::UsefulAnitaEvent()
   gotCalibTemp=0;
   fLastEventGuessed=0;
   fC3poNum=0;
+  fFromCalibratedAnitaEvent=0;
   //Default Constructor
+}
+
+
+UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr) 
+  : RawAnitaEvent(*calibratedPtr)
+{
+  fFromCalibratedAnitaEvent=1;
+  fC3poNum=calibratedPtr->fC3poNum;
+  fLastEventGuessed=calibratedPtr->eventNumber;
+  gotCalibTemp=0;
+  fTempFactorGuess=calibratedPtr->fTempFactorGuess;
+  for(int surf=0;surf<10;surf++) {
+    fRcoArray[surf]=calibratedPtr->fRcoArray[surf];
+    fClockPhiArray[surf]=calibratedPtr->fClockPhiArray[surf];    
+  }
+  fCalType=calibratedPtr->fCalType;
+  calibrateEvent(fCalType);
 }
 
 UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, PrettyAnitaHk *theHk) 
@@ -58,6 +77,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
 UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, RawAnitaHeader *theHd) 
   : RawAnitaEvent(*eventPtr)
 {
+  fFromCalibratedAnitaEvent=0;
   fC3poNum=theHd->c3poNum;
   fLastEventGuessed=0;
   gotCalibTemp=0;
@@ -69,6 +89,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
 UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, Double_t surfTemp) 
   : RawAnitaEvent(*eventPtr)
 {
+  fFromCalibratedAnitaEvent=0;
   fC3poNum=0;
   gotCalibTemp=1;
   calibTemp=surfTemp;

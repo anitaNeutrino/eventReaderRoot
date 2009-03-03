@@ -50,8 +50,8 @@ GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 #Now the bits we're actually compiling
 ROOT_LIBRARY = libAnitaEvent.${DLLSUF}
-LIB_OBJS = RawAnitaEvent.o UsefulAnitaEvent.o  AnitaEventCalibrator.o AnitaGeomTool.o RawAnitaHeader.o PrettyAnitaHk.o Adu5Pat.o Adu5Vtg.o SurfHk.o TurfRate.o RawDataReader.o AnitaConventions.o TimedAnitaHeader.o SummedTurfRate.o AveragedSurfHk.o AcqdStart.o GpsdStart.o LogWatchdStart.o RunStart.o G12Pos.o GpsGga.o G12Sat.o Adu5Sat.o CommandEcho.o MonitorHk.o OtherMonitorHk.o RawHk.o CalibratedHk.o AnitaPacketUtil.o SlowRate.o eventDict.o
-CLASS_HEADERS = RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaHk.h Adu5Pat.h Adu5Vtg.h SurfHk.h TurfRate.h AnitaEventCalibrator.h AnitaConventions.h AnitaGeomTool.h TimedAnitaHeader.h SummedTurfRate.h AveragedSurfHk.h AcqdStart.h GpsdStart.h LogWatchdStart.h RunStart.h G12Pos.h GpsGga.h G12Sat.h Adu5Sat.h CommandEcho.h MonitorHk.h OtherMonitorHk.h RawHk.h CalibratedHk.h AnitaPacketUtil.h SlowRate.h simpleStructs.h
+LIB_OBJS = RawAnitaEvent.o UsefulAnitaEvent.o  AnitaEventCalibrator.o AnitaGeomTool.o RawAnitaHeader.o PrettyAnitaHk.o Adu5Pat.o Adu5Vtg.o SurfHk.o TurfRate.o RawDataReader.o AnitaConventions.o TimedAnitaHeader.o SummedTurfRate.o AveragedSurfHk.o AcqdStart.o GpsdStart.o LogWatchdStart.o RunStart.o G12Pos.o GpsGga.o G12Sat.o Adu5Sat.o CommandEcho.o MonitorHk.o OtherMonitorHk.o RawHk.o CalibratedHk.o AnitaPacketUtil.o SlowRate.o CalibratedAnitaEvent.o eventDict.o
+CLASS_HEADERS = RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaHk.h Adu5Pat.h Adu5Vtg.h SurfHk.h TurfRate.h AnitaEventCalibrator.h AnitaConventions.h AnitaGeomTool.h TimedAnitaHeader.h SummedTurfRate.h AveragedSurfHk.h AcqdStart.h GpsdStart.h LogWatchdStart.h RunStart.h G12Pos.h GpsGga.h G12Sat.h Adu5Sat.h CommandEcho.h MonitorHk.h OtherMonitorHk.h RawHk.h CalibratedHk.h AnitaPacketUtil.h SlowRate.h CalibratedAnitaEvent.h simpleStructs.h
 
 
 all : $(ROOT_LIBRARY)
