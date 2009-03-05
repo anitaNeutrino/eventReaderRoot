@@ -496,9 +496,14 @@ void AnitaEventCalibrator::processClockJitterCorrelation(UsefulAnitaEvent *event
 	    //	 }	 
       }
       grClock[surf] = new TGraph(numPoints,times[surf],volts[surf]);
-      TGraph *grTemp = FFTtools::getInterpolatedGraph(grClock[surf],1./2.6);
-      grClockFiltered[surf]=FFTtools::simplePassBandFilter(grTemp,0,400);
-      delete grTemp;
+      if(numPoints>100) {
+	TGraph *grTemp = FFTtools::getInterpolatedGraph(grClock[surf],1./2.6);
+	grClockFiltered[surf]=FFTtools::simplePassBandFilter(grTemp,0,400);
+	delete grTemp;
+      }
+      else {
+	grClockFiltered[surf] = new TGraph(numPoints,times[surf],volts[surf]);
+      }
    }
 
    // At this point we have filled the normalised voltage arrays and created TGraphs
@@ -511,35 +516,41 @@ void AnitaEventCalibrator::processClockJitterCorrelation(UsefulAnitaEvent *event
       Double_t clockCor=0;
       if(surf>0) {
 	TGraph *grCor = grCorClock[surf-1];
-	Int_t dtInt=FFTtools::getPeakBin(grCor);
-	Double_t peakVal,phiDiff;
-	grCor->GetPoint(dtInt,phiDiff,peakVal);
-	clockCor=phiDiff;
-	
-	if(TMath::Abs(clockCor-clockCrossCorr[surf][fLabChip[surf][8]])>clockPeriod/2) {
-	  //Need to try again
-	  if(clockCor>clockCrossCorr[surf][fLabChip[surf][8]]) {
-	     if(dtInt>2*fClockUpSampleFactor) {
-	       Int_t dt2ndInt=FFTtools::getPeakBin(grCor,0,dtInt-(2*fClockUpSampleFactor));
+	if(grCor) {
+	  Int_t dtInt=FFTtools::getPeakBin(grCor);
+	  Double_t peakVal,phiDiff;
+	  grCor->GetPoint(dtInt,phiDiff,peakVal);
+	  clockCor=phiDiff;
+	  if(TMath::Abs(clockCor-clockCrossCorr[surf][fLabChip[surf][8]])>clockPeriod/2) {
+	    //Need to try again
+	    if(clockCor>clockCrossCorr[surf][fLabChip[surf][8]]) {
+	      if(dtInt>2*fClockUpSampleFactor) {
+		Int_t dt2ndInt=FFTtools::getPeakBin(grCor,0,dtInt-(2*fClockUpSampleFactor));
 	       grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
 	       clockCor=phiDiff;		 
-	     }
-	     else {
-	       std::cerr << "What's going on here then??\n";
-	     }
-	   }
-	   else {
-	     if(dtInt<(grCor->GetN()-2*fClockUpSampleFactor)) {
-	       Int_t dt2ndInt=FFTtools::getPeakBin(grCor,dtInt+(2*fClockUpSampleFactor),grCor->GetN());
-	       grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
+	      }
+	      else {
+		std::cerr << "What's going on here then??\n";
+	      }
+	    }
+	    else {
+	      if(dtInt<(grCor->GetN()-2*fClockUpSampleFactor)) {
+		Int_t dt2ndInt=FFTtools::getPeakBin(grCor,dtInt+(2*fClockUpSampleFactor),grCor->GetN());
+		grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
 	       clockCor=phiDiff;
-	     }
-	     else {
-	       std::cerr << "What's going on here then??\n";
-	     }
-	   }	     	       	   	    	   
-	 }
-
+	      }
+	      else {
+		std::cerr << "What's going on here then??\n";
+	      }
+	    }	     	       	   	    	   
+	  }
+	}
+	else {
+	  clockCor=0;
+	  std::cout << "Clock is broken for SURF " << surf+1 << "\tevent " 
+		    << eventPtr->eventNumber << "\n";
+	}
+	
 	 //	 delete grCor;
       }
 	 
@@ -1385,6 +1396,7 @@ void AnitaEventCalibrator::correlateTenClocks(TGraph *grClock[NUM_SURF], Double_
   for(int surf=1;surf<NUM_SURF;surf++) {
     if(grCorClock[surf-1])
       delete grCorClock[surf-1];
+    grCorClock[surf-1]=0;
   }
 
 //   TGraph *grDeriv[NUM_SURF]={0};
@@ -1496,10 +1508,19 @@ void AnitaEventCalibrator::correlateTenClocks(TGraph *grClock[NUM_SURF], Double_
   //    delete grDeriv[surf];
   //    delete grInt[surf];
   //  }
-  for(int surf=1;surf<NUM_SURF;surf++) {
-    grCorClock[surf-1]= FFTtools::getInterpolatedCorrelationGraph(grClock[surf],grClock[0],deltaT);
+  if(grClock[0]->GetN()>100) {
+    for(int surf=1;surf<NUM_SURF;surf++) {
+      if(grClock[surf]->GetN()>100) {
+	grCorClock[surf-1]= FFTtools::getInterpolatedCorrelationGraph(grClock[surf],grClock[0],deltaT);
+      }
+      else {
+	std::cout << "Missing clock for SURF " << surf+1 << "\n";
+      }
+    }
   }
-    
+  else {
+    std::cout << "Missing clock for SURF " << 1 << "\n";
+  } 
 #endif
 }
 
