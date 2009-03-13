@@ -999,22 +999,16 @@ void AnitaGeomTool::readPhotogrammetry()
   //  fRollRotationAxis.SetXYZ(gpsHeadingFromVertical[0],gpsHeadingFromVertical[1],gpsHeadingFromVertical[2]);
 
   //Fix the heading and other axes to be 'ideal'
+  //Now just for the sake of confusion we are going to redefine our definition
+  //of phi equals zero to lie in the ADU5 fore direction.
   fHeadingRotationAxis.SetXYZ(0.,0.,1.);
-  //fRollRotationAxis.SetXYZ(1./TMath::Sqrt(2),-1./TMath::Sqrt(2),0.);
-
-  //ryans original pitch axis
-  //fPitchRotationAxis=fRollRotationAxis.Cross(fHeadingRotationAxis);
-
-  //reversed pitch axis
-  //fPitchRotationAxis=fHeadingRotationAxis.Cross(fRollRotationAxis);
+  fPitchRotationAxis.SetXYZ(0.,1.,0.);
+  fRollRotationAxis=fPitchRotationAxis.Cross(fHeadingRotationAxis);
 
 //   std::cout << " heading axis x " << fHeadingRotationAxis.x() << " y " << fHeadingRotationAxis.y() << " z " << fHeadingRotationAxis.z() << std::endl;
 //   std::cout << " roll axis x " << fRollRotationAxis.x() << " y " << fRollRotationAxis.y() << " z " << fRollRotationAxis.z() << std::endl;
 //   std::cout << " pitch axis x " << fPitchRotationAxis.x() << " y " << fPitchRotationAxis.y() << " z " << fPitchRotationAxis.z() << std::endl;
 
-
-  fPitchRotationAxis.SetXYZ(0.,1.,0.);
-  fRollRotationAxis=fPitchRotationAxis.Cross(fHeadingRotationAxis);
 
 
 }
