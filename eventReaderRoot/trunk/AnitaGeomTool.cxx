@@ -1000,21 +1000,21 @@ void AnitaGeomTool::readPhotogrammetry()
 
   //Fix the heading and other axes to be 'ideal'
   fHeadingRotationAxis.SetXYZ(0.,0.,1.);
-  fRollRotationAxis.SetXYZ(1./TMath::Sqrt(2),-1./TMath::Sqrt(2),0.);
+  //fRollRotationAxis.SetXYZ(1./TMath::Sqrt(2),-1./TMath::Sqrt(2),0.);
 
   //ryans original pitch axis
   //fPitchRotationAxis=fRollRotationAxis.Cross(fHeadingRotationAxis);
 
   //reversed pitch axis
-  fPitchRotationAxis=fHeadingRotationAxis.Cross(fRollRotationAxis);
+  //fPitchRotationAxis=fHeadingRotationAxis.Cross(fRollRotationAxis);
 
 //   std::cout << " heading axis x " << fHeadingRotationAxis.x() << " y " << fHeadingRotationAxis.y() << " z " << fHeadingRotationAxis.z() << std::endl;
 //   std::cout << " roll axis x " << fRollRotationAxis.x() << " y " << fRollRotationAxis.y() << " z " << fRollRotationAxis.z() << std::endl;
 //   std::cout << " pitch axis x " << fPitchRotationAxis.x() << " y " << fPitchRotationAxis.y() << " z " << fPitchRotationAxis.z() << std::endl;
 
 
-  //fPitchRotationAxis.SetXYZ(0.,1.,0.);
-  //fRollRotationAxis=fPitchRotationAxis.Cross(fHeadingRotationAxis);
+  fPitchRotationAxis.SetXYZ(0.,1.,0.);
+  fRollRotationAxis=fPitchRotationAxis.Cross(fHeadingRotationAxis);
 
 
 }
