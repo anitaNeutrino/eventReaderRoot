@@ -7,5 +7,5 @@ void runExampleLoop() {
 			  
   gSystem->Load("libAnitaEvent.so");
   gSystem->CompileMacro("exampleLoopAllEvents.C","k");
-  exampleLoopAllEvents(1032);
+  exampleLoopAllEvents(1001);
 }

@@ -40,7 +40,7 @@ namespace AnitaGeom {
 				      -2,-2,-2,-2,-2,-2,-2,-2}; 
 
    // Note that this array uses antenna number 1-42 as it needs
-   // the negative sign to indicate polarization
+   // the negative sign to indicate polarization (-ve is vertical)
   int surfToAntMap[ACTIVE_SURFS][RFCHAN_PER_SURF]=
     {{-9,-13,-17,-25,9,13,17,25},
      {-4,-8,-24,-32,4,8,24,32},
@@ -73,8 +73,8 @@ AnitaGeomTool::AnitaGeomTool()
    //Default constructor
   phaseCentreToAntFront=0.2+0.0852; //Arbitrary value selected to minimise the timing residuals.
   readPhotogrammetry();
-   //   std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
-   //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
+  //std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
+  //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
 
 }
 
@@ -180,6 +180,28 @@ int AnitaGeomTool::getChanIndexFromAntPol(int ant,
    else
       return -1;
    return getChanIndex(surf,chan);
+}
+
+
+int AnitaGeomTool::getSurfFromAnt(int ant)
+{
+  if(ant<0 || ant>31) return -1;
+  int surf;
+  surf=AnitaGeom::antToSurfMap[ant];
+  return surf;
+}
+
+
+int AnitaGeomTool::getChanFromAntPol(int ant,AnitaPol::AnitaPol_t pol)
+{
+  int chan;
+  if(pol==AnitaPol::kHorizontal) 
+      chan=AnitaGeom::hAntToChan[ant];
+   else if(pol==AnitaPol::kVertical)
+      chan=AnitaGeom::vAntToChan[ant];
+   else
+      return -1;
+  return chan;
 }
 
 
@@ -979,7 +1001,20 @@ void AnitaGeomTool::readPhotogrammetry()
   //Fix the heading and other axes to be 'ideal'
   fHeadingRotationAxis.SetXYZ(0.,0.,1.);
   fRollRotationAxis.SetXYZ(1./TMath::Sqrt(2),-1./TMath::Sqrt(2),0.);
-  fPitchRotationAxis=fRollRotationAxis.Cross(fHeadingRotationAxis);
+
+  //ryans original pitch axis
+  //fPitchRotationAxis=fRollRotationAxis.Cross(fHeadingRotationAxis);
+
+  //reversed pitch axis
+  fPitchRotationAxis=fHeadingRotationAxis.Cross(fRollRotationAxis);
+
+//   std::cout << " heading axis x " << fHeadingRotationAxis.x() << " y " << fHeadingRotationAxis.y() << " z " << fHeadingRotationAxis.z() << std::endl;
+//   std::cout << " roll axis x " << fRollRotationAxis.x() << " y " << fRollRotationAxis.y() << " z " << fRollRotationAxis.z() << std::endl;
+//   std::cout << " pitch axis x " << fPitchRotationAxis.x() << " y " << fPitchRotationAxis.y() << " z " << fPitchRotationAxis.z() << std::endl;
+
+
+  //fPitchRotationAxis.SetXYZ(0.,1.,0.);
+  //fRollRotationAxis=fPitchRotationAxis.Cross(fHeadingRotationAxis);
 
 
 }

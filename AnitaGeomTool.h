@@ -161,6 +161,8 @@ class AnitaGeomTool
   static int getChanIndexFromAntPol(int ant,
 				    AnitaPol::AnitaPol_t pol); ///< Convert ant-pol to logical index
 
+  static int getSurfFromAnt(int ant);
+  static int getChanFromAntPol(int ant,AnitaPol::AnitaPol_t pol);
 
   static int getSurfChanFromChanIndex(int chanIndex, // input channel index
 				      int &surf,int &chan); ///< Convert logical index to  surf and channel
