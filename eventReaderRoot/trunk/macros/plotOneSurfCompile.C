@@ -20,7 +20,7 @@ void plotOneSurf(int run, int startEntry, int numEntries,int surf);
 
 void plotOneSurf()
 {
-  plotOneSurf(1028,1000,1,1);
+  plotOneSurf(1028,1000,1,4);
 }
   
 
@@ -80,12 +80,14 @@ void plotOneSurf(int run, int startEntry, int numEntries,int surf) {
     for(int chan=0;chan<9;chan++) {
       if(gr[chan]) delete gr[chan];
     }
-    canSurf->Divide(2,5);
+    canSurf->Divide(2);
 
-    for(int chan=0;chan<9;chan++) {
+    for(int chan=0;chan<2;chan++) {
       canSurf->cd(chan+1);
       gr[chan]=realEvent.getGraph(realEvent.getChanIndex(surf,chan));
       gr[chan]->Draw("al");
+      cout << gr[chan]->GetX()[1]-gr[chan]->GetX()[0] << endl;
+      cout << gr[chan]->GetX()[2]-gr[chan]->GetX()[1] << endl;
     }
     canSurf->Update();
     gSystem->Sleep(1000);
