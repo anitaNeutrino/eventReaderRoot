@@ -285,6 +285,9 @@ class AnitaGeomTool
    TVector3 fPitchRotationAxis;
    TVector3 fRollRotationAxis;
 
+   void updateAnt(double deltaR,double deltaRL,double deltaUD);
+   void printAntPos();
+
  protected:
    static AnitaGeomTool *fgInstance;  
    // protect against multiple instances
