@@ -18,10 +18,13 @@
 
 #define INCHTOMETER 0.0254
 
+double deltaRL = 0.0;
+double deltaUD = 0.0;
+
 namespace AnitaGeom {
    
-   //Positive is horizontal
-   //Negative is vetical
+  //Positive is horizontal
+  //Negative is vetical
   int antToSurfMap[NUM_SEAVEYS]={5,7,6,1,5,7,6,1,0,2,3,4,0,2,3,4,
 				 0,5,2,7,3,6,4,1,0,5,2,7,3,6,4,1,
 				 8,9,8,9,8,9,8,9};
@@ -39,8 +42,12 @@ namespace AnitaGeom {
 				      1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,
 				      -2,-2,-2,-2,-2,-2,-2,-2}; 
 
+
+  // Note that this array uses antenna number 1-42 as it needs
+  // the negative sign to indicate polarization
    // Note that this array uses antenna number 1-42 as it needs
    // the negative sign to indicate polarization (-ve is vertical)
+
   int surfToAntMap[ACTIVE_SURFS][RFCHAN_PER_SURF]=
     {{-9,-13,-17,-25,9,13,17,25},
      {-4,-8,-24,-32,4,8,24,32},
@@ -70,9 +77,13 @@ AnitaGeomTool*  AnitaGeomTool::fgInstance = 0;
 
 AnitaGeomTool::AnitaGeomTool()
 {
-   //Default constructor
-  phaseCentreToAntFront=0.2+0.0852; //Arbitrary value selected to minimise the timing residuals.
+  //Default constructor
+  phaseCentreToAntFront=0.2-0.042685; //Arbitrary value selected to minimise the timing residuals
   readPhotogrammetry();
+
+  //   std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
+  //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
+
   //std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
   //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
 
@@ -80,7 +91,7 @@ AnitaGeomTool::AnitaGeomTool()
 
 AnitaGeomTool::~AnitaGeomTool()
 {
-   //Default destructor
+  //Default destructor
 }
 
 
@@ -88,57 +99,57 @@ AnitaGeomTool::~AnitaGeomTool()
 //______________________________________________________________________________
 AnitaGeomTool*  AnitaGeomTool::Instance()
 {
-   //static function
-   return (fgInstance) ? (AnitaGeomTool*) fgInstance : new AnitaGeomTool();
+  //static function
+  return (fgInstance) ? (AnitaGeomTool*) fgInstance : new AnitaGeomTool();
 }
 
 void AnitaGeomTool::getPhiWave(Double_t balloonLon, Double_t balloonLat, Double_t balloonAlt, Double_t balloonHeading, Double_t sourceLon, Double_t sourceLat, Double_t sourceAlt, Double_t &thetaWave, Double_t &phiWave)
 {
-   Double_t thetaBalloon=getThetaFromLat(TMath::Abs(balloonLat));
-   Double_t phiBalloon=getPhiFromLon(balloonLon);
-   Double_t balloonHeight=getGeoid(thetaBalloon)+balloonAlt;
+  Double_t thetaBalloon=getThetaFromLat(TMath::Abs(balloonLat));
+  Double_t phiBalloon=getPhiFromLon(balloonLon);
+  Double_t balloonHeight=getGeoid(thetaBalloon)+balloonAlt;
    
-   Double_t thetaSource=getThetaFromLat(TMath::Abs(sourceLat));
-   Double_t phiSource=getPhiFromLon(sourceLon);
-   Double_t radiusSource=getGeoid(thetaSource)+sourceAlt;
+  Double_t thetaSource=getThetaFromLat(TMath::Abs(sourceLat));
+  Double_t phiSource=getPhiFromLon(sourceLon);
+  Double_t radiusSource=getGeoid(thetaSource)+sourceAlt;
 
-   //Get vector from Earth's centre to source
-   TVector3 fSourcePos;
-   fSourcePos.SetX(radiusSource*TMath::Sin(thetaSource)*TMath::Cos(phiSource));
-   fSourcePos.SetY(radiusSource*TMath::Sin(thetaSource)*TMath::Sin(phiSource));
-   fSourcePos.SetZ(radiusSource*TMath::Cos(thetaSource));
+  //Get vector from Earth's centre to source
+  TVector3 fSourcePos;
+  fSourcePos.SetX(radiusSource*TMath::Sin(thetaSource)*TMath::Cos(phiSource));
+  fSourcePos.SetY(radiusSource*TMath::Sin(thetaSource)*TMath::Sin(phiSource));
+  fSourcePos.SetZ(radiusSource*TMath::Cos(thetaSource));
    
-   //Rotate such that balloon is at 0,0,balloonHeight
-   fSourcePos.RotateZ(-1*phiBalloon);
-   fSourcePos.RotateY(-1*thetaBalloon);
+  //Rotate such that balloon is at 0,0,balloonHeight
+  fSourcePos.RotateZ(-1*phiBalloon);
+  fSourcePos.RotateY(-1*thetaBalloon);
 
-   //Now find thetaWave and phiWave
-   thetaWave=TMath::ATan((balloonHeight-fSourcePos.Z())/TMath::Sqrt(fSourcePos.X()*fSourcePos.X() + fSourcePos.Y()*fSourcePos.Y()));
+  //Now find thetaWave and phiWave
+  thetaWave=TMath::ATan((balloonHeight-fSourcePos.Z())/TMath::Sqrt(fSourcePos.X()*fSourcePos.X() + fSourcePos.Y()*fSourcePos.Y()));
    
-   //phiWave is just atan(yp/xp) only looks confusing to make sure I get the sign and 0-360 convention
-   phiWave=0;
-   if(fSourcePos.X()==0) {
-      phiWave=TMath::PiOver2();
-      if(fSourcePos.Y()<0)
-	 phiWave+=TMath::Pi();
-   }
-   else if(fSourcePos.X()<0) {
-      phiWave=TMath::Pi()+TMath::ATan(fSourcePos.Y()/fSourcePos.X());
-   }
-   else {
-      phiWave=TMath::ATan(fSourcePos.Y()/fSourcePos.X());
-      if(fSourcePos.Y()<0) {
-	 phiWave+=TMath::TwoPi();
-      }
-   }   
+  //phiWave is just atan(yp/xp) only looks confusing to make sure I get the sign and 0-360 convention
+  phiWave=0;
+  if(fSourcePos.X()==0) {
+    phiWave=TMath::PiOver2();
+    if(fSourcePos.Y()<0)
+      phiWave+=TMath::Pi();
+  }
+  else if(fSourcePos.X()<0) {
+    phiWave=TMath::Pi()+TMath::ATan(fSourcePos.Y()/fSourcePos.X());
+  }
+  else {
+    phiWave=TMath::ATan(fSourcePos.Y()/fSourcePos.X());
+    if(fSourcePos.Y()<0) {
+      phiWave+=TMath::TwoPi();
+    }
+  }   
 
-   //Now need to take account of balloon heading
-   //Will have to check heading at some point
-   if(balloonHeading>=0 && balloonHeading<=360) {
-      phiWave+=balloonHeading*TMath::DegToRad();
-      if(phiWave>TMath::TwoPi())
-	 phiWave-=TMath::TwoPi();
-   }
+  //Now need to take account of balloon heading
+  //Will have to check heading at some point
+  if(balloonHeading>=0 && balloonHeading<=360) {
+    phiWave+=balloonHeading*TMath::DegToRad();
+    if(phiWave>TMath::TwoPi())
+      phiWave-=TMath::TwoPi();
+  }
 
 }
 
@@ -148,38 +159,38 @@ int AnitaGeomTool::getChanIndexFromRingPhiPol(AnitaRing::AnitaRing_t ring,
 					      int phi,
 					      AnitaPol::AnitaPol_t pol)
 {
-   int ant;
-   if(phi<0 || phi>15) return -1;
-   switch(ring) {
-   case AnitaRing::kUpperRing:
-      ant=AnitaGeom::upperAntNums[phi];
-      break;
-   case AnitaRing::kLowerRing:
-      ant=AnitaGeom::lowerAntNums[phi];
-      break;
-   case AnitaRing::kNadirRing:
-      ant=AnitaGeom::nadirAntNums[phi];
-      break;
-   default:
-      return -1;
-   }
-   return getChanIndexFromAntPol(ant,pol);
+  int ant;
+  if(phi<0 || phi>15) return -1;
+  switch(ring) {
+  case AnitaRing::kUpperRing:
+    ant=AnitaGeom::upperAntNums[phi];
+    break;
+  case AnitaRing::kLowerRing:
+    ant=AnitaGeom::lowerAntNums[phi];
+    break;
+  case AnitaRing::kNadirRing:
+    ant=AnitaGeom::nadirAntNums[phi];
+    break;
+  default:
+    return -1;
+  }
+  return getChanIndexFromAntPol(ant,pol);
 }
 
 
 int AnitaGeomTool::getChanIndexFromAntPol(int ant,
 					  AnitaPol::AnitaPol_t pol)
 {
-   if(ant<0 || ant>39) return -1;
-   int surf,chan;
-   surf=AnitaGeom::antToSurfMap[ant];
-   if(pol==AnitaPol::kHorizontal) 
-      chan=AnitaGeom::hAntToChan[ant];
-   else if(pol==AnitaPol::kVertical)
-      chan=AnitaGeom::vAntToChan[ant];
-   else
-      return -1;
-   return getChanIndex(surf,chan);
+  if(ant<0 || ant>39) return -1;
+  int surf,chan;
+  surf=AnitaGeom::antToSurfMap[ant];
+  if(pol==AnitaPol::kHorizontal) 
+    chan=AnitaGeom::hAntToChan[ant];
+  else if(pol==AnitaPol::kVertical)
+    chan=AnitaGeom::vAntToChan[ant];
+  else
+    return -1;
+  return getChanIndex(surf,chan);
 }
 
 
@@ -210,18 +221,20 @@ int AnitaGeomTool::getAzimuthPartner(int rx)
   //Need to update for nadir ring
   
   if (rx<16) 
-     return AnitaGeom::lowerAntNums[AnitaGeom::upperPhiNums[rx]];
+    return AnitaGeom::lowerAntNums[AnitaGeom::upperPhiNums[rx]];
   else if(rx<32)
     return AnitaGeom::upperAntNums[AnitaGeom::lowerPhiNums[rx-16]]; 
+  else
+    return AnitaGeom::lowerAntNums[AnitaGeom::nadirPhiNums[rx-32]]; 
 
   return -1;
 }
 
 void AnitaGeomTool::getNeighbors(int rx,int& rxleft,int& rxright)
 {
-    // input antenna number 0 to 31
-  if (rx<0 || rx>31)    
-     std::cout << "Antenna number " << rx << " out of range!\n";  
+  // input antenna number 0 to 31
+  if (rx<0 || rx>39)    
+    std::cout << "Antenna number " << rx << " out of range!\n";  
   if (rx<8)    
     rxleft=rx+8;
   else if (rx==8)
@@ -242,33 +255,59 @@ void AnitaGeomTool::getNeighbors(int rx,int& rxleft,int& rxright)
   else if (rx<31)   
     rxright=rx+1;  
   else if (rx==31)    
-    rxright=16;   
+    rxright=16;  
+
+  if (rx<39 && rx>31)    
+    rxright=rx+1;  
+  else if (rx==39)   
+    rxright=32;
+
+    if (rx<39 && rx>31)    
+    rxleft=rx-1;  
+  else if (rx==31)   
+    rxleft=39;
+
+ 
   //  std::cout << "rx, rxleft, rxright " << rx << " " << rxleft << " " << rxright << "\n"; 
 
 }
 
 void AnitaGeomTool::getThetaPartners(int rx,int& rxleft,int& rxright)
 {
-   if (rx<0 || rx>31)    
+  if (rx<0 || rx>39)    
     std::cerr << "Antenna number out of range!\n";     
   if (rx<16) {
-     int phi=AnitaGeom::upperPhiNums[rx];
-     int phiLeft=phi-1;
-     if(phiLeft<0) phiLeft=15;
-     int phiRight=phi+1;
-     if(phiRight>15) phiRight=0;
-     rxleft=AnitaGeom::upperAntNums[phiLeft];
-     rxright=AnitaGeom::upperAntNums[phiRight];
+    int phi=AnitaGeom::upperPhiNums[rx];
+    int phiLeft=phi-1;
+    if(phiLeft<0) phiLeft=15;
+    int phiRight=phi+1;
+    if(phiRight>15) phiRight=0;
+    rxleft=AnitaGeom::upperAntNums[phiLeft];
+    rxright=AnitaGeom::upperAntNums[phiRight];
   }
-  else {
-     int phi=AnitaGeom::lowerPhiNums[rx-16];
-     int phiLeft=phi-1;
-     if(phiLeft<0) phiLeft=15;
-     int phiRight=phi+1;
-     if(phiRight>15) phiRight=0;
-     rxleft=AnitaGeom::lowerAntNums[phiLeft];
-     rxright=AnitaGeom::lowerAntNums[phiRight];
+  else if (rx<32){
+    int phi=AnitaGeom::lowerPhiNums[rx-16];
+    int phiLeft=phi-1;
+    if(phiLeft<0) phiLeft=15;
+    int phiRight=phi+1;
+    if(phiRight>15) phiRight=0;
+    rxleft=AnitaGeom::lowerAntNums[phiLeft];
+    rxright=AnitaGeom::lowerAntNums[phiRight];
   }
+  else{
+
+if (rx<39 && rx>31)    
+    rxright=rx+1;  
+  else if (rx==39)   
+    rxright=32;
+
+    if (rx<39 && rx>31)    
+    rxleft=rx-1;  
+  else if (rx==31)   
+    rxleft=39;
+
+  }
+
 }
 
 int AnitaGeomTool::getPhiSector(int rx)
@@ -285,22 +324,22 @@ int AnitaGeomTool::getPhiSector(int rx)
 }
 float AnitaGeomTool::getDirectionwrtNorth(int phimax,float heading) {
 
-    if(phimax<0 || phimax>=16) return -1.;
+  if(phimax<0 || phimax>=16) return -1.;
 
-    //Copied this change from Amy don't (yet) know if it is correct
-    float direction=(1.*360./16)+heading-(phimax*360./16);
-    //    float direction=(2*360./16)+heading-(phimax*360./16);
-//    float direction=heading+(phimax*360./16);
-    if(direction>360) direction-=360;
-    //std::cout << direction << endl;
-    return direction;
+  //Copied this change from Amy don't (yet) know if it is correct
+  float direction=(1.*360./16)+heading-(phimax*360./16);
+  //    float direction=(2*360./16)+heading-(phimax*360./16);
+  //    float direction=heading+(phimax*360./16);
+  if(direction>360) direction-=360;
+  //std::cout << direction << endl;
+  return direction;
 
 }
 
 
 
 int AnitaGeomTool::getSurfChanFromChanIndex(int chanIndex, // input channel index
-				int &surf,int &chan) // output surf and channel
+					    int &surf,int &chan) // output surf and channel
 {
   if(chanIndex<0 || chanIndex>=NUM_DIGITZED_CHANNELS)
     return 0;
@@ -362,10 +401,10 @@ AnitaRing::AnitaRing_t AnitaGeomTool::getRingFromAnt(int ant) {
 }
 
 void AnitaGeomTool::getRingAntPolPhiFromSurfChan(int surf, int chan,
-				 AnitaRing::AnitaRing_t &ring,
-				 int &ant,
-				 AnitaPol::AnitaPol_t &pol,
-				 int &phi)
+						 AnitaRing::AnitaRing_t &ring,
+						 int &ant,
+						 AnitaPol::AnitaPol_t &pol,
+						 int &phi)
 {
   AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,pol);
   ring=AnitaGeomTool::getRingFromAnt(ant);
@@ -403,60 +442,60 @@ void AnitaGeomTool::readPhotogrammetry()
   sprintf(fileName,"%s/antennaPositionTables.csv",calibDir);
   std::ifstream AntennaFile(fileName);
   if(!AntennaFile) {
-     std::cerr << "Couldn't open:\t" << fileName << "\n";
-     return;
+    std::cerr << "Couldn't open:\t" << fileName << "\n";
+    return;
   }
 
 
   //First up are the antenna positions
   TString line;
   for(int i=0;i<4;i++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << line.Data() << "\n";
+    line.ReadLine(AntennaFile);
+    //std::cout << line.Data() << "\n";
   }
   
   for(int ant=0;ant<32;ant++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << "Seavey:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<8;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   if (ant+1 != subString.Atoi()) {
-	      std::cerr << "Antenna number mismatch\n";
-	   }
-	   break;
-	case 1:	   
-	   xAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 2:	   
-	   yAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 3:	   
-	   zAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 4:	   
-	   rAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
-	   //	   std::cout << ant << "\t" << rAntFromDeckHorn[ant] << "\n";
-	   break;
-	case 5:	   
-	   azCentreFromDeckHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
-	   break;
-	case 6:	   
-	   apertureAzFromDeckHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
-	   break;
-	case 7:	   
-	   apertureElFromDeckHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
-	   break;
-	default:	   
-	   break;
+    line.ReadLine(AntennaFile);
+    //std::cout << "Seavey:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<8;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	if (ant+1 != subString.Atoi()) {
+	  std::cerr << "Antenna number mismatch\n";
 	}
+	break;
+      case 1:	   
+	xAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 2:	   
+	yAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 3:	   
+	zAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 4:	   
+	rAntFromDeckHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	//	   std::cout << ant << "\t" << rAntFromDeckHorn[ant] << "\n";
+	break;
+      case 5:	   
+	azCentreFromDeckHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	break;
+      case 6:	   
+	apertureAzFromDeckHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	break;
+      case 7:	   
+	apertureElFromDeckHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	break;
+      default:	   
+	break;
+      }
    
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
 
   }
 
@@ -475,237 +514,261 @@ void AnitaGeomTool::readPhotogrammetry()
   }
 
   for(int ant=0;ant<NUM_SEAVEYS;ant++) {
-     //Now try to find the location of the antenna phaseCentre point     
-     xPhaseCentreFromDeckHorn[ant]=xAntFromDeckHorn[ant]-
-       phaseCentreToAntFront*TMath::Cos( apertureAzFromDeckHorn[ant])*TMath::Cos(apertureElFromDeckHorn[ant]); //m
-     yPhaseCentreFromDeckHorn[ant]=yAntFromDeckHorn[ant]-
-       phaseCentreToAntFront*TMath::Sin( apertureAzFromDeckHorn[ant])*TMath::Cos(apertureElFromDeckHorn[ant]); //m
-     zPhaseCentreFromDeckHorn[ant]=zAntFromDeckHorn[ant]-phaseCentreToAntFront*TMath::Sin(apertureElFromDeckHorn[ant]); //m
-     rPhaseCentreFromDeckHorn[ant]=TMath::Sqrt(xPhaseCentreFromDeckHorn[ant]*xPhaseCentreFromDeckHorn[ant]+
-					yPhaseCentreFromDeckHorn[ant]*yPhaseCentreFromDeckHorn[ant]);//m
-     azPhaseCentreFromDeckHorn[ant]=TMath::ATan(yPhaseCentreFromDeckHorn[ant]/xPhaseCentreFromDeckHorn[ant]); //radians
-     if(xPhaseCentreFromDeckHorn[ant]<0)
-       azPhaseCentreFromDeckHorn[ant]+=TMath::Pi();
-     if(azPhaseCentreFromDeckHorn[ant]<0)
-       azPhaseCentreFromDeckHorn[ant]+=TMath::TwoPi();
 
-//      std::cout << "Face v PhaseCentre -- Ant " << ant  << std::endl;
-//      std::cout << apertureAzFromDeckHorn[ant] << "\t" << apertureElFromDeckHorn[ant] << "\n";
-//      std::cout << "x\t" << xAntFromDeckHorn[ant] << "\t" << xPhaseCentreFromDeckHorn[ant] << std::endl;
-//      std::cout << "y\t" << yAntFromDeckHorn[ant] << "\t" << yPhaseCentreFromDeckHorn[ant] << std::endl;
-//      std::cout << "z\t" << zAntFromDeckHorn[ant] << "\t" << zPhaseCentreFromDeckHorn[ant] << std::endl;
-//      std::cout << "r\t" << rAntFromDeckHorn[ant] << "\t" << rPhaseCentreFromDeckHorn[ant] << std::endl;
-//      std::cout << "phi\t" << azCentreFromDeckHorn[ant] << "\t" << azPhaseCentreFromDeckHorn[ant] << std::endl;
+    double   deltaXRL = -deltaRL*TMath::Sin(apertureAzFromDeckHorn[ant]);
+    double   deltaYRL = deltaRL*TMath::Cos(apertureAzFromDeckHorn[ant]);
+
+    double  deltaZUD = deltaUD*TMath::Cos(apertureElFromDeckHorn[ant]);
+    double  deltaXUD = deltaUD*TMath::Sin(apertureElFromDeckHorn[ant])*TMath::Cos(apertureAzFromDeckHorn[ant]);
+    double  deltaYUD = deltaUD*TMath::Sin(apertureElFromDeckHorn[ant])*TMath::Sin(apertureAzFromDeckHorn[ant]);
+
+    deltaXRL = 0;
+    deltaYRL = 0;
+
+    deltaZUD = 0;
+    deltaXUD = 0;
+    deltaYUD = 0;
+
+    // std::cout << deltaXRL << "  " << deltaXUD << "  "<< deltaYUD << "  "<< deltaYRL  <<  "  " <<  deltaZUD << std::endl;
+
+    //     Now try to find the location of the antenna phaseCentre point     
+    xPhaseCentreFromDeckHorn[ant]=(xAntFromDeckHorn[ant] + deltaXRL + deltaXUD) -
+      phaseCentreToAntFront*TMath::Cos( apertureAzFromDeckHorn[ant])*TMath::Cos(apertureElFromDeckHorn[ant]); //m
+    yPhaseCentreFromDeckHorn[ant]=(yAntFromDeckHorn[ant] + deltaYRL + deltaYUD) -
+      phaseCentreToAntFront*TMath::Sin( apertureAzFromDeckHorn[ant])*TMath::Cos(apertureElFromDeckHorn[ant]); //m
+    zPhaseCentreFromDeckHorn[ant]=(zAntFromDeckHorn[ant] + deltaZUD) -phaseCentreToAntFront*TMath::Sin(apertureElFromDeckHorn[ant]); //m
+
+    //  xPhaseCentreFromDeckHorn[ant]=xAntFromDeckHorn[ant] -
+    //        phaseCentreToAntFront*TMath::Cos( apertureAzFromDeckHorn[ant])*TMath::Cos(apertureElFromDeckHorn[ant]); //m
+    //      yPhaseCentreFromDeckHorn[ant]=yAntFromDeckHorn[ant] -
+    //        phaseCentreToAntFront*TMath::Sin( apertureAzFromDeckHorn[ant])*TMath::Cos(apertureElFromDeckHorn[ant]); //m
+    //      zPhaseCentreFromDeckHorn[ant]=zAntFromDeckHorn[ant] - phaseCentreToAntFront*TMath::Sin(apertureElFromDeckHorn[ant]); //m
+
+    rPhaseCentreFromDeckHorn[ant]=TMath::Sqrt(xPhaseCentreFromDeckHorn[ant]*xPhaseCentreFromDeckHorn[ant]+
+					      yPhaseCentreFromDeckHorn[ant]*yPhaseCentreFromDeckHorn[ant]);//m
+    azPhaseCentreFromDeckHorn[ant]=TMath::ATan(yPhaseCentreFromDeckHorn[ant]/xPhaseCentreFromDeckHorn[ant]); //radians
+    if(xPhaseCentreFromDeckHorn[ant]<0)
+      azPhaseCentreFromDeckHorn[ant]+=TMath::Pi();
+    if(azPhaseCentreFromDeckHorn[ant]<0)
+      azPhaseCentreFromDeckHorn[ant]+=TMath::TwoPi();
+
+    //      std::cout << "Face v PhaseCentre -- Ant " << ant  << std::endl;
+    //      std::cout << apertureAzFromDeckHorn[ant] << "\t" << apertureElFromDeckHorn[ant] << "\n";
+    //      std::cout << "x\t" << xAntFromDeckHorn[ant] << "\t" << xPhaseCentreFromDeckHorn[ant] << std::endl;
+    //      std::cout << "y\t" << yAntFromDeckHorn[ant] << "\t" << yPhaseCentreFromDeckHorn[ant] << std::endl;
+    //      std::cout << "z\t" << zAntFromDeckHorn[ant] << "\t" << zPhaseCentreFromDeckHorn[ant] << std::endl;
+    //      std::cout << "r\t" << rAntFromDeckHorn[ant] << "\t" << rPhaseCentreFromDeckHorn[ant] << std::endl;
+    //      std::cout << "phi\t" << azCentreFromDeckHorn[ant] << "\t" << azPhaseCentreFromDeckHorn[ant] << std::endl;
      
   }
 
   //Now bicones and discones  
   for(int i=0;i<2;i++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << line.Data() << "\n";
+    line.ReadLine(AntennaFile);
+    //std::cout << line.Data() << "\n";
   }
 
 
   for(int ant=0;ant<4;ant++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << "Bicones:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	   
-	   xAntFromDeckBicone[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 2:	   
-	   yAntFromDeckBicone[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 3:	   
-	   zAntFromDeckBicone[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "Bicones:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	   
+	xAntFromDeckBicone[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 2:	   
+	yAntFromDeckBicone[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 3:	   
+	zAntFromDeckBicone[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      default:	   
+	break;
+      }
    
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }
 
   for(int ant=0;ant<4;ant++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << "Discones:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	   
-	   xAntFromDeckDiscone[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 2:	   
-	   yAntFromDeckDiscone[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 3:	   
-	   zAntFromDeckDiscone[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "Discones:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	   
+	xAntFromDeckDiscone[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 2:	   
+	yAntFromDeckDiscone[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 3:	   
+	zAntFromDeckDiscone[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      default:	   
+	break;
+      }
    
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }
 
   //Now box enclosures and the like
   for(int i=0;i<2;i++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << line.Data() << "\n";
+    line.ReadLine(AntennaFile);
+    //std::cout << line.Data() << "\n";
   }
   for(int corner=0;corner<4;corner++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << "Anita Box:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	   
-	   xAnitaBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 2:	   
-	   yAnitaBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 3:	   
-	   zAnitaBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "Anita Box:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	   
+	xAnitaBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 2:	   
+	yAnitaBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 3:	   
+	zAnitaBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      default:	   
+	break;
+      }
    
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }
   for(int i=0;i<2;i++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << line.Data() << "\n";
+    line.ReadLine(AntennaFile);
+    //std::cout << line.Data() << "\n";
   }
   for(int corner=0;corner<4;corner++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << "Battery Box:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	   
-	   xBatteryBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 2:	   
-	   yBatteryBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 3:	   
-	   zBatteryBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "Battery Box:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	   
+	xBatteryBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 2:	   
+	yBatteryBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 3:	   
+	zBatteryBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      default:	   
+	break;
+      }
    
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }
   for(int i=0;i<2;i++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << line.Data() << "\n";
+    line.ReadLine(AntennaFile);
+    //std::cout << line.Data() << "\n";
   }
   for(int corner=0;corner<4;corner++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << "Sip Box:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	   
-	   xSipBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 2:	   
-	   ySipBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 3:	   
-	   zSipBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "Sip Box:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	   
+	xSipBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 2:	   
+	ySipBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 3:	   
+	zSipBoxFromDeckCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      default:	   
+	break;
+      }
    
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }
   //Now gps stuff
   for(int i=0;i<2;i++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << line.Data() << "\n";
+    line.ReadLine(AntennaFile);
+    //std::cout << line.Data() << "\n";
   }
   {
-     line.ReadLine(AntennaFile);
-     //std::cout << "GPS Plane:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	 
-	case 2:	
-	case 3:	     
-	  gpsPlaneFromDeck[j-1]=subString.Atof(); //unit vector
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "GPS Plane:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	 
+      case 2:	
+      case 3:	     
+	gpsPlaneFromDeck[j-1]=subString.Atof(); //unit vector
+	break;
+      default:	   
+	break;
+      }
 	
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }  
   {
-     line.ReadLine(AntennaFile);
-     //std::cout << "GPS Heading:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	 
-	case 2:	
-	case 3:	     
-	   gpsHeadingFromDeck[j-1]=subString.Atof(); //unit vector
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "GPS Heading:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	 
+      case 2:	
+      case 3:	     
+	gpsHeadingFromDeck[j-1]=subString.Atof(); //unit vector
+	break;
+      default:	   
+	break;
+      }
 	
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }  
 
   aftForeOffsetAngleDeck=TMath::ATan(gpsHeadingFromDeck[1]/gpsHeadingFromDeck[0]);
@@ -713,286 +776,353 @@ void AnitaGeomTool::readPhotogrammetry()
   //Now switch to the (more useful) vertical measurements
   //First up are the antenna positions
   for(int i=0;i<5;i++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << line.Data() << "\n";
+    line.ReadLine(AntennaFile);
+    //std::cout << line.Data() << "\n";
   }
   
   for(int ant=0;ant<32;ant++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << "Seavey:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<8;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	//std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   if (ant+1 != subString.Atoi()) {
-	      std::cerr << "Antenna number mismatch\n";
-	   }
-	   break;
-	case 1:	   
-	   xAntFromVerticalHorn[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 2:	   
-	   yAntFromVerticalHorn[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 3:	   
-	   zAntFromVerticalHorn[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 4:	   
-	   rAntFromVerticalHorn[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 5:	   
-	   azCentreFromVerticalHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
-	   if(azCentreFromVerticalHorn[ant]<0)
-	      azCentreFromVerticalHorn[ant]+=TMath::TwoPi();
-	   break;
-	case 6:	   
-	   apertureAzFromVerticalHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
-	   break;
-	case 7:	   
-	   apertureElFromVerticalHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
-	   break;
-	default:	   
-	   break;
+    line.ReadLine(AntennaFile);
+    //std::cout << "Seavey:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<8;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	//std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	if (ant+1 != subString.Atoi()) {
+	  std::cerr << "Antenna number mismatch\n";
 	}
+	break;
+      case 1:	   
+	xAntFromVerticalHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 2:	   
+	yAntFromVerticalHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 3:	   
+	zAntFromVerticalHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 4:	   
+	rAntFromVerticalHorn[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 5:	   
+	azCentreFromVerticalHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	if(azCentreFromVerticalHorn[ant]<0)
+	  azCentreFromVerticalHorn[ant]+=TMath::TwoPi();
+	break;
+      case 6:	   
+	apertureAzFromVerticalHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	break;
+      case 7:	   
+	apertureElFromVerticalHorn[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	break;
+      default:	   
+	break;
+      }
    
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
 
-     
-     //Now try to find the location of the antenna phaseCentre point     
-     xPhaseCentreFromVerticalHorn[ant]=xAntFromVerticalHorn[ant]-
-       phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
-     yPhaseCentreFromVerticalHorn[ant]=yAntFromVerticalHorn[ant]-
-       phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
-     zPhaseCentreFromVerticalHorn[ant]=zAntFromVerticalHorn[ant]-phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHorn[ant]); //m
-     rPhaseCentreFromVerticalHorn[ant]=TMath::Sqrt(xPhaseCentreFromVerticalHorn[ant]*xPhaseCentreFromVerticalHorn[ant]+
-					yPhaseCentreFromVerticalHorn[ant]*yPhaseCentreFromVerticalHorn[ant]);//m
-     azPhaseCentreFromVerticalHorn[ant]=TMath::ATan(yPhaseCentreFromVerticalHorn[ant]/xPhaseCentreFromVerticalHorn[ant]); //radians
-     if(xPhaseCentreFromVerticalHorn[ant]<0)
-       azPhaseCentreFromVerticalHorn[ant]+=TMath::Pi();
-     if(azPhaseCentreFromVerticalHorn[ant]<0)
-       azPhaseCentreFromVerticalHorn[ant]+=TMath::TwoPi();
+    
+
+
+
+    double   deltaXRL = -deltaRL*TMath::Sin(apertureAzFromVerticalHorn[ant]);
+    double   deltaYRL = deltaRL*TMath::Cos(apertureAzFromVerticalHorn[ant]);
+
+    double  deltaZUD = deltaUD*TMath::Cos(apertureElFromVerticalHorn[ant]);
+    double  deltaXUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Cos(apertureAzFromVerticalHorn[ant]);
+    double  deltaYUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Sin(apertureAzFromVerticalHorn[ant]);
+
+    //std::cout << deltaXRL << "  " << deltaXUD << "  "<< deltaYUD << "  "<< deltaYRL  <<  "  " <<  deltaZUD << std::endl;
+
+    //Now try to find the location of the antenna phaseCentre point     
+    xPhaseCentreFromVerticalHorn[ant]=(xAntFromVerticalHorn[ant] + deltaXRL + deltaXUD) -
+      phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    yPhaseCentreFromVerticalHorn[ant]=(yAntFromVerticalHorn[ant] + deltaYRL + deltaYUD) -
+      phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    zPhaseCentreFromVerticalHorn[ant]=(zAntFromVerticalHorn[ant] + deltaZUD) -phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHorn[ant]); //m
+
+    //      //Now try to find the location of the antenna phaseCentre point     
+    //      xPhaseCentreFromVerticalHorn[ant]=xAntFromVerticalHorn[ant]-
+    //        phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    //      yPhaseCentreFromVerticalHorn[ant]=yAntFromVerticalHorn[ant]-
+    //        phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    //      zPhaseCentreFromVerticalHorn[ant]=zAntFromVerticalHorn[ant]-phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHorn[ant]); //m
+    rPhaseCentreFromVerticalHorn[ant]=TMath::Sqrt(xPhaseCentreFromVerticalHorn[ant]*xPhaseCentreFromVerticalHorn[ant]+
+						  yPhaseCentreFromVerticalHorn[ant]*yPhaseCentreFromVerticalHorn[ant]);//m
+    azPhaseCentreFromVerticalHorn[ant]=TMath::ATan(yPhaseCentreFromVerticalHorn[ant]/xPhaseCentreFromVerticalHorn[ant]); //radians
+    if(xPhaseCentreFromVerticalHorn[ant]<0)
+      azPhaseCentreFromVerticalHorn[ant]+=TMath::Pi();
+    if(azPhaseCentreFromVerticalHorn[ant]<0)
+      azPhaseCentreFromVerticalHorn[ant]+=TMath::TwoPi();
 
        
-//      std::cout << "Face v PhaseCentre -- Ant " << ant  << std::endl;
-//      std::cout << "x\t" << xAntFromVerticalHorn[ant] << "\t" << xPhaseCentreFromVerticalHorn[ant] << std::endl;
-//      std::cout << "y\t" << yAntFromVerticalHorn[ant] << "\t" << yPhaseCentreFromVerticalHorn[ant] << std::endl;
-//      std::cout << "z\t" << zAntFromVerticalHorn[ant] << "\t" << zPhaseCentreFromVerticalHorn[ant] << std::endl;
-//      std::cout << "r\t" << rAntFromVerticalHorn[ant] << "\t" << rPhaseCentreFromVerticalHorn[ant] << std::endl;
-//      std::cout << "phi\t" << azCentreFromVerticalHorn[ant] << "\t" << azPhaseCentreFromVerticalHorn[ant] << std::endl;
+    //      std::cout << "Face v PhaseCentre -- Ant " << ant  << std::endl;
+    //      std::cout << "x\t" << xAntFromVerticalHorn[ant] << "\t" << xPhaseCentreFromVerticalHorn[ant] << std::endl;
+    //      std::cout << "y\t" << yAntFromVerticalHorn[ant] << "\t" << yPhaseCentreFromVerticalHorn[ant] << std::endl;
+    //      std::cout << "z\t" << zAntFromVerticalHorn[ant] << "\t" << zPhaseCentreFromVerticalHorn[ant] << std::endl;
+    //      std::cout << "r\t" << rAntFromVerticalHorn[ant] << "\t" << rPhaseCentreFromVerticalHorn[ant] << std::endl;
+    //      std::cout << "phi\t" << azCentreFromVerticalHorn[ant] << "\t" << azPhaseCentreFromVerticalHorn[ant] << std::endl;
 
   }
+
+
+
+  //Now we'll add a hack for the drop-down antennas
+  for(int ant=32;ant<40;ant++) {
+
+    double   deltaXRL = 0;
+    double   deltaYRL = 0;
+
+    double  deltaZUD = 0;
+    double  deltaXUD = 0;
+      double  deltaYUD = 0;
+
+    rAntFromVerticalHorn[ant]=(101*INCHTOMETER)-0.38;
+    zAntFromVerticalHorn[ant]=(-21*INCHTOMETER)-1.8;
+    azCentreFromVerticalHorn[ant]=(-67.5 + 45*(ant-32))*TMath::DegToRad();
+    
+    apertureAzFromVerticalHorn[ant]=azCentreFromVerticalHorn[ant];
+    apertureElFromVerticalHorn[ant]=-10*TMath::DegToRad();
+    xAntFromVerticalHorn[ant]=rAntFromVerticalHorn[ant]*TMath::Cos(azCentreFromVerticalHorn[ant]);
+    yAntFromVerticalHorn[ant]=rAntFromVerticalHorn[ant]*TMath::Sin(azCentreFromVerticalHorn[ant]);
+
+
+    xPhaseCentreFromVerticalHorn[ant]=(xAntFromVerticalHorn[ant] + deltaXRL + deltaXUD) -
+      phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    yPhaseCentreFromVerticalHorn[ant]=(yAntFromVerticalHorn[ant] + deltaYRL + deltaYUD) -
+      phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    zPhaseCentreFromVerticalHorn[ant]=(zAntFromVerticalHorn[ant] + deltaZUD) -phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHorn[ant]); //m
+
+    //      //Now try to find the location of the antenna phaseCentre point     
+    //      xPhaseCentreFromVerticalHorn[ant]=xAntFromVerticalHorn[ant]-
+    //        phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    //      yPhaseCentreFromVerticalHorn[ant]=yAntFromVerticalHorn[ant]-
+    //        phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    //      zPhaseCentreFromVerticalHorn[ant]=zAntFromVerticalHorn[ant]-phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHorn[ant]); //m
+    rPhaseCentreFromVerticalHorn[ant]=TMath::Sqrt(xPhaseCentreFromVerticalHorn[ant]*xPhaseCentreFromVerticalHorn[ant]+
+						  yPhaseCentreFromVerticalHorn[ant]*yPhaseCentreFromVerticalHorn[ant]);//m
+    azPhaseCentreFromVerticalHorn[ant]=TMath::ATan(yPhaseCentreFromVerticalHorn[ant]/xPhaseCentreFromVerticalHorn[ant]); //radians
+    if(xPhaseCentreFromVerticalHorn[ant]<0)
+      azPhaseCentreFromVerticalHorn[ant]+=TMath::Pi();
+    if(azPhaseCentreFromVerticalHorn[ant]<0)
+      azPhaseCentreFromVerticalHorn[ant]+=TMath::TwoPi();
+
+
+
+
+}
+
 
   //Now bicones and discones  
   for(int i=0;i<2;i++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << line.Data() << "\n";
+    line.ReadLine(AntennaFile);
+    //std::cout << line.Data() << "\n";
   }
 
 
   for(int ant=0;ant<4;ant++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << "Bicones:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	//std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	   
-	   xAntFromVerticalBicone[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 2:	   
-	   yAntFromVerticalBicone[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 3:	   
-	   zAntFromVerticalBicone[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "Bicones:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	//std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	   
+	xAntFromVerticalBicone[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 2:	   
+	yAntFromVerticalBicone[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 3:	   
+	zAntFromVerticalBicone[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      default:	   
+	break;
+      }
    
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }
 
   for(int ant=0;ant<4;ant++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << "Discones:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	//std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	   
-	   xAntFromVerticalDiscone[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 2:	   
-	   yAntFromVerticalDiscone[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 3:	   
-	   zAntFromVerticalDiscone[ant]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "Discones:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	//std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	   
+	xAntFromVerticalDiscone[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 2:	   
+	yAntFromVerticalDiscone[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 3:	   
+	zAntFromVerticalDiscone[ant]=subString.Atof()*INCHTOMETER; //m
+	break;
+      default:	   
+	break;
+      }
    
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }
 
   //Now box enclosures and the like
   for(int i=0;i<2;i++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << line.Data() << "\n";
+    line.ReadLine(AntennaFile);
+    //std::cout << line.Data() << "\n";
   }
   for(int corner=0;corner<4;corner++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << "Anita Box:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	//std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	   
-	   xAnitaBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 2:	   
-	   yAnitaBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 3:	   
-	   zAnitaBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "Anita Box:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	//std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	   
+	xAnitaBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 2:	   
+	yAnitaBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 3:	   
+	zAnitaBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      default:	   
+	break;
+      }
    
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }
   for(int i=0;i<2;i++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << line.Data() << "\n";
+    line.ReadLine(AntennaFile);
+    //std::cout << line.Data() << "\n";
   }
   for(int corner=0;corner<4;corner++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << "Battery Box:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	//std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	   
-	   xBatteryBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 2:	   
-	   yBatteryBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 3:	   
-	   zBatteryBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "Battery Box:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	//std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	   
+	xBatteryBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 2:	   
+	yBatteryBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 3:	   
+	zBatteryBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      default:	   
+	break;
+      }
    
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }
   for(int i=0;i<2;i++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << line.Data() << "\n";
+    line.ReadLine(AntennaFile);
+    //std::cout << line.Data() << "\n";
   }
   for(int corner=0;corner<4;corner++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << "Sip Box:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	//std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	   
-	   xSipBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 2:	   
-	   ySipBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	case 3:	   
-	   zSipBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "Sip Box:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	//std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	   
+	xSipBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 2:	   
+	ySipBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      case 3:	   
+	zSipBoxFromVerticalCorner[corner]=subString.Atof()*INCHTOMETER; //m
+	break;
+      default:	   
+	break;
+      }
    
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }
   //Now gps stuff
   for(int i=0;i<2;i++) {
-     line.ReadLine(AntennaFile);
-     //std::cout << line.Data() << "\n";
+    line.ReadLine(AntennaFile);
+    //std::cout << line.Data() << "\n";
   }
   {
-     line.ReadLine(AntennaFile);
-     //std::cout << "GPS Plane:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	//std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	 
-	case 2:	
-	case 3:	     
-	   gpsPlaneFromVertical[j-1]=subString.Atof(); //unit vector
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "GPS Plane:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	//std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	 
+      case 2:	
+      case 3:	     
+	gpsPlaneFromVertical[j-1]=subString.Atof(); //unit vector
+	break;
+      default:	   
+	break;
+      }
 	
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }  
   {
-     line.ReadLine(AntennaFile);
-     //std::cout << "GPS Heading:\t" << line.Data() << "\n";
-     TObjArray *tokens = line.Tokenize(",");
-     for(int j=0;j<4;j++) {
-	const TString subString = ((TObjString*)tokens->At(j))->GetString();
-	//	TString *subString = (TString*) tokens->At(j);
-	//	//std::cout << j << "\t" << subString.Data() << "\n";
-	switch(j) {
-	case 0:
-	   break;
-	case 1:	 
-	case 2:	
-	case 3:	     
-	   gpsHeadingFromVertical[j-1]=subString.Atof(); // unit vector
-	   break;
-	default:	   
-	   break;
-	}
+    line.ReadLine(AntennaFile);
+    //std::cout << "GPS Heading:\t" << line.Data() << "\n";
+    TObjArray *tokens = line.Tokenize(",");
+    for(int j=0;j<4;j++) {
+      const TString subString = ((TObjString*)tokens->At(j))->GetString();
+      //	TString *subString = (TString*) tokens->At(j);
+      //	//std::cout << j << "\t" << subString.Data() << "\n";
+      switch(j) {
+      case 0:
+	break;
+      case 1:	 
+      case 2:	
+      case 3:	     
+	gpsHeadingFromVertical[j-1]=subString.Atof(); // unit vector
+	break;
+      default:	   
+	break;
+      }
 	
-     }
-     tokens->Delete();
+    }
+    tokens->Delete();
   }  
   aftForeOffsetAngleVertical=TMath::ATan(gpsHeadingFromVertical[1]/gpsHeadingFromVertical[0]);
   //  fHeadingRotationAxis.SetXYZ(gpsPlaneFromVertical[0],gpsPlaneFromVertical[1],gpsPlaneFromVertical[2]);
@@ -1017,60 +1147,60 @@ void AnitaGeomTool::readPhotogrammetry()
 //Non static thingies
 void AnitaGeomTool::getAntXYZ(int ant, Double_t &x, Double_t &y, Double_t &z)
 {
-   if(ant>=0 && ant<NUM_SEAVEYS) {
-      x=xPhaseCentreFromVerticalHorn[ant];
-      y=yPhaseCentreFromVerticalHorn[ant];
-      z=zPhaseCentreFromVerticalHorn[ant];
-   }
+  if(ant>=0 && ant<NUM_SEAVEYS) {
+    x=xPhaseCentreFromVerticalHorn[ant];
+    y=yPhaseCentreFromVerticalHorn[ant];
+    z=zPhaseCentreFromVerticalHorn[ant];
+  }
 }
 
 Double_t AnitaGeomTool::getAntZ(int ant) {
-   if(ant>=0 && ant<NUM_SEAVEYS) {
-      return zPhaseCentreFromVerticalHorn[ant];
-      //      return zAntFromDeckHorn[ant];
-   }
-   return 0;
+  if(ant>=0 && ant<NUM_SEAVEYS) {
+    return zPhaseCentreFromVerticalHorn[ant];
+    //      return zAntFromDeckHorn[ant];
+  }
+  return 0;
 }
 
 Double_t AnitaGeomTool::getAntR(int ant) {
-   if(ant>=0 && ant<NUM_SEAVEYS) {
-      return rPhaseCentreFromVerticalHorn[ant];
-	    //return rAntFromDeckHorn[ant];
-   }
-   return 0;
+  if(ant>=0 && ant<NUM_SEAVEYS) {
+    return rPhaseCentreFromVerticalHorn[ant];
+    //return rAntFromDeckHorn[ant];
+  }
+  return 0;
 }
 
 Double_t AnitaGeomTool::getAntPhiPosition(int ant) {
-   if(ant>=0 && ant<NUM_SEAVEYS) {
-      return azPhaseCentreFromVerticalHorn[ant];
-   }
-   return 0;
+  if(ant>=0 && ant<NUM_SEAVEYS) {
+    return azPhaseCentreFromVerticalHorn[ant];
+  }
+  return 0;
 }
 
 Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(int ant) {
-   if(ant>=0 && ant<NUM_SEAVEYS) {
-      Double_t phi=azPhaseCentreFromVerticalHorn[ant]-aftForeOffsetAngleVertical;
-      if(phi<0)
-	 phi+=TMath::TwoPi();
-      return phi;
-   }
-   return 0;
+  if(ant>=0 && ant<NUM_SEAVEYS) {
+    Double_t phi=azPhaseCentreFromVerticalHorn[ant]-aftForeOffsetAngleVertical;
+    if(phi<0)
+      phi+=TMath::TwoPi();
+    return phi;
+  }
+  return 0;
 }
 
 Int_t AnitaGeomTool::getUpperAntNearestPhiWave(Double_t phiWave) {
-   Double_t phiPrime=phiWave+aftForeOffsetAngleVertical;
-   if(phiPrime>TMath::TwoPi()) 
-      phiPrime-=TMath::TwoPi();
-   Double_t minDiff=TMath::TwoPi();
-   Int_t minAnt=0;;
-   for(int ant=0;ant<16;ant++) {
-      //      std::cout << ant << "\t" << azPhaseCentreFromVerticalHorn[ant] << "\t" << phiPrime << "\t" << TMath::Abs(azPhaseCentreFromVerticalHorn[ant]-phiPrime) << "\n";
-      if(TMath::Abs(azPhaseCentreFromVerticalHorn[ant]-phiPrime)<minDiff) {
-	 minDiff=TMath::Abs(azPhaseCentreFromVerticalHorn[ant]-phiPrime);
-	 minAnt=ant;
-      }
-   }
-   return minAnt;
+  Double_t phiPrime=phiWave+aftForeOffsetAngleVertical;
+  if(phiPrime>TMath::TwoPi()) 
+    phiPrime-=TMath::TwoPi();
+  Double_t minDiff=TMath::TwoPi();
+  Int_t minAnt=0;;
+  for(int ant=0;ant<16;ant++) {
+    //      std::cout << ant << "\t" << azPhaseCentreFromVerticalHorn[ant] << "\t" << phiPrime << "\t" << TMath::Abs(azPhaseCentreFromVerticalHorn[ant]-phiPrime) << "\n";
+    if(TMath::Abs(azPhaseCentreFromVerticalHorn[ant]-phiPrime)<minDiff) {
+      minDiff=TMath::Abs(azPhaseCentreFromVerticalHorn[ant]-phiPrime);
+      minAnt=ant;
+    }
+  }
+  return minAnt;
 }
 
 
@@ -1079,65 +1209,165 @@ Int_t AnitaGeomTool::getUpperAntNearestPhiWave(Double_t phiWave) {
 //Non static thingies
 void AnitaGeomTool::getAntFaceXYZ(int ant, Double_t &x, Double_t &y, Double_t &z)
 {
-   if(ant>=0 && ant<NUM_SEAVEYS) {
-      x=xAntFromVerticalHorn[ant];
-      y=yAntFromVerticalHorn[ant];
-      z=zAntFromVerticalHorn[ant];
-   }
+  if(ant>=0 && ant<NUM_SEAVEYS) {
+    x=xAntFromVerticalHorn[ant];
+    y=yAntFromVerticalHorn[ant];
+    z=zAntFromVerticalHorn[ant];
+  }
 }
 
 Double_t AnitaGeomTool::getAntFaceZ(int ant) {
-   if(ant>=0 && ant<NUM_SEAVEYS) {
-      return zAntFromVerticalHorn[ant];
-      //      return zAntFaceFromDeckHorn[ant];
-   }
-   return 0;
+  if(ant>=0 && ant<NUM_SEAVEYS) {
+    return zAntFromVerticalHorn[ant];
+    //      return zAntFaceFromDeckHorn[ant];
+  }
+  return 0;
 }
 
 Double_t AnitaGeomTool::getAntFaceR(int ant) {
-   if(ant>=0 && ant<NUM_SEAVEYS) {
-      return rAntFromVerticalHorn[ant];
-	    //return rAntFromDeckHorn[ant];
-   }
-   return 0;
+  if(ant>=0 && ant<NUM_SEAVEYS) {
+    return rAntFromVerticalHorn[ant];
+    //return rAntFromDeckHorn[ant];
+  }
+  return 0;
 }
 
 Double_t AnitaGeomTool::getAntFacePhiPosition(int ant) {
-   if(ant>=0 && ant<NUM_SEAVEYS) {
-      return azCentreFromVerticalHorn[ant];
-   }
-   return 0;
+  if(ant>=0 && ant<NUM_SEAVEYS) {
+    return azCentreFromVerticalHorn[ant];
+  }
+  return 0;
 }
 
 Double_t AnitaGeomTool::getAntFacePhiPositionRelToAftFore(int ant) {
-   if(ant>=0 && ant<NUM_SEAVEYS) {
-      Double_t phi=azCentreFromVerticalHorn[ant]-aftForeOffsetAngleVertical;
-      if(phi<0)
-	 phi+=TMath::TwoPi();
-      return phi;
-   }
-   return 0;
+  if(ant>=0 && ant<NUM_SEAVEYS) {
+    Double_t phi=azCentreFromVerticalHorn[ant]-aftForeOffsetAngleVertical;
+    if(phi<0)
+      phi+=TMath::TwoPi();
+    return phi;
+  }
+  return 0;
 }
 
 Int_t AnitaGeomTool::getUpperAntFaceNearestPhiWave(Double_t phiWave) {
-   Double_t phiPrime=phiWave+aftForeOffsetAngleVertical;
-   if(phiPrime>TMath::TwoPi()) 
-      phiPrime-=TMath::TwoPi();
-   Double_t minDiff=TMath::TwoPi();
-   Int_t minAnt=0;;
-   for(int ant=0;ant<16;ant++) {
-      //      std::cout << ant << "\t" << azPhaseCentreFromVerticalHorn[ant] << "\t" << phiPrime << "\t" << TMath::Abs(azPhaseCentreFromVerticalHorn[ant]-phiPrime) << "\n";
-      if(TMath::Abs(azCentreFromVerticalHorn[ant]-phiPrime)<minDiff) {
-	 minDiff=TMath::Abs(azCentreFromVerticalHorn[ant]-phiPrime);
-	 minAnt=ant;
-      }
-   }
-   return minAnt;
+  Double_t phiPrime=phiWave+aftForeOffsetAngleVertical;
+  if(phiPrime>TMath::TwoPi()) 
+    phiPrime-=TMath::TwoPi();
+  Double_t minDiff=TMath::TwoPi();
+  Int_t minAnt=0;;
+  for(int ant=0;ant<16;ant++) {
+    //      std::cout << ant << "\t" << azPhaseCentreFromVerticalHorn[ant] << "\t" << phiPrime << "\t" << TMath::Abs(azPhaseCentreFromVerticalHorn[ant]-phiPrime) << "\n";
+    if(TMath::Abs(azCentreFromVerticalHorn[ant]-phiPrime)<minDiff) {
+      minDiff=TMath::Abs(azCentreFromVerticalHorn[ant]-phiPrime);
+      minAnt=ant;
+    }
+  }
+  return minAnt;
+}
+
+void AnitaGeomTool::updateAnt(double deltaR,double deltaRL,double deltaUD){
+
+   phaseCentreToAntFront=0.2+deltaR;
+  
+   double   deltaXRL = 0;
+   double   deltaYRL = 0;
+   
+   double  deltaZUD = 0;
+   double  deltaXUD = 0;
+   double  deltaYUD = 0;
+   
+    //std::cout << deltaXRL << "  " << deltaXUD << "  "<< deltaYUD << "  "<< deltaYRL  <<  "  " <<  deltaZUD << std::endl;
+
+  for(int ant=0;ant<32;ant++) {
+    
+    //         deltaXRL = -deltaRL*TMath::Sin(apertureAzFromVerticalHorn[ant]);
+	    //       deltaYRL = deltaRL*TMath::Cos(apertureAzFromVerticalHorn[ant]);
+    
+           deltaZUD = deltaUD*TMath::Cos(apertureElFromVerticalHorn[ant]);
+          deltaXUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Cos(apertureAzFromVerticalHorn[ant]);
+          deltaYUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Sin(apertureAzFromVerticalHorn[ant]);
+    
+    //std::cout << deltaXRL << "  " << deltaXUD << "  "<< deltaYUD << "  "<< deltaYRL  <<  "  " <<  deltaZUD << std::endl;
+    
+    //Now try to find the location of the antenna phaseCentre point     
+    xPhaseCentreFromVerticalHorn[ant]=(xAntFromVerticalHorn[ant] + deltaXRL + deltaXUD) -
+      phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    yPhaseCentreFromVerticalHorn[ant]=(yAntFromVerticalHorn[ant] + deltaYRL + deltaYUD) -
+      phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    zPhaseCentreFromVerticalHorn[ant]=(zAntFromVerticalHorn[ant] + deltaZUD) -phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHorn[ant]); //m
+
+    
+    rPhaseCentreFromVerticalHorn[ant]=TMath::Sqrt(xPhaseCentreFromVerticalHorn[ant]*xPhaseCentreFromVerticalHorn[ant]+
+						  yPhaseCentreFromVerticalHorn[ant]*yPhaseCentreFromVerticalHorn[ant]);//m
+    azPhaseCentreFromVerticalHorn[ant]=TMath::ATan(yPhaseCentreFromVerticalHorn[ant]/xPhaseCentreFromVerticalHorn[ant]); //radians
+    if(xPhaseCentreFromVerticalHorn[ant]<0)
+      azPhaseCentreFromVerticalHorn[ant]+=TMath::Pi();
+    if(azPhaseCentreFromVerticalHorn[ant]<0)
+      azPhaseCentreFromVerticalHorn[ant]+=TMath::TwoPi();
+
+ }
+
+ for(int ant=32;ant<40;ant++) {
+
+    double   deltaXRL = 0;
+    double   deltaYRL = 0;
+
+    double  deltaZUD = 0;
+    double  deltaXUD = 0;
+      double  deltaYUD = 0;
+
+     deltaZUD = deltaUD*TMath::Cos(apertureElFromVerticalHorn[ant]);
+          deltaXUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Cos(apertureAzFromVerticalHorn[ant]);
+          deltaYUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Sin(apertureAzFromVerticalHorn[ant]);
+
+	  //    rAntFromVerticalHorn[ant]=(101*INCHTOMETER)-0.38;
+    rAntFromVerticalHorn[ant]=(101*INCHTOMETER)-0.3;
+    zAntFromVerticalHorn[ant]=(-21*INCHTOMETER)-1.8;
+   azCentreFromVerticalHorn[ant]=(-67.5 + 45*(ant-32))*TMath::DegToRad();
+    apertureAzFromVerticalHorn[ant]=azCentreFromVerticalHorn[ant];
+    apertureElFromVerticalHorn[ant]=-10*TMath::DegToRad();
+    xAntFromVerticalHorn[ant]=rAntFromVerticalHorn[ant]*TMath::Cos(azCentreFromVerticalHorn[ant]);
+    yAntFromVerticalHorn[ant]=rAntFromVerticalHorn[ant]*TMath::Sin(azCentreFromVerticalHorn[ant]);
+
+
+    xPhaseCentreFromVerticalHorn[ant]=(xAntFromVerticalHorn[ant] + deltaXRL + deltaXUD) -
+      phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    yPhaseCentreFromVerticalHorn[ant]=(yAntFromVerticalHorn[ant] + deltaYRL + deltaYUD) -
+      phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    zPhaseCentreFromVerticalHorn[ant]=(zAntFromVerticalHorn[ant] + deltaZUD) -phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHorn[ant]); //m
+
+    //      //Now try to find the location of the antenna phaseCentre point     
+    //      xPhaseCentreFromVerticalHorn[ant]=xAntFromVerticalHorn[ant]-
+    //        phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    //      yPhaseCentreFromVerticalHorn[ant]=yAntFromVerticalHorn[ant]-
+    //        phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
+    //      zPhaseCentreFromVerticalHorn[ant]=zAntFromVerticalHorn[ant]-phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHorn[ant]); //m
+    rPhaseCentreFromVerticalHorn[ant]=TMath::Sqrt(xPhaseCentreFromVerticalHorn[ant]*xPhaseCentreFromVerticalHorn[ant]+
+						  yPhaseCentreFromVerticalHorn[ant]*yPhaseCentreFromVerticalHorn[ant]);//m
+    azPhaseCentreFromVerticalHorn[ant]=TMath::ATan(yPhaseCentreFromVerticalHorn[ant]/xPhaseCentreFromVerticalHorn[ant]); //radians
+    if(xPhaseCentreFromVerticalHorn[ant]<0)
+      azPhaseCentreFromVerticalHorn[ant]+=TMath::Pi();
+    if(azPhaseCentreFromVerticalHorn[ant]<0)
+      azPhaseCentreFromVerticalHorn[ant]+=TMath::TwoPi();
+
+
+
+
 }
 
 
 
+};
 
+
+
+void AnitaGeomTool::printAntPos(){
+
+  for(int ant = 0; ant < 32; ant++){
+  std::cout << rPhaseCentreFromVerticalHorn[ant] << std::endl;
+  }
+
+}
 
 
 
@@ -1160,10 +1390,10 @@ int AnitaGeomTool::getAntFromPhiRing(int phi, AnitaRing::AnitaRing_t ring)
   switch(ring) {
   case AnitaRing::kUpperRing:
     return AnitaGeom::upperAntNums[phi];
-   case AnitaRing::kLowerRing:
-      return AnitaGeom::lowerAntNums[phi];
-   case AnitaRing::kNadirRing:
-      return AnitaGeom::nadirAntNums[phi];
+  case AnitaRing::kLowerRing:
+    return AnitaGeom::lowerAntNums[phi];
+  case AnitaRing::kNadirRing:
+    return AnitaGeom::nadirAntNums[phi];
   default:
     return -1;
   }
