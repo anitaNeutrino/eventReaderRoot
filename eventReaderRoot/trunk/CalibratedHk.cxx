@@ -219,7 +219,7 @@ Float_t CalibratedHk::getPower(int index) {
 }
 
 Float_t CalibratedHk::getAttitude(int index) {
-  int attitudeChans[10]={70,50,69,49,68,58,67,57,51,71};
+  int attitudeChans[10]={70,50,69,49,68,48,67,47,51,71};
   if(index>=0 && index<10) {
     return useful[attitudeChans[index]/40][attitudeChans[index]%40];
   }

@@ -1231,7 +1231,7 @@ void AnitaEventCalibrator::loadCalib() {
       Double_t orient=AnitaGeomTool::getAntOrientation(ant-1);
       if(orient==-1) 
 	calib*=-1;
-      if(orient==-2 && pol=='V') //Even Orient have never scored -2 goals
+      if(orient==-2 && pol=='H') //Even Orient have never scored -2 goals
 	calib*=-1;
       
 
