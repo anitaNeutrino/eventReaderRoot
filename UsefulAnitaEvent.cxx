@@ -42,7 +42,7 @@ UsefulAnitaEvent::UsefulAnitaEvent()
 }
 
 
-UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr) 
+UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr, WaveCalType::WaveCalType_t calType) 
   : RawAnitaEvent(*calibratedPtr)
 {
   fFromCalibratedAnitaEvent=1;
@@ -54,7 +54,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr)
     fRcoArray[surf]=calibratedPtr->fRcoArray[surf];
     fClockPhiArray[surf]=calibratedPtr->fClockPhiArray[surf];    
   }
-  fCalType=calibratedPtr->fCalType;
+  fCalType=calType;
   calibrateEvent(fCalType);
 }
 
@@ -107,7 +107,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
   //   std::cout << "UsefulAnitaEvent::calibrateEvent" << std::endl;
   fCalibrator=AnitaEventCalibrator::Instance();
   fCalibrator->calibrateUsefulEvent(this,calType);
-
+  
   fCalType=calType;
   //Fill the calibrated variables  
   switch(calType) {
@@ -302,6 +302,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 
   case WaveCalType::kVTFullAGFastClock:
   case WaveCalType::kVTFullAGCrossCorClock:
+  case WaveCalType::kVTCalFilePlusSimon:
     // kVTLabAG + Clock Jitter Correction (+ Zero Mean)
     for(int surf=0;surf<NUM_SURF;surf++) {
       for(int chan=0;chan<NUM_CHAN;chan++) {
@@ -311,7 +312,10 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	//	memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
 	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
 	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
-	  this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp]-fCalibrator->chipByChipDeltats[surf][chan][getLabChip(chanIndex)];
+	  this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp]-fCalibrator->chipByChipDeltats[surf][chan][getLabChip(chanIndex)];	  
+	  if(calType==WaveCalType::kVTCalFilePlusSimon) {
+	    this->fTimes[chanIndex][samp]-=fCalibrator->simonsDeltaT[surf][chan];
+	  }
 	  //	  std::cout << surf << "\t" << chan << "\t" << fCalibrator->chipByChipDeltats[surf][chan][getLabChip(chanIndex)] <<"\n";
 	  this->fCapacitorNum[chanIndex][samp]=fCalibrator->scaArray[surf][chan][samp];
 	}

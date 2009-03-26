@@ -78,7 +78,11 @@ AnitaGeomTool*  AnitaGeomTool::fgInstance = 0;
 AnitaGeomTool::AnitaGeomTool()
 {
   //Default constructor
-  phaseCentreToAntFront=0.2-0.042685; //Arbitrary value selected to minimise the timing residuals
+  ringPhaseCentreOffset[0]=0.2-0.042685;
+  ringPhaseCentreOffset[1]=0.2+0.00653;
+  ringPhaseCentreOffset[2]=0.2+0.1927;
+
+  readSimonsNumbers();
   readPhotogrammetry();
 
   //   std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
@@ -514,6 +518,8 @@ void AnitaGeomTool::readPhotogrammetry()
   }
 
   for(int ant=0;ant<NUM_SEAVEYS;ant++) {
+    Double_t phaseCentreToAntFront=ringPhaseCentreOffset[Int_t(this->getRingFromAnt(ant))];
+
 
     double   deltaXRL = -deltaRL*TMath::Sin(apertureAzFromDeckHorn[ant]);
     double   deltaYRL = deltaRL*TMath::Cos(apertureAzFromDeckHorn[ant]);
@@ -824,9 +830,7 @@ void AnitaGeomTool::readPhotogrammetry()
     }
     tokens->Delete();
 
-    
-
-
+    Double_t phaseCentreToAntFront=ringPhaseCentreOffset[Int_t(this->getRingFromAnt(ant))];
 
     double   deltaXRL = -deltaRL*TMath::Sin(apertureAzFromVerticalHorn[ant]);
     double   deltaYRL = deltaRL*TMath::Cos(apertureAzFromVerticalHorn[ant]);
@@ -871,8 +875,8 @@ void AnitaGeomTool::readPhotogrammetry()
 
 
   //Now we'll add a hack for the drop-down antennas
-  for(int ant=32;ant<40;ant++) {
-
+  for(int ant=32;ant<NUM_SEAVEYS;ant++) {
+    Double_t phaseCentreToAntFront=ringPhaseCentreOffset[Int_t(this->getRingFromAnt(ant))];
     double   deltaXRL = 0;
     double   deltaYRL = 0;
 
@@ -909,9 +913,6 @@ void AnitaGeomTool::readPhotogrammetry()
       azPhaseCentreFromVerticalHorn[ant]+=TMath::Pi();
     if(azPhaseCentreFromVerticalHorn[ant]<0)
       azPhaseCentreFromVerticalHorn[ant]+=TMath::TwoPi();
-
-
-
 
 }
 
@@ -1139,8 +1140,18 @@ void AnitaGeomTool::readPhotogrammetry()
 //   std::cout << " roll axis x " << fRollRotationAxis.x() << " y " << fRollRotationAxis.y() << " z " << fRollRotationAxis.z() << std::endl;
 //   std::cout << " pitch axis x " << fPitchRotationAxis.x() << " y " << fPitchRotationAxis.y() << " z " << fPitchRotationAxis.z() << std::endl;
 
-
-
+  //Now add in Simon's corrections
+  for(int ant=0;ant<NUM_SEAVEYS;ant++) {
+    rPhaseCentreFromVerticalHorn[ant]+=deltaRPhaseCentre[ant];
+    azPhaseCentreFromVerticalHorn[ant]+=deltaPhiPhaseCentre[ant];    
+    if(azPhaseCentreFromVerticalHorn[ant]<0)
+      azPhaseCentreFromVerticalHorn[ant]+=TMath::TwoPi();
+    if(azPhaseCentreFromVerticalHorn[ant]>TMath::TwoPi())
+      azPhaseCentreFromVerticalHorn[ant]-=TMath::TwoPi();    
+    zPhaseCentreFromVerticalHorn[ant]+=deltaZPhaseCentre[ant];
+    xPhaseCentreFromVerticalHorn[ant]=rPhaseCentreFromVerticalHorn[ant]*TMath::Cos(azPhaseCentreFromVerticalHorn[ant]);
+    yPhaseCentreFromVerticalHorn[ant]=rPhaseCentreFromVerticalHorn[ant]*TMath::Sin(azPhaseCentreFromVerticalHorn[ant]);
+  }
 }
 
 
@@ -1266,8 +1277,8 @@ Int_t AnitaGeomTool::getUpperAntFaceNearestPhiWave(Double_t phiWave) {
 }
 
 void AnitaGeomTool::updateAnt(double deltaR,double deltaRL,double deltaUD){
-
-   phaseCentreToAntFront=0.2+deltaR;
+  
+   Double_t phaseCentreToAntFront=0.2+deltaR;
   
    double   deltaXRL = 0;
    double   deltaYRL = 0;
@@ -1280,7 +1291,7 @@ void AnitaGeomTool::updateAnt(double deltaR,double deltaRL,double deltaUD){
 
   for(int ant=0;ant<32;ant++) {
     
-    //         deltaXRL = -deltaRL*TMath::Sin(apertureAzFromVerticalHorn[ant]);
+    //deltaXRL = -deltaRL*TMath::Sin(apertureAzFromVerticalHorn[ant]);
 	    //       deltaYRL = deltaRL*TMath::Cos(apertureAzFromVerticalHorn[ant]);
     
            deltaZUD = deltaUD*TMath::Cos(apertureElFromVerticalHorn[ant]);
@@ -1400,3 +1411,41 @@ int AnitaGeomTool::getAntFromPhiRing(int phi, AnitaRing::AnitaRing_t ring)
 
 }
 
+void AnitaGeomTool::readSimonsNumbers() {
+
+
+  char calibDir[FILENAME_MAX];
+  char fileName[FILENAME_MAX];
+  char *calibEnv=getenv("ANITA_CALIB_DIR");
+  if(!calibEnv) {
+    char *utilEnv=getenv("ANITA_UTIL_INSTALL_DIR");
+    if(!utilEnv)
+      sprintf(calibDir,"calib");
+    else
+      sprintf(calibDir,"%s/share/anitaCalib",utilEnv);    
+  }
+  else {
+    strncpy(calibDir,calibEnv,FILENAME_MAX);
+  }
+
+  sprintf(fileName,"%s/simonsPositionAndTimingOffsets.dat",calibDir);
+  std::ifstream SimonFile(fileName);
+  if(!SimonFile) {
+    std::cerr << "Couldn't open:\t" << fileName << "\n";
+    return;
+  }
+  
+  Int_t antNum;
+  Double_t deltaT,deltaR,deltaPhi,deltaZ;
+  char firstLine[180];
+  
+  SimonFile.getline(firstLine,179);
+  while(SimonFile >> antNum >> deltaT >> deltaR >> deltaPhi >> deltaZ) {
+    deltaRPhaseCentre[antNum]=deltaR;
+    deltaPhiPhaseCentre[antNum]=deltaPhi;
+    deltaZPhaseCentre[antNum]=deltaZ;
+  }
+
+ 
+
+}

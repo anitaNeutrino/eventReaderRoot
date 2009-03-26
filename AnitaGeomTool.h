@@ -203,83 +203,89 @@ class AnitaGeomTool
   Double_t getAntFacePhiPositionRelToAftFore(int ant); ///< get phi position relative to ADU5 AFT-FORE direction
   Int_t getUpperAntFaceNearestPhiWave(Double_t phiWave); ///< get upper antenna closest to given plane wave direction
 
-  Float_t phaseCentreToAntFront; //m
+  //  Double_t phaseCentreToAntFront; //m
   
   
-  Float_t xAntFromDeckHorn[NUM_SEAVEYS]; //m
-  Float_t yAntFromDeckHorn[NUM_SEAVEYS]; //m
-  Float_t zAntFromDeckHorn[NUM_SEAVEYS]; //m
-  Float_t rAntFromDeckHorn[NUM_SEAVEYS]; //m
-  Float_t azCentreFromDeckHorn[NUM_SEAVEYS]; //radians
-  Float_t apertureAzFromDeckHorn[NUM_SEAVEYS]; //radians
-  Float_t apertureElFromDeckHorn[NUM_SEAVEYS]; //radians
+  Double_t xAntFromDeckHorn[NUM_SEAVEYS]; //m
+  Double_t yAntFromDeckHorn[NUM_SEAVEYS]; //m
+  Double_t zAntFromDeckHorn[NUM_SEAVEYS]; //m
+  Double_t rAntFromDeckHorn[NUM_SEAVEYS]; //m
+  Double_t azCentreFromDeckHorn[NUM_SEAVEYS]; //radians
+  Double_t apertureAzFromDeckHorn[NUM_SEAVEYS]; //radians
+  Double_t apertureElFromDeckHorn[NUM_SEAVEYS]; //radians
   
    
-   Float_t xPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
-   Float_t yPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
-   Float_t zPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
-   Float_t rPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
-   Float_t azPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //radians
+   Double_t xPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
+   Double_t yPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
+   Double_t zPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
+   Double_t rPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
+   Double_t azPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //radians
 
    
-   Float_t xAntFromDeckBicone[NUM_BICONES]; //m
-   Float_t yAntFromDeckBicone[NUM_BICONES]; //m
-   Float_t zAntFromDeckBicone[NUM_BICONES]; //m
+   Double_t xAntFromDeckBicone[NUM_BICONES]; //m
+   Double_t yAntFromDeckBicone[NUM_BICONES]; //m
+   Double_t zAntFromDeckBicone[NUM_BICONES]; //m
 
-   Float_t xAntFromDeckDiscone[NUM_DISCONES]; //m
-   Float_t yAntFromDeckDiscone[NUM_DISCONES]; //m
-   Float_t zAntFromDeckDiscone[NUM_DISCONES]; //m
+   Double_t xAntFromDeckDiscone[NUM_DISCONES]; //m
+   Double_t yAntFromDeckDiscone[NUM_DISCONES]; //m
+   Double_t zAntFromDeckDiscone[NUM_DISCONES]; //m
 
-   Float_t xAnitaBoxFromDeckCorner[4];
-   Float_t yAnitaBoxFromDeckCorner[4];
-   Float_t zAnitaBoxFromDeckCorner[4];
-   Float_t xBatteryBoxFromDeckCorner[4];
-   Float_t yBatteryBoxFromDeckCorner[4];
-   Float_t zBatteryBoxFromDeckCorner[4];
-   Float_t xSipBoxFromDeckCorner[4];
-   Float_t ySipBoxFromDeckCorner[4];
-   Float_t zSipBoxFromDeckCorner[4];
+   Double_t xAnitaBoxFromDeckCorner[4];
+   Double_t yAnitaBoxFromDeckCorner[4];
+   Double_t zAnitaBoxFromDeckCorner[4];
+   Double_t xBatteryBoxFromDeckCorner[4];
+   Double_t yBatteryBoxFromDeckCorner[4];
+   Double_t zBatteryBoxFromDeckCorner[4];
+   Double_t xSipBoxFromDeckCorner[4];
+   Double_t ySipBoxFromDeckCorner[4];
+   Double_t zSipBoxFromDeckCorner[4];
    
-   Float_t gpsPlaneFromDeck[3];
-   Float_t gpsHeadingFromDeck[3];
-   Float_t aftForeOffsetAngleDeck;
+   Double_t gpsPlaneFromDeck[3];
+   Double_t gpsHeadingFromDeck[3];
+   Double_t aftForeOffsetAngleDeck;
 
-   Float_t xAntFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t yAntFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t zAntFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t rAntFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t azCentreFromVerticalHorn[NUM_SEAVEYS]; //radians
-   Float_t apertureAzFromVerticalHorn[NUM_SEAVEYS]; //radians
-   Float_t apertureElFromVerticalHorn[NUM_SEAVEYS]; //radians
+   Double_t xAntFromVerticalHorn[NUM_SEAVEYS]; //m
+   Double_t yAntFromVerticalHorn[NUM_SEAVEYS]; //m
+   Double_t zAntFromVerticalHorn[NUM_SEAVEYS]; //m
+   Double_t rAntFromVerticalHorn[NUM_SEAVEYS]; //m
+   Double_t azCentreFromVerticalHorn[NUM_SEAVEYS]; //radians
+   Double_t apertureAzFromVerticalHorn[NUM_SEAVEYS]; //radians
+   Double_t apertureElFromVerticalHorn[NUM_SEAVEYS]; //radians
   
-   Float_t xPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t yPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t zPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t rPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
-   Float_t azPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //radians
+   Double_t xPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
+   Double_t yPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
+   Double_t zPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
+   Double_t rPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
+   Double_t azPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //radians
 
    
-   Float_t xAntFromVerticalBicone[NUM_BICONES]; //m
-   Float_t yAntFromVerticalBicone[NUM_BICONES]; //m
-   Float_t zAntFromVerticalBicone[NUM_BICONES]; //m
+   Double_t xAntFromVerticalBicone[NUM_BICONES]; //m
+   Double_t yAntFromVerticalBicone[NUM_BICONES]; //m
+   Double_t zAntFromVerticalBicone[NUM_BICONES]; //m
 
-   Float_t xAntFromVerticalDiscone[NUM_DISCONES]; //m
-   Float_t yAntFromVerticalDiscone[NUM_DISCONES]; //m
-   Float_t zAntFromVerticalDiscone[NUM_DISCONES]; //m
+   Double_t xAntFromVerticalDiscone[NUM_DISCONES]; //m
+   Double_t yAntFromVerticalDiscone[NUM_DISCONES]; //m
+   Double_t zAntFromVerticalDiscone[NUM_DISCONES]; //m
 
-   Float_t xAnitaBoxFromVerticalCorner[4];
-   Float_t yAnitaBoxFromVerticalCorner[4];
-   Float_t zAnitaBoxFromVerticalCorner[4];
-   Float_t xBatteryBoxFromVerticalCorner[4];
-   Float_t yBatteryBoxFromVerticalCorner[4];
-   Float_t zBatteryBoxFromVerticalCorner[4];
-   Float_t xSipBoxFromVerticalCorner[4];
-   Float_t ySipBoxFromVerticalCorner[4];
-   Float_t zSipBoxFromVerticalCorner[4];
+   Double_t xAnitaBoxFromVerticalCorner[4];
+   Double_t yAnitaBoxFromVerticalCorner[4];
+   Double_t zAnitaBoxFromVerticalCorner[4];
+   Double_t xBatteryBoxFromVerticalCorner[4];
+   Double_t yBatteryBoxFromVerticalCorner[4];
+   Double_t zBatteryBoxFromVerticalCorner[4];
+   Double_t xSipBoxFromVerticalCorner[4];
+   Double_t ySipBoxFromVerticalCorner[4];
+   Double_t zSipBoxFromVerticalCorner[4];
    
-   Float_t gpsPlaneFromVertical[3];
-   Float_t gpsHeadingFromVertical[3];
-   Float_t aftForeOffsetAngleVertical;
+   Double_t gpsPlaneFromVertical[3];
+   Double_t gpsHeadingFromVertical[3];
+   Double_t aftForeOffsetAngleVertical;
+
+   //Simons position calib numbers
+   Double_t deltaRPhaseCentre[NUM_SEAVEYS]; //Relative to photogrammetry + ring offset
+   Double_t deltaZPhaseCentre[NUM_SEAVEYS]; //Relative to photogrammetry + ring offset
+   Double_t deltaPhiPhaseCentre[NUM_SEAVEYS]; //Relative to photogrammetry + ring offset
+   Double_t ringPhaseCentreOffset[3]; //Offset for each ring, upper lower and nadir
 
    TVector3 fHeadingRotationAxis;
    TVector3 fPitchRotationAxis;
@@ -294,6 +300,7 @@ class AnitaGeomTool
 
  private:
    void readPhotogrammetry();
+   void readSimonsNumbers();
 
 };
 
