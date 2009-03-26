@@ -55,31 +55,33 @@ class AnitaEventCalibrator : public TObject
 
 
   //Variables for RG Calib
-  double mvCalibVals[NUM_SURF][NUM_CHAN][NUM_CHIP];
-  double timeBaseCalib[NUM_SURF][NUM_CHIP][NUM_RCO];
+  Double_t mvCalibVals[NUM_SURF][NUM_CHAN][NUM_CHIP];
+  Double_t timeBaseCalib[NUM_SURF][NUM_CHIP][NUM_RCO];
   int rcoLatchCalib[NUM_SURF][NUM_CHIP];
-  double epsilonCalib[NUM_SURF][NUM_CHIP][NUM_RCO]; //Note the rco is the end rco
+  Double_t epsilonCalib[NUM_SURF][NUM_CHIP][NUM_RCO]; //Note the rco is the end rco
 
   //Variables Jiwoo Calib
-  double tcalTBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
-  double tcalEpsilon[NUM_SURF][NUM_CHIP][NUM_RCO];
-  double tcalRcoDelayBin[NUM_SURF][NUM_CHIP][NUM_RCO];
-  double tcalFudgeFactor[NUM_SURF][NUM_CHIP][NUM_RCO];
+  Double_t tcalTBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
+  Double_t tcalEpsilon[NUM_SURF][NUM_CHIP][NUM_RCO];
+  Double_t tcalRcoDelayBin[NUM_SURF][NUM_CHIP][NUM_RCO];
+  Double_t tcalFudgeFactor[NUM_SURF][NUM_CHIP][NUM_RCO];
   
   //Variables for clock-based trigger jitter correction
-  double clockJitterOffset[NUM_SURF][NUM_CHIP];
-  double fastClockPeakOffset[NUM_SURF][NUM_CHIP];
-  double fancyClockJitterOffset[NUM_SURF][NUM_CHIP];
+  Double_t clockJitterOffset[NUM_SURF][NUM_CHIP];
+  Double_t fastClockPeakOffset[NUM_SURF][NUM_CHIP];
+  Double_t fancyClockJitterOffset[NUM_SURF][NUM_CHIP];
 
   //Calibration constants for first pass bin-by-bin
-  double justBinByBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
-  double epsilonFromAbby[NUM_SURF][NUM_CHIP][NUM_RCO]; ///< Note the rco here is the rco which the event reports (ie. 1-->0 goes in [0] and 0-->1 goes in [1]
-  double clockCrossCorr[NUM_SURF][NUM_CHIP];
-  double chipByChipDeltats[NUM_SURF][NUM_CHAN][NUM_CHIP]; ///< Cable + chip-to-chip delays
-
+  Double_t justBinByBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
+  Double_t epsilonFromAbby[NUM_SURF][NUM_CHIP][NUM_RCO]; ///< Note the rco here is the rco which the event reports (ie. 1-->0 goes in [0] and 0-->1 goes in [1]
+  Double_t clockCrossCorr[NUM_SURF][NUM_CHIP];
+  Double_t chipByChipDeltats[NUM_SURF][NUM_CHAN][NUM_CHIP]; ///< Cable + chip-to-chip delays
 
   //Cable Length Calib
-  double groupDelayCalib[NUM_SURF][NUM_CHAN];
+  Double_t groupDelayCalib[NUM_SURF][NUM_CHAN];
+
+  //Simon's deltat values
+  Double_t simonsDeltaT[NUM_SURF][NUM_CHAN];
 
   //RF power calibration
   Double_t rfPowPed[NUM_SURF][NUM_CHAN];
@@ -94,12 +96,12 @@ class AnitaEventCalibrator : public TObject
   int rcobit[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
   int scaArray[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
   int unwrappedArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
-  double surfTimeArray[NUM_SURF][NUM_SAMP];
-  double mvArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
+  Double_t surfTimeArray[NUM_SURF][NUM_SAMP];
+  Double_t mvArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
   int numPointsArray[NUM_SURF][NUM_CHAN];
 
-  double clockPhiArray[NUM_SURF];
-  double timeArray[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
+  Double_t clockPhiArray[NUM_SURF];
+  Double_t timeArray[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
 
 
 
@@ -136,7 +138,7 @@ class AnitaEventCalibrator : public TObject
 
  private:
   void loadCalib();
-  double Get_Interpolation_X(double x1, double y1, double x2, double y2, double y);
+  Double_t Get_Interpolation_X(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Double_t y);
   void correlateTenClocks(TGraph *grClock[NUM_SURF], Double_t deltaT);
   Int_t fClockUpSampleFactor;
   Double_t fEpsilonTempScale;

@@ -83,7 +83,9 @@ namespace WaveCalType {
     kVTLabAGCrossCorClock           = 0x19, ///< Applies the bin-by-bin and epsilon corrections and tries to do a clock calibration using corrections
     kVTFullAGFastClock               = 0x1a, ///< Applies the bin-by-bin and epsilon corrections and tries to do a clock calibration + chip and cable delays
     kVTFullAGCrossCorClock           = 0x1b, ///< Applies the bin-by-bin and epsilon corrections and tries to do a clock calibration using corrections + chip and cable delays
-    kDefault                         = 0x1b, ///< For use particularly with the new CalibratedAnitaEvent files
+    kVTInCalibratedFile              = 0x1b, ///< For use particularly with the new CalibratedAnitaEvent files
+    kVTCalFilePlusSimon              = 0x1c, ///< As above with Simon's deltaT's
+    kDefault                         = 0x1c, ///< Is now the default calibration if you don't specify anything
     kNotACalib ///< Useful for looping over all calibrations 
   } WaveCalType_t; ///< The calibration enumeration type
 

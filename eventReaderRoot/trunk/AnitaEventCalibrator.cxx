@@ -191,7 +191,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
    }
 
    
-   if(calType==WaveCalType::kDefault && eventPtr->fFromCalibratedAnitaEvent==1) {
+   if(calType>=WaveCalType::kVTInCalibratedFile && eventPtr->fFromCalibratedAnitaEvent==1) {
      applyClockPhiCorrection(eventPtr);
      
   }
@@ -1191,6 +1191,7 @@ void AnitaEventCalibrator::loadCalib() {
    //Set up some default numbers
     for(int surf=0;surf<NUM_SURF;surf++) {
 	for(int chan=0;chan<NUM_CHAN;chan++) {
+	  simonsDeltaT[surf][chan]=0;
 	    for(int chip=0;chip<NUM_CHIP;chip++) {
 		mvCalibVals[surf][chan][chip]=1;
 		chipByChipDeltats[surf][chan][chip]=0;
@@ -1379,6 +1380,17 @@ void AnitaEventCalibrator::loadCalib() {
       garysRfPowTSys[surf][chan]=rfTSys;
       garysRfPowSlope[surf][chan]=rfSlope;
       //      std::cout << surf << "\t" << chan << "\t" << calib << "\n";
+    }
+
+
+    sprintf(fileName,"%s/simonsPositionAndTimingOffsets.dat",calibDir);
+    std::ifstream SimonsOffsets(fileName);
+    SimonsOffsets.getline(firstLine,179);
+    Double_t dt,dr,dphi,dz;
+    while(SimonsOffsets >> iant >> dt >> dr >> dphi >> dz) {
+      Int_t surf=AnitaGeomTool::getSurfFromAnt(iant);
+      Int_t chan=AnitaGeomTool::getChanFromAntPol(iant,AnitaPol::kVertical);
+      simonsDeltaT[surf][chan]=dt;     
     }
 
 }
