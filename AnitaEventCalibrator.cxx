@@ -169,7 +169,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
    if(calType==WaveCalType::kVTFullJWPlusFudge || calType==WaveCalType::kVTFullJWPlusFancyClockZero)
      fApplyClockFudge=1;
    //   std::cout << "AnitaEventCalibrator::calibrateUsefulEvent():" << calType << std::endl;
-   if(calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGFastClock || calType==WaveCalType::kVTFullAGCrossCorClock) {
+   if(calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGFastClock || calType==WaveCalType::kVTFullAGCrossCorClock || calType==WaveCalType::kVTCalFilePlusSimon) {
      processEventAG(eventPtr);
    }
    else if(calType==WaveCalType::kVTFullJW || calType==WaveCalType::kVTLabJW ||
@@ -736,23 +736,29 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
     }
     //Okay now add Stephen's check to make sure that all the channels on the SURF have the same number of points.
     for(int chan=0;chan<8;chan++) {
-      if(numPointsArray[surf][chan]<numPointsArray[surf][8]) {
-	numPointsArray[surf][chan]=numPointsArray[surf][8];
-	for(int samp=0;samp<numPointsArray[surf][8];samp++) {
-	  timeArray[surf][chan][samp]=timeArray[surf][8][samp];
-	}    	
-      }
+	
+       
+       if(numPointsArray[surf][chan]<numPointsArray[surf][8]) {
 
-      if(numPointsArray[surf][chan]>numPointsArray[surf][8]) {
-	numPointsArray[surf][chan]=numPointsArray[surf][8];
-	for(int samp=0;samp<numPointsArray[surf][8];samp++) {
-	  timeArray[surf][chan][samp]=timeArray[surf][8][samp];
-	}    	
-      }
+       
+	  numPointsArray[surf][chan]=numPointsArray[surf][8];
+	  for(int samp=0;samp<numPointsArray[surf][8];samp++) {
+	     
+	     timeArray[surf][chan][samp]=timeArray[surf][8][samp];
+	     //	     std::cout << "Fix: " << surf << "\t" << chan << "\t" << samp
+	     //		       << "\t" << timeArray[surf][chan][samp] << "\n";
+	  }    
+       }
 
-
-
-
+       if(numPointsArray[surf][chan]>numPointsArray[surf][8]) {
+	  numPointsArray[surf][chan]=numPointsArray[surf][8];
+	  for(int samp=0;samp<numPointsArray[surf][8];samp++) {
+	     //	     std::cout << "Fix: " << surf << "\t" << chan << "\t" << samp
+	     //		       << "\t" << timeArray[surf][chan][samp] << "\n";
+	     timeArray[surf][chan][samp]=timeArray[surf][8][samp];
+	  }    	
+       }
+              
     }
     
     //And fill in surfTimeArray if we need it for anything

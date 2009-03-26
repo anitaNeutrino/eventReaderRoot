@@ -308,6 +308,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
       for(int chan=0;chan<NUM_CHAN;chan++) {
 	int chanIndex=getChanIndex(surf,chan);
 	this->fNumPoints[chanIndex]=fCalibrator->numPointsArray[surf][chan];
+	//	std::cout << chanIndex << "\t" << this->fNumPoints[chanIndex] << "\n";
 	//	memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
 	//	memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
 	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
@@ -315,6 +316,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	  this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp]-fCalibrator->chipByChipDeltats[surf][chan][getLabChip(chanIndex)];	  
 	  if(calType==WaveCalType::kVTCalFilePlusSimon) {
 	    this->fTimes[chanIndex][samp]-=fCalibrator->simonsDeltaT[surf][chan];
+	    //	    std::cout << chanIndex << "\t" << surf << "\t" << chan << "\t" << this->fTimes[chanIndex][samp] << "\t" << fCalibrator->simonsDeltaT[surf][chan] << "\n";
 	  }
 	  //	  std::cout << surf << "\t" << chan << "\t" << fCalibrator->chipByChipDeltats[surf][chan][getLabChip(chanIndex)] <<"\n";
 	  this->fCapacitorNum[chanIndex][samp]=fCalibrator->scaArray[surf][chan][samp];
@@ -516,8 +518,8 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	//We have two RCOs
 	{
 	  //Here is the first RCO
-	  Double_t posZcUp[100]={0};
-	  Double_t posZcDown[100]={0};
+	  Double_t posZcUp[400]={0};
+	  Double_t posZcDown[400]={0};
 	  Int_t numZcUp=0;
 	  Int_t numZcDown=0;	    
 	  for(int samp=earliestSample;samp<259;samp++) {
@@ -569,8 +571,8 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	{
 	  //Now lets do the second RCO
 	       
-	  Double_t posZcUp[100]={0};
-	  Double_t posZcDown[100]={0};
+	  Double_t posZcUp[400]={0};
+	  Double_t posZcDown[400]={0};
 	  Int_t numZcUp=0;
 	  Int_t numZcDown=0;
 	  if(latestSample>0) {
@@ -620,8 +622,8 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	//Only one RCO
 	//	   In this case rcoGuess==0 means that the rco for the whole segment is zero
 	//	   In this case rcoGuess==1 means that the rco for the whole segment is one
-	Double_t posZcUp[100]={0};
-	Double_t posZcDown[100]={0};
+	Double_t posZcUp[400]={0};
+	Double_t posZcDown[400]={0};
 	Int_t numZcUp=0;
 	Int_t numZcDown=0;
 	for(int samp=earliestSample;samp<latestSample;samp++) {
