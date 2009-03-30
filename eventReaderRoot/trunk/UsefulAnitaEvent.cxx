@@ -315,7 +315,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
 	  this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp]-fCalibrator->chipByChipDeltats[surf][chan][getLabChip(chanIndex)];	  
 	  if(calType==WaveCalType::kVTCalFilePlusSimon) {
-	    this->fTimes[chanIndex][samp]-=fCalibrator->simonsDeltaT[surf][chan];
+	    this->fTimes[chanIndex][samp]+=fCalibrator->simonsDeltaT[surf][chan];
 	    //	    std::cout << chanIndex << "\t" << surf << "\t" << chan << "\t" << this->fTimes[chanIndex][samp] << "\t" << fCalibrator->simonsDeltaT[surf][chan] << "\n";
 	  }
 	  //	  std::cout << surf << "\t" << chan << "\t" << fCalibrator->chipByChipDeltats[surf][chan][getLabChip(chanIndex)] <<"\n";
