@@ -1143,7 +1143,7 @@ void AnitaGeomTool::readPhotogrammetry()
   //Now add in Simon's corrections
   for(int ant=0;ant<NUM_SEAVEYS;ant++) {
     rPhaseCentreFromVerticalHorn[ant]+=deltaRPhaseCentre[ant];
-    std::cout << rPhaseCentreFromVerticalHorn[ant] << "\t" << deltaRPhaseCentre[ant] << "\n";
+    //    std::cout << rPhaseCentreFromVerticalHorn[ant] << "\t" << deltaRPhaseCentre[ant] << "\n";
     azPhaseCentreFromVerticalHorn[ant]+=deltaPhiPhaseCentre[ant];    
     if(azPhaseCentreFromVerticalHorn[ant]<0)
       azPhaseCentreFromVerticalHorn[ant]+=TMath::TwoPi();
