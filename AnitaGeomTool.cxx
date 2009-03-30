@@ -90,7 +90,7 @@ AnitaGeomTool::AnitaGeomTool()
 
   //std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
   //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
-
+  fgInstance=this;
 }
 
 AnitaGeomTool::~AnitaGeomTool()
@@ -185,7 +185,7 @@ int AnitaGeomTool::getChanIndexFromRingPhiPol(AnitaRing::AnitaRing_t ring,
 int AnitaGeomTool::getChanIndexFromAntPol(int ant,
 					  AnitaPol::AnitaPol_t pol)
 {
-  if(ant<0 || ant>39) return -1;
+  if(ant<0 || ant>(NUM_SEAVEYS-1)) return -1;
   int surf,chan;
   surf=AnitaGeom::antToSurfMap[ant];
   if(pol==AnitaPol::kHorizontal) 
@@ -200,7 +200,7 @@ int AnitaGeomTool::getChanIndexFromAntPol(int ant,
 
 int AnitaGeomTool::getSurfFromAnt(int ant)
 {
-  if(ant<0 || ant>31) return -1;
+  if(ant<0 || ant>(NUM_SEAVEYS-1)) return -1;
   int surf;
   surf=AnitaGeom::antToSurfMap[ant];
   return surf;
@@ -237,7 +237,7 @@ int AnitaGeomTool::getAzimuthPartner(int rx)
 void AnitaGeomTool::getNeighbors(int rx,int& rxleft,int& rxright)
 {
   // input antenna number 0 to 31
-  if (rx<0 || rx>39)    
+  if (rx<0 || rx>(NUM_SEAVEYS-1))    
     std::cout << "Antenna number " << rx << " out of range!\n";  
   if (rx<8)    
     rxleft=rx+8;
@@ -278,7 +278,7 @@ void AnitaGeomTool::getNeighbors(int rx,int& rxleft,int& rxright)
 
 void AnitaGeomTool::getThetaPartners(int rx,int& rxleft,int& rxright)
 {
-  if (rx<0 || rx>39)    
+  if (rx<0 || rx>(NUM_SEAVEYS-1))    
     std::cerr << "Antenna number out of range!\n";     
   if (rx<16) {
     int phi=AnitaGeom::upperPhiNums[rx];
@@ -877,14 +877,18 @@ void AnitaGeomTool::readPhotogrammetry()
   //Now we'll add a hack for the drop-down antennas
   for(int ant=32;ant<NUM_SEAVEYS;ant++) {
     Double_t phaseCentreToAntFront=ringPhaseCentreOffset[Int_t(this->getRingFromAnt(ant))];
+    //    std::cout << ant << "\t" << phaseCentreToAntFront << "\n";
     double   deltaXRL = 0;
     double   deltaYRL = 0;
 
     double  deltaZUD = 0;
     double  deltaXUD = 0;
-      double  deltaYUD = 0;
+    double  deltaYUD = 0;
 
-    rAntFromVerticalHorn[ant]=(101*INCHTOMETER)-0.38;
+    // RJN changed the 0.38 number to 0.3 to match simons update function
+    //Here's the little bastard that was causing all the problems
+    rAntFromVerticalHorn[ant]=(101*INCHTOMETER)-0.3;
+    //    rAntFromVerticalHorn[ant]=(101*INCHTOMETER)-0.38;
     zAntFromVerticalHorn[ant]=(-21*INCHTOMETER)-1.8;
     azCentreFromVerticalHorn[ant]=(-67.5 + 45*(ant-32))*TMath::DegToRad();
     
@@ -914,7 +918,13 @@ void AnitaGeomTool::readPhotogrammetry()
     if(azPhaseCentreFromVerticalHorn[ant]<0)
       azPhaseCentreFromVerticalHorn[ant]+=TMath::TwoPi();
 
-}
+    
+  //   std::cout << "Ryan's:\t" << ant << " "  
+// 	      << rPhaseCentreFromVerticalHorn[ant] << " " 
+// 	      << azPhaseCentreFromVerticalHorn[ant] << " "
+// 	      << zPhaseCentreFromVerticalHorn[ant] << "\n";
+
+  }
 
 
   //Now bicones and discones  
@@ -1319,29 +1329,29 @@ void AnitaGeomTool::updateAnt(double deltaR,double deltaRL,double deltaUD){
 
  }
 
- for(int ant=32;ant<40;ant++) {
-
+  for(int ant=32;ant<40;ant++) {
+    
     double   deltaXRL = 0;
     double   deltaYRL = 0;
-
+    
     double  deltaZUD = 0;
     double  deltaXUD = 0;
-      double  deltaYUD = 0;
-
-     deltaZUD = deltaUD*TMath::Cos(apertureElFromVerticalHorn[ant]);
-          deltaXUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Cos(apertureAzFromVerticalHorn[ant]);
-          deltaYUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Sin(apertureAzFromVerticalHorn[ant]);
-
-	  //    rAntFromVerticalHorn[ant]=(101*INCHTOMETER)-0.38;
+    double  deltaYUD = 0;
+    
+    deltaZUD = deltaUD*TMath::Cos(apertureElFromVerticalHorn[ant]);
+    deltaXUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Cos(apertureAzFromVerticalHorn[ant]);
+    deltaYUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Sin(apertureAzFromVerticalHorn[ant]);
+    
+    //    rAntFromVerticalHorn[ant]=(101*INCHTOMETER)-0.38;
     rAntFromVerticalHorn[ant]=(101*INCHTOMETER)-0.3;
     zAntFromVerticalHorn[ant]=(-21*INCHTOMETER)-1.8;
-   azCentreFromVerticalHorn[ant]=(-67.5 + 45*(ant-32))*TMath::DegToRad();
+    azCentreFromVerticalHorn[ant]=(-67.5 + 45*(ant-32))*TMath::DegToRad();
     apertureAzFromVerticalHorn[ant]=azCentreFromVerticalHorn[ant];
     apertureElFromVerticalHorn[ant]=-10*TMath::DegToRad();
     xAntFromVerticalHorn[ant]=rAntFromVerticalHorn[ant]*TMath::Cos(azCentreFromVerticalHorn[ant]);
     yAntFromVerticalHorn[ant]=rAntFromVerticalHorn[ant]*TMath::Sin(azCentreFromVerticalHorn[ant]);
-
-
+    
+      
     xPhaseCentreFromVerticalHorn[ant]=(xAntFromVerticalHorn[ant] + deltaXRL + deltaXUD) -
       phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
     yPhaseCentreFromVerticalHorn[ant]=(yAntFromVerticalHorn[ant] + deltaYRL + deltaYUD) -
@@ -1362,8 +1372,10 @@ void AnitaGeomTool::updateAnt(double deltaR,double deltaRL,double deltaUD){
     if(azPhaseCentreFromVerticalHorn[ant]<0)
       azPhaseCentreFromVerticalHorn[ant]+=TMath::TwoPi();
 
-
-
+ //    std::cout << "Simon's:\t" << ant << " "  
+// 	      << rPhaseCentreFromVerticalHorn[ant] << " " 
+// 	      << azPhaseCentreFromVerticalHorn[ant] << " "
+// 	      << zPhaseCentreFromVerticalHorn[ant] << "\n";
 
 }
 
