@@ -1140,15 +1140,25 @@ void AnitaGeomTool::readPhotogrammetry()
   //  fRollRotationAxis.SetXYZ(gpsHeadingFromVertical[0],gpsHeadingFromVertical[1],gpsHeadingFromVertical[2]);
 
   //Fix the heading and other axes to be 'ideal'
+
   //Now just for the sake of confusion we are going to redefine our definition
   //of phi equals zero to lie in the ADU5 fore direction.
   fHeadingRotationAxis.SetXYZ(0.,0.,1.);
   fPitchRotationAxis.SetXYZ(0.,1.,0.);
   fRollRotationAxis=fPitchRotationAxis.Cross(fHeadingRotationAxis);
+  //ryans original pitch axis
+  //fPitchRotationAxis=fRollRotationAxis.Cross(fHeadingRotationAxis);
+  //reversed pitch axis
+  //fPitchRotationAxis=fHeadingRotationAxis.Cross(fRollRotationAxis);
 
-//   std::cout << " heading axis x " << fHeadingRotationAxis.x() << " y " << fHeadingRotationAxis.y() << " z " << fHeadingRotationAxis.z() << std::endl;
-//   std::cout << " roll axis x " << fRollRotationAxis.x() << " y " << fRollRotationAxis.y() << " z " << fRollRotationAxis.z() << std::endl;
-//   std::cout << " pitch axis x " << fPitchRotationAxis.x() << " y " << fPitchRotationAxis.y() << " z " << fPitchRotationAxis.z() << std::endl;
+  //fPitchRotationAxis.SetXYZ(0.,1.,0.);
+  //fRollRotationAxis=fPitchRotationAxis.Cross(fHeadingRotationAxis);
+
+  //fitted gps axes
+  //fPitchRotationAxis.SetXYZ(0,cos(-0.176*TMath::DegToRad()),sin(-0.176*TMath::DegToRad()));
+  //fRollRotationAxis.SetXYZ(cos(0.460*TMath::DegToRad()),0,sin(0.460*TMath::DegToRad()));
+  //fHeadingRotationAxis=fRollRotationAxis.Cross(fPitchRotationAxis);
+
 
   //Now add in Simon's corrections
   for(int ant=0;ant<NUM_SEAVEYS;ant++) {
@@ -1156,13 +1166,19 @@ void AnitaGeomTool::readPhotogrammetry()
     //    std::cout << rPhaseCentreFromVerticalHorn[ant] << "\t" << deltaRPhaseCentre[ant] << "\n";
     azPhaseCentreFromVerticalHorn[ant]+=deltaPhiPhaseCentre[ant];    
     if(azPhaseCentreFromVerticalHorn[ant]<0)
-      azPhaseCentreFromVerticalHorn[ant]+=TMath::TwoPi();
+       azPhaseCentreFromVerticalHorn[ant]+=TMath::TwoPi();
     if(azPhaseCentreFromVerticalHorn[ant]>TMath::TwoPi())
-      azPhaseCentreFromVerticalHorn[ant]-=TMath::TwoPi();    
-    zPhaseCentreFromVerticalHorn[ant]+=deltaZPhaseCentre[ant];
-    xPhaseCentreFromVerticalHorn[ant]=rPhaseCentreFromVerticalHorn[ant]*TMath::Cos(azPhaseCentreFromVerticalHorn[ant]);
-    yPhaseCentreFromVerticalHorn[ant]=rPhaseCentreFromVerticalHorn[ant]*TMath::Sin(azPhaseCentreFromVerticalHorn[ant]);
-  }
+       azPhaseCentreFromVerticalHorn[ant]-=TMath::TwoPi();    
+     zPhaseCentreFromVerticalHorn[ant]+=deltaZPhaseCentre[ant];
+     xPhaseCentreFromVerticalHorn[ant]=rPhaseCentreFromVerticalHorn[ant]*TMath::Cos(azPhaseCentreFromVerticalHorn[ant]);
+     yPhaseCentreFromVerticalHorn[ant]=rPhaseCentreFromVerticalHorn[ant]*TMath::Sin(azPhaseCentreFromVerticalHorn[ant]);
+   }
+
+   std::cout << " heading axis x " << fHeadingRotationAxis.x() << " y " << fHeadingRotationAxis.y() << " z " << fHeadingRotationAxis.z() << std::endl;
+   std::cout << " roll axis x " << fRollRotationAxis.x() << " y " << fRollRotationAxis.y() << " z " << fRollRotationAxis.z() << std::endl;
+   std::cout << " pitch axis x " << fPitchRotationAxis.x() << " y " << fPitchRotationAxis.y() << " z " << fPitchRotationAxis.z() << std::endl;
+
+
 }
 
 
