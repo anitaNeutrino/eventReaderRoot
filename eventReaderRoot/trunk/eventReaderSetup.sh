@@ -18,9 +18,9 @@
 LD_LIBRARY_PATH=${LD_LIBRARY_PATH}/unix/anita/software/install/lib/
 
 ##Event Reader Stuff
-#export EVENT_READER_DIR=/home/mottram/work/eventReaderRoot/trunk
+export EVENT_READER_DIR=/home/mottram/work/eventReaderRoot/trunk
 #export ANITA_CALIB_DIR=${EVENT_READER_DIR}/calib
-#export LD_LIBRARY_PATH=${EVENT_READER_DIR}:${LD_LIBRARY_PATH}
+LD_LIBRARY_PATH=${EVENT_READER_DIR}:${LD_LIBRARY_PATH}
 
 ##fftw stuff
 #export FFTW_DIR=/home/mottram/work/libRootFftwWrapper/trunk
