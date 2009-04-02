@@ -27,6 +27,7 @@ class UsefulAnitaEvent;
 #define  GEOID_MAX 6.378137E6 // parameters of geoid model
 #define  GEOID_MIN 6.356752E6
 #define C_LIGHT 299792458 //meters
+#define FLATTENING_FACTOR (1./298.257223563)
 
 
 //!  AnitaGeomTool -- The ANITA Geometry Tool
@@ -52,6 +53,7 @@ class AnitaGeomTool
 					    (GEOID_MIN*GEOID_MIN-GEOID_MAX*GEOID_MAX)*c*c);    
   }   ///<Returns the geoid radiuus as a function of theta (the polar angle?)
   
+  void getCartesianCoords(Double_t lat, Double_t lon, Double_t alt, Double_t p[3]);
 
   inline Double_t getLat(Double_t theta) {      
      return (90.-((theta*TMath::RadToDeg()))); 
