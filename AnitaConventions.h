@@ -233,9 +233,12 @@ namespace AnitaLocations {
    const double LATITUDE_BH=-77.861936111; ///< Latitude if borehole antenna.
    const double ALTITUDE_BH=-33.67; ///< Altitude of borehole antenna.
 
-   const double LONGITUDE_TD=158.4564333333; ///< Longitude of Taylor Dome antenna.
-   const double LATITUDE_TD=77.88116666666; ///< Latitude of Taylor Dome antenna.
-   const double ALTITUDE_TD=2712.72; ///< Altitude of Taylor Dome antenna.
+   //   const double LONGITUDE_TD=158.4564333333; ///< Longitude of Taylor Dome antenna.
+   //   const double LATITUDE_TD=77.88116666666; ///< Latitude of Taylor Dome antenna.
+   //   const double ALTITUDE_TD=2712.72; ///< Altitude of Taylor Dome antenna.
+   const double LONGITUDE_TD=158.45925;
+   const double LATITUDE_TD=77.8803;
+   const double ALTITUDE_TD=2260-97.;
 };
 
 

@@ -107,6 +107,23 @@ AnitaGeomTool*  AnitaGeomTool::Instance()
   return (fgInstance) ? (AnitaGeomTool*) fgInstance : new AnitaGeomTool();
 }
 
+void AnitaGeomTool::getCartesianCoords(Double_t lat, Double_t lon, Double_t alt, Double_t p[3])
+{
+   //Note that x and y are switched to conform with previous standards
+   lat*=TMath::DegToRad();
+   lon*=TMath::DegToRad();
+   //calculate x,y,z coordinates
+   double C2=pow(cos(lat)*cos(lat)+(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR)*sin(lat)*sin(lat),-0.5);
+   double Q2=(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR)*C2;
+   p[1]=(R_EARTH*C2+alt)*TMath::Cos(lat)*TMath::Cos(lon);
+   p[0]=(R_EARTH*C2+alt)*TMath::Cos(lat)*TMath::Sin(lon);
+   p[2]=(R_EARTH*Q2+alt)*TMath::Sin(lat);
+}
+
+
+
+
+
 void AnitaGeomTool::getPhiWave(Double_t balloonLon, Double_t balloonLat, Double_t balloonAlt, Double_t balloonHeading, Double_t sourceLon, Double_t sourceLat, Double_t sourceAlt, Double_t &thetaWave, Double_t &phiWave)
 {
   Double_t thetaBalloon=getThetaFromLat(TMath::Abs(balloonLat));
