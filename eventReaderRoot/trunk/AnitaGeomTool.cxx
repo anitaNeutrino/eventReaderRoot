@@ -172,55 +172,55 @@ Double_t AnitaGeomTool::getDistanceToCentreOfEarth(Double_t lat)
 }
 
 
-void AnitaGeomTool::getPhiWave(Double_t balloonLon, Double_t balloonLat, Double_t balloonAlt, Double_t balloonHeading, Double_t sourceLon, Double_t sourceLat, Double_t sourceAlt, Double_t &thetaWave, Double_t &phiWave)
-{
-  Double_t thetaBalloon=getThetaFromLat(TMath::Abs(balloonLat));
-  Double_t phiBalloon=getPhiFromLon(balloonLon);
-  Double_t balloonHeight=getGeoid(thetaBalloon)+balloonAlt;
+// void AnitaGeomTool::getPhiWave(Double_t balloonLon, Double_t balloonLat, Double_t balloonAlt, Double_t balloonHeading, Double_t sourceLon, Double_t sourceLat, Double_t sourceAlt, Double_t &thetaWave, Double_t &phiWave)
+// {
+//   Double_t thetaBalloon=getThetaFromLat(TMath::Abs(balloonLat));
+//   Double_t phiBalloon=getPhiFromLon(balloonLon);
+//   Double_t balloonHeight=getGeoid(thetaBalloon)+balloonAlt;
    
-  Double_t thetaSource=getThetaFromLat(TMath::Abs(sourceLat));
-  Double_t phiSource=getPhiFromLon(sourceLon);
-  Double_t radiusSource=getGeoid(thetaSource)+sourceAlt;
+//   Double_t thetaSource=getThetaFromLat(TMath::Abs(sourceLat));
+//   Double_t phiSource=getPhiFromLon(sourceLon);
+//   Double_t radiusSource=getGeoid(thetaSource)+sourceAlt;
 
-  //Get vector from Earth's centre to source
-  TVector3 fSourcePos;
-  fSourcePos.SetX(radiusSource*TMath::Sin(thetaSource)*TMath::Cos(phiSource));
-  fSourcePos.SetY(radiusSource*TMath::Sin(thetaSource)*TMath::Sin(phiSource));
-  fSourcePos.SetZ(radiusSource*TMath::Cos(thetaSource));
+//   //Get vector from Earth's centre to source
+//   TVector3 fSourcePos;
+//   fSourcePos.SetX(radiusSource*TMath::Sin(thetaSource)*TMath::Cos(phiSource));
+//   fSourcePos.SetY(radiusSource*TMath::Sin(thetaSource)*TMath::Sin(phiSource));
+//   fSourcePos.SetZ(radiusSource*TMath::Cos(thetaSource));
    
-  //Rotate such that balloon is at 0,0,balloonHeight
-  fSourcePos.RotateZ(-1*phiBalloon);
-  fSourcePos.RotateY(-1*thetaBalloon);
+//   //Rotate such that balloon is at 0,0,balloonHeight
+//   fSourcePos.RotateZ(-1*phiBalloon);
+//   fSourcePos.RotateY(-1*thetaBalloon);
 
-  //Now find thetaWave and phiWave
-  thetaWave=TMath::ATan((balloonHeight-fSourcePos.Z())/TMath::Sqrt(fSourcePos.X()*fSourcePos.X() + fSourcePos.Y()*fSourcePos.Y()));
+//   //Now find thetaWave and phiWave
+//   thetaWave=TMath::ATan((balloonHeight-fSourcePos.Z())/TMath::Sqrt(fSourcePos.X()*fSourcePos.X() + fSourcePos.Y()*fSourcePos.Y()));
    
-  //phiWave is just atan(yp/xp) only looks confusing to make sure I get the sign and 0-360 convention
-  phiWave=0;
-  if(fSourcePos.X()==0) {
-    phiWave=TMath::PiOver2();
-    if(fSourcePos.Y()<0)
-      phiWave+=TMath::Pi();
-  }
-  else if(fSourcePos.X()<0) {
-    phiWave=TMath::Pi()+TMath::ATan(fSourcePos.Y()/fSourcePos.X());
-  }
-  else {
-    phiWave=TMath::ATan(fSourcePos.Y()/fSourcePos.X());
-    if(fSourcePos.Y()<0) {
-      phiWave+=TMath::TwoPi();
-    }
-  }   
+//   //phiWave is just atan(yp/xp) only looks confusing to make sure I get the sign and 0-360 convention
+//   phiWave=0;
+//   if(fSourcePos.X()==0) {
+//     phiWave=TMath::PiOver2();
+//     if(fSourcePos.Y()<0)
+//       phiWave+=TMath::Pi();
+//   }
+//   else if(fSourcePos.X()<0) {
+//     phiWave=TMath::Pi()+TMath::ATan(fSourcePos.Y()/fSourcePos.X());
+//   }
+//   else {
+//     phiWave=TMath::ATan(fSourcePos.Y()/fSourcePos.X());
+//     if(fSourcePos.Y()<0) {
+//       phiWave+=TMath::TwoPi();
+//     }
+//   }   
 
-  //Now need to take account of balloon heading
-  //Will have to check heading at some point
-  if(balloonHeading>=0 && balloonHeading<=360) {
-    phiWave+=balloonHeading*TMath::DegToRad();
-    if(phiWave>TMath::TwoPi())
-      phiWave-=TMath::TwoPi();
-  }
+//   //Now need to take account of balloon heading
+//   //Will have to check heading at some point
+//   if(balloonHeading>=0 && balloonHeading<=360) {
+//     phiWave+=balloonHeading*TMath::DegToRad();
+//     if(phiWave>TMath::TwoPi())
+//       phiWave-=TMath::TwoPi();
+//   }
 
-}
+// }
 
 
 
