@@ -237,7 +237,7 @@ namespace AnitaLocations {
    //   const double LATITUDE_TD=77.88116666666; ///< Latitude of Taylor Dome antenna.
    //   const double ALTITUDE_TD=2712.72; ///< Altitude of Taylor Dome antenna.
    const double LONGITUDE_TD=158.45925;
-   const double LATITUDE_TD=77.8803;
+   const double LATITUDE_TD=-77.8803;
    const double ALTITUDE_TD=2260-97.;
 };
 

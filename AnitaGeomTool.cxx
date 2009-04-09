@@ -109,6 +109,7 @@ AnitaGeomTool*  AnitaGeomTool::Instance()
 
 void AnitaGeomTool::getCartesianCoords(Double_t lat, Double_t lon, Double_t alt, Double_t p[3])
 {
+  if(lat<0) lat*=-1;
    //Note that x and y are switched to conform with previous standards
    lat*=TMath::DegToRad();
    lon*=TMath::DegToRad();
@@ -125,7 +126,7 @@ void AnitaGeomTool::getLatLonAltFromCartesian(Double_t p[3], Double_t &lat, Doub
   //Here again x and y are flipped for confusions sake
   Double_t xt=p[1];
   Double_t yt=p[0];
-  Double_t zt=p[2];
+  Double_t zt=p[2]; //And flipped z for a test
 
   static Double_t cosaeSq=(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR);
   Double_t lonVal=TMath::ATan2(yt,xt);
@@ -135,10 +136,12 @@ void AnitaGeomTool::getLatLonAltFromCartesian(Double_t p[3], Double_t &lat, Doub
   Double_t nextLat=latGuess;
   Double_t geomBot=R_EARTH*R_EARTH*xySq;
   do {
+    latGuess=nextLat;
     Double_t N=R_EARTH/TMath::Sqrt(cos(latGuess)*cos(latGuess)+(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR)*sin(latGuess)*sin(latGuess));
     Double_t top=(R_EARTH*R_EARTH*zt + (1-cosaeSq)*cosaeSq*TMath::Power(N*TMath::Sin(latGuess),3));
     Double_t bottom=geomBot-(1-cosaeSq)*TMath::Power(N*TMath::Cos(latGuess),3);        
     nextLat=TMath::ATan(top/bottom);
+    //    std::cout << latGuess << "\t" << nextLat << "\n";
     
   } while(TMath::Abs(nextLat-latGuess)>0.0001);
   latGuess=nextLat;
@@ -148,9 +151,25 @@ void AnitaGeomTool::getLatLonAltFromCartesian(Double_t p[3], Double_t &lat, Doub
   lat=latGuess*TMath::RadToDeg();
   lon=lonVal*TMath::RadToDeg();
   alt=height;
+  if(lat>0) lat*=-1;
  
 }
 
+Double_t AnitaGeomTool::getDistanceToCentreOfEarth(Double_t lat)
+{
+  Double_t pVec[3];
+  this->getCartesianCoords(lat,0,0,pVec);
+//   Double_t cosLat=TMath::Cos(lat);
+//   Double_t sinLat=TMath::Sin(lat);
+//   Double_t a=R_EARTH;
+//   Double_t b=a-FLATTENING_FACTOR*a;
+//   Double_t radSq=(a*a*cosLat)*(a*a*cosLat)+(b*b*sinLat)*(b*b*sinLat);
+//   radSq/=(a*cosLat)*(a*cosLat)+(b*sinLat)*(b*sinLat);
+ //  Double_t cosSqAe=(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR);
+//   Double_t N=R_EARTH/TMath::Sqrt(cosLat*cosLat+cosSqAe*sinLat*sinLat);
+//   Double_t radSq=N*N*(cosLat*cosLat+cosSqAe*cosSqAe*sinLat*sinLat);
+  return TMath::Sqrt(pVec[0]*pVec[0]+pVec[1]*pVec[1]+pVec[2]*pVec[2]);
+}
 
 
 void AnitaGeomTool::getPhiWave(Double_t balloonLon, Double_t balloonLat, Double_t balloonAlt, Double_t balloonHeading, Double_t sourceLon, Double_t sourceLat, Double_t sourceAlt, Double_t &thetaWave, Double_t &phiWave)
