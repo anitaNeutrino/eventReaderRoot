@@ -54,6 +54,7 @@ class AnitaGeomTool
   }   ///<Returns the geoid radiuus as a function of theta (the polar angle?)
   
   void getCartesianCoords(Double_t lat, Double_t lon, Double_t alt, Double_t p[3]);
+  void getLatLonAltFromCartesian(Double_t p[3], Double_t &lat, Double_t &lon, Double_t &alt);
 
   inline Double_t getLat(Double_t theta) {      
      return (90.-((theta*TMath::RadToDeg()))); 
