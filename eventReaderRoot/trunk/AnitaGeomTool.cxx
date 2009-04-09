@@ -120,7 +120,36 @@ void AnitaGeomTool::getCartesianCoords(Double_t lat, Double_t lon, Double_t alt,
    p[2]=(R_EARTH*Q2+alt)*TMath::Sin(lat);
 }
 
+void AnitaGeomTool::getLatLonAltFromCartesian(Double_t p[3], Double_t &lat, Double_t &lon, Double_t &alt)
+{
+  //Here again x and y are flipped for confusions sake
+  Double_t xt=p[1];
+  Double_t yt=p[0];
+  Double_t zt=p[2];
 
+  static Double_t cosaeSq=(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR);
+  Double_t lonVal=TMath::ATan2(yt,xt);
+  Double_t xySq=TMath::Sqrt(xt*xt+yt*yt);
+  Double_t tanPsit=zt/xySq;
+  Double_t latGuess=TMath::ATan(tanPsit/cosaeSq);
+  Double_t nextLat=latGuess;
+  Double_t geomBot=R_EARTH*R_EARTH*xySq;
+  do {
+    Double_t N=R_EARTH/TMath::Sqrt(cos(latGuess)*cos(latGuess)+(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR)*sin(latGuess)*sin(latGuess));
+    Double_t top=(R_EARTH*R_EARTH*zt + (1-cosaeSq)*cosaeSq*TMath::Power(N*TMath::Sin(latGuess),3));
+    Double_t bottom=geomBot-(1-cosaeSq)*TMath::Power(N*TMath::Cos(latGuess),3);        
+    nextLat=TMath::ATan(top/bottom);
+    
+  } while(TMath::Abs(nextLat-latGuess)>0.0001);
+  latGuess=nextLat;
+  Double_t N=R_EARTH/TMath::Sqrt(cos(latGuess)*cos(latGuess)+(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR)*sin(latGuess)*sin(latGuess));
+  Double_t height=(xySq/TMath::Cos(nextLat))-N;
+  
+  lat=latGuess*TMath::RadToDeg();
+  lon=lonVal*TMath::RadToDeg();
+  alt=height;
+ 
+}
 
 
 
