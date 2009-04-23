@@ -225,9 +225,9 @@ namespace AnitaBand {
   \ingroup rootclasses
 */
 namespace AnitaLocations { 
-   const double LONGITUDE_SURF_SEAVEY=167.06405555; ///< Longitude of surface seavey.
-   const double LATITUDE_SURF_SEAVEY=-77.86177777; ///< Latitude of surface seavey.
-   const double ALTITUDE_SURF_SEAVEY=-13.0; ///< Altitude of surface seavey.
+   const double LONGITUDE_SURF_SEAVEY=167.0564667; ///< Longitude of surface seavey.
+   const double LATITUDE_SURF_SEAVEY=-77.86185; ///< Latitude of surface seavey.
+   const double ALTITUDE_SURF_SEAVEY=15.0; ///< Altitude of surface seavey.
    
    const double LONGITUDE_BH=167.06679444; ///< Longitude of borehole antenna.
    const double LATITUDE_BH=-77.861936111; ///< Latitude if borehole antenna.
