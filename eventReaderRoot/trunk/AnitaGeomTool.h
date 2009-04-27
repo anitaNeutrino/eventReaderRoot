@@ -291,6 +291,11 @@ class AnitaGeomTool
    Double_t deltaPhiPhaseCentre[NUM_SEAVEYS]; //Relative to photogrammetry + ring offset
    Double_t ringPhaseCentreOffset[3]; //Offset for each ring, upper lower and nadir
 
+
+   TVector3 fHeadingRotationAxis;
+   TVector3 fPitchRotationAxis;
+   TVector3 fRollRotationAxis;
+
    //Kurt's ANITA-II numbers
    Double_t xAntFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
    Double_t yAntFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
@@ -307,9 +312,6 @@ class AnitaGeomTool
    Double_t azPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //radians
    Double_t aftForeOffsetAngleVerticalKurtAnitaII; //radians
 
-   TVector3 fHeadingRotationAxis;
-   TVector3 fPitchRotationAxis;
-   TVector3 fRollRotationAxis;
 
    void updateAnt(double deltaR,double deltaRL,double deltaUD);
    void printAntPos();
