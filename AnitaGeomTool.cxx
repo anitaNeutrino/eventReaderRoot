@@ -58,7 +58,7 @@ namespace AnitaGeom {
      {-3,-7,-22,-30,3,7,22,30},
      {-2,-6,-20,-28,2,6,20,28},
      {-33,-35,-37,-39,33,35,37,39},
-     {-34,-36,-38,40,34,36,38,40}};
+     {-34,-36,-38,-40,34,36,38,40}};
       
   //Map from phi to antenna both start counting at zero
   int upperAntNums[NUM_PHI]={8,0,9,1,10,2,11,3,12,4,13,5,14,6,15,7};
@@ -87,7 +87,7 @@ AnitaGeomTool::AnitaGeomTool()
   readAnitaIIPhotogrammetry();
   fUseKurtAnitaIINumbers=0;
 
-  //   std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
+  std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
   //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
 
   //std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
@@ -1262,11 +1262,13 @@ void AnitaGeomTool::getAntXYZ(int ant, Double_t &x, Double_t &y, Double_t &z)
 Double_t AnitaGeomTool::getAntZ(int ant) {
   if(fUseKurtAnitaIINumbers==0) {
     if(ant>=0 && ant<NUM_SEAVEYS) {
+      //      std::cout << "Using simon z\n";
       return zPhaseCentreFromVerticalHorn[ant];
     }
   }
   else {
     if(ant>=0 && ant<NUM_SEAVEYS) {
+      //      std::cout << "Using kurt z\n";
       return zPhaseCentreFromVerticalHornKurtAnitaII[ant];
     }      
   }
@@ -1275,11 +1277,13 @@ Double_t AnitaGeomTool::getAntZ(int ant) {
 
 Double_t AnitaGeomTool::getAntR(int ant) {
   if(fUseKurtAnitaIINumbers==0) {
+    //    std::cout << "Using simon R\n";
     if(ant>=0 && ant<NUM_SEAVEYS) {
       return rPhaseCentreFromVerticalHorn[ant];
     }
   }
   else {
+    //    std::cout << "Using kurt R\n";
     if(ant>=0 && ant<NUM_SEAVEYS) {
       return rPhaseCentreFromVerticalHornKurtAnitaII[ant];
     }
@@ -1290,12 +1294,14 @@ Double_t AnitaGeomTool::getAntR(int ant) {
 Double_t AnitaGeomTool::getAntPhiPosition(int ant) {
 
   if(fUseKurtAnitaIINumbers==0) {
+    //    std::cout << "Using simon phi\n";
     if(ant>=0 && ant<NUM_SEAVEYS) {
       return azPhaseCentreFromVerticalHorn[ant];
     }
   }
   else {
     if(ant>=0 && ant<NUM_SEAVEYS) {
+      //      std::cout << "Using kurt phi\n";
       return azPhaseCentreFromVerticalHornKurtAnitaII[ant];
     }
   }
@@ -1303,19 +1309,26 @@ Double_t AnitaGeomTool::getAntPhiPosition(int ant) {
 }
 
 Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(int ant) {
+
   if(fUseKurtAnitaIINumbers==0) {
+    //    std::cout << "Using simon phi-rel\n";
     if(ant>=0 && ant<NUM_SEAVEYS) {
       Double_t phi=azPhaseCentreFromVerticalHorn[ant]-aftForeOffsetAngleVertical;
       if(phi<0)
 	phi+=TMath::TwoPi();
+    if(phi>TMath::TwoPi())
+      phi-=TMath::TwoPi();
       return phi;
     }
   }
   else {
     if(ant>=0 && ant<NUM_SEAVEYS) {
+      //      std::cout << "Using kurt phi-rel\n";
       Double_t phi=azPhaseCentreFromVerticalHornKurtAnitaII[ant]-aftForeOffsetAngleVerticalKurtAnitaII;
       if(phi<0)
 	phi+=TMath::TwoPi();
+    if(phi>TMath::TwoPi())
+      phi-=TMath::TwoPi();
       return phi;
     }
   }      
@@ -1323,17 +1336,27 @@ Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(int ant) {
 }
 
 Int_t AnitaGeomTool::getUpperAntNearestPhiWave(Double_t phiWave) {
-  Double_t phiPrime=phiWave+aftForeOffsetAngleVertical;
-  if(phiPrime>TMath::TwoPi()) 
-    phiPrime-=TMath::TwoPi();
+  if(phiWave<0) phiWave+=TMath::TwoPi();
+  if(phiWave>TMath::TwoPi()) phiWave-=TMath::TwoPi();
   Double_t minDiff=TMath::TwoPi();
   Int_t minAnt=0;;
   for(int ant=0;ant<16;ant++) {
     //      std::cout << ant << "\t" << azPhaseCentreFromVerticalHorn[ant] << "\t" << phiPrime << "\t" << TMath::Abs(azPhaseCentreFromVerticalHorn[ant]-phiPrime) << "\n";
-    if(TMath::Abs(azPhaseCentreFromVerticalHorn[ant]-phiPrime)<minDiff) {
-      minDiff=TMath::Abs(azPhaseCentreFromVerticalHorn[ant]-phiPrime);
+    if(TMath::Abs(getAntPhiPositionRelToAftFore(ant)-phiWave)<minDiff) {
+      minDiff=TMath::Abs(getAntPhiPositionRelToAftFore(ant)-phiWave);
       minAnt=ant;
     }
+    
+    if(TMath::Abs((getAntPhiPositionRelToAftFore(ant)-TMath::TwoPi())-phiWave)<minDiff) {
+      minDiff=TMath::Abs((getAntPhiPositionRelToAftFore(ant)-TMath::TwoPi())-phiWave);
+      minAnt=ant;      
+    }
+
+    if(TMath::Abs((getAntPhiPositionRelToAftFore(ant)+TMath::TwoPi())-phiWave)<minDiff) {
+      minDiff=TMath::Abs((getAntPhiPositionRelToAftFore(ant)+TMath::TwoPi())-phiWave);
+      minAnt=ant;      
+    }
+
   }
   return minAnt;
 }
@@ -1596,8 +1619,8 @@ void AnitaGeomTool::readAnitaIIPhotogrammetry()
   }
 
   sprintf(fileName,"%s/anitaIIPhotogrammetry.csv",calibDir);
-  std::ifstream AntennaFile(fileName);
-  if(!AntennaFile) {
+  std::ifstream AnitaIIPhotoFile(fileName);
+  if(!AnitaIIPhotoFile) {
     std::cerr << "Couldn't open:\t" << fileName << "\n";
     return;
   }
@@ -1606,12 +1629,12 @@ void AnitaGeomTool::readAnitaIIPhotogrammetry()
   //First up are the antenna positions
   TString line;
   for(int i=0;i<2;i++) {
-    line.ReadLine(AntennaFile);
+    line.ReadLine(AnitaIIPhotoFile);
     //std::cout << line.Data() << "\n";
   }
   
   for(int ant=0;ant<40;ant++) {
-    line.ReadLine(AntennaFile);
+    line.ReadLine(AnitaIIPhotoFile);
     //std::cout << "Seavey:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
     for(int j=0;j<8;j++) {

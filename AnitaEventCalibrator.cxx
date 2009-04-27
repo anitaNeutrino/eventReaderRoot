@@ -1231,17 +1231,20 @@ void AnitaEventCalibrator::loadCalib() {
     char firstLine[180];
     CalibFile.getline(firstLine,179);
     while(CalibFile >> surf >> chan >> chip >> ant >> pol >> mean >> rms >> calib) {      
-      if(pol=='H') 
-	calib*=-1;
+       Int_t realAnt;
+       AnitaPol::AnitaPol_t realPol;
+
+       AnitaGeomTool::getAntPolFromSurfChan(surf-1,chan-1,realAnt,realPol);
+       if(realPol==AnitaPol::kHorizontal) 
+	  calib*=-1;
 
       //The bastards switched the antenna orientation
-      Double_t orient=AnitaGeomTool::getAntOrientation(ant-1);
+      Double_t orient=AnitaGeomTool::getAntOrientation(realAnt);
       if(orient==-1) 
-	calib*=-1;
-      if(orient==-2 && pol=='H') //Even Orient have never scored -2 goals
-	calib*=-1;
+	 calib*=-1;
+      if(orient==-2 && realPol==AnitaPol::kHorizontal) //Even Orient have never scored -2 goals
+	 calib*=-1;
       
-
 
       mvCalibVals[surf-1][chan-1][chip-1]=calib;
       //	cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
