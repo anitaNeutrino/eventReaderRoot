@@ -285,11 +285,27 @@ class AnitaGeomTool
    Double_t gpsHeadingFromVertical[3];
    Double_t aftForeOffsetAngleVertical;
 
-   //Simons position calib numbers
+   //Simon's position calib numbers
    Double_t deltaRPhaseCentre[NUM_SEAVEYS]; //Relative to photogrammetry + ring offset
    Double_t deltaZPhaseCentre[NUM_SEAVEYS]; //Relative to photogrammetry + ring offset
    Double_t deltaPhiPhaseCentre[NUM_SEAVEYS]; //Relative to photogrammetry + ring offset
    Double_t ringPhaseCentreOffset[3]; //Offset for each ring, upper lower and nadir
+
+   //Kurt's ANITA-II numbers
+   Double_t xAntFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
+   Double_t yAntFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
+   Double_t zAntFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
+   Double_t rAntFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
+   Double_t azCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //radians
+   Double_t apertureAzFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //radians
+   Double_t apertureElFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //radians
+  
+   Double_t xPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
+   Double_t yPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
+   Double_t zPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
+   Double_t rPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
+   Double_t azPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //radians
+   Double_t aftForeOffsetAngleVerticalKurtAnitaII; //radians
 
    TVector3 fHeadingRotationAxis;
    TVector3 fPitchRotationAxis;
@@ -297,6 +313,9 @@ class AnitaGeomTool
 
    void updateAnt(double deltaR,double deltaRL,double deltaUD);
    void printAntPos();
+   void useKurtAnitaIINumbers(Int_t flag) {
+     fUseKurtAnitaIINumbers=flag;
+   }
 
  protected:
    static AnitaGeomTool *fgInstance;  
@@ -304,7 +323,9 @@ class AnitaGeomTool
 
  private:
    void readPhotogrammetry();
+   void readAnitaIIPhotogrammetry();
    void readSimonsNumbers();
+   Int_t fUseKurtAnitaIINumbers;
 
 };
 
