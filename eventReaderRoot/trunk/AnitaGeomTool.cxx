@@ -1698,6 +1698,22 @@ void AnitaGeomTool::readAnitaIIPhotogrammetry()
       azPhaseCentreFromVerticalHornKurtAnitaII[ant]+=TMath::Pi();
     if(azPhaseCentreFromVerticalHornKurtAnitaII[ant]<0)
       azPhaseCentreFromVerticalHornKurtAnitaII[ant]+=TMath::TwoPi();
+
+//   //Silly hack for testing only    
+//     TVector3 kurtVector(xPhaseCentreFromVerticalHornKurtAnitaII[ant],    
+// 			yPhaseCentreFromVerticalHornKurtAnitaII[ant],   
+// 			zPhaseCentreFromVerticalHornKurtAnitaII[ant]);
+//     kurtVector.RotateZ(+45.12*TMath::DegToRad());  
+//     kurtVector.RotateY(0.75*TMath::DegToRad());   
+//     kurtVector.RotateX(1*TMath::DegToRad());  
+//     kurtVector.RotateZ(-45.12*TMath::DegToRad());   
+//     xPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.x();
+//     yPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.y(); 
+//     zPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.z();  
+//     rPhaseCentreFromVerticalHornKurtAnitaII[ant]=TMath::Sqrt(kurtVector.x()*kurtVector.x()+kurtVector.y()*kurtVector.y());    
+//     azPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.Phi();
+
+
     
   }
 
