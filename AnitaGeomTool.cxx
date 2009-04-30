@@ -1360,8 +1360,7 @@ Double_t AnitaGeomTool::getMeanAntPairPhiRelToAftFore(int firstAnt, int secondAn
       else if(TMath::Abs(meanPhi-(this->getAntPhiPositionRelToAftFore(secondAnt)-TMath::TwoPi()))<TMath::PiOver2()) {	 
 	 meanPhi+=(this->getAntPhiPositionRelToAftFore(secondAnt)-TMath::TwoPi());	 
 	 meanPhi*=0.5;       
-      }  
-      meanPhi*=TMath::RadToDeg();      
+      }      
       return meanPhi;
    }
    return -999;
