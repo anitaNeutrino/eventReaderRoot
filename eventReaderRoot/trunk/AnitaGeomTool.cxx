@@ -224,6 +224,15 @@ Double_t AnitaGeomTool::getDistanceToCentreOfEarth(Double_t lat)
 
 // }
 
+Double_t AnitaGeomTool::getPhiDiff(int firstPhi, int secondPhi)
+{
+   Double_t phiDiff=firstPhi-secondPhi;
+   if(TMath::Abs(phiDiff)>TMath::Abs(firstPhi-(secondPhi+TMath::TwoPi())))
+      phiDiff=firstPhi-(secondPhi+TMath::TwoPi());
+   if(TMath::Abs(phiDiff)>TMath::Abs(firstPhi-(secondPhi-TMath::TwoPi())))
+      phiDiff=firstPhi-(secondPhi-TMath::TwoPi());
+   return phiDiff;
+}
 
 
 int AnitaGeomTool::getChanIndexFromRingPhiPol(AnitaRing::AnitaRing_t ring,
@@ -1334,6 +1343,31 @@ Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(int ant) {
   }      
   return 0;
 }
+
+Double_t AnitaGeomTool::getMeanAntPairPhiRelToAftFore(int firstAnt, int secondAnt) {
+
+   if(firstAnt>=0 && firstAnt<NUM_SEAVEYS && secondAnt>=0 && secondAnt<40) {
+      //Calculating the phi of each antenna pair
+      double meanPhi=this->getAntPhiPositionRelToAftFore(firstAnt); 
+      if(TMath::Abs(meanPhi-this->getAntPhiPositionRelToAftFore(secondAnt))<TMath::PiOver2()) {	 
+	 meanPhi+=this->getAntPhiPositionRelToAftFore(secondAnt);	 
+	 meanPhi*=0.5;       
+      }       
+      else if(TMath::Abs(meanPhi-(this->getAntPhiPositionRelToAftFore(secondAnt)+TMath::TwoPi()))<TMath::PiOver2()) {	 
+	 meanPhi+=(this->getAntPhiPositionRelToAftFore(secondAnt)+TMath::TwoPi());	 
+	 meanPhi*=0.5;       
+      }       
+      else if(TMath::Abs(meanPhi-(this->getAntPhiPositionRelToAftFore(secondAnt)-TMath::TwoPi()))<TMath::PiOver2()) {	 
+	 meanPhi+=(this->getAntPhiPositionRelToAftFore(secondAnt)-TMath::TwoPi());	 
+	 meanPhi*=0.5;       
+      }  
+      meanPhi*=TMath::RadToDeg();      
+      return meanPhi;
+   }
+   return -999;
+}
+
+
 
 Int_t AnitaGeomTool::getUpperAntNearestPhiWave(Double_t phiWave) {
   if(phiWave<0) phiWave+=TMath::TwoPi();
