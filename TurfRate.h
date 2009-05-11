@@ -43,7 +43,7 @@ class TurfRate: public TObject
     - "0" == 0%
     - "65535" = 100%
     - "2897" == 2897/65535 * 100 %
-    A differential dead time number is available in the RawAnitaHeader.
+    Users are encouraged to use the getDeadTimeFrac function where available. A differential dead time number is available in the RawAnitaHeader, which only includes the fraction of the current second before the event trigger in the count.
   */ 
    UShort_t        deadTime; 
    UShort_t        l1Rates[PHI_SECTORS][2]; ///< l1 antenna rates
