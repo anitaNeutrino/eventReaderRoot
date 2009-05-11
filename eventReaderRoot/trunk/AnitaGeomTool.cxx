@@ -78,9 +78,12 @@ AnitaGeomTool*  AnitaGeomTool::fgInstance = 0;
 AnitaGeomTool::AnitaGeomTool()
 {
   //Default constructor
-  ringPhaseCentreOffset[0]=0.2-0.042685;
-  ringPhaseCentreOffset[1]=0.2+0.00653;
-  ringPhaseCentreOffset[2]=0.2+0.1927;
+   ringPhaseCentreOffset[0]=0.2-0.042685;
+   ringPhaseCentreOffset[1]=0.2+0.00653;
+   ringPhaseCentreOffset[2]=0.2+0.1927;
+//  ringPhaseCentreOffset[0]=0.2;
+//  ringPhaseCentreOffset[1]=0.2;
+//  ringPhaseCentreOffset[2]=0.2;
 
   readSimonsNumbers();
   readPhotogrammetry();
@@ -375,17 +378,15 @@ void AnitaGeomTool::getThetaPartners(int rx,int& rxleft,int& rxright)
     rxright=AnitaGeom::lowerAntNums[phiRight];
   }
   else{
-
-if (rx<39 && rx>31)    
-    rxright=rx+1;  
-  else if (rx==39)   
-    rxright=32;
-
     if (rx<39 && rx>31)    
-    rxleft=rx-1;  
-  else if (rx==31)   
-    rxleft=39;
+      rxright=rx+1;  
+    else if (rx==39)   
+      rxright=32;
 
+    if (rx<40 && rx>32)    
+      rxleft=rx-1;  
+    else if (rx==32)   
+      rxleft=39;
   }
 
 }
@@ -1748,6 +1749,24 @@ void AnitaGeomTool::readAnitaIIPhotogrammetry()
 
 
     
+ //    //Silly hack for testing only
+//     TVector3 kurtVector(xPhaseCentreFromVerticalHornKurtAnitaII[ant],
+//                         yPhaseCentreFromVerticalHornKurtAnitaII[ant],
+//                         zPhaseCentreFromVerticalHornKurtAnitaII[ant]);  
+//     //    std::cout <<kurtVector.x() << "\t" << kurtVector.y() << "\t"
+//     //	      << kurtVector.z() << "\n";
+//     //       kurtVector.RotateX(1.461*TMath::DegToRad());  
+//     //       kurtVector.RotateY(-0.21*TMath::DegToRad());
+//     kurtVector.RotateZ(+45.12*TMath::DegToRad());
+//     kurtVector.RotateY(0.75*TMath::DegToRad());
+//     kurtVector.RotateX(1*TMath::DegToRad());
+//     kurtVector.RotateZ(-45.12*TMath::DegToRad());
+//     xPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.x();
+//     yPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.y();
+//     zPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.z();
+//     rPhaseCentreFromVerticalHornKurtAnitaII[ant]=TMath::Sqrt(kurtVector.x()*kurtVector.x()+kurtVector.y()*kurtVector.y());
+//     azPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.Phi();
+
   }
 
   aftForeOffsetAngleVerticalKurtAnitaII=-45.12*TMath::DegToRad();

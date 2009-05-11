@@ -109,7 +109,11 @@ The second byte (reserved[1]) is currently reserved.
   UInt_t          trigTime; ///< Trigger time in TURF clock ticks
   UInt_t          c3poNum; ///< Number of TURF clock ticks between GPS pulse per seconds
   UShort_t        ppsNum; ///< Number of GPS PPS since last clear all
-  UShort_t        deadTime; ///< Deadtime as measured as a fraction of a second that all buffers were full (65535 means 100% dead)
+  //!  Dead Time
+  /*!
+    The number of of 65535Hz clock ticks in the current second, upto triggerTimeNs ns, which all four buffers were full. A more consistent definition of deadTime is available in the TurfRate class.
+  */
+  UShort_t        deadTime; 
   //!  Buffer depth
   /*!
     The lowest two bits (bufferDepth&0x3) are a two-bit number (with range 0-3) that count the number of held buffers at the time of the trigger.
