@@ -36,7 +36,16 @@ class TurfRate: public TObject
    UInt_t          realTime; ///< Time in unixTime
    UInt_t          payloadTime; ///< Time in unixTime
    UShort_t        ppsNum; ///< ppsNum of data
-   UShort_t        deadTime; ///< deadTime (66535 means buffers always full)
+  
+  //!  Dead Time
+  /*!
+    The number of of 65535Hz clock ticks in the previous second  which all four buffers were full and new triggers were inhibited. So in terms of percentage:
+    - "0" == 0%
+    - "65535" = 100%
+    - "2897" == 2897/65535 * 100 %
+    A differential dead time number is available in the RawAnitaHeader.
+  */ 
+   UShort_t        deadTime; 
    UShort_t        l1Rates[PHI_SECTORS][2]; ///< l1 antenna rates
    UChar_t         upperL2Rates[PHI_SECTORS]; ///< upper l2 cluster rates
    UChar_t         lowerL2Rates[PHI_SECTORS]; ///< lower l2 cluster rates
