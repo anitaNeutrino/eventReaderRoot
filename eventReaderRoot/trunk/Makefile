@@ -63,6 +63,11 @@ readRawData : $(ROOT_LIBRARY) readRawData.$(SRCSUF)
 	$(LD)  $(CXXFLAGS) $(LDFLAGS) readRawData.$(SRCSUF) $(ROOT_LIBRARY) $(LIBS) -o $@
 
 
+readRootData : $(ROOT_LIBRARY) readRootData.$(SRCSUF)
+	@echo "<**Compiling**> "  
+	$(LD)  $(CXXFLAGS) $(LDFLAGS) readRootData.$(SRCSUF) $(ROOT_LIBRARY) $(LIBS) -o $@
+
+
 exampleDumpHk : $(ROOT_LIBRARY) exampleDumpHk.$(SRCSUF)
 	@echo "<**Compiling**> "  
 	$(LD)  $(CXXFLAGS) $(LDFLAGS) exampleDumpHk.$(SRCSUF) $(ROOT_LIBRARY) $(LIBS) -o $@
