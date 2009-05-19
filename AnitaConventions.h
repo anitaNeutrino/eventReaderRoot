@@ -31,9 +31,18 @@
  * There are a myriad of ways that one can run into problems with the event reader, the most common of which are listed here
  * - Path problems -- the bane of poorly organised code. By far the easiest way to use the ANITA offline code is to just set the ANITA_UTIL_INSTALL_DIR and have it point to the location you want to install all the packages. If things are set up correctly you will end up with a ANITA_UTIL_INSTALL_DIR/include and ANITA_UTIL_INSTALL_DIR/lib and ANITA_UTIL_INSTALL_DIR/share/anitaCalib all populated with essential headers, libraries and calibration constants. A quick round of <pre>make clean all install</pre> in libRootFftwWrapper and eventReader (and magicDisplay, etc.) can solve most such difficulties.
  * - Calibration data -- AnitaEventCalibrator looks for calibration data in the following order (make sure it finds some).
- *   -# ANITA_CALIB_DIR
- *   -# ANITA_UTIL_INSTALL_DIR/share/anitaCalib
- *   -# ./calib
+ * \section examples_sec Examples
+ * The first example of the eventReaderRoot library in use is the exampleDumpHk program which  can be made by typing <PRE>make exampleDumpHk</PRE> in the main eventReaderRoot directory. This program shows the way to access hk data in the ROOT files, similar programs could be written for all the other data types. The main components of the program are:
+ * - Opening a TFile of the .root file
+ * - Getting the TTree from the TFile (in this case hkTree)
+ * - Setting the tree branch address to be the address of a pointer to the class type (in this case CalibratedHk)
+ * - A loop over all the "events" in the TTree
+ * - The GetEntry function which effectively copies the data for this "event" from the TTree such that it can be accessed from the class pointer
+ * - At this point all methods of the class (CalibratedHk) can be accessed.
+ * 
+ * There are a number of examples of eventReaderRoot in use in the macros directory. In general these are simply run at the command prompt by typing something like: <PRE>root macroName.C</PRE>
+ * 
+ * For further examples of using the waveform data in the event files, see the <a href="http://www.hep.ucl.ac.uk/uhen/anita/magicDisplay/">Magic Display</a> and <a href="http://www.hep.ucl.ac.uk/uhen/anita/eventCorrelator/">Event Correlator</a> libraries.
  *
  */
 
