@@ -1468,16 +1468,16 @@ void AnitaGeomTool::updateAnt(double deltaR,double deltaRL,double deltaUD){
    double  deltaXUD = 0;
    double  deltaYUD = 0;
    
-    //std::cout << deltaXRL << "  " << deltaXUD << "  "<< deltaYUD << "  "<< deltaYRL  <<  "  " <<  deltaZUD << std::endl;
+   std::cout << deltaXRL << "  " << deltaXUD << "  "<< deltaYUD << "  "<< deltaYRL  <<  "  " <<  deltaZUD << " " << deltaRL << std::endl;
 
   for(int ant=0;ant<32;ant++) {
     
     //deltaXRL = -deltaRL*TMath::Sin(apertureAzFromVerticalHorn[ant]);
 	    //       deltaYRL = deltaRL*TMath::Cos(apertureAzFromVerticalHorn[ant]);
     
-           deltaZUD = deltaUD*TMath::Cos(apertureElFromVerticalHorn[ant]);
-          deltaXUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Cos(apertureAzFromVerticalHorn[ant]);
-          deltaYUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Sin(apertureAzFromVerticalHorn[ant]);
+    deltaZUD = deltaUD*TMath::Cos(apertureElFromVerticalHorn[ant]);
+    deltaXUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Cos(apertureAzFromVerticalHorn[ant]);
+    deltaYUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Sin(apertureAzFromVerticalHorn[ant]);
     
     //std::cout << deltaXRL << "  " << deltaXUD << "  "<< deltaYUD << "  "<< deltaYRL  <<  "  " <<  deltaZUD << std::endl;
     
@@ -1733,42 +1733,22 @@ void AnitaGeomTool::readAnitaIIPhotogrammetry()
     if(azPhaseCentreFromVerticalHornKurtAnitaII[ant]<0)
       azPhaseCentreFromVerticalHornKurtAnitaII[ant]+=TMath::TwoPi();
 
-//   //Silly hack for testing only    
-//     TVector3 kurtVector(xPhaseCentreFromVerticalHornKurtAnitaII[ant],    
-// 			yPhaseCentreFromVerticalHornKurtAnitaII[ant],   
-// 			zPhaseCentreFromVerticalHornKurtAnitaII[ant]);
-//     kurtVector.RotateZ(+45.12*TMath::DegToRad());  
-//     kurtVector.RotateY(0.75*TMath::DegToRad());   
-//     kurtVector.RotateX(1*TMath::DegToRad());  
-//     kurtVector.RotateZ(-45.12*TMath::DegToRad());   
-//     xPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.x();
-//     yPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.y(); 
-//     zPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.z();  
-//     rPhaseCentreFromVerticalHornKurtAnitaII[ant]=TMath::Sqrt(kurtVector.x()*kurtVector.x()+kurtVector.y()*kurtVector.y());    
-//     azPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.Phi();
-
-
-    
- //    //Silly hack for testing only
-//     TVector3 kurtVector(xPhaseCentreFromVerticalHornKurtAnitaII[ant],
-//                         yPhaseCentreFromVerticalHornKurtAnitaII[ant],
-//                         zPhaseCentreFromVerticalHornKurtAnitaII[ant]);  
-//     //    std::cout <<kurtVector.x() << "\t" << kurtVector.y() << "\t"
-//     //	      << kurtVector.z() << "\n";
-//     //       kurtVector.RotateX(1.461*TMath::DegToRad());  
-//     //       kurtVector.RotateY(-0.21*TMath::DegToRad());
-//     kurtVector.RotateZ(+45.12*TMath::DegToRad());
-//     kurtVector.RotateY(0.75*TMath::DegToRad());
-//     kurtVector.RotateX(1*TMath::DegToRad());
-//     kurtVector.RotateZ(-45.12*TMath::DegToRad());
-//     xPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.x();
-//     yPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.y();
-//     zPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.z();
-//     rPhaseCentreFromVerticalHornKurtAnitaII[ant]=TMath::Sqrt(kurtVector.x()*kurtVector.x()+kurtVector.y()*kurtVector.y());
-//     azPhaseCentreFromVerticalHornKurtAnitaII[ant]=kurtVector.Phi();
-
+        
   }
 
   aftForeOffsetAngleVerticalKurtAnitaII=-45.12*TMath::DegToRad();
 
+  //Will now make the default numbers the ones that start with Simon's and modify the positions
+  //Now add in Simon's corrections
+  for(int ant=0;ant<NUM_SEAVEYS;ant++) {
+    rPhaseCentreFromVerticalHorn[ant]=rPhaseCentreFromVerticalHornKurtAnitaII[ant]+deltaRPhaseCentre[ant];
+    azPhaseCentreFromVerticalHorn[ant]=azPhaseCentreFromVerticalHornKurtAnitaII[ant]+deltaPhiPhaseCentre[ant];    
+    if(azPhaseCentreFromVerticalHorn[ant]<0)
+      azPhaseCentreFromVerticalHorn[ant]+=TMath::TwoPi();
+    if(azPhaseCentreFromVerticalHorn[ant]>TMath::TwoPi())
+      azPhaseCentreFromVerticalHorn[ant]-=TMath::TwoPi();    
+    zPhaseCentreFromVerticalHorn[ant]=zPhaseCentreFromVerticalHornKurtAnitaII[ant]+deltaZPhaseCentre[ant];
+    xPhaseCentreFromVerticalHorn[ant]=rPhaseCentreFromVerticalHorn[ant]*TMath::Cos(azPhaseCentreFromVerticalHorn[ant]);
+    yPhaseCentreFromVerticalHorn[ant]=rPhaseCentreFromVerticalHorn[ant]*TMath::Sin(azPhaseCentreFromVerticalHorn[ant]);
+  }
 }
