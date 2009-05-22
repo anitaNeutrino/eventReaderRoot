@@ -1737,7 +1737,7 @@ void AnitaGeomTool::readAnitaIIPhotogrammetry()
   }
 
   aftForeOffsetAngleVerticalKurtAnitaII=-45.12*TMath::DegToRad();
-
+  aftForeOffsetAngleVertical=aftForeOffsetAngleVerticalKurtAnitaII;
   //Will now make the default numbers the ones that start with Simon's and modify the positions
   //Now add in Simon's corrections
   for(int ant=0;ant<NUM_SEAVEYS;ant++) {
