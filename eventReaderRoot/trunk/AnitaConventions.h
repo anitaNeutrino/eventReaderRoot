@@ -251,4 +251,8 @@ namespace AnitaLocations {
 };
 
 
+#define STATIC_ADU5_PITCH -0.29
+#define STATIC_ADU5_ROLL 0.89
+#define OFFSET_ADU5_HEADING -0.32
+
 #endif //ANITACONVENTIONS_H
