@@ -193,13 +193,13 @@ class AnitaGeomTool
   //Non static thingies
   //  void getPhiWave(Double_t balloonLon, Double_t balloonLat, Double_t ballonAlt, Double_t balloonHeading, Double_t sourceLon, Double_t sourceLat, Double_t sourceAlt, Double_t &thetaWave, Double_t &phiWave); ///< Calculates phi and theta for a plane wave hypothesis given a balloon and source location. thetaWave and phiWave are relative to the balloon coordinate system
 
-  void getAntXYZ(int ant, Double_t &x, Double_t &y, Double_t &z); ///< get antenna cartesian coordinates (from photogrammetry)
-  Double_t getAntZ(int ant); ///< get antenna z position
-  Double_t getAntR(int ant); ///< get antenna r position
-  Double_t getAntPhiPosition(int ant); ///< get antenna phi position
-  Double_t getAntPhiPositionRelToAftFore(int ant); ///< get antenna phi position relative to ADU5 AFT-FORE line
-  Double_t getMeanAntPairPhiRelToAftFore(int firstAnt, int secondAnt); ///< The mean of the two antenna phi positions
-  Int_t getUpperAntNearestPhiWave(Double_t phiWave); ///< get antenna closest to given plane wave direction
+  void getAntXYZ(int ant, Double_t &x, Double_t &y, Double_t &z, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna cartesian coordinates (from photogrammetry)
+  Double_t getAntZ(int ant, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna z position
+  Double_t getAntR(int ant, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna r position
+  Double_t getAntPhiPosition(int ant, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna phi position
+  Double_t getAntPhiPositionRelToAftFore(int ant, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna phi position relative to ADU5 AFT-FORE line
+  Double_t getMeanAntPairPhiRelToAftFore(int firstAnt, int secondAnt, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< The mean of the two antenna phi positions
+  Int_t getUpperAntNearestPhiWave(Double_t phiWave, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna closest to given plane wave direction
 
   
   void getAntFaceXYZ(int ant, Double_t &x, Double_t &y, Double_t &z); ///< get location fo antenna face in balloon cartesian coordinates
@@ -221,11 +221,11 @@ class AnitaGeomTool
   Double_t apertureElFromDeckHorn[NUM_SEAVEYS]; //radians
   
    
-   Double_t xPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
-   Double_t yPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
-   Double_t zPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
-   Double_t rPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //m
-   Double_t azPhaseCentreFromDeckHorn[NUM_SEAVEYS]; //radians
+   Double_t xPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t yPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t zPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t rPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t azPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //radians
 
    
    Double_t xAntFromDeckBicone[NUM_BICONES]; //m
@@ -258,11 +258,11 @@ class AnitaGeomTool
    Double_t apertureAzFromVerticalHorn[NUM_SEAVEYS]; //radians
    Double_t apertureElFromVerticalHorn[NUM_SEAVEYS]; //radians
   
-   Double_t xPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
-   Double_t yPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
-   Double_t zPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
-   Double_t rPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //m
-   Double_t azPhaseCentreFromVerticalHorn[NUM_SEAVEYS]; //radians
+   Double_t xPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t yPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t zPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t rPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t azPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //radians
 
    
    Double_t xAntFromVerticalBicone[NUM_BICONES]; //m
@@ -288,9 +288,9 @@ class AnitaGeomTool
    Double_t aftForeOffsetAngleVertical;
 
    //Simon's position calib numbers
-   Double_t deltaRPhaseCentre[NUM_SEAVEYS]; //Relative to photogrammetry + ring offset
-   Double_t deltaZPhaseCentre[NUM_SEAVEYS]; //Relative to photogrammetry + ring offset
-   Double_t deltaPhiPhaseCentre[NUM_SEAVEYS]; //Relative to photogrammetry + ring offset
+   Double_t deltaRPhaseCentre[NUM_SEAVEYS][NUM_POLS]; //Relative to photogrammetry + ring offset
+   Double_t deltaZPhaseCentre[NUM_SEAVEYS][NUM_POLS]; //Relative to photogrammetry + ring offset
+   Double_t deltaPhiPhaseCentre[NUM_SEAVEYS][NUM_POLS]; //Relative to photogrammetry + ring offset
    Double_t ringPhaseCentreOffset[3]; //Offset for each ring, upper lower and nadir
 
 
@@ -307,11 +307,11 @@ class AnitaGeomTool
    Double_t apertureAzFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //radians
    Double_t apertureElFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //radians
   
-   Double_t xPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
-   Double_t yPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
-   Double_t zPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
-   Double_t rPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
-   Double_t azPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //radians
+   Double_t xPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t yPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t zPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t rPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t azPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS][NUM_POLS]; //radians
    Double_t aftForeOffsetAngleVerticalKurtAnitaII; //radians
 
 

@@ -1402,6 +1402,16 @@ void AnitaEventCalibrator::loadCalib() {
       simonsDeltaT[surf][chan]=dt;     
     }
 
+
+    sprintf(fileName,"%s/simonsHPolPositionAndTimingOffsets.dat",calibDir);
+    std::ifstream SimonsHPolOffsets(fileName);
+    SimonsHPolOffsets.getline(firstLine,179);
+    while(SimonsHPolOffsets >> iant >> dt >> dr >> dphi >> dz) {
+      Int_t surf=AnitaGeomTool::getSurfFromAnt(iant);
+      Int_t chan=AnitaGeomTool::getChanFromAntPol(iant,AnitaPol::kHorizontal);
+      simonsDeltaT[surf][chan]=dt;     
+    }
+
 }
 
 
