@@ -230,10 +230,10 @@ Double_t AnitaGeomTool::getDistanceToCentreOfEarth(Double_t lat)
 Double_t AnitaGeomTool::getPhiDiff(Double_t firstPhi, Double_t secondPhi)
 {
    Double_t phiDiff=firstPhi-secondPhi;
-   if(TMath::Abs(phiDiff)>TMath::Abs(firstPhi-(secondPhi+TMath::TwoPi())))
-      phiDiff=firstPhi-(secondPhi+TMath::TwoPi());
-   if(TMath::Abs(phiDiff)>TMath::Abs(firstPhi-(secondPhi-TMath::TwoPi())))
-      phiDiff=firstPhi-(secondPhi-TMath::TwoPi());
+   if(TMath::Abs(phiDiff)>TMath::Abs(phiDiff+TMath::TwoPi()))
+     phiDiff+=TMath::TwoPi();
+   if(TMath::Abs(phiDiff)>TMath::Abs(phiDiff-TMath::TwoPi()))
+     phiDiff-=TMath::TwoPi();
    return phiDiff;
 }
 
