@@ -43,7 +43,17 @@ namespace AnitaGeom {
 				      -2,-2,-2,-2,-2,-2,-2,-2}; 
 
 
-  // Note that this array uses antenna number 1-42 as it needs
+  int antToRFCM[NUM_SEAVEYS]={2,8,8,13,13,21,21,2,16,7,7,12,12,14,14,16,
+			       3,3,5,5,6,6,9,9,11,11,4,4,1,1,10,10,
+			       17,18,18,19,19,20,20,17};
+  int hAntToRFCMChan[NUM_SEAVEYS]={1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,
+				   1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,
+				   1,4,1,4,1,4,1,4};  
+  int vAntToRFCMChan[NUM_SEAVEYS]={2,3,2,3,2,3,2,3,2,3,2,3,2,3,2,3,
+				   2,3,2,3,2,3,2,3,2,3,2,3,2,3,2,3,
+				   2,3,2,3,2,3,2,3};  
+
+  // SEAVEYS that this array uses antenna number 1-42 as it needs
   // the negative sign to indicate polarization
    // Note that this array uses antenna number 1-42 as it needs
    // the negative sign to indicate polarization (-ve is vertical)
@@ -274,6 +284,24 @@ int AnitaGeomTool::getChanIndexFromAntPol(int ant,
   else
     return -1;
   return getChanIndex(surf,chan);
+}
+
+
+int AnitaGeomTool::getRFCMFromAnt(int ant)
+{
+  if(ant<0 || ant>(NUM_SEAVEYS-1)) return -1;
+  return AnitaGeom::antToRFCM[ant];
+}
+
+int AnitaGeomTool::getRFCMChannelFromAntPol(int ant,AnitaPol::AnitaPol_t pol)
+{
+  if(ant<0 || ant>(NUM_SEAVEYS-1)) return -1;
+  if(pol==AnitaPol::kHorizontal)
+    return AnitaGeom::hAntToRFCMChan[ant];
+  if(pol==AnitaPol::kVertical)
+    return AnitaGeom::vAntToRFCMChan[ant];
+  
+  return -1;
 }
 
 

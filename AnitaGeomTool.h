@@ -171,6 +171,9 @@ class AnitaGeomTool
   static int getSurfChanFromChanIndex(int chanIndex, // input channel index
 				      int &surf,int &chan); ///< Convert logical index to  surf and channel
   
+  static int getRFCMFromAnt(int ant); ///<Returns the RFCM number
+  static int getRFCMChannelFromAntPol(int ant,AnitaPol::AnitaPol_t pol); ///< Returns the RFCM channel number
+
   static int getAntPolFromSurfChan(int surf,int chan,int &ant,AnitaPol::AnitaPol_t &pol); ///< Convert surf-chan to ant-pol
   
   static int getAzimuthPartner(int rx); ///< output the antenna that points to the same place in phi as the input antenna

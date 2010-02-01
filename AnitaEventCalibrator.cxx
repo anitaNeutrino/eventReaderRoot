@@ -196,20 +196,20 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
      
   }
    else { 
-   //Clock Jitter correction
-   if(calType==WaveCalType::kVTLabJWPlusClock || calType==WaveCalType::kVTFullJWPlusClock ||
-      calType==WaveCalType::kVTLabClockRG || calType==WaveCalType::kVTFullClockRG ||
-      calType==WaveCalType::kVTLabJWPlusClockZero || calType==WaveCalType::kVTFullJWPlusClockZero) {
-      processClockJitter(eventPtr);
-   }
+     //Clock Jitter correction
+     if(calType==WaveCalType::kVTLabJWPlusClock || calType==WaveCalType::kVTFullJWPlusClock ||
+	calType==WaveCalType::kVTLabClockRG || calType==WaveCalType::kVTFullClockRG ||
+	calType==WaveCalType::kVTLabJWPlusClockZero || calType==WaveCalType::kVTFullJWPlusClockZero) {
+       processClockJitter(eventPtr);
+     }
 
-   if(calType==WaveCalType::kVTLabJWPlusFastClockZero || calType==WaveCalType::kVTFullJWPlusFastClockZero || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTFullAGFastClock) {
-     processClockJitterFast(eventPtr);
-   }
+     if(calType==WaveCalType::kVTLabJWPlusFastClockZero || calType==WaveCalType::kVTFullJWPlusFastClockZero || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTFullAGFastClock) {
+       processClockJitterFast(eventPtr);
+     }
    
-   if(calType==WaveCalType::kVTFullJWPlusFancyClockZero || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGCrossCorClock) {
-     processClockJitterCorrelation(eventPtr);
-   }
+     if(calType==WaveCalType::kVTFullJWPlusFancyClockZero || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGCrossCorClock) {
+       processClockJitterCorrelation(eventPtr);
+     }
    } 
 
    //Zero Mean
