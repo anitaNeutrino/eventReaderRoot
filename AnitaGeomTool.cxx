@@ -100,7 +100,7 @@ AnitaGeomTool::AnitaGeomTool()
   readAnitaIIPhotogrammetry();
   fUseKurtAnitaIINumbers=0;
 
-  std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
+//   std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
   //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
 
   //std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
@@ -1258,6 +1258,7 @@ void AnitaGeomTool::readPhotogrammetry()
   fHeadingRotationAxis.SetXYZ(0.,0.,1.);
   fPitchRotationAxis.SetXYZ(0.,1.,0.);
   fRollRotationAxis=fPitchRotationAxis.Cross(fHeadingRotationAxis);
+
   //ryans original pitch axis
   //fPitchRotationAxis=fRollRotationAxis.Cross(fHeadingRotationAxis);
   //reversed pitch axis
@@ -1267,9 +1268,15 @@ void AnitaGeomTool::readPhotogrammetry()
   //fRollRotationAxis=fPitchRotationAxis.Cross(fHeadingRotationAxis);
 
   //fitted gps axes
-  //fPitchRotationAxis.SetXYZ(0,cos(-0.176*TMath::DegToRad()),sin(-0.176*TMath::DegToRad()));
-  //fRollRotationAxis.SetXYZ(cos(0.460*TMath::DegToRad()),0,sin(0.460*TMath::DegToRad()));
-  //fHeadingRotationAxis=fRollRotationAxis.Cross(fPitchRotationAxis);
+//   fPitchRotationAxis.SetXYZ(0,cos(-0.176*TMath::DegToRad()),sin(-0.176*TMath::DegToRad()));
+//   fRollRotationAxis.SetXYZ(cos(0.460*TMath::DegToRad()),0,sin(0.460*TMath::DegToRad()));
+//   fHeadingRotationAxis=fRollRotationAxis.Cross(fPitchRotationAxis);
+
+  //2nd attempt fitted gps axes
+//    fPitchRotationAxis.SetXYZ(0,cos(1.3*TMath::DegToRad()),sin(1.3*TMath::DegToRad()));
+//    fRollRotationAxis.SetXYZ(cos(0.36*TMath::DegToRad()),0,sin(0.36*TMath::DegToRad()));
+//    fHeadingRotationAxis=fRollRotationAxis.Cross(fPitchRotationAxis)
+     ;
 
 
   //Now add in Simon's corrections
@@ -1288,9 +1295,9 @@ void AnitaGeomTool::readPhotogrammetry()
      }
   }
 
-   std::cout << " heading axis x " << fHeadingRotationAxis.x() << " y " << fHeadingRotationAxis.y() << " z " << fHeadingRotationAxis.z() << std::endl;
-   std::cout << " roll axis x " << fRollRotationAxis.x() << " y " << fRollRotationAxis.y() << " z " << fRollRotationAxis.z() << std::endl;
-   std::cout << " pitch axis x " << fPitchRotationAxis.x() << " y " << fPitchRotationAxis.y() << " z " << fPitchRotationAxis.z() << std::endl;
+//    std::cout << " heading axis x " << fHeadingRotationAxis.x() << " y " << fHeadingRotationAxis.y() << " z " << fHeadingRotationAxis.z() << std::endl;
+//    std::cout << " roll axis x " << fRollRotationAxis.x() << " y " << fRollRotationAxis.y() << " z " << fRollRotationAxis.z() << std::endl;
+//    std::cout << " pitch axis x " << fPitchRotationAxis.x() << " y " << fPitchRotationAxis.y() << " z " << fPitchRotationAxis.z() << std::endl;
 
 
 }
@@ -1303,6 +1310,7 @@ void AnitaGeomTool::getAntXYZ(int ant, Double_t &x, Double_t &y, Double_t &z,Ani
     x=xPhaseCentreFromVerticalHorn[ant][pol];
     y=yPhaseCentreFromVerticalHorn[ant][pol];
     z=zPhaseCentreFromVerticalHorn[ant][pol];
+    //std::cout << "ant " << x << " y " << y << " z " << std::endl;
   }
 }
 

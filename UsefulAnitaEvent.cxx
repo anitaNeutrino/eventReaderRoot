@@ -38,6 +38,8 @@ UsefulAnitaEvent::UsefulAnitaEvent()
   fLastEventGuessed=0;
   fC3poNum=0;
   fFromCalibratedAnitaEvent=0;
+  fCalibrator=0;
+
   //Default Constructor
 }
 
@@ -45,6 +47,7 @@ UsefulAnitaEvent::UsefulAnitaEvent()
 UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr, WaveCalType::WaveCalType_t calType) 
   : RawAnitaEvent(*calibratedPtr)
 {
+  fCalibrator=0;
   fFromCalibratedAnitaEvent=1;
   fC3poNum=calibratedPtr->fC3poNum;
   fLastEventGuessed=calibratedPtr->eventNumber;
@@ -61,6 +64,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr, WaveCalT
 UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, PrettyAnitaHk *theHk) 
   : RawAnitaEvent(*eventPtr)
 {
+  fCalibrator=0;
   fC3poNum=0;
   fLastEventGuessed=0;
   if(theHk) {
@@ -77,6 +81,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
 UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, RawAnitaHeader *theHd) 
   : RawAnitaEvent(*eventPtr)
 {
+  fCalibrator=0;
   fFromCalibratedAnitaEvent=0;
   fC3poNum=theHd->c3poNum;
   fLastEventGuessed=0;
@@ -89,6 +94,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
 UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, Double_t surfTemp) 
   : RawAnitaEvent(*eventPtr)
 {
+  fCalibrator=0;
   fFromCalibratedAnitaEvent=0;
   fC3poNum=0;
   gotCalibTemp=1;

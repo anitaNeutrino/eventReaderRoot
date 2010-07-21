@@ -15,7 +15,7 @@
 ##Uncomment the below line if you are bored of the "naked lady"
 #alias root="root -l"
 #for the MakeAskaryan program
-LD_LIBRARY_PATH=${LD_LIBRARY_PATH}/unix/anita/software/install/lib/
+LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
 
 ##Event Reader Stuff
 export EVENT_READER_DIR=/home/mottram/work/eventReaderRoot/trunk
@@ -39,8 +39,14 @@ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EVENT_SIMULATION_DIR
 
 #magicDisplay stuff
 export ANITA_UTIL_INSTALL_DIR=/home/mottram/work/install
-LD_LIBRARY_PATH=${ANITA_UTIL_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}
+LD_LIBRARY_PATH=/unix/anita1/software/install/lib:${ANITA_UTIL_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}
 
+#for the bedmap stuff
+export BEDMAP_DATA_DIR=/home/mottram/work/eventCorrelator/data
+#for the antenna stuff
+export ANTENNA_DATA_DIR=/home/mottram/work/relocationWork/data
+#for the flight root data
+export FLIGHT_ROOT_DATA_DIR=/home/mottram/work/relocationWork/data
 
 #export LIB64_DIR=/usr/lib64/
 #export LD_LIBRARY_PATH=${LIB64_DIR}:${LD_LIBRARY_PATH}
