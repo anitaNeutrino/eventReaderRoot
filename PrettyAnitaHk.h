@@ -65,7 +65,9 @@ class PrettyAnitaHk: public TObject
   Float_t         ssAzimuthAdu5[4]; ///< Sunsensor azimuth relative to ADU5
   Int_t           ssGoodFlag[4]; ///< Sunsensor goodness flag
   Int_t           intFlag; ///< Interpolation flag -- zero for raw data
-   
+  
+
+ 
   ClassDef(PrettyAnitaHk,2);
 };
 

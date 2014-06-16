@@ -97,13 +97,13 @@ class CalibratedHk: public TObject
 		    Float_t *elevation, Float_t *relAzimuth); ///< Convert sunsensor data to elevation and azimuth
 
 
-   char *getPowerName(int index); ///< Return char string name of power
-   char *getCurrentName(int index); ///< Return char string name of current
-   char *getVoltageName(int index); ///< Return char string name of voltage
-   char *getExternalTempName(int index); ///< Return char string name of external temperature sensor
-   char *getInternalTempName(int index); ///< Return char string name of internal temperature sensor
-   char *getSBSTempName(int index); ///< Return char string name of SBS temperature sensor
-   char *getAttitudeName(int index); ///< Return char string name of attitude sensor
+   static const char *getPowerName(int index); ///< Return char string name of power
+   static const char *getCurrentName(int index); ///< Return char string name of current
+   static const char *getVoltageName(int index); ///< Return char string name of voltage
+   static const char *getExternalTempName(int index); ///< Return char string name of external temperature sensor
+   static const char *getInternalTempName(int index); ///< Return char string name of internal temperature sensor
+   static const char *getSBSTempName(int index); ///< Return char string name of SBS temperature sensor
+   static const char *getAttitudeName(int index); ///< Return char string name of attitude sensor
 
   ClassDef(CalibratedHk,10);
 };
