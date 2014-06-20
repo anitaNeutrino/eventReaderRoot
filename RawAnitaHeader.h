@@ -134,7 +134,7 @@ The second byte (reserved[1]) is currently reserved.
   UInt_t          triggerTimeNs; ///< Trigger time in ns from TURF
   Int_t           goodTimeFlag; ///< 1 is good trigger time, 0 is bad trigger time
    
-  char *trigTypeAsString(); ///< Returns trigger type as string
+  const char *trigTypeAsString(); ///< Returns trigger type as string
   int isInL3Pattern(int phi); ///< Returns 1 if phi sector had l3 trigger
   int isInL2Pattern(int phi, AnitaRing::AnitaRing_t ring); ///< Returns 1 if given phi-ring had l2 trigger
   int isInL1Pattern(int phi, AnitaRing::AnitaRing_t ring); ///< Returns 1 if given phi-ring had l1 trigger

@@ -296,13 +296,13 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer10_t *hdPtr, Int_t trun, UInt_
 }
 
 
-char *RawAnitaHeader::trigTypeAsString()
+const char *RawAnitaHeader::trigTypeAsString()
 {
    static char theString[20];
    int count=0;
    sprintf(theString,"None");
    
-   char *trigTypes[4]={"RF","PPS1","PPS2","Soft"};
+   const char *trigTypes[4]={"RF","PPS1","PPS2","Soft"};
    
    for(int i=0;i<4;i++) {
       if(trigType & (1<<i)) {
@@ -322,7 +322,7 @@ char *RawAnitaHeader::trigTypeAsString()
 int RawAnitaHeader::isInL3Pattern(int phi)
 {
   if(phi<0 || phi>=PHI_SECTORS) return -1;
-  return l3TrigPattern&(1<<phi);
+  return (l3TrigPattern&(1<<phi) ? 1 : 0) ;
 }
  
 int RawAnitaHeader::isInL2Pattern(int phi, AnitaRing::AnitaRing_t ring)
