@@ -59,8 +59,8 @@ class OtherMonitorHk: public TObject
    UShort_t        processBitMask; ///< Bit mask of currently running processes
    UShort_t        reserved; ///< Reserved
 
-   char *getDirName(int dirInd); ///< Returns dir name
-   char *getProcName(int procInd); ///< Returns process name (using 0 as the index of the first bit).
+   const char *getDirName(int dirInd); ///< Returns dir name
+   const char *getProcName(int procInd); ///< Returns process name (using 0 as the index of the first bit).
   ClassDef(OtherMonitorHk,10);
 };
 

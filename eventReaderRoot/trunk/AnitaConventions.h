@@ -196,7 +196,7 @@ namespace AnitaRing {
      kNotARing ///< Useful in for loops.
    } AnitaRing_t; ///< Ring enumeration
    
-   char *ringAsString(AnitaRing::AnitaRing_t ring); ///< Returns the ring as a character string
+   const char *ringAsString(AnitaRing::AnitaRing_t ring); ///< Returns the ring as a character string
 }
 
 //!  AnitaPol -- Enumeration for the two polarisations
@@ -225,7 +225,7 @@ namespace AnitaBand {
      kHigh =2, ///< The high band.
      kFull =3 ///< The full band.x
    } AnitaBand_t; ///< Band enumeration.
-   char *bandAsString(AnitaBand::AnitaBand_t band); ///< Returns the band as a character string.
+   const char *bandAsString(AnitaBand::AnitaBand_t band); ///< Returns the band as a character string.
 }
 
 //!  AnitaLocations -- A selection of useful ANITA-I related locations

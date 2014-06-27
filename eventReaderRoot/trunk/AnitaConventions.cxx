@@ -41,7 +41,7 @@ const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
    return "Unknown Calibration Type";
 }
 
-char *AnitaRing::ringAsString(AnitaRing::AnitaRing_t ring)
+const char *AnitaRing::ringAsString(AnitaRing::AnitaRing_t ring)
 {
   switch(ring) {
   case kUpperRing: return "Upper";
@@ -64,7 +64,7 @@ char AnitaPol::polAsChar(AnitaPol::AnitaPol_t pol)
   return 'U';
 }
 
-char *AnitaBand::bandAsString(AnitaBand::AnitaBand_t band)
+const char *AnitaBand::bandAsString(AnitaBand::AnitaBand_t band)
 {
   switch(band) {
   case kLow: return "Low";
