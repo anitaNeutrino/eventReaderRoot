@@ -53,9 +53,9 @@ MonitorHk::MonitorHk(Int_t trun, Int_t trealTime, MonitorStruct_t *monPtr)
 
 
 
-char *MonitorHk::getDriveName(int driveInd) 
+const char *MonitorHk::getDriveName(int driveInd) 
 {
-  char *diskNames[NUM_DISK_SPACES]={"Ramdisk","Var","Home","PMC",satabladeLabel,sataminiLabel,"Home","Neobrick"};
+  const char *diskNames[NUM_DISK_SPACES]={"Ramdisk","Var","Home","PMC",satabladeLabel,sataminiLabel,"Home","Neobrick"};
   if(driveInd<0 || driveInd>7)
     return "Invalid";
   return diskNames[driveInd];
@@ -78,9 +78,9 @@ int MonitorHk::getDiskSpaceAvailable(int driveInd)
  return (diskSpace[driveInd]*multiplier[driveInd]);
 }
 
-char *MonitorHk::getHkQueueName(int hkInd)
+const char *MonitorHk::getHkQueueName(int hkInd)
 {
-  char *telemNames[21]=
+  const char *telemNames[21]=
     {"LosCmd","SipCmd","Monitor","Header","Acromag",
      "Adu5aSat","Adu5bSat","G12Sat","Adu5aPat","Adu5bPat","G12Pos",
      "Adu5aVtg","Adu5bVtg","G12Gga","Adu5aGga","Adu5bGga","SurfHk",
@@ -90,10 +90,10 @@ char *MonitorHk::getHkQueueName(int hkInd)
   return telemNames[hkInd];
 }
 
-char *MonitorHk::getProcName(int procInd)
+const char *MonitorHk::getProcName(int procInd)
 {
   
-  char *procName[16]=
+  const char *procName[16]=
     {"Acqd","Archived","Calibd","Cmdd","Eventd","GPSd","Hkd","LOSd"
      "Prioritizerd","SIPd","Monitord","Playbackd","Logwatchd","Neobrickd",
      "n/a","n/a"};

@@ -61,8 +61,8 @@ class SlowRate: public TObject
    Float_t getPower(int powerInd); ///< Returns the actual power value
    Float_t getTemp(int tempInd); ///< Returns the actual temp
 
-   char *getPowerName(int powerInd); ///< Returns the name of the power reading
-   char *getTempName(int tempInd); ///< Returns the name of temp sensor
+   const char *getPowerName(int powerInd); ///< Returns the name of the power reading
+   const char *getTempName(int tempInd); ///< Returns the name of temp sensor
    ClassDef(SlowRate,10);
 };
 

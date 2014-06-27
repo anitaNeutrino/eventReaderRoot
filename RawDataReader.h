@@ -41,9 +41,9 @@ class RawDataReader
    AnitaEventHeader_t theHeader; ///< The header
    gzFile eventFile; ///< File ptr
    gzFile headFile; ///< File ptr
-   TFile *fpSurf; ///< Who knows
-   TTree *surfTempTree; ///< Who knows
-   Float_t surfTemp; ///< Who knows
+   //   TFile *fpSurf; ///< Who knows
+   //   TTree *surfTempTree; ///< Who knows
+   //   Float_t surfTemp; ///< Who knows
 };
 
 

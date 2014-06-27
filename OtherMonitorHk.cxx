@@ -51,19 +51,19 @@ OtherMonitorHk::OtherMonitorHk(Int_t trun, Int_t trealTime, OtherMonitorStruct_t
 }
 
 
-char *OtherMonitorHk::getDirName(int dirInd)
+const char *OtherMonitorHk::getDirName(int dirInd)
 {
-  char *dirNames[3]={"acqd","eventd","prioritizerd"};
+  const char *dirNames[3]={"acqd","eventd","prioritizerd"};
   if(dirInd<0 || dirInd>2)
     return "unknown";
   return dirNames[dirInd];
  
 }
 
-char *OtherMonitorHk::getProcName(int procInd)
+const char *OtherMonitorHk::getProcName(int procInd)
 {
   
-  char *procName[16]=
+  const char *procName[16]=
     {"Acqd","Archived","Calibd","Cmdd","Eventd","GPSd","Hkd","LOSd"
      "Prioritizerd","SIPd","Monitord","Playbackd","Logwatchd","Neobrickd",
      "n/a","n/a"};

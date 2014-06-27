@@ -48,7 +48,7 @@ unsigned int simpleIntCrc(unsigned int *p, unsigned int n);
   Converts packet code enumeration to char string
   \ingroup packetutil
 */
-char *packetCodeAsString(PacketCode_t code);
+const char *packetCodeAsString(PacketCode_t code);
 //!  unzipZippedPacket -- utility function
 /*!
   Utility function useful when looking at zipped telemetry data
@@ -182,7 +182,7 @@ namespace AnitaCompress {
     ChannelEncodingType_t getBinFibEncType(int bitSize);
     int getBinFibBitSize(ChannelEncodingType_t encType);
 
-    char *compressErrorCodeAsString(CompressErrorCode_t code);
+    const char *compressErrorCodeAsString(CompressErrorCode_t code);
     
 #define PACKVALS 4      // no. of 16-bit values packed into each unit
 #define PACKWDS  3      // no. of 16-bit words the values are packed into

@@ -84,11 +84,11 @@ class MonitorHk: public TObject
    */
    UInt_t          vsize[NUM_PROCESSES]; ///< vsize of each process
 
-   char *getDriveName(int driveInd); ///< Returns drive name by index
+   const char *getDriveName(int driveInd); ///< Returns drive name by index
    int getDriveCapacity(int driveInd); ///< Returns drive capacity by index
    int getDiskSpaceAvailable(int driveInd); ///< Returns drive capacity by index
-   char *getHkQueueName(int hkInd); ///< Returns Hk Queue name
-   char *getProcName(int procInd); ///< Returns process name
+   const char *getHkQueueName(int hkInd); ///< Returns Hk Queue name
+   const char *getProcName(int procInd); ///< Returns process name
 
   ClassDef(MonitorHk,10);
 };

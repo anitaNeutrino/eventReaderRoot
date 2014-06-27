@@ -161,18 +161,18 @@ Float_t SlowRate::getTemp(int tempInd)
   return value;
 }
 
-char *SlowRate::getPowerName(int powerInd)
+const char *SlowRate::getPowerName(int powerInd)
 {
-  char *slowPowerNames[4]={"PV V","24 V","Batt I","24 I"};
+  const char *slowPowerNames[4]={"PV V","24 V","Batt I","24 I"};
   if(powerInd<0 || powerInd>3)
     return NULL;
   return slowPowerNames[powerInd];
 
 }
 
-char *SlowRate::getTempName(int tempInd) 
+const char *SlowRate::getTempName(int tempInd) 
 {
-  char *slowTempNames[4]={"SBS","SURF","SHORT","Rad. Plate"};
+  const char *slowTempNames[4]={"SBS","SURF","SHORT","Rad. Plate"};
   if(tempInd<0 || tempInd>3)
     return NULL;
   return slowTempNames[tempInd];

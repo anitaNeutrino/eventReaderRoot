@@ -64,7 +64,8 @@ void fillGenericHeader(void *thePtr, PacketCode_t code, unsigned short numBytes)
   case PACKET_GPS_G12_POS: gHdr->verId=VER_G12_POS; break;
   case PACKET_GPS_G12_SAT: gHdr->verId=VER_G12_SAT; break;
   case PACKET_GPS_GGA: gHdr->verId=VER_GPS_GGA; break;
-  case PACKET_HKD: gHdr->verId=VER_HK_FULL; break;
+  case PACKET_HKD: gHdr->verId=VER_HK_FULL; break;  
+  case PACKET_HKD_SS: gHdr->verId=VER_HK_SS; break;
   case PACKET_CMD_ECHO: gHdr->verId=VER_CMD_ECHO; break;
   case PACKET_MONITOR: gHdr->verId=VER_MONITOR; break;
   case PACKET_SLOW1: gHdr->verId=VER_SLOW_1; break;
@@ -138,7 +139,8 @@ int checkPacket(void *thePtr)
   case PACKET_GPS_G12_POS: packetSize=sizeof(GpsG12PosStruct_t); break;
   case PACKET_GPS_G12_SAT: packetSize=sizeof(GpsG12SatStruct_t); break;
   case PACKET_GPS_GGA: packetSize=sizeof(GpsGgaStruct_t); break;
-  case PACKET_HKD: packetSize=sizeof(HkDataStruct_t); break;
+  case PACKET_HKD: packetSize=sizeof(HkDataStruct_t); break;    
+  case PACKET_HKD_SS: packetSize=sizeof(SSHkDataStruct_t); break;    
   case PACKET_CMD_ECHO: packetSize=sizeof(CommandEcho_t); break;
   case PACKET_MONITOR: packetSize=sizeof(MonitorStruct_t); break;
   case PACKET_WAKEUP_LOS: packetSize=WAKEUP_LOS_BUFFER_SIZE; break;
@@ -173,8 +175,8 @@ int checkPacket(void *thePtr)
 
 }
 
-char *packetCodeAsString(PacketCode_t code) {
-  char* string ;
+const char *packetCodeAsString(PacketCode_t code) {
+  const char* string ;
   switch(code) {
   case PACKET_BD: string="AnitaEventBody_t"; break;	    
   case PACKET_HD: string="AnitaEventHeader_t"; break;	    
@@ -195,6 +197,7 @@ char *packetCodeAsString(PacketCode_t code) {
   case PACKET_GPS_G12_POS: string="GpsG12PosStruct_t"; break;
   case PACKET_GPS_G12_SAT: string="GpsG12SatStruct_t"; break;
   case PACKET_HKD: string="HkDataStruct_t"; break;
+  case PACKET_HKD_SS: string="SSHkDataStruct_t"; break;
   case PACKET_CMD_ECHO: string="CommandEcho_t"; break;
   case PACKET_MONITOR: string="MonitorStruct_t"; break;
   case PACKET_WAKEUP_LOS: string="LosWakeUpPacket"; break;
@@ -1733,9 +1736,9 @@ unsigned short AnitaCompress::simpleCrcShort(unsigned short *p, unsigned long n)
     return ((0xffff - sum) + 1);
 }
 
-char *AnitaCompress::compressErrorCodeAsString(CompressErrorCode_t code) 
+const char *AnitaCompress::compressErrorCodeAsString(CompressErrorCode_t code) 
 {
-    char *string;
+    const char *string;
     switch(code) {
 	case COMPRESS_E_OK:
 	    string = "Success";
