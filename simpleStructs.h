@@ -72,7 +72,7 @@
 #define VER_ZIPPED_PACKET 1
 #define VER_RUN_START 1
 #define VER_OTHER_MON 1
-#else
+#elif ANITA_2_DATA
 #define VER_EVENT_BODY 11
 #define VER_PEDSUBBED_EVENT_BODY 11
 #define VER_EVENT_HEADER 13
@@ -107,6 +107,41 @@
 #define VER_SUM_TURF_RATE 16
 #define VER_ACQD_START 11
 #define VER_TURF_REG 10
+#else // ANITA_3_DATA
+#define VER_EVENT_BODY 30
+#define VER_PEDSUBBED_EVENT_BODY 30
+#define VER_EVENT_HEADER 30
+#define SLAC_VER_EVENT_HEADER 30
+#define VER_WAVE_PACKET 30
+#define VER_SURF_PACKET 30
+#define VER_ENC_WAVE_PACKET 30
+#define VER_ENC_SURF_PACKET 30
+#define VER_SURF_HK 30
+#define VER_GPS_GGA 30
+#define VER_ADU5_PAT 30
+#define VER_ADU5_SAT 30
+#define VER_ADU5_VTG 30
+#define VER_G12_POS 30
+#define VER_G12_SAT 30
+#define VER_HK_FULL 30
+#define VER_CMD_ECHO 30
+#define VER_MONITOR 30
+#define VER_TURF_RATE 30
+#define VER_LAB_PED 30
+#define VER_FULL_PED 30
+#define VER_SLOW_1 30
+#define VER_SLOW_2 30
+#define VER_SLOW_FULL 30
+#define VER_ZIPPED_FILE 30
+#define VER_ZIPPED_PACKET 30
+#define VER_RUN_START 30
+#define VER_OTHER_MON 30
+#define VER_GPSD_START 30
+#define VER_LOGWATCHD_START 30
+#define VER_AVG_SURF_HK 30
+#define VER_SUM_TURF_RATE 30
+#define VER_ACQD_START 31
+#define VER_TURF_REG 30
 #endif
 
 
@@ -476,17 +511,35 @@ typedef struct {
 } FullAnalogueStruct_t;
 
 
+//!  Single Acromag data structure
+/*!
+  Single Acromag data structure comes in data, or calibration flavour.
+*/
+typedef struct {
+    AnalogueCode_t code;
+    AnalogueDataStruct_t board;
+} SingleAnalogueStruct_t;
+
+
 #ifdef ANITA_1_DATA
 typedef struct {
     unsigned short temp[2];
 } SBSTemperatureDataStruct_t;
-#else
+#elif ANITA_2_DATA
 //!  The CR11 temperatures
 /*!
   The CR11 temperatue structure is in (4/100) * milli deg C
 */
 typedef struct {
   short temp[4]; ///< 
+} SBSTemperatureDataStruct_t;
+#else // ANITA_3_DATA
+//!  The XCR14 temperatures
+/*!
+  The XCR14 temperatue structure is in (4/100) * milli deg C
+*/
+typedef struct {
+  short temp[6]; ///< 
 } SBSTemperatureDataStruct_t;
 #endif
 
@@ -963,7 +1016,11 @@ typedef struct {
 */
 typedef struct {
   GenericHeader_t gHdr;
-    unsigned char testBytes[8];
+  unsigned char turfIdBytes[4];
+  unsigned int turfIdVersion;
+  unsigned char turfioIdBytes[4];
+  unsigned int turfioIdVersion;
+  unsigned char testBytes[8];
   unsigned int unixTime;
   unsigned int numEvents;
   float chanMean[ACTIVE_SURFS][CHANNELS_PER_SURF]; ///<Ped subtracted
@@ -984,6 +1041,18 @@ typedef struct {
     MagnetometerDataStruct_t mag;
     SBSTemperatureDataStruct_t sbs;
 } HkDataStruct_t;
+
+
+//! SS Hk Data Struct -- Telemetered
+/*!
+  The main housekeeping data structure with acromag + SBS temps + magnetometer data
+*/
+typedef struct {    
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int unixTimeUs;
+    SingleAnalogueStruct_t ip320;
+} SSHkDataStruct_t;
 
 //! SURF Hk -- Telemetered
 /*!
