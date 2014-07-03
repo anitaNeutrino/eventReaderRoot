@@ -65,7 +65,9 @@ void fillGenericHeader(void *thePtr, PacketCode_t code, unsigned short numBytes)
   case PACKET_GPS_G12_SAT: gHdr->verId=VER_G12_SAT; break;
   case PACKET_GPS_GGA: gHdr->verId=VER_GPS_GGA; break;
   case PACKET_HKD: gHdr->verId=VER_HK_FULL; break;  
+#ifndef ANITA_2_DATA
   case PACKET_HKD_SS: gHdr->verId=VER_HK_SS; break;
+#endif
   case PACKET_CMD_ECHO: gHdr->verId=VER_CMD_ECHO; break;
   case PACKET_MONITOR: gHdr->verId=VER_MONITOR; break;
   case PACKET_SLOW1: gHdr->verId=VER_SLOW_1; break;
