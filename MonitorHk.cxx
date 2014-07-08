@@ -41,8 +41,8 @@ MonitorHk::MonitorHk(Int_t trun, Int_t trealTime, MonitorStruct_t *monPtr)
   realTime=trealTime;
   payloadTime=monPtr->unixTime;
   memcpy(diskSpace,monPtr->diskInfo.diskSpace,sizeof(UShort_t)*8);
-  memcpy(sataminiLabel,monPtr->diskInfo.sataminiLabel,sizeof(Char_t)*12);
-  memcpy(satabladeLabel,monPtr->diskInfo.satabladeLabel,sizeof(Char_t)*12);
+  memcpy(ntuLabel,monPtr->diskInfo.ntuLabel,sizeof(Char_t)*12);
+  memcpy(otherLabel,monPtr->diskInfo.otherLabel,sizeof(Char_t)*12);
   memcpy(usbLabel,monPtr->diskInfo.usbLabel,sizeof(Char_t)*12);
   memcpy(eventLinks,monPtr->queueInfo.eventLinks,sizeof(UShort_t)*NUM_PRIORITIES);
   memcpy(hkLinks,monPtr->queueInfo.hkLinks,sizeof(UShort_t)*21);
@@ -55,7 +55,7 @@ MonitorHk::MonitorHk(Int_t trun, Int_t trealTime, MonitorStruct_t *monPtr)
 
 const char *MonitorHk::getDriveName(int driveInd) 
 {
-  const char *diskNames[NUM_DISK_SPACES]={"Ramdisk","Var","Home","PMC",satabladeLabel,sataminiLabel,"Home","Neobrick"};
+  const char *diskNames[NUM_DISK_SPACES]={"Ramdisk","Var","Home","Root","Helium1","Helium2",usbLabel,ntuLabel};
   if(driveInd<0 || driveInd>7)
     return "Invalid";
   return diskNames[driveInd];
@@ -63,7 +63,7 @@ const char *MonitorHk::getDriveName(int driveInd)
 
 int MonitorHk::getDriveCapacity(int driveInd) 
 {
-  int diskMax[NUM_DISK_SPACES]={2000,8000,8000,9000,125000,125000,8000,1000000};
+  int diskMax[NUM_DISK_SPACES]={2000,8000,8000,9000,6000000,6000000,128000,1000000};
   if(driveInd<0 || driveInd>7)
     return -1;
   return diskMax[driveInd];
