@@ -15,8 +15,12 @@
 #include "simpleStructs.h"
 
 
+
+#ifndef NUM_HK_TELEM_QUEUES
+#define NUM_HK_TELEM_QUEUES 21
+#endif
 #ifndef NUM_TELEM_QUEUES
-#define NUM_TELEM_QUEUES 31
+#define NUM_TELEM_QUEUES NUM_HK_TELEM_QUEUES+NUM_PRIORITIES
 #endif
 #ifndef NUM_DISK_SPACES
 #define NUM_DISK_SPACES 8
@@ -64,7 +68,7 @@ class MonitorHk: public TObject
      <li>Adu5aVtg</li><li>Adu5bVtg</li><li>G12Gga</li><li>Adu5aGga</li><li>Adu5bGga</li><li>SurfHk</li>
      <li>TurfHk</li><li>Other</li><li>Pedestal</li><li>Request</li></ol>
    */
-   UShort_t        hkLinks[21]; // Links in the 21 hk telemetry queues
+   UShort_t        hkLinks[NUM_HK_TELEM_QUEUES]; // Links in the 21 hk telemetry queues
    //!  The user space CPU time used by the flight software processes.
    /*!
      The user time used by the flight software processes.

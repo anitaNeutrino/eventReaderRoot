@@ -71,3 +71,13 @@ const char *OtherMonitorHk::getProcName(int procInd)
     return "No Proc";
   return procName[procInd];
 }
+
+int OtherMonitorHk::isInProcessMask(int procInd) 
+{
+  
+  if(procInd<0 || procInd>15)
+    return 0;
+
+ return (processBitMask&(1<<procInd) ? 1 : 0) ;
+  
+}
