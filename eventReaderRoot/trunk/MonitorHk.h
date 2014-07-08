@@ -42,18 +42,18 @@ class MonitorHk: public TObject
    //!  The free space left on the disks in units of 10 Megabytes
    /*!
      The free space left on the disks in units of 10 Megabytes. The eight disks  and their capacities are:
-    -  "[0]" The ramdisk (2GB)
-    -  "[1]" The var partition (8GB)
-    -  "[2]" The home partition (2GB)
-    -  "[3]" The PMC data partition (8GB)
-    -  "[4]" The MTRON sata blade disk (125GB)
-    -  "[5]" The MTRON sata mini disk (125GB)
-    -  "[6]" n/a
-    -  "[7]" The Neobrick (1TB) -- currently non-reporting
+    -  "[0]" The ramdisk (8GB)
+    -  "[1]" The var partition (3GB)
+    -  "[2]" The home partition (4GB)
+    -  "[3]" The root partiiton (8GB)
+    -  "[4]" The helium1 drive (6000GB)
+    -  "[5]" The helium2 drive (6000GB)
+    -  "[6]" The USB drive (128GB)
+    -  "[7]" The NTU SSD drive (1000GB)
    */
    UShort_t        diskSpace[8]; ///<In units of 10 MegaBytes
-   Char_t          sataminiLabel[12]; ///< Label of the currently mounted satamini drive
-   Char_t          satabladeLabel[12]; ///< Label of the currently mounted satablade drive
+   Char_t          ntuLabel[12]; ///< Label of the currently mounted ntu drive
+   Char_t          otherLabel[12]; ///< Label of the currently mounted other drive
    Char_t          usbLabel[12]; ///< Defunct
    UShort_t        eventLinks[NUM_PRIORITIES]; ///< The number of links in the 10 prioritity queues.
     //!  The number of links in the housekeeping queues
