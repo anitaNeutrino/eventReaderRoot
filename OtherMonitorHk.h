@@ -58,6 +58,8 @@ class OtherMonitorHk: public TObject
 */
    UShort_t        processBitMask; ///< Bit mask of currently running processes
    UShort_t        reserved; ///< Reserved
+   
+   int isInProcessMask(int procInd); ///< Returns 1 or 0 if process is in mask
 
    const char *getDirName(int dirInd); ///< Returns dir name
    const char *getProcName(int procInd); ///< Returns process name (using 0 as the index of the first bit).
