@@ -64,11 +64,11 @@ const char *OtherMonitorHk::getProcName(int procInd)
 {
   
   const char *procName[16]=
-    {"Acqd","Archived","Calibd","Cmdd","Eventd","GPSd","Hkd","LOSd"
-     "Prioritizerd","SIPd","Monitord","Playbackd","Logwatchd","Neobrickd",
-     "n/a","n/a"};
+     {"Acqd","Archived","Calibd","Cmdd","Eventd","GPSd","Hkd","LOSd",
+      "Prioritizerd","SIPd","Monitord","Playbackd","Logwatchd","Neobrickd",
+      "n/a","n/a"};
   if(procInd<0 || procInd>15)
-    return "No Proc";
+     return "No Proc";
   return procName[procInd];
 }
 

@@ -94,7 +94,7 @@ const char *MonitorHk::getProcName(int procInd)
 {
   
   const char *procName[16]=
-    {"Acqd","Archived","Calibd","Cmdd","Eventd","GPSd","Hkd","LOSd"
+     {"Acqd","Archived","Calibd","Cmdd","Eventd","GPSd","Hkd","LOSd",
      "Prioritizerd","SIPd","Monitord","Playbackd","Logwatchd","Neobrickd",
      "n/a","n/a"};
   if(procInd<0 || procInd>15)
