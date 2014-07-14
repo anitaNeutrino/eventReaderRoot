@@ -179,7 +179,7 @@ int checkPacket(void *thePtr)
 
 const char *packetCodeAsString(PacketCode_t code) {
   const char* string ;
-  switch(code) {
+  switch(code&BASE_PACKET_MASK) {
   case PACKET_BD: string="AnitaEventBody_t"; break;	    
   case PACKET_HD: string="AnitaEventHeader_t"; break;	    
   case PACKET_WV: string="RawWaveformPacket_t"; break;
