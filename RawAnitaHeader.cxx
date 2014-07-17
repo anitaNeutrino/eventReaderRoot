@@ -32,8 +32,8 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
      hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeader_t)) {
     std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
 	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
-	      << "\nversion:\t" << hdPtr->gHdr.verId 
-	      << "\t" << VER_EVENT_HEADER 
+	      << "\nversion:\t" << (int)hdPtr->gHdr.verId 
+	      << "\t" << (int)VER_EVENT_HEADER 
 	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
 	      << sizeof(AnitaEventHeader_t) << std::endl;
   }

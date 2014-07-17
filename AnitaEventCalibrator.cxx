@@ -225,6 +225,9 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
    }
     
 
+   if(calType==WaveCalType::kAddPeds) {
+     addPedestals();
+   }
 
    
 
@@ -335,6 +338,20 @@ void AnitaEventCalibrator::processClockJitter(UsefulAnitaEvent *eventPtr) {
 
    }
    
+}
+
+
+void AnitaEventCalibrator::addPedestals() {
+
+  //  int rawArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
+  for(int surf=0;surf<NUM_SURF;surf++) {
+    for(int chan=0;chan<NUM_CHAN;chan++) {
+      int chip=fLabChip[surf][chan];
+      for(int samp=0;samp<NUM_SAMP;samp++) {
+	rawArray[surf][chan][samp]+=fPedStruct.thePeds[surf][chip][chan][samp];
+      }
+    }
+  }
 }
 
 
@@ -1411,6 +1428,13 @@ void AnitaEventCalibrator::loadCalib() {
       Int_t chan=AnitaGeomTool::getChanFromAntPol(iant,AnitaPol::kHorizontal);
       simonsDeltaT[surf][chan]=dt;     
     }
+
+
+
+    sprintf(fileName,"%s/peds.dat",calibDir);
+    std::ifstream PedestalFile(fileName,std::ios::in | std::ios::binary);
+    PedestalFile.read((char*)&fPedStruct,sizeof(PedestalStruct_t));
+    
 
 }
 

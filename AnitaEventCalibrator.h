@@ -14,6 +14,7 @@
 #include <TF1.h>
 #include <TH1.h>
 #include "AnitaConventions.h"
+#include "simpleStructs.h"
 
 class TGraph;
 class UsefulAnitaEvent;
@@ -140,8 +141,12 @@ class AnitaEventCalibrator : public TObject
   void loadCalib();
   Double_t Get_Interpolation_X(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Double_t y);
   void correlateTenClocks(TGraph *grClock[NUM_SURF], Double_t deltaT);
+  void addPedestals();
   Int_t fClockUpSampleFactor;
   Double_t fEpsilonTempScale;
+
+  PedestalStruct_t fPedStruct;
+
 
   ClassDef(AnitaEventCalibrator,2);
   

@@ -95,6 +95,7 @@ namespace WaveCalType {
     kVTInCalibratedFile              = 0x1b, ///< For use particularly with the new CalibratedAnitaEvent files
     kVTCalFilePlusSimon              = 0x1c, ///< As above with Simon's deltaT's
     kDefault                         = 0x1c, ///< Is now the default calibration if you don't specify anything
+    kAddPeds                         = 0x40, ///< New thing
     kNotACalib ///< Useful for looping over all calibrations 
   } WaveCalType_t; ///< The calibration enumeration type
 
