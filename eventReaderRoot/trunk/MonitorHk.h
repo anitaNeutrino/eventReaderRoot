@@ -94,7 +94,7 @@ class MonitorHk: public TObject
    const char *getHkQueueName(int hkInd); ///< Returns Hk Queue name
    const char *getProcName(int procInd); ///< Returns process name
 
-  ClassDef(MonitorHk,10);
+  ClassDef(MonitorHk,11);
 };
 
 
