@@ -46,6 +46,7 @@ class SummedTurfRate: public TObject
    UShort_t         nadirL2Rates[NADIR_ANTS]; ///< Summed l2 rates (nadir)
    UInt_t           antTrigMask; ///< Which (upper+lower) ants are excluded?
    UShort_t         phiTrigMask; ///< Which phi sectors are masked off?
+   UShort_t         phiTrigMaskH; ///< Which phi sectors are masked off?
    UChar_t          nadirAntTrigMask; ///< Which nadir ants are excluded?
    UChar_t          errorFlag; ///< Error flag
    Int_t            intFlag; ///< Interpolation flag -- zero for raw data

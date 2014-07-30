@@ -55,6 +55,7 @@ class TurfRate: public TObject
    UInt_t          antTrigMask; ///< Which upper+lower ring antennas are masked off?
    UChar_t         nadirAntTrigMask; ///< Which nadir antennas are masked off?
    UShort_t        phiTrigMask; ///< Which phi sectors are masked off?
+   UShort_t        phiTrigMaskH; ///< Which phi sectors are masked off?
    UChar_t         errorFlag; ///< Error flag (who knows)?
    Int_t           intFlag; ///< Interpolation flag, zero for raw data.
 

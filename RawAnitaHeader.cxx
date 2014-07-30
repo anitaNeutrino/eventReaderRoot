@@ -50,8 +50,10 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    errorFlag=hdPtr->errorFlag;
    surfSlipFlag=hdPtr->surfSlipFlag;
    nadirAntTrigMask=hdPtr->nadirAntTrigMask;
-   antTrigMask=hdPtr->antTrigMask;
+   l1TrigMask=hdPtr->l1TrigMask;
+   l1TrigMaskH=hdPtr->l1TrigMaskH;
    phiTrigMask=hdPtr->phiTrigMask;
+   phiTrigMaskH=hdPtr->phiTrigMaskH;
    trigType=hdPtr->turfio.trigType;
    l3Type1Count=hdPtr->turfio.l3Type1Count;
    trigNum=hdPtr->turfio.trigNum;
@@ -60,16 +62,9 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    ppsNum=hdPtr->turfio.ppsNum;
    deadTime=hdPtr->turfio.deadTime;
    bufferDepth=hdPtr->turfio.bufferDepth;
-   turfioReserved=hdPtr->turfio.reserved;
-   upperL1TrigPattern=hdPtr->turfio.upperL1TrigPattern;
-   lowerL1TrigPattern=hdPtr->turfio.lowerL1TrigPattern;
-   upperL2TrigPattern=hdPtr->turfio.upperL2TrigPattern;
-   lowerL2TrigPattern=hdPtr->turfio.lowerL2TrigPattern;
+   turfioReserved=hdPtr->turfio.reserved[0];
    l3TrigPattern=hdPtr->turfio.l3TrigPattern;
    memcpy(reserved,hdPtr->reserved,2*sizeof(UChar_t));
-   memcpy(otherTrigPattern,hdPtr->turfio.otherTrigPattern,3*sizeof(UShort_t));
-   nadirL1TrigPattern=hdPtr->turfio.nadirL1TrigPattern;
-   nadirL2TrigPattern=hdPtr->turfio.nadirL2TrigPattern;
    run=trun;
    realTime=trealTime;
    triggerTime=ttriggerTime;
@@ -78,18 +73,19 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
 }
 
 
-RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer13_t *hdPtr, Int_t trun, UInt_t trealTime,
+
+RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer30_t *hdPtr, Int_t trun, UInt_t trealTime,
 			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
 {
  if(hdPtr->gHdr.code!=PACKET_HD ||
-     hdPtr->gHdr.verId!=13 ||
-     hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeaderVer13_t)) {
+     hdPtr->gHdr.verId!=VER_EVENT_HEADER ||
+     hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeader_t)) {
     std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
 	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
-	      << "\nversion:\t" << hdPtr->gHdr.verId 
-	      << "\t" << 13
+	      << "\nversion:\t" << (int)hdPtr->gHdr.verId 
+	      << "\t" << (int)VER_EVENT_HEADER 
 	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
-	      << sizeof(AnitaEventHeaderVer13_t) << std::endl;
+	      << sizeof(AnitaEventHeader_t) << std::endl;
   }
 
    payloadTime=hdPtr->unixTime;
@@ -124,6 +120,63 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer13_t *hdPtr, Int_t trun, UInt_
    memcpy(otherTrigPattern,hdPtr->turfio.otherTrigPattern,3*sizeof(UShort_t));
    nadirL1TrigPattern=hdPtr->turfio.nadirL1TrigPattern;
    nadirL2TrigPattern=hdPtr->turfio.nadirL2TrigPattern;
+   run=trun;
+   realTime=trealTime;
+   triggerTime=ttriggerTime;
+   triggerTimeNs=ttriggerTimeNs;
+   goodTimeFlag=tgoodTimeFlag;
+}
+
+
+
+
+RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer13_t *hdPtr, Int_t trun, UInt_t trealTime,
+			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
+{
+ if(hdPtr->gHdr.code!=PACKET_HD ||
+     hdPtr->gHdr.verId!=13 ||
+     hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeaderVer13_t)) {
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
+	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
+	      << "\nversion:\t" << hdPtr->gHdr.verId 
+	      << "\t" << 13
+	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
+	      << sizeof(AnitaEventHeaderVer13_t) << std::endl;
+  }
+
+   payloadTime=hdPtr->unixTime;
+   payloadTimeUs=hdPtr->unixTimeUs;
+   gpsSubTime=hdPtr->gpsSubTime;
+   turfEventId=hdPtr->turfEventId;
+   eventNumber=hdPtr->eventNumber;
+   calibStatus=hdPtr->calibStatus;
+   priority=hdPtr->priority;
+   turfUpperWord=hdPtr->turfUpperWord;
+   otherFlag=hdPtr->otherFlag;
+   errorFlag=hdPtr->errorFlag;
+   surfSlipFlag=hdPtr->surfSlipFlag;
+   nadirAntTrigMask=hdPtr->nadirAntTrigMask;
+   antTrigMask=hdPtr->antTrigMask;
+   phiTrigMask=hdPtr->phiTrigMask;
+   phiTrigMaskH=0;//hdPtr->phiTrigMaskH;
+   trigType=hdPtr->turfio.trigType;
+   l3Type1Count=hdPtr->turfio.l3Type1Count;
+   trigNum=hdPtr->turfio.trigNum;
+   trigTime=hdPtr->turfio.trigTime;
+   c3poNum=hdPtr->turfio.c3poNum;
+   ppsNum=hdPtr->turfio.ppsNum;
+   deadTime=hdPtr->turfio.deadTime;
+   bufferDepth=hdPtr->turfio.bufferDepth;
+     turfioReserved=hdPtr->turfio.reserved;
+   upperL1TrigPattern=hdPtr->turfio.upperL1TrigPattern;
+   lowerL1TrigPattern=hdPtr->turfio.lowerL1TrigPattern;
+   upperL2TrigPattern=hdPtr->turfio.upperL2TrigPattern;
+   lowerL2TrigPattern=hdPtr->turfio.lowerL2TrigPattern;
+   l3TrigPattern=hdPtr->turfio.l3TrigPattern;
+   memcpy(reserved,hdPtr->reserved,2*sizeof(UChar_t));
+     memcpy(otherTrigPattern,hdPtr->turfio.otherTrigPattern,3*sizeof(UShort_t));
+     nadirL1TrigPattern=hdPtr->turfio.nadirL1TrigPattern;
+     nadirL2TrigPattern=hdPtr->turfio.nadirL2TrigPattern;
    run=trun;
    realTime=trealTime;
    triggerTime=ttriggerTime;
@@ -160,6 +213,7 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer12_t *hdPtr, Int_t trun, UInt_
    nadirAntTrigMask=hdPtr->nadirAntTrigMask;
    antTrigMask=hdPtr->antTrigMask;
    phiTrigMask=0;
+   phiTrigMaskH=0;
    trigType=hdPtr->turfio.trigType;
    l3Type1Count=hdPtr->turfio.l3Type1Count;
    trigNum=hdPtr->turfio.trigNum;
@@ -168,16 +222,16 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer12_t *hdPtr, Int_t trun, UInt_
    ppsNum=hdPtr->turfio.ppsNum;
    deadTime=hdPtr->turfio.deadTime;
    bufferDepth=hdPtr->turfio.bufferDepth;
-   turfioReserved=hdPtr->turfio.reserved;
+     turfioReserved=hdPtr->turfio.reserved;
    upperL1TrigPattern=hdPtr->turfio.upperL1TrigPattern;
    lowerL1TrigPattern=hdPtr->turfio.lowerL1TrigPattern;
    upperL2TrigPattern=hdPtr->turfio.upperL2TrigPattern;
    lowerL2TrigPattern=hdPtr->turfio.lowerL2TrigPattern;
    l3TrigPattern=hdPtr->turfio.l3TrigPattern;
    memset(reserved,0,2*sizeof(UChar_t));
-   memcpy(otherTrigPattern,hdPtr->turfio.otherTrigPattern,3*sizeof(UShort_t));
-   nadirL1TrigPattern=hdPtr->turfio.nadirL1TrigPattern;
-   nadirL2TrigPattern=hdPtr->turfio.nadirL2TrigPattern;
+     memcpy(otherTrigPattern,hdPtr->turfio.otherTrigPattern,3*sizeof(UShort_t));
+     nadirL1TrigPattern=hdPtr->turfio.nadirL1TrigPattern;
+     nadirL2TrigPattern=hdPtr->turfio.nadirL2TrigPattern;
    run=trun;
    realTime=trealTime;
    triggerTime=ttriggerTime;
@@ -215,6 +269,7 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer11_t *hdPtr, Int_t trun, UInt_
    nadirAntTrigMask=hdPtr->nadirAntTrigMask;
    antTrigMask=hdPtr->antTrigMask;
    phiTrigMask=0;
+   phiTrigMaskH=0;
    trigType=hdPtr->turfio.trigType;
    l3Type1Count=hdPtr->turfio.l3Type1Count;
    trigNum=hdPtr->turfio.trigNum;
@@ -230,9 +285,6 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer11_t *hdPtr, Int_t trun, UInt_
    lowerL2TrigPattern=hdPtr->turfio.lowerL2TrigPattern;
    l3TrigPattern=hdPtr->turfio.l3TrigPattern;
    memset(reserved,0,2*sizeof(UChar_t));
-   memcpy(otherTrigPattern,hdPtr->turfio.otherTrigPattern,3*sizeof(UShort_t));
-   nadirL1TrigPattern=hdPtr->turfio.nadirL1TrigPattern;
-   nadirL2TrigPattern=hdPtr->turfio.nadirL2TrigPattern;
    run=trun;
    realTime=trealTime;
    triggerTime=ttriggerTime;
@@ -270,6 +322,7 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer10_t *hdPtr, Int_t trun, UInt_
    nadirAntTrigMask=0;
    antTrigMask=hdPtr->antTrigMask;
    phiTrigMask=0;
+   phiTrigMaskH=0;
    trigType=hdPtr->turfio.trigType;
    l3Type1Count=hdPtr->turfio.l3Type1Count;
    trigNum=hdPtr->turfio.trigNum;
@@ -285,9 +338,6 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer10_t *hdPtr, Int_t trun, UInt_
    lowerL2TrigPattern=hdPtr->turfio.lowerL2TrigPattern;
    l3TrigPattern=hdPtr->turfio.l3TrigPattern;
    memset(reserved,0,2*sizeof(UChar_t));
-   memcpy(otherTrigPattern,hdPtr->turfio.otherTrigPattern,3*sizeof(UShort_t));
-   nadirL1TrigPattern=hdPtr->turfio.nadirL1TrigPattern;
-   nadirL2TrigPattern=hdPtr->turfio.nadirL2TrigPattern;
    run=trun;
    realTime=trealTime;
    triggerTime=ttriggerTime;

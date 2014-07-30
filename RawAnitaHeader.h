@@ -25,14 +25,16 @@ class RawAnitaHeader: public TObject
    RawAnitaHeader(); ///< Default constructor
    RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t run, UInt_t realTime,
 		  UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Assignment constructor
+  RawAnitaHeader(AnitaEventHeaderVer30_t *hdPtr, Int_t run, UInt_t realTime,
+  		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 30 constructor
   RawAnitaHeader(AnitaEventHeaderVer13_t *hdPtr, Int_t run, UInt_t realTime,
-		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 13 constructor
+  		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 13 constructor
   RawAnitaHeader(AnitaEventHeaderVer12_t *hdPtr, Int_t run, UInt_t realTime,
-		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 12 constructor
+  		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 12 constructor
   RawAnitaHeader(AnitaEventHeaderVer11_t *hdPtr, Int_t run, UInt_t realTime,
-		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 11 constructor
+  		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 11 constructor
   RawAnitaHeader(AnitaEventHeaderVer10_t *hdPtr, Int_t run, UInt_t realTime,
-		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 10 constructor
+  		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 10 constructor
   ~RawAnitaHeader(); ///< Destructor
 
   Int_t           run; ///< Run number, assigned on ground
@@ -87,8 +89,13 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
   UChar_t         errorFlag;
   UChar_t         surfSlipFlag; ///< Sync Slip between SURF 2-9 and SURF 1
   UChar_t         nadirAntTrigMask; ///< 8-bit nadir phi mask (from TURF)
-  UInt_t          antTrigMask; ///< 2x 16-bit phi ant mask (from TURF)
+  UInt_t          antTrigMask; ///< Deprecated
+
+  UShort_t        l1TrigMask;
+  UShort_t        l1TrigMaskH;
+
   UShort_t        phiTrigMask; ///< 16-bit phi mask (from TURF)
+  UShort_t        phiTrigMaskH; ///< 16-bit phi mask (from TURF)
   //!  Reserved bytes
   /*!
     The lower four bits of the first byte (reserved[0]&0xf) show the TURF hold issued for this trigger. There should be only one buffer held per trigger and it should match the SURF labrador readout for the event.
