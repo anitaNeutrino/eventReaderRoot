@@ -53,10 +53,10 @@ SlowRate::SlowRate(Int_t trun, UInt_t trealTime, SlowRateFull_t *slowPtr)
 
    memcpy(rfPwrAvg,&(slowPtr->rf.rfPwrAvg[0][0]),sizeof(UChar_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
    memcpy(avgScalerRates,&(slowPtr->rf.avgScalerRates[0][0]),sizeof(UChar_t)*TRIGGER_SURFS*ANTS_PER_SURF);
-   memcpy(rmsScalerRates,&(slowPtr->rf.rmsScalerRates[0][0]),sizeof(UChar_t)*TRIGGER_SURFS*ANTS_PER_SURF);
-   memcpy(avgL1Rates,&(slowPtr->rf.avgL1Rates[0]),sizeof(UChar_t)*TRIGGER_SURFS);
-   memcpy(avgL2Rates,&(slowPtr->rf.avgL2Rates[0]),sizeof(UChar_t)*PHI_SECTORS);
-   memcpy(avgL3Rates,&(slowPtr->rf.avgL3Rates[0]),sizeof(UChar_t)*PHI_SECTORS);
+   //   memcpy(rmsScalerRates,&(slowPtr->rf.rmsScalerRates[0][0]),sizeof(UChar_t)*TRIGGER_SURFS*ANTS_PER_SURF);
+   //   memcpy(avgL1Rates,&(slowPtr->rf.avgL1Rates[0]),sizeof(UChar_t)*TRIGGER_SURFS);
+   //   memcpy(avgL2Rates,&(slowPtr->rf.avgL2Rates[0]),sizeof(UChar_t)*PHI_SECTORS);
+   //   memcpy(avgL3Rates,&(slowPtr->rf.avgL3Rates[0]),sizeof(UChar_t)*PHI_SECTORS);
 
    memcpy(temps,&(slowPtr->hk.temps[0]),sizeof(UChar_t)*4);
    memcpy(powers,&(slowPtr->hk.powers[0]),sizeof(UChar_t)*4);

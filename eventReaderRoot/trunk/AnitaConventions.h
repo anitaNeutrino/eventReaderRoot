@@ -138,6 +138,7 @@ namespace WaveCalType {
 
 //Trigger Stuff
 #define ANTS_PER_SURF 4 ///< Number of trigger antennas per SURF.
+#define TRIGGERS_PER_SURF 8  ///< Who knows
 #define TRIGGER_SURFS 10 ///< Who knows
 #define PHI_SECTORS 16 ///< Number of azimuthal phi sectors
 #define BANDS_PER_ANT 4 ///< Number of frequency bands used in the trigger

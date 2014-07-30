@@ -43,15 +43,16 @@ SummedTurfRate::SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStruct
    deltaT=turfPtr->deltaT;
    deadTime=turfPtr->deadTime;
    memcpy(bufferCount,turfPtr->bufferCount,sizeof(UChar_t)*4);
-   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UInt_t)*PHI_SECTORS*2);
-   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UShort_t)*PHI_SECTORS);
-   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UShort_t)*PHI_SECTORS);
+   //   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UInt_t)*PHI_SECTORS*2);
+   //   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UShort_t)*PHI_SECTORS);
+   //   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UShort_t)*PHI_SECTORS);
    memcpy(l3Rates,turfPtr->l3Rates,sizeof(UShort_t)*PHI_SECTORS);
-   memcpy(nadirL1Rates,turfPtr->nadirL1Rates,sizeof(UInt_t)*NADIR_ANTS);
-   memcpy(nadirL2Rates,turfPtr->nadirL2Rates,sizeof(UShort_t)*NADIR_ANTS);
-   antTrigMask=turfPtr->antTrigMask;
+   //   memcpy(nadirL1Rates,turfPtr->nadirL1Rates,sizeof(UInt_t)*NADIR_ANTS);
+   //   memcpy(nadirL2Rates,turfPtr->nadirL2Rates,sizeof(UShort_t)*NADIR_ANTS);
+   //   antTrigMask=turfPtr->antTrigMask;
    phiTrigMask=turfPtr->phiTrigMask;   
-   nadirAntTrigMask=turfPtr->nadirAntTrigMask;
+   phiTrigMaskH=turfPtr->phiTrigMaskH;   
+   //   nadirAntTrigMask=turfPtr->nadirAntTrigMask;
    errorFlag=turfPtr->errorFlag;
    intFlag=0;
 
