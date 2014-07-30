@@ -41,7 +41,13 @@ class AcqdStart: public TObject
    UInt_t turfIdVersion;
    UChar_t turfioIdBytes[4];
    UInt_t turfioIdVersion;
+
+
+   UChar_t surfIdBytes[ACTIVE_SURFS][4];
+   UInt_t surfIdVersion[ACTIVE_SURFS];
    
+
+
    UChar_t         testBytes[8];
    Float_t         chanMean[ACTIVE_SURFS][CHANNELS_PER_SURF]; ///<Ped subtracted
    Float_t         chanRMS[ACTIVE_SURFS][CHANNELS_PER_SURF]; ///<Ped subtracted
@@ -50,7 +56,8 @@ class AcqdStart: public TObject
    
    void printTurfioVersion();
    void printTurfVersion();
-
+   void printSurfVersion();
+   
 
   ClassDef(AcqdStart,11);
 };

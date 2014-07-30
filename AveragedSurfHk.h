@@ -27,6 +27,7 @@ class AveragedSurfHk: public TObject
    ~AveragedSurfHk(); ///<Default destructor
 
   AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct_t *surfPtr); ///< Default assignment constructor
+  AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStructVer30_t *surfPtr); ///< Assignment constructor for version 30
   AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStructVer14_t *surfPtr); ///< Assignment constructor for version 14
   AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStructVer13_t *surfPtr); ///< Assignment constructor for version 13
   AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStructVer12_t *surfPtr); ///< Assignment constructor for version 12
@@ -42,10 +43,13 @@ class AveragedSurfHk: public TObject
    UShort_t        scalerGoals[BANDS_PER_ANT]; ///< The scaler goals for the four bands
    UShort_t        scalerGoalsNadir[BANDS_PER_ANT]; ///< The scaler goals for the four bands of the andir ring
    UShort_t        upperWords[ACTIVE_SURFS]; ///< The upper words -- contains debugging info
-   UShort_t        avgScaler[ACTIVE_SURFS][SCALERS_PER_SURF]; ///< The mean scaler value per channel
-   UShort_t        rmsScaler[ACTIVE_SURFS][SCALERS_PER_SURF]; ///< The rms scaler value per channel
-   UShort_t        avgThresh[ACTIVE_SURFS][SCALERS_PER_SURF]; ///< The mean threshold value per channel
-   UShort_t        rmsThresh[ACTIVE_SURFS][SCALERS_PER_SURF]; ///< The rms threhsold value per channel
+   UShort_t        avgScaler[ACTIVE_SURFS][SCALERS_PER_SURF_V30]; ///< The mean scaler value per channel
+   UShort_t        rmsScaler[ACTIVE_SURFS][SCALERS_PER_SURF_V30]; ///< The rms scaler value per channel
+   UShort_t        avgL1[ACTIVE_SURFS][L1S_PER_SURF]; ///< The mean scaler value per channel
+   UShort_t        rmsL1[ACTIVE_SURFS][L1S_PER_SURF]; ///< The rms scaler value per channel
+   UShort_t        avgThresh[ACTIVE_SURFS][SCALERS_PER_SURF_V30]; ///< The mean threshold value per channel
+   UShort_t        rmsThresh[ACTIVE_SURFS][SCALERS_PER_SURF_V30]; ///< The rms threhsold value per channel
+
    UShort_t        avgRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF]; ///< The mean RF power value per channel
    UShort_t        rmsRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF]; ///< The rms RF power value per channel
    UShort_t        surfTrigBandMask[ACTIVE_SURFS]; ///< The mask showing whcih bands were excluded from the trigger
@@ -65,7 +69,7 @@ class AveragedSurfHk: public TObject
    Double_t getRMSRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
    Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
    Double_t getMeasuredRMSRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
-  ClassDef(AveragedSurfHk,13);
+  ClassDef(AveragedSurfHk,31);
 };
 
 

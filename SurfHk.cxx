@@ -47,12 +47,46 @@ SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr)
   payloadTimeUs=surfPtr->unixTimeUs;
   globalThreshold=surfPtr->globalThreshold;
   errorFlag=surfPtr->errorFlag;
+  memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*NUM_ANTENNA_RINGS);
+  memcpy(upperWords,surfPtr->upperWords,sizeof(UShort_t)*ACTIVE_SURFS);
+  memcpy(scaler,surfPtr->scaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(l1Scaler,surfPtr->l1Scaler,sizeof(UShort_t)*ACTIVE_SURFS*L1S_PER_SURF);
+  memcpy(threshold,surfPtr->threshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(setThreshold,surfPtr->setThreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(rfPower,surfPtr->rfPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
+  memcpy(surfTrigBandMask,surfPtr->surfTrigBandMask,sizeof(UShort_t)*ACTIVE_SURFS);
+  intFlag=0;
+}
+
+
+
+SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer30_t *surfPtr)
+{
+  if(surfPtr->gHdr.code!=PACKET_SURF_HK ||
+     surfPtr->gHdr.verId!=VER_SURF_HK ||
+     surfPtr->gHdr.numBytes!=sizeof(FullSurfHkStruct_t)) {
+     std::cerr << "Mismatched packet\t" << packetCodeAsString(PACKET_SURF_HK)
+	 
+	       << "\ncode:\t" << (int)surfPtr->gHdr.code << "\t" << PACKET_SURF_HK 
+	       << "\nversion:\t" << (int)surfPtr->gHdr.verId 
+	       << "\t" << VER_SURF_HK 
+	       << "\nsize:\t" << surfPtr->gHdr.numBytes << "\t"
+	       << sizeof(FullSurfHkStruct_t) << std::endl;
+  }
+     
+
+  run=trun;
+  realTime=trealTime;
+  payloadTime=surfPtr->unixTime;
+  payloadTimeUs=surfPtr->unixTimeUs;
+  globalThreshold=surfPtr->globalThreshold;
+  errorFlag=surfPtr->errorFlag;
   memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*BANDS_PER_ANT);
   memcpy(scalerGoalsNadir,surfPtr->scalerGoalsNadir,sizeof(UShort_t)*BANDS_PER_ANT);
   memcpy(upperWords,surfPtr->upperWords,sizeof(UShort_t)*ACTIVE_SURFS);
-  memcpy(scaler,surfPtr->scaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
-  memcpy(threshold,surfPtr->threshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
-  memcpy(setThreshold,surfPtr->setThreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(scaler,surfPtr->scaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
+  memcpy(threshold,surfPtr->threshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
+  memcpy(setThreshold,surfPtr->setThreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
   memcpy(rfPower,surfPtr->rfPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
   memcpy(surfTrigBandMask,surfPtr->surfTrigBandMask,sizeof(UShort_t)*ACTIVE_SURFS);
   intFlag=0;
