@@ -50,8 +50,12 @@ AcqdStart::AcqdStart(Int_t trun, Int_t trealTime, AcqdStartStruct_t *startPtr)
   turfIdVersion=startPtr->turfIdVersion;
   turfioIdVersion=startPtr->turfioIdVersion;
 
+  memcpy(surfIdBytes,startPtr->surfIdBytes,sizeof(UChar_t)*4*ACTIVE_SURFS);
+  memcpy(surfIdVersion,startPtr->surfIdVersion,sizeof(UInt_t)*ACTIVE_SURFS);
+
   printTurfioVersion();
   printTurfVersion();
+  printSurfVersion();
 
 }
 
@@ -82,6 +86,26 @@ void AcqdStart::printTurfioVersion() {
   int rev=turfioIdVersion&0xff;
 
   printf("Version: %d %d/%d %d-%d %d\n",boardRevision,month,day,majorRev,minorRev,rev);
+
+
+}
+
+
+void AcqdStart::printSurfVersion() {
+
+  for(int surf=0;surf<ACTIVE_SURFS;surf++) {
+    printf("SURF: %c %c %c %c\n",surfIdBytes[surf][0],surfIdBytes[surf][1],surfIdBytes[surf][2],surfIdBytes[surf][3]);
+    printf("Version: %#x\n",surfIdVersion[surf]);
+    printf("Version: %x %x %x %x\n",surfIdVersion[surf]&0xFF,(surfIdVersion[surf]&0xFF00)>>8,(surfIdVersion[surf]&0xFF0000)>>16,(surfIdVersion[surf]&0xFF000000)>>24);
+    int boardRevision=surfIdVersion[surf]>>28;
+    int month=((surfIdVersion[surf]>>24)&0xf);
+    int day=((surfIdVersion[surf])&0x00ff0000)>>16;
+    int majorRev=((surfIdVersion[surf]>>12)&0xf);
+    int minorRev=((surfIdVersion[surf]>>8)&0xf);
+    int rev=surfIdVersion[surf]&0xff;
+    
+    printf("SURF %d: Version: %d %d/%d %d-%d %d\n",surf+1,boardRevision,month,day,majorRev,minorRev,rev);
+  }
 
 
 }

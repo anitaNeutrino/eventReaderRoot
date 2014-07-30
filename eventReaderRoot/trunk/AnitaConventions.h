@@ -113,7 +113,9 @@ namespace WaveCalType {
 #define ACTIVE_SURFS 12 ///< The number of SURF digitizer cards.
 #endif
 
-#define SCALERS_PER_SURF 16 ///< The number of active trigger channels per SURF.
+#define SCALERS_PER_SURF 12 ///< The number of active trigger channels per SURF.
+#define SCALERS_PER_SURF_V30 16 ///< The number of active trigger channels per SURF.
+#define L1S_PER_SURF 4
 #define RFCHAN_PER_SURF 8 ///< The number of RF input channels per SURF.
 #define CHANNELS_PER_SURF 9 ///< The total number of channels per SURF (including the clock).
 #define LABRADORS_PER_SURF 4 ///< The number of LABRADOR chips per SURF.
@@ -122,9 +124,13 @@ namespace WaveCalType {
 #define MAX_NUMBER_SAMPLES 260 ///< The number of samples per waveform.
 #define EFFECTIVE_SAMPLES 256 ///< The number of capacitors in the main array.
 #define NUM_PHI 16 ///< The number of azimuthal segments.
+#define NUM_ANTENNA_RINGS 3
+
+
 #define NUM_NADIRS 8 ///< The number of dropdown antennas.
 #define NUM_BICONES 4 ///< The number of calibration bicone antennas.
 #define NUM_DISCONES 4 ///< Defunct
+
 
 #define BASE_PACKET_MASK 0xffff ///< Bit mask to select packet code in GenericHeader_t
 
@@ -143,7 +149,9 @@ namespace WaveCalType {
 #define PHI_SECTORS 16 ///< Number of azimuthal phi sectors
 #define BANDS_PER_ANT 4 ///< Number of frequency bands used in the trigger
 #define TURF_BANK_SIZE 4 ///< Number of TURF register banks
+#define TURF_EVENT_DATA_SIZE 256
 #define NADIR_ANTS 8 ///< Number of nadir dropdown antennas
+
 
 #define WRAPPED_HITBUS 0x8 ///< Bit 3 is the wrapped hitbus bit
 

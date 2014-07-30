@@ -153,7 +153,7 @@ The second byte (reserved[1]) is currently reserved.
   int getTurfEventNumber()
   { return (turfEventId&0xfffff);} ///< Returns the event number portion of the TURF event id.
 
-  ClassDef(RawAnitaHeader,13);
+  ClassDef(RawAnitaHeader,33);
 };
 
 
