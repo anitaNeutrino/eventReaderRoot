@@ -59,7 +59,7 @@ class AcqdStart: public TObject
    void printSurfVersion();
    
 
-  ClassDef(AcqdStart,11);
+  ClassDef(AcqdStart,31);
 };
 
 

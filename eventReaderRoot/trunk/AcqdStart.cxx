@@ -95,8 +95,8 @@ void AcqdStart::printSurfVersion() {
 
   for(int surf=0;surf<ACTIVE_SURFS;surf++) {
     printf("SURF: %c %c %c %c\n",surfIdBytes[surf][0],surfIdBytes[surf][1],surfIdBytes[surf][2],surfIdBytes[surf][3]);
-    printf("Version: %#x\n",surfIdVersion[surf]);
-    printf("Version: %x %x %x %x\n",surfIdVersion[surf]&0xFF,(surfIdVersion[surf]&0xFF00)>>8,(surfIdVersion[surf]&0xFF0000)>>16,(surfIdVersion[surf]&0xFF000000)>>24);
+    //    printf("Version: %#x\n",surfIdVersion[surf]);
+    //printf("Version: %x %x %x %x\n",surfIdVersion[surf]&0xFF,(surfIdVersion[surf]&0xFF00)>>8,(surfIdVersion[surf]&0xFF0000)>>16,(surfIdVersion[surf]&0xFF000000)>>24);
     int boardRevision=surfIdVersion[surf]>>28;
     int month=((surfIdVersion[surf]>>24)&0xf);
     int day=((surfIdVersion[surf])&0x00ff0000)>>16;
