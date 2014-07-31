@@ -49,7 +49,7 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    otherFlag=hdPtr->otherFlag;
    errorFlag=hdPtr->errorFlag;
    surfSlipFlag=hdPtr->surfSlipFlag;
-   nadirAntTrigMask=hdPtr->nadirAntTrigMask;
+   //   nadirAntTrigMask=hdPtr->nadirAntTrigMask;
    l1TrigMask=hdPtr->l1TrigMask;
    l1TrigMaskH=hdPtr->l1TrigMaskH;
    phiTrigMask=hdPtr->phiTrigMask;
