@@ -104,13 +104,16 @@ namespace WaveCalType {
 }
 
 ///First up we'll add some definitions of the raw data
-#define NUM_SEAVEYS 40 ///< The number of Seavey antennas.
 #define NUM_SEAVEYS_ANITA1 32 ///< The number of Seavey antennas.
+#define NUM_SEAVEYS_ANITA2 40 ///< The number of Seavey antennas.
+#define NUM_SEAVEYS_ANITA3 48 ///< The number of Seavey antennas.
 #define NUM_POLS 2 ///< The number of polarisations per Seavey
 #ifdef ANITA_2_DATA
 #define ACTIVE_SURFS 10 ///< The number of SURF digitizer cards.
+#define NUM_SEAVEYS NUM_SEAVEYS_ANITA2 ///< The number of Seavey antennas.
 #else
 #define ACTIVE_SURFS 12 ///< The number of SURF digitizer cards.
+#define NUM_SEAVEYS NUM_SEAVEYS_ANITA3 ///< The number of Seavey antennas.
 #endif
 
 #define SCALERS_PER_SURF 12 ///< The number of active trigger channels per SURF.
@@ -205,9 +208,12 @@ namespace WaveCalType {
 */
 namespace AnitaRing {
    typedef enum EAnitaRing {
-     kUpperRing  = 0, ///< The Upper Ring.
-     kLowerRing  = 1, ///< The Lower Ring.
-     kNadirRing = 2, ///< The Nadir Ring.
+     kTopRing  = 0, ///< The Top Ring.
+     kUpperRing = kTopRing,
+     kMiddleRing  = 1, ///< The Middle Ring.
+     kLowerRing = kMiddleRing,
+     kBottomRing = 2, ///< The Bottom Ring.
+     kNadirRing=kBottomRing,
      kNotARing ///< Useful in for loops.
    } AnitaRing_t; ///< Ring enumeration
    

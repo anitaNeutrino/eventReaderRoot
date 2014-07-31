@@ -171,8 +171,8 @@ class AnitaGeomTool
   static int getSurfChanFromChanIndex(int chanIndex, // input channel index
 				      int &surf,int &chan); ///< Convert logical index to  surf and channel
   
-  static int getRFCMFromAnt(int ant); ///<Returns the RFCM number
-  static int getRFCMChannelFromAntPol(int ant,AnitaPol::AnitaPol_t pol); ///< Returns the RFCM channel number
+  //  static int getRFCMFromAnt(int ant); ///<Returns the RFCM number
+  //  static int getRFCMChannelFromAntPol(int ant,AnitaPol::AnitaPol_t pol); ///< Returns the RFCM channel number
 
   static int getAntPolFromSurfChan(int surf,int chan,int &ant,AnitaPol::AnitaPol_t &pol); ///< Convert surf-chan to ant-pol
   
@@ -202,7 +202,9 @@ class AnitaGeomTool
   Double_t getAntPhiPosition(int ant, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna phi position
   Double_t getAntPhiPositionRelToAftFore(int ant, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna phi position relative to ADU5 AFT-FORE line
   Double_t getMeanAntPairPhiRelToAftFore(int firstAnt, int secondAnt, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< The mean of the two antenna phi positions
-  Int_t getUpperAntNearestPhiWave(Double_t phiWave, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna closest to given plane wave direction
+  Int_t getTopAntNearestPhiWave(Double_t phiWave, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna closest to given plane wave direction
+  Int_t getUpperAntNearestPhiWave(Double_t phiWave, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) {return getTopAntNearestPhiWave(phiWave,pol);}
+
 
   
   void getAntFaceXYZ(int ant, Double_t &x, Double_t &y, Double_t &z); ///< get location fo antenna face in balloon cartesian coordinates
@@ -210,7 +212,8 @@ class AnitaGeomTool
   Double_t getAntFaceR(int ant); ///< get r position for antenna face
   Double_t getAntFacePhiPosition(int ant); ///< get phi position for antenna face
   Double_t getAntFacePhiPositionRelToAftFore(int ant); ///< get phi position relative to ADU5 AFT-FORE direction
-  Int_t getUpperAntFaceNearestPhiWave(Double_t phiWave); ///< get upper antenna closest to given plane wave direction
+  Int_t getTopAntFaceNearestPhiWave(Double_t phiWave); ///< get upper antenna closest to given plane wave direction
+  Int_t getUpperAntFaceNearestPhiWave(Double_t phiWave) { return getTopAntFaceNearestPhiWave(phiWave);}///< get upper antenna closest to given plane wave direction
 
   //  Double_t phaseCentreToAntFront; //m
   
