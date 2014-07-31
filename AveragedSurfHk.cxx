@@ -46,7 +46,7 @@ AveragedSurfHk::AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct
   deltaT=surfPtr->deltaT;
   hadError=surfPtr->hadError;
   globalThreshold=surfPtr->globalThreshold;
-  reserved=surfPtr->reserved;
+  //  reserved=surfPtr->reserved;
   memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*NUM_ANTENNA_RINGS);
   memcpy(avgScaler,surfPtr->avgScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
   memcpy(rmsScaler,surfPtr->rmsScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);

@@ -140,7 +140,7 @@
 #define VER_GPSD_START 30
 #define VER_LOGWATCHD_START 30
 #define VER_AVG_SURF_HK 31
-#define VER_SUM_TURF_RATE 33
+#define VER_SUM_TURF_RATE 34
 #define VER_ACQD_START 32
 #define VER_TURF_REG 30
 #define VER_TURF_EVENT_DATA 30
@@ -773,12 +773,7 @@ typedef struct {
     unsigned short deltaT; ///<Difference in time between first and last 
     unsigned int deadTime; ///<Summed dead time between first and last
     unsigned char bufferCount[4]; ///<Counting filled buffers
-    unsigned int l1Rates[PHI_SECTORS][2]; ///<x16/numRates to get Hz 
-    unsigned short upperL2Rates[PHI_SECTORS]; ///<x64/numRates to get Hz
-    unsigned short lowerL2Rates[PHI_SECTORS]; ///<x64/numRates to get Hz
-    unsigned short l3Rates[PHI_SECTORS]; ///< /numRates to get Hz
-    unsigned int nadirL1Rates[NADIR_ANTS]; ///<x16/numRates to get Hz
-    unsigned short nadirL2Rates[NADIR_ANTS]; ///<x64/numRates to get Hz  
+    unsigned short l3Rates[PHI_SECTORS][2]; ///</numRates to get Hz z  
     unsigned short l1TrigMask; ///<As read from TURF (16-bit phi)
     unsigned short l1TrigMaskH; ///<As read from TURF (16-bit phi)
     unsigned short phiTrigMask; ///<16-bit phi-sector mask
@@ -822,7 +817,7 @@ typedef struct {
   */
   unsigned char errorFlag; 
   unsigned char surfSlipFlag; ///< Sync Slip between SURF 2-9 and SURF 1
-  unsigned char nadirAntTrigMask; ///< 8-bit nadir phi mask (from TURF)
+  unsigned char blank; ///< 8-bit nadir phi mask (from TURF)
   unsigned short l1TrigMask; ///< 16-bit phi ant mask (from TURF)
   unsigned short l1TrigMaskH; ///< 16-bit phi ant mask (from TURF)
   unsigned short phiTrigMask; ///< 16-bit phi mask (from TURF)
@@ -1043,6 +1038,7 @@ typedef struct {
 */
 typedef struct {
   GenericHeader_t gHdr;
+  unsigned int unixTime;
   unsigned char turfIdBytes[4];
   unsigned int turfIdVersion;
   unsigned char turfioIdBytes[4];
@@ -1050,7 +1046,6 @@ typedef struct {
   unsigned char surfIdBytes[ACTIVE_SURFS][4];
   unsigned int surfIdVersion[ACTIVE_SURFS];
   unsigned char testBytes[8];
-  unsigned int unixTime;
   unsigned int numEvents;
   float chanMean[ACTIVE_SURFS][CHANNELS_PER_SURF]; ///<Ped subtracted
   float chanRMS[ACTIVE_SURFS][CHANNELS_PER_SURF]; ///<Ped subtracted
@@ -1115,7 +1110,6 @@ typedef struct {
   unsigned short deltaT; ///<Difference in time between first and last 
   unsigned int hadError; ///<Bit mask to be defined
   unsigned short globalThreshold;
-  unsigned short reserved; 
   unsigned short scalerGoals[NUM_ANTENNA_RINGS];
   unsigned short avgScaler[ACTIVE_SURFS][SCALERS_PER_SURF];
   unsigned short rmsScaler[ACTIVE_SURFS][SCALERS_PER_SURF];
