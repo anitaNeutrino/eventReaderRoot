@@ -25,33 +25,25 @@ namespace AnitaGeom {
    
   //Positive is horizontal
   //Negative is vetical
-  int antToSurfMap[NUM_SEAVEYS]={5,7,6,1,5,7,6,1,0,2,3,4,0,2,3,4,
-				 0,5,2,7,3,6,4,1,0,5,2,7,3,6,4,1,
-				 8,9,8,9,8,9,8,9};
+  int antToSurfMap[NUM_SEAVEYS]={11,5,10,4,11,4,10,5,11,5,10,4,11,4,10,5,
+				  9,3,8,2,8,3,9,2,9,3,8,2,8,3,9,2,
+				  6,0,7,1,6,1,7,0,6,0,7,1,6,1,7,0};
+
 				  
-  int hAntToChan[NUM_SEAVEYS]={4,4,4,4,5,5,5,5,4,4,4,4,5,5,5,1,
-			       6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,
-			       4,4,5,5,6,6,7,7};
+  int hAntToChan[NUM_SEAVEYS]={7,5,7,5,5,7,5,7,6,4,6,4,4,6,4,6,
+			       5,7,5,7,7,5,7,5,4,6,4,6,6,4,6,4,
+			       7,5,7,5,5,7,5,7,6,4,6,4,4,6,4,6};
   
-  int vAntToChan[NUM_SEAVEYS]={0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,5,
-			       2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,
-			       0,0,1,1,2,2,3,3};
+  
+  int vAntToChan[NUM_SEAVEYS]={3,1,3,1,1,3,1,3,2,0,2,0,0,2,0,2,
+			       1,3,1,3,3,1,3,1,0,2,0,2,2,0,2,0,
+			       3,1,3,1,1,3,1,3,2,0,2,0,0,2,0,2};
    
   ///< 1 is normal orientation, -1 is 180 degree flip, -2 is 90 degree flip (so only H-channels need flipping).
-  int antOrientationMap[NUM_SEAVEYS]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-				      1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,
-				      -2,-2,-2,-2,-2,-2,-2,-2}; 
+  int antOrientationMap[NUM_SEAVEYS]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+				      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+				      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; 
 
-
-  int antToRFCM[NUM_SEAVEYS]={2,8,8,13,13,21,21,2,16,7,7,12,12,14,14,16,
-			       3,3,5,5,6,6,9,9,11,11,4,4,1,1,10,10,
-			       17,18,18,19,19,20,20,17};
-  int hAntToRFCMChan[NUM_SEAVEYS]={1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,
-				   1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,
-				   1,4,1,4,1,4,1,4};  
-  int vAntToRFCMChan[NUM_SEAVEYS]={2,3,2,3,2,3,2,3,2,3,2,3,2,3,2,3,
-				   2,3,2,3,2,3,2,3,2,3,2,3,2,3,2,3,
-				   2,3,2,3,2,3,2,3};  
 
   // SEAVEYS that this array uses antenna number 1-42 as it needs
   // the negative sign to indicate polarization
@@ -59,26 +51,28 @@ namespace AnitaGeom {
    // the negative sign to indicate polarization (-ve is vertical)
 
   int surfToAntMap[ACTIVE_SURFS][RFCHAN_PER_SURF]=
-    {{-9,-13,-17,-25,9,13,17,25},
-     {-4,-8,-24,-32,4,8,24,32},
-     {-10,-14,-19,-27,10,14,19,27},
-     {-11,-15,-21,-29,11,15,21,29},
-     {-12,+16,-23,-31,12,-16,23,31},
-     {-1,-5,-18,-26,1,5,18,26},
-     {-3,-7,-22,-30,3,7,22,30},
-     {-2,-6,-20,-28,2,6,20,28},
-     {-33,-35,-37,-39,33,35,37,39},
-     {-34,-36,-38,-40,34,36,38,40}};
+    {{-42,-34,-48,-40,42,34,48,40},
+     {-44,-36,-46,-38,44,36,46,38},
+     {-32,-24,-28,-20,32,24,28,20},
+     {-30,-22,-26,-18,30,22,26,18},
+     {-12,-4,-14,-6,12,4,14,6},
+     {-10,-2,-16,-8,10,2,16,8},
+     {-45,-37,-41,-33,45,37,41,33},
+     {-47,-39,-43,-35,47,39,43,35},
+     {-27,-19,-29,-21,27,19,29,21},
+     {-25,-17,-31,-23,25,17,31,23},
+     {-15,-7,-11,-3,15,7,11,3},
+     {-13,-5,-9,-1,13,5,9,1}};
       
   //Map from phi to antenna both start counting at zero
-  int upperAntNums[NUM_PHI]={8,0,9,1,10,2,11,3,12,4,13,5,14,6,15,7};
-  int lowerAntNums[NUM_PHI]={16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
-  int nadirAntNums[NUM_PHI]={32,-1,33,-1,34,-1,35,-1,36,-1,37,-1,38,-1,39,-1};
+  int topAntNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+  int middleAntNums[NUM_PHI]={16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+  int bottomAntNums[NUM_PHI]={32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47};
    
   //and the inverse (using ANT-1 and ANT-17 and ANT-32 with the arrays)
-  int upperPhiNums[NUM_PHI]={1,3,5,7,9,11,13,15,0,2,4,6,8,10,12,14};
-  int lowerPhiNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-  int nadirPhiNums[NUM_NADIRS]={0,2,4,6,8,10,12,14};
+  int topPhiNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+  int middlePhiNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+  int bottomPhiNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
    
 }
 
@@ -255,14 +249,14 @@ int AnitaGeomTool::getChanIndexFromRingPhiPol(AnitaRing::AnitaRing_t ring,
   int ant;
   if(phi<0 || phi>15) return -1;
   switch(ring) {
-  case AnitaRing::kUpperRing:
-    ant=AnitaGeom::upperAntNums[phi];
+  case AnitaRing::kTopRing:
+    ant=AnitaGeom::topAntNums[phi];
     break;
-  case AnitaRing::kLowerRing:
-    ant=AnitaGeom::lowerAntNums[phi];
+  case AnitaRing::kMiddleRing:
+    ant=AnitaGeom::middleAntNums[phi];
     break;
-  case AnitaRing::kNadirRing:
-    ant=AnitaGeom::nadirAntNums[phi];
+  case AnitaRing::kBottomRing:
+    ant=AnitaGeom::bottomAntNums[phi];
     break;
   default:
     return -1;
@@ -287,22 +281,22 @@ int AnitaGeomTool::getChanIndexFromAntPol(int ant,
 }
 
 
-int AnitaGeomTool::getRFCMFromAnt(int ant)
-{
-  if(ant<0 || ant>(NUM_SEAVEYS-1)) return -1;
-  return AnitaGeom::antToRFCM[ant];
-}
+// int AnitaGeomTool::getRFCMFromAnt(int ant)
+// {
+//   if(ant<0 || ant>(NUM_SEAVEYS-1)) return -1;
+//   return AnitaGeom::antToRFCM[ant];
+// }
 
-int AnitaGeomTool::getRFCMChannelFromAntPol(int ant,AnitaPol::AnitaPol_t pol)
-{
-  if(ant<0 || ant>(NUM_SEAVEYS-1)) return -1;
-  if(pol==AnitaPol::kHorizontal)
-    return AnitaGeom::hAntToRFCMChan[ant];
-  if(pol==AnitaPol::kVertical)
-    return AnitaGeom::vAntToRFCMChan[ant];
+// int AnitaGeomTool::getRFCMChannelFromAntPol(int ant,AnitaPol::AnitaPol_t pol)
+// {
+//   if(ant<0 || ant>(NUM_SEAVEYS-1)) return -1;
+//   if(pol==AnitaPol::kHorizontal)
+//     return AnitaGeom::hAntToRFCMChan[ant];
+//   if(pol==AnitaPol::kVertical)
+//     return AnitaGeom::vAntToRFCMChan[ant];
   
-  return -1;
-}
+//   return -1;
+// }
 
 
 int AnitaGeomTool::getSurfFromAnt(int ant)
@@ -329,14 +323,14 @@ int AnitaGeomTool::getChanFromAntPol(int ant,AnitaPol::AnitaPol_t pol)
 
 int AnitaGeomTool::getAzimuthPartner(int rx)
 {
-  //Need to update for nadir ring
+  //Need to update for bottom ring
   
   if (rx<16) 
-    return AnitaGeom::lowerAntNums[AnitaGeom::upperPhiNums[rx]];
+    return AnitaGeom::middleAntNums[AnitaGeom::topPhiNums[rx]];
   else if(rx<32)
-    return AnitaGeom::upperAntNums[AnitaGeom::lowerPhiNums[rx-16]]; 
+    return AnitaGeom::topAntNums[AnitaGeom::middlePhiNums[rx-16]]; 
   else
-    return AnitaGeom::lowerAntNums[AnitaGeom::nadirPhiNums[rx-32]]; 
+    return AnitaGeom::middleAntNums[AnitaGeom::bottomPhiNums[rx-32]]; 
 
   return -1;
 }
@@ -388,22 +382,22 @@ void AnitaGeomTool::getThetaPartners(int rx,int& rxleft,int& rxright)
   if (rx<0 || rx>(NUM_SEAVEYS-1))    
     std::cerr << "Antenna number out of range!\n";     
   if (rx<16) {
-    int phi=AnitaGeom::upperPhiNums[rx];
+    int phi=AnitaGeom::topPhiNums[rx];
     int phiLeft=phi-1;
     if(phiLeft<0) phiLeft=15;
     int phiRight=phi+1;
     if(phiRight>15) phiRight=0;
-    rxleft=AnitaGeom::upperAntNums[phiLeft];
-    rxright=AnitaGeom::upperAntNums[phiRight];
+    rxleft=AnitaGeom::topAntNums[phiLeft];
+    rxright=AnitaGeom::topAntNums[phiRight];
   }
   else if (rx<32){
-    int phi=AnitaGeom::lowerPhiNums[rx-16];
+    int phi=AnitaGeom::middlePhiNums[rx-16];
     int phiLeft=phi-1;
     if(phiLeft<0) phiLeft=15;
     int phiRight=phi+1;
     if(phiRight>15) phiRight=0;
-    rxleft=AnitaGeom::lowerAntNums[phiLeft];
-    rxright=AnitaGeom::lowerAntNums[phiRight];
+    rxleft=AnitaGeom::middleAntNums[phiLeft];
+    rxright=AnitaGeom::middleAntNums[phiRight];
   }
   else{
     if (rx<39 && rx>31)    
@@ -422,11 +416,11 @@ void AnitaGeomTool::getThetaPartners(int rx,int& rxleft,int& rxright)
 int AnitaGeomTool::getPhiSector(int rx)
 {
   if (rx<16)
-    return AnitaGeom::upperPhiNums[rx];
+    return AnitaGeom::topPhiNums[rx];
   else if(rx<32)
-    return AnitaGeom::lowerPhiNums[rx-16];
+    return AnitaGeom::middlePhiNums[rx-16];
   else if(rx<40) {
-    return AnitaGeom::nadirPhiNums[rx-32];
+    return AnitaGeom::bottomPhiNums[rx-32];
   }
 
   return 0;
@@ -498,13 +492,13 @@ int AnitaGeomTool::getLayer(int irx)
 
 AnitaRing::AnitaRing_t AnitaGeomTool::getRingFromAnt(int ant) {
   if (ant<8)
-    return AnitaRing::kUpperRing;
+    return AnitaRing::kTopRing;
   else if (ant>=8 && ant<16)
-    return AnitaRing::kUpperRing;
+    return AnitaRing::kTopRing;
   else if (ant<32)
-    return AnitaRing::kLowerRing;
+    return AnitaRing::kMiddleRing;
   else if (ant<40)
-    return AnitaRing::kNadirRing;
+    return AnitaRing::kBottomRing;
   return AnitaRing::kNotARing;
 
 }
@@ -1414,7 +1408,7 @@ Double_t AnitaGeomTool::getMeanAntPairPhiRelToAftFore(int firstAnt, int secondAn
 
 
 
-Int_t AnitaGeomTool::getUpperAntNearestPhiWave(Double_t phiWave, AnitaPol::AnitaPol_t pol) {
+Int_t AnitaGeomTool::getTopAntNearestPhiWave(Double_t phiWave, AnitaPol::AnitaPol_t pol) {
   if(phiWave<0) phiWave+=TMath::TwoPi();
   if(phiWave>TMath::TwoPi()) phiWave-=TMath::TwoPi();
   Double_t minDiff=TMath::TwoPi();
@@ -1486,7 +1480,7 @@ Double_t AnitaGeomTool::getAntFacePhiPositionRelToAftFore(int ant) {
   return 0;
 }
 
-Int_t AnitaGeomTool::getUpperAntFaceNearestPhiWave(Double_t phiWave) {
+Int_t AnitaGeomTool::getTopAntFaceNearestPhiWave(Double_t phiWave) {
   Double_t phiPrime=phiWave+aftForeOffsetAngleVertical;
   if(phiPrime>TMath::TwoPi()) 
     phiPrime-=TMath::TwoPi();
@@ -1618,11 +1612,11 @@ void AnitaGeomTool::printAntPos(){
 int AnitaGeomTool::getPhiFromAnt(int ant)
 {
   if(ant<16)
-    return AnitaGeom::upperPhiNums[ant];
+    return AnitaGeom::topPhiNums[ant];
   else if(ant<32)
-    return AnitaGeom::lowerPhiNums[ant-16];
+    return AnitaGeom::middlePhiNums[ant-16];
   else if(ant<40)
-    return AnitaGeom::nadirPhiNums[ant-32];
+    return AnitaGeom::bottomPhiNums[ant-32];
   std::cerr << "There isn't an antenna " << ant << " (0-39 only)\n";
   return -1;
 
@@ -1632,12 +1626,12 @@ int AnitaGeomTool::getPhiFromAnt(int ant)
 int AnitaGeomTool::getAntFromPhiRing(int phi, AnitaRing::AnitaRing_t ring)
 {
   switch(ring) {
-  case AnitaRing::kUpperRing:
-    return AnitaGeom::upperAntNums[phi];
-  case AnitaRing::kLowerRing:
-    return AnitaGeom::lowerAntNums[phi];
-  case AnitaRing::kNadirRing:
-    return AnitaGeom::nadirAntNums[phi];
+  case AnitaRing::kTopRing:
+    return AnitaGeom::topAntNums[phi];
+  case AnitaRing::kMiddleRing:
+    return AnitaGeom::middleAntNums[phi];
+  case AnitaRing::kBottomRing:
+    return AnitaGeom::bottomAntNums[phi];
   default:
     return -1;
   }
