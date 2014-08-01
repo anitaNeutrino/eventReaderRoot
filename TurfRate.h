@@ -50,14 +50,21 @@ class TurfRate: public TObject
    UChar_t         upperL2Rates[PHI_SECTORS]; ///< upper l2 cluster rates
    UChar_t         lowerL2Rates[PHI_SECTORS]; ///< lower l2 cluster rates
    UChar_t         l3Rates[PHI_SECTORS]; ///< l3 rates
+   UChar_t         l3RatesH[PHI_SECTORS]; ///< l3 rates
    UShort_t        nadirL1Rates[NADIR_ANTS]; ///< nadir l1 rates
    UChar_t         nadirL2Rates[NADIR_ANTS]; ///< nadir l2 rates
-   UInt_t          antTrigMask; ///< Which upper+lower ring antennas are masked off?
-   UChar_t         nadirAntTrigMask; ///< Which nadir antennas are masked off?
+   UShort_t        l1TrigMask; ///< Which L1 were on
+   UShort_t        l1TrigMaskH; ///< Which L1 were on
    UShort_t        phiTrigMask; ///< Which phi sectors are masked off?
    UShort_t        phiTrigMaskH; ///< Which phi sectors are masked off?
    UChar_t         errorFlag; ///< Error flag (who knows)?
+   UInt_t          c3poNum; ///< Number of clock cycles per second
    Int_t           intFlag; ///< Interpolation flag, zero for raw data.
+
+   //Deprecated
+   UInt_t          antTrigMask; ///< Which upper+lower ring antennas are masked off?
+   UChar_t         nadirAntTrigMask; ///< Which nadir antennas are masked off?
+
 
    Int_t getL1Rate(int phi, int ring); ///< Returns l1 rate in phi-ring
    Int_t getL2Rate(int phi, int ring); ///< Returns l2 rate in phi-ring
@@ -69,7 +76,7 @@ class TurfRate: public TObject
    Float_t getDeadTimeFrac() {return deadTime/65535.;} ///< Returns the deadtime as a fraction of a second (by dividing by 65535)
    
    
-  ClassDef(TurfRate,16);
+  ClassDef(TurfRate,34);
 };
 
 

@@ -37,23 +37,24 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *turfPtr)
 	      << sizeof(TurfRateStruct_t) << std::endl;
   }
 
-   // run=trun;
-   // realTime=trealTime;
-   // payloadTime=turfPtr->unixTime;
-   // ppsNum=turfPtr->ppsNum;   
-   // deadTime=turfPtr->deadTime;   
-   // //   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
-   // //   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // //   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(nadirL1Rates,turfPtr->nadirL1Rates,sizeof(UShort_t)*NADIR_ANTS);
-   // memcpy(nadirL2Rates,turfPtr->nadirL2Rates,sizeof(UChar_t)*NADIR_ANTS);
-   // antTrigMask=turfPtr->antTrigMask;
-   // nadirAntTrigMask=turfPtr->nadirAntTrigMask;
-   // phiTrigMask=turfPtr->phiTrigMaskV;
-   // phiTrigMaskH=turfPtr->phiTrigMaskH;
-   // errorFlag=turfPtr->errorFlag;
-   // intFlag=0;
+   run=trun;
+   realTime=trealTime;
+   payloadTime=turfPtr->unixTime;
+   ppsNum=turfPtr->ppsNum;   
+   deadTime=turfPtr->deadTime;   
+   //   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
+   //   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   //   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   for(int i=0;i<PHI_SECTORS;i++) {
+     l3Rates[i]=turfPtr->l3Rates[i][0];
+     l3RatesH[i]=turfPtr->l3Rates[i][1];
+   }
+   l1TrigMask=turfPtr->l1TrigMask;
+   l1TrigMaskH=turfPtr->l1TrigMaskH;
+   phiTrigMask=turfPtr->phiTrigMask;
+   phiTrigMaskH=turfPtr->phiTrigMaskH;
+   errorFlag=turfPtr->errorFlag;
+   intFlag=0;
 
 }
 
