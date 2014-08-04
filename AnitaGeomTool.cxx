@@ -1615,7 +1615,7 @@ int AnitaGeomTool::getPhiFromAnt(int ant)
     return AnitaGeom::middlePhiNums[ant-16];
   else if(ant<48)
     return AnitaGeom::bottomPhiNums[ant-32];
-  std::cerr << "There isn't an antenna " << ant << " (0-39 only)\n";
+  std::cerr << "There isn't an antenna " << ant << " (0-47 only)\n";
   return -1;
 
 }
