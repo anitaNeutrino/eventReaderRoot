@@ -25,6 +25,7 @@ class TurfRate: public TObject
    ~TurfRate(); ///< Destructor
 
    TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *ratePtr); ///< Assignment constructor
+   TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer34_t *ratePtr); ///< Version 16 constructor
    TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer16_t *ratePtr); ///< Version 16 constructor
    TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer15_t *ratePtr); ///< Version 15 constructor
    TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer14_t *ratePtr); ///< Version 14 constructor
@@ -46,7 +47,7 @@ class TurfRate: public TObject
     Users are encouraged to use the getDeadTimeFrac function where available. A differential dead time number is available in the RawAnitaHeader, which only includes the fraction of the current second before the event trigger in the count.
   */ 
    UShort_t        deadTime; 
-   UShort_t        l1Rates[PHI_SECTORS][2]; ///< l1 antenna rates
+   UShort_t        l1Rates[PHI_SECTORS][2]; ///< l1 antenna rates  v and H
    UChar_t         upperL2Rates[PHI_SECTORS]; ///< upper l2 cluster rates
    UChar_t         lowerL2Rates[PHI_SECTORS]; ///< lower l2 cluster rates
    UChar_t         l3Rates[PHI_SECTORS]; ///< l3 rates

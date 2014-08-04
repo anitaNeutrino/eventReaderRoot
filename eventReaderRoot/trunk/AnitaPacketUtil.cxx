@@ -170,8 +170,57 @@ int checkPacket(void *thePtr)
     //  default: 
     //    retVal+=PKT_E_CODE; break;
   }
-  if(packetSize && (packetSize!=gHdr->numBytes))
+  if(packetSize && (packetSize!=gHdr->numBytes))  
     retVal+=PKT_E_SIZE;
+
+  unsigned char expVerId;
+
+  switch(code&BASE_PACKET_MASK) {
+  case PACKET_BD: expVerId=VER_EVENT_BODY; break;
+  case PACKET_HD: expVerId=VER_EVENT_HEADER; break;
+  case PACKET_HD_SLAC: expVerId=SLAC_VER_EVENT_HEADER; break;
+  case PACKET_WV: expVerId=VER_WAVE_PACKET; break;
+  case PACKET_SURF: expVerId=VER_SURF_PACKET; break;
+  case PACKET_SURF_HK: expVerId=VER_SURF_HK; break;
+  case PACKET_TURF_RATE: expVerId=VER_TURF_RATE; break;
+  case PACKET_AVG_SURF_HK: expVerId=VER_AVG_SURF_HK; break;
+  case PACKET_SUM_TURF_RATE: expVerId=VER_SUM_TURF_RATE; break;
+  case PACKET_TURF_REGISTER: expVerId=VER_TURF_REG; break;
+  case PACKET_LAB_PED: expVerId=VER_LAB_PED; break;
+  case PACKET_FULL_PED: expVerId=VER_FULL_PED; break;
+  case PACKET_ENC_WV_PEDSUB: expVerId=VER_ENC_WAVE_PACKET; break;
+  case PACKET_ENC_SURF: expVerId=VER_ENC_SURF_PACKET; break;
+  case PACKET_PED_SUBBED_EVENT: expVerId=VER_PEDSUBBED_EVENT_BODY; break;
+  case PACKET_GPS_ADU5_PAT: expVerId=VER_ADU5_PAT; break;
+  case PACKET_GPS_ADU5_SAT: expVerId=VER_ADU5_SAT; break;
+  case PACKET_GPS_ADU5_VTG: expVerId=VER_ADU5_VTG; break;
+  case PACKET_GPS_G12_POS: expVerId=VER_G12_POS; break;
+  case PACKET_GPS_G12_SAT: expVerId=VER_G12_SAT; break;
+  case PACKET_GPS_GGA: expVerId=VER_GPS_GGA; break;
+  case PACKET_HKD: expVerId=VER_HK_FULL; break;  
+#ifndef ANITA_2_DATA
+  case PACKET_HKD_SS: expVerId=VER_HK_SS; break;
+#endif
+  case PACKET_CMD_ECHO: expVerId=VER_CMD_ECHO; break;
+  case PACKET_MONITOR: expVerId=VER_MONITOR; break;
+  case PACKET_SLOW1: expVerId=VER_SLOW_1; break;
+  case PACKET_SLOW2: expVerId=VER_SLOW_2; break;
+  case PACKET_SLOW_FULL: expVerId=VER_SLOW_FULL; break;
+  case PACKET_ZIPPED_FILE: expVerId=VER_ZIPPED_FILE; break;
+  case PACKET_ZIPPED_PACKET: expVerId=VER_ZIPPED_PACKET; break;
+  case PACKET_RUN_START: expVerId=VER_RUN_START; break;
+  case PACKET_OTHER_MONITOR: expVerId=VER_OTHER_MON; break;
+  case PACKET_GPSD_START: expVerId=VER_GPSD_START; break;
+  case PACKET_LOGWATCHD_START: expVerId=VER_LOGWATCHD_START; break;
+  case PACKET_ACQD_START: expVerId=VER_ACQD_START; break;
+  default: 
+    expVerId=0; break;
+  }
+  if(gHdr->verId!=expVerId) {
+    std::cout << "Version mis-match: " << (int) gHdr->verId << "\t" << (int)expVerId << "\n";
+  }
+
+
   if(gHdr->feByte!=0xfe) retVal+=PKT_E_FEBYTE;
   return retVal;
 

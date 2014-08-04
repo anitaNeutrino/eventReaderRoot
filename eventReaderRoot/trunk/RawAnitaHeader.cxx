@@ -23,7 +23,7 @@ RawAnitaHeader::~RawAnitaHeader() {
    //Default Destructor
 }
 
-
+ 
 RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t trealTime,
 			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
 {
