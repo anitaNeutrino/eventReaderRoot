@@ -49,10 +49,17 @@ SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr)
   errorFlag=surfPtr->errorFlag;
   memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*NUM_ANTENNA_RINGS);
   memcpy(upperWords,surfPtr->upperWords,sizeof(UShort_t)*ACTIVE_SURFS);
-  memcpy(scaler,surfPtr->scaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
-  memcpy(l1Scaler,surfPtr->l1Scaler,sizeof(UShort_t)*ACTIVE_SURFS*L1S_PER_SURF);
-  memcpy(threshold,surfPtr->threshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
-  memcpy(setThreshold,surfPtr->setThreshold,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  
+  for(int surf=0;surf<ACTIVE_SURFS;surf++) {
+    for(int l1=0;l1<L1S_PER_SURF;l1++) {
+      l1Scaler[surf][l1]=surfPtr->l1Scaler[surf][l1];
+    }
+    for(int i=0;i<12;i++) {
+      scaler[surf][i]=surfPtr->scaler[surf][i];
+      threshold[surf][i]=surfPtr->threshold[surf][i];
+      setThreshold[surf][i]=surfPtr->setThreshold[surf][i];
+    }
+  }
   memcpy(rfPower,surfPtr->rfPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
   memcpy(surfTrigBandMask,surfPtr->surfTrigBandMask,sizeof(UShort_t)*ACTIVE_SURFS);
   intFlag=0;
