@@ -42,6 +42,42 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *turfPtr)
    payloadTime=turfPtr->unixTime;
    ppsNum=turfPtr->ppsNum;   
    deadTime=turfPtr->deadTime;   
+   //   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   //   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   for(int i=0;i<PHI_SECTORS;i++) {
+     l3Rates[i]=turfPtr->l3Rates[i][0];
+     l3RatesH[i]=turfPtr->l3Rates[i][1];
+     l1Rates[i][0]=turfPtr->l1Rates[i][0];
+     l1Rates[i][1]=turfPtr->l1Rates[i][1];
+   }
+   l1TrigMask=turfPtr->l1TrigMask;
+   l1TrigMaskH=turfPtr->l1TrigMaskH;
+   phiTrigMask=turfPtr->phiTrigMask;
+   phiTrigMaskH=turfPtr->phiTrigMaskH;
+   errorFlag=turfPtr->errorFlag;
+   intFlag=0;
+}
+
+
+TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer34_t *turfPtr)
+{
+
+ if(turfPtr->gHdr.code!=PACKET_TURF_RATE ||
+     turfPtr->gHdr.verId!=VER_TURF_RATE ||
+     turfPtr->gHdr.numBytes!=sizeof(TurfRateStruct_t)) {
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_TURF_RATE) << "\n" 
+	      << "code:\t" << (int)turfPtr->gHdr.code << "\t" << PACKET_TURF_RATE 
+	      << "\nversion:\t" << (int)turfPtr->gHdr.verId 
+	      << "\t" << VER_TURF_RATE 
+	      << "\nsize:\t" << turfPtr->gHdr.numBytes << "\t"
+	      << sizeof(TurfRateStruct_t) << std::endl;
+  }
+
+   run=trun;
+   realTime=trealTime;
+   payloadTime=turfPtr->unixTime;
+   ppsNum=turfPtr->ppsNum;   
+   deadTime=turfPtr->deadTime;   
    //   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
    //   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
    //   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
@@ -57,6 +93,7 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *turfPtr)
    intFlag=0;
 
 }
+
 
 TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer16_t *turfPtr)
 {
@@ -77,18 +114,18 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer16_t *turfPtr)
    payloadTime=turfPtr->unixTime;
    ppsNum=turfPtr->ppsNum;   
    deadTime=turfPtr->deadTime;   
-   // memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
-   // memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(nadirL1Rates,turfPtr->nadirL1Rates,sizeof(UShort_t)*NADIR_ANTS);
-   // memcpy(nadirL2Rates,turfPtr->nadirL2Rates,sizeof(UChar_t)*NADIR_ANTS);
-   // antTrigMask=turfPtr->antTrigMask;
-   // nadirAntTrigMask=turfPtr->nadirAntTrigMask;
-   // phiTrigMask=turfPtr->phiTrigMask;
-   // phiTrigMaskH=0;
-   // errorFlag=turfPtr->errorFlag;
-   // intFlag=0;
+   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
+   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(nadirL1Rates,turfPtr->nadirL1Rates,sizeof(UShort_t)*NADIR_ANTS);
+   memcpy(nadirL2Rates,turfPtr->nadirL2Rates,sizeof(UChar_t)*NADIR_ANTS);
+   antTrigMask=turfPtr->antTrigMask;
+   nadirAntTrigMask=turfPtr->nadirAntTrigMask;
+   phiTrigMask=turfPtr->phiTrigMask;
+   phiTrigMaskH=0;
+   errorFlag=turfPtr->errorFlag;
+   intFlag=0;
 
 }
 
@@ -111,18 +148,18 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer15_t *turfPtr)
    payloadTime=turfPtr->unixTime;
    ppsNum=turfPtr->ppsNum;   
    deadTime=0;
-   // memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
-   // memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(nadirL1Rates,turfPtr->nadirL1Rates,sizeof(UShort_t)*NADIR_ANTS);
-   // memcpy(nadirL2Rates,turfPtr->nadirL2Rates,sizeof(UChar_t)*NADIR_ANTS);
-   // antTrigMask=turfPtr->antTrigMask;
-   // nadirAntTrigMask=turfPtr->nadirAntTrigMask;
-   // phiTrigMask=turfPtr->phiTrigMask;
-   // phiTrigMaskH=0;
-   // errorFlag=turfPtr->errorFlag;
-   // intFlag=0;
+   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
+   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(nadirL1Rates,turfPtr->nadirL1Rates,sizeof(UShort_t)*NADIR_ANTS);
+   memcpy(nadirL2Rates,turfPtr->nadirL2Rates,sizeof(UChar_t)*NADIR_ANTS);
+   antTrigMask=turfPtr->antTrigMask;
+   nadirAntTrigMask=turfPtr->nadirAntTrigMask;
+   phiTrigMask=turfPtr->phiTrigMask;
+   phiTrigMaskH=0;
+   errorFlag=turfPtr->errorFlag;
+   intFlag=0;
 }
 
 
@@ -145,16 +182,16 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer14_t *turfPtr)
    payloadTime=turfPtr->unixTime;
    ppsNum=turfPtr->ppsNum;   
    deadTime=0;
-   // memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
-   // memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(nadirL1Rates,turfPtr->nadirL1Rates,sizeof(UShort_t)*NADIR_ANTS);
-   // memcpy(nadirL2Rates,turfPtr->nadirL2Rates,sizeof(UChar_t)*NADIR_ANTS);
-   // antTrigMask=turfPtr->antTrigMask;
-   // nadirAntTrigMask=turfPtr->nadirAntTrigMask;
-   // phiTrigMask=0;
-   // phiTrigMaskH=0;
+   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
+   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(nadirL1Rates,turfPtr->nadirL1Rates,sizeof(UShort_t)*NADIR_ANTS);
+   memcpy(nadirL2Rates,turfPtr->nadirL2Rates,sizeof(UChar_t)*NADIR_ANTS);
+   antTrigMask=turfPtr->antTrigMask;
+   nadirAntTrigMask=turfPtr->nadirAntTrigMask;
+   phiTrigMask=0;
+   phiTrigMaskH=0;
    errorFlag=0;
    intFlag=0;
 }
@@ -178,16 +215,16 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer13_t *turfPtr)
    payloadTime=turfPtr->unixTime;
    ppsNum=turfPtr->ppsNum;   
    deadTime=0;
-   // memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
-   // memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memset(nadirL1Rates,0,sizeof(UShort_t)*NADIR_ANTS);
-   // memset(nadirL2Rates,0,sizeof(UChar_t)*NADIR_ANTS);
-   // antTrigMask=turfPtr->antTrigMask;
-   // nadirAntTrigMask=turfPtr->nadirAntTrigMask;
-   // phiTrigMask=0;
-   // phiTrigMaskH=0;
+   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
+   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memset(nadirL1Rates,0,sizeof(UShort_t)*NADIR_ANTS);
+   memset(nadirL2Rates,0,sizeof(UChar_t)*NADIR_ANTS);
+   antTrigMask=turfPtr->antTrigMask;
+   nadirAntTrigMask=turfPtr->nadirAntTrigMask;
+   phiTrigMask=0;
+   phiTrigMaskH=0;
    errorFlag=0;
    intFlag=0;
 }
@@ -206,23 +243,23 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer12_t *turfPtr)
 	      << sizeof(TurfRateStructVer12_t) << std::endl;
   }
 
-   // run=trun;
-   // realTime=trealTime;
-   // payloadTime=turfPtr->unixTime;
-   // ppsNum=turfPtr->ppsNum;   
-   // deadTime=0;
-   // memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
-   // memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
-   // memset(nadirL1Rates,0,sizeof(UShort_t)*NADIR_ANTS);
-   // memset(nadirL2Rates,0,sizeof(UChar_t)*NADIR_ANTS);
-   // antTrigMask=0;
-   // nadirAntTrigMask=0;
-   // phiTrigMask=0;
-   // phiTrigMaskH=0;
-   // errorFlag=0;
-   // intFlag=0;
+   run=trun;
+   realTime=trealTime;
+   payloadTime=turfPtr->unixTime;
+   ppsNum=turfPtr->ppsNum;   
+   deadTime=0;
+   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
+   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memset(nadirL1Rates,0,sizeof(UShort_t)*NADIR_ANTS);
+   memset(nadirL2Rates,0,sizeof(UChar_t)*NADIR_ANTS);
+   antTrigMask=0;
+   nadirAntTrigMask=0;
+   phiTrigMask=0;
+   phiTrigMaskH=0;
+   errorFlag=0;
+   intFlag=0;
 }
 
 TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer11_t *turfPtr)
@@ -239,23 +276,23 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer11_t *turfPtr)
 	      << sizeof(TurfRateStructVer11_t) << std::endl;
   }
 
-  //  run=trun;
-//    realTime=trealTime;
-//    payloadTime=turfPtr->unixTime;
-//    ppsNum=turfPtr->ppsNum;   
-//    deadTime=0;
-//    memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
-//    memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-//    memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-//    memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
-//    memset(nadirL1Rates,0,sizeof(UShort_t)*NADIR_ANTS);
-//    memset(nadirL2Rates,0,sizeof(UChar_t)*NADIR_ANTS);
-//    antTrigMask=0;
-//    nadirAntTrigMask=0;
-//    phiTrigMask=0;
-//    phiTrigMaskH=0;
-//    errorFlag=0;
-//    intFlag=0;
+   run=trun;
+   realTime=trealTime;
+   payloadTime=turfPtr->unixTime;
+   ppsNum=turfPtr->ppsNum;   
+   deadTime=0;
+   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
+   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(l3Rates,turfPtr->l3Rates,sizeof(UChar_t)*PHI_SECTORS);
+   memset(nadirL1Rates,0,sizeof(UShort_t)*NADIR_ANTS);
+   memset(nadirL2Rates,0,sizeof(UChar_t)*NADIR_ANTS);
+   antTrigMask=0;
+   nadirAntTrigMask=0;
+   phiTrigMask=0;
+   phiTrigMaskH=0;
+   errorFlag=0;
+   intFlag=0;
 }
 
 

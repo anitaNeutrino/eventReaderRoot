@@ -89,9 +89,9 @@ AnitaGeomTool::AnitaGeomTool()
 //  ringPhaseCentreOffset[1]=0.2;
 //  ringPhaseCentreOffset[2]=0.2;
 
-  readSimonsNumbers();
-  readPhotogrammetry();
-  readAnitaIIPhotogrammetry();
+//  readSimonsNumbers();
+  //  readPhotogrammetry();
+  //  readAnitaIIPhotogrammetry();
   fUseKurtAnitaIINumbers=0;
 
 //   std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
@@ -400,15 +400,13 @@ void AnitaGeomTool::getThetaPartners(int rx,int& rxleft,int& rxright)
     rxright=AnitaGeom::middleAntNums[phiRight];
   }
   else{
-    if (rx<39 && rx>31)    
-      rxright=rx+1;  
-    else if (rx==39)   
-      rxright=32;
-
-    if (rx<40 && rx>32)    
-      rxleft=rx-1;  
-    else if (rx==32)   
-      rxleft=39;
+    int phi=AnitaGeom::bottomPhiNums[rx-16];
+    int phiLeft=phi-1;
+    if(phiLeft<0) phiLeft=15;
+    int phiRight=phi+1;
+    if(phiRight>15) phiRight=0;
+    rxleft=AnitaGeom::bottomAntNums[phiLeft];
+    rxright=AnitaGeom::bottomAntNums[phiRight];
   }
 
 }
@@ -419,7 +417,7 @@ int AnitaGeomTool::getPhiSector(int rx)
     return AnitaGeom::topPhiNums[rx];
   else if(rx<32)
     return AnitaGeom::middlePhiNums[rx-16];
-  else if(rx<40) {
+  else if(rx<48) {
     return AnitaGeom::bottomPhiNums[rx-32];
   }
 
@@ -497,7 +495,7 @@ AnitaRing::AnitaRing_t AnitaGeomTool::getRingFromAnt(int ant) {
     return AnitaRing::kTopRing;
   else if (ant<32)
     return AnitaRing::kMiddleRing;
-  else if (ant<40)
+  else if (ant<48)
     return AnitaRing::kBottomRing;
   return AnitaRing::kNotARing;
 
@@ -604,7 +602,7 @@ void AnitaGeomTool::readPhotogrammetry()
 
 
   //Now we'll add a hack for the drop-down antennas
-  for(int ant=32;ant<40;ant++) {
+  for(int ant=32;ant<48;ant++) {
     rAntFromDeckHorn[ant]=(101*INCHTOMETER)-0.38;
     zAntFromDeckHorn[ant]=(-21*INCHTOMETER)-1.8;
     azCentreFromDeckHorn[ant]=(-67.5 + 45*(ant-32))*TMath::DegToRad();
@@ -1386,7 +1384,7 @@ Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(int ant, AnitaPol::AnitaPo
 
 Double_t AnitaGeomTool::getMeanAntPairPhiRelToAftFore(int firstAnt, int secondAnt, AnitaPol::AnitaPol_t pol) {
 
-   if(firstAnt>=0 && firstAnt<NUM_SEAVEYS && secondAnt>=0 && secondAnt<40) {
+   if(firstAnt>=0 && firstAnt<NUM_SEAVEYS && secondAnt>=0 && secondAnt<NUM_SEAVEYS) {
       //Calculating the phi of each antenna pair
       double meanPhi=this->getAntPhiPositionRelToAftFore(firstAnt,pol); 
       if(TMath::Abs(meanPhi-this->getAntPhiPositionRelToAftFore(secondAnt,pol))<TMath::PiOver2()) {	 
@@ -1542,7 +1540,7 @@ void AnitaGeomTool::updateAnt(double deltaR,double deltaRL,double deltaUD){
 
 
   for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
-     for(int ant=32;ant<40;ant++) {
+     for(int ant=32;ant<48;ant++) {
     
     double   deltaXRL = 0;
     double   deltaYRL = 0;
@@ -1615,7 +1613,7 @@ int AnitaGeomTool::getPhiFromAnt(int ant)
     return AnitaGeom::topPhiNums[ant];
   else if(ant<32)
     return AnitaGeom::middlePhiNums[ant-16];
-  else if(ant<40)
+  else if(ant<48)
     return AnitaGeom::bottomPhiNums[ant-32];
   std::cerr << "There isn't an antenna " << ant << " (0-39 only)\n";
   return -1;
@@ -1730,7 +1728,7 @@ void AnitaGeomTool::readAnitaIIPhotogrammetry()
     //std::cout << line.Data() << "\n";
   }
   
-  for(int ant=0;ant<40;ant++) {
+  for(int ant=0;ant<48;ant++) {
     line.ReadLine(AnitaIIPhotoFile);
     //std::cout << "Seavey:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
