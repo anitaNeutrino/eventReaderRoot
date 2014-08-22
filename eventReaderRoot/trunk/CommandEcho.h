@@ -36,6 +36,9 @@ class CommandEcho: public TObject
    UChar_t         cmd[MAX_CMD_LENGTH]; ///< List of command bytes
    Int_t           fromPayload; ///< Was the command auto-generated or sent from the ground?
 
+
+   const char * getCommandAsString() ;
+
   ClassDef(CommandEcho,11);
 };
 
