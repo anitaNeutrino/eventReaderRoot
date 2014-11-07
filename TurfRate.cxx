@@ -341,6 +341,10 @@ Int_t TurfRate::isPhiMasked(int phi) {
   if(phi<0 || phi>15) return -1;
   return (phiTrigMask & (1<<phi));
 }
+Int_t TurfRate::isPhiMaskedHPol(int phi) {
+  if(phi<0 || phi>15) return -1;
+  return (phiTrigMaskH & (1<<phi));
+}
 
 Int_t TurfRate::isAntMasked(int phi, int ring)
 {

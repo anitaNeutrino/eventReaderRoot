@@ -74,6 +74,7 @@ class TurfRate: public TObject
    Int_t getNadirL12Rate(int phi); ///< Returns naidr l1+l2 rate (the L2 rates are the OR of the neighbouring antennas
    Int_t isAntMasked(int phi, int ring); ///< Returns 1 if given phi-ring antenna is masked
    Int_t isPhiMasked(int phi); ///< Returns 1 if given phi is masked
+   Int_t isPhiMaskedHPol(int phi); ///< Returns 1 if given phi is masked
    Float_t getDeadTimeFrac() {return deadTime/65535.;} ///< Returns the deadtime as a fraction of a second (by dividing by 65535)
    
    
