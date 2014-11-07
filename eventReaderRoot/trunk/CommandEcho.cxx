@@ -54,196 +54,194 @@ CommandEcho::CommandEcho(Int_t trun, Int_t trealTime, CommandEcho_t *echoPtr)
 
 const char * CommandEcho::getCommandAsString() 
 {
-  char *cmdString;
   switch(cmd[0]) {	
   case CMD_TAIL_VAR_LOG_MESSAGES: 
-    cmdString="tail /var/log/messages"; break;
+    return "tail /var/log/messages"; 
   case CMD_TAIL_VAR_LOG_ANITA: 
-    cmdString="tail /var/log/anita.log"; break;
+    return "tail /var/log/anita.log"; 
   case LOG_REQUEST_COMMAND:
-    cmdString="log request "; break;
+    return "log request "; 
   case CMD_START_NEW_RUN: 
-    cmdString="Start New Run"; break;
+    return "Start New Run"; 
   case CMD_SHUTDOWN_HALT: 
-    cmdString="shutdown -h now (i.e halt the CPU)"; break;
+    return "shutdown -h now (i.e halt the CPU)"; 
   case CMD_REBOOT: 
-    cmdString="reboot"; break;
+    return "reboot"; 
   case CMD_SIPD_REBOOT: 
-    cmdString="SIPd reboot"; break;
+    return "SIPd reboot"; 
   case CMD_KILL_PROGS: 
-    cmdString="Kill process with mask"; break;
+    return "Kill process with mask"; 
   case CMD_REALLY_KILL_PROGS: 
-    cmdString="Kill -9  process with mask"; break;
+    return "Kill -9  process with mask"; 
   case CMD_RESPAWN_PROGS:
-    cmdString="Respawn process with mask"; break;
+    return "Respawn process with mask"; 
   case CMD_START_PROGS: 
-    cmdString="Start process with mask"; break;
+    return "Start process with mask"; 
     //  case CMD_MOUNT: 
-    //    cmdString="mount -a"; break;
+    //    return "mount -a"; 
   case CMD_DISABLE_DISK: 
-    cmdString="Disable disk"; break;
+    return "Disable disk"; 
   case CMD_MOUNT_NEXT_USB: 
-    cmdString="Mount next usb drive"; break;
+    return "Mount next usb drive"; 
     //  case CMD_MOUNT_NEXT_SATA: 
-    //    cmdString="Mount next sata drive"; break;
+    //    return "Mount next sata drive"; 
   case CMD_EVENT_DISKTYPE: 
-    cmdString="Change Event Disk Mask"; break;
+    return "Change Event Disk Mask"; 
   case CMD_HK_DISKTYPE: 
-    cmdString="Change Hk Disk Mask"; break;
+    return "Change Hk Disk Mask"; 
   case ARCHIVE_STORAGE_TYPE: 
-    cmdString="Change File Format On Disk"; break;
+    return "Change File Format On Disk"; 
   case ARCHIVE_PRI_DISK: 
-    cmdString="Change Disk Mask for Priority"; break;
+    return "Change Disk Mask for Priority"; 
   case ARCHIVE_PPS_PRIORITIES: 
-    cmdString="Set Priority for PPS/Software triggers"; break;
+    return "Set Priority for PPS/Software triggers"; 
   case ARCHIVE_PPS_DECIMATE: 
-    cmdString="Set Decimation for PPS/Software triggers"; break;
+    return "Set Decimation for PPS/Software triggers"; 
   case ARCHIVE_PRI_ENC_TYPE:
-    cmdString="Change Disk Encoding Type for Priority"; break;
+    return "Change Disk Encoding Type for Priority"; 
   case ARCHIVE_DECIMATE_PRI: 
-    cmdString="Change Decimation Fraction for Priority"; break; //Not implemented
+    return "Change Decimation Fraction for Priority";  //Not implemented
   case ARCHIVE_GLOBAL_DECIMATE: 
-    cmdString="Change Global Decimation Fraction for Priority"; break; //Not implemented
+    return "Change Global Decimation Fraction for Priority";  //Not implemented
   case TELEM_TYPE: 
-    cmdString="Change Telem Waveform Format"; break;
+    return "Change Telem Waveform Format"; 
   case TELEM_PRI_ENC_TYPE: 
-    cmdString="Change Telem Encoding Type for Priority"; break;
+    return "Change Telem Encoding Type for Priority"; 
   case CMD_TURN_GPS_ON: 
-    cmdString="Turn GPS On"; break;
+    return "Turn GPS On"; 
   case CMD_TURN_GPS_OFF: 
-    cmdString="Turn GPS Off"; break;
+    return "Turn GPS Off"; 
   case CMD_TURN_RFCM_ON: 
-    cmdString="Turn RFCM On"; break;
+    return "Turn RFCM On"; 
   case CMD_TURN_RFCM_OFF: 
-    cmdString="Turn RFCM Off"; break;
+    return "Turn RFCM Off"; 
   case CMD_TURN_CALPULSER_ON: 
-    cmdString="Turn CalPulser On"; break;
+    return "Turn CalPulser On"; 
   case CMD_TURN_CALPULSER_OFF: 
-    cmdString="Turn CalPulser Off"; break;
+    return "Turn CalPulser Off"; 
   case CMD_TURN_VETO_ON: 
-    cmdString="Turn Veto On"; break;
+    return "Turn Veto On"; 
   case CMD_TURN_VETO_OFF: 
-    cmdString="Turn Veto Off"; break;
+    return "Turn Veto Off"; 
   case CMD_TURN_ALL_ON: 
-    cmdString="Turn All On"; break;
+    return "Turn All On"; 
   case CMD_TURN_ALL_OFF: 
-    cmdString="Turn All Off"; break;
+    return "Turn All Off"; 
   case SET_CALPULSER_SWITCH: 
-    cmdString="Set CalPulser RF Switch to Port"; break;
+    return "Set CalPulser RF Switch to Port"; 
   case SET_CALPULSER_ATTEN: 
-    cmdString="Set CalPulser Attenuation to"; break;
+    return "Set CalPulser Attenuation to"; 
   case SET_ATTEN_LOOP_PERIOD: 
-    cmdString="Set CalPulser Attenuation Loop Period"; break;
+    return "Set CalPulser Attenuation Loop Period"; 
   case SET_SWITCH_LOOP_PERIOD: 
-    cmdString="Set CalPulser RF Switch Loop Period"; break;
+    return "Set CalPulser RF Switch Loop Period"; 
   case SET_PULSER_OFF_PERIOD: 
-    cmdString="Set CalPulser Off Period"; break;
+    return "Set CalPulser Off Period"; 
   case SET_CALIB_WRITE_PERIOD: 
-    cmdString="Set Calibd Write Period"; break;
+    return "Set Calibd Write Period"; 
   case SET_ADU5_PAT_PERIOD: 
-    cmdString="Set ADU5 Attitude Readout Period"; break;
+    return "Set ADU5 Attitude Readout Period"; 
   case SET_ADU5_SAT_PERIOD: 
-    cmdString="Set ADU5 Satellite Info Readout Period"; break;
+    return "Set ADU5 Satellite Info Readout Period"; 
   case SET_G12_PPS_PERIOD: 
-    cmdString="Set G12 PPS Period"; break;
+    return "Set G12 PPS Period"; 
   case SET_G12_PPS_OFFSET: 
-    cmdString="Set G12 PPS Offset"; break;
+    return "Set G12 PPS Offset"; 
   case SET_ADU5_CALIBRATION_12: 
-    cmdString="Set ADU5 Calibration Vector 1->2"; break;
+    return "Set ADU5 Calibration Vector 1->2"; 
   case SET_ADU5_CALIBRATION_13: 
-    cmdString="Set ADU5 Calibration Vector 1->3"; break;
+    return "Set ADU5 Calibration Vector 1->3"; 
   case SET_ADU5_CALIBRATION_14: 
-    cmdString="Set ADU5 Calibration Vector 1->4"; break;
+    return "Set ADU5 Calibration Vector 1->4"; 
   case SET_ADU5_VTG_PERIOD: 
-    cmdString="Set ADU5 Velocity Readout Period"; break;
+    return "Set ADU5 Velocity Readout Period"; 
   case SET_G12_POS_PERIOD: 
-    cmdString="Set G12 Position Readout Period"; break;
+    return "Set G12 Position Readout Period"; 
   case SET_HK_PERIOD: 
-    cmdString="Set Acromag Housekeeping Readout Period"; break;
+    return "Set Acromag Housekeeping Readout Period"; 
   case SET_HK_CAL_PERIOD: 
-    cmdString="Set Acromag Calibration Period"; break;
+    return "Set Acromag Calibration Period"; 
   case CLEAN_DIRS: 
-    cmdString="Clean Packet Dirs"; break;
+    return "Clean Packet Dirs"; 
   case SEND_CONFIG: 
-    cmdString="Send Config File Over Telemetry"; break;
+    return "Send Config File Over Telemetry"; 
   case DEFAULT_CONFIG:
-    cmdString="Switch to Default Config"; break;
+    return "Switch to Default Config"; 
   case SWITCH_CONFIG:
-    cmdString="Switch to Alternate Config File "; break;
+    return "Switch to Alternate Config File "; 
   case LAST_CONFIG:
-    cmdString="Switch to Last Config File"; break;
+    return "Switch to Last Config File"; 
   case ACQD_ADU5_TRIG_FLAG: 
-    cmdString="Set ADU5 PPS Trigger Flag"; break;
+    return "Set ADU5 PPS Trigger Flag"; 
   case ACQD_G12_TRIG_FLAG: 
-    cmdString="Set G12 PPS Trigger Flag"; break;
+    return "Set G12 PPS Trigger Flag"; 
   case ACQD_SOFT_TRIG_FLAG: 
-    cmdString="Set Software Trigger Flag"; break;
+    return "Set Software Trigger Flag"; 
   case ACQD_SOFT_TRIG_PERIOD: 
-    cmdString="Set Software Trigger Period"; break;
+    return "Set Software Trigger Period"; 
   case ACQD_PEDESTAL_RUN: 
-    cmdString="Start Pedestal Run"; break;
+    return "Start Pedestal Run"; 
   case ACQD_THRESHOLD_SCAN:
-    cmdString="Start Threshold Scan"; break;
+    return "Start Threshold Scan"; 
   case ACQD_REPROGRAM_TURF: 
-    cmdString="Enable TURF Reprogramming"; break;
+    return "Enable TURF Reprogramming"; 
   case ACQD_SURFHK_PERIOD: 
-    cmdString="Set SurfHk Write Period"; break;
+    return "Set SurfHk Write Period"; 
   case ACQD_SURFHK_TELEM_EVERY: 
-    cmdString="Set SurfHK Telemetry Duty Factor"; break;
+    return "Set SurfHK Telemetry Duty Factor"; 
   case ACQD_TURFHK_TELEM_EVERY:
-    cmdString="Set Turf Rate Telemetry Duty Factor"; break;
+    return "Set Turf Rate Telemetry Duty Factor"; 
   case ACQD_NUM_EVENTS_PEDESTAL: 
-    cmdString="Set Number of Pedestal Events"; break;
+    return "Set Number of Pedestal Events"; 
   case ACQD_THRESH_SCAN_STEP_SIZE: 
-    cmdString="Set Threshold Scan Step Size"; break;
+    return "Set Threshold Scan Step Size"; 
   case ACQD_THRESH_SCAN_POINTS_PER_STEP: 
-    cmdString="Set Threshold Scan Points Per Step"; break;
+    return "Set Threshold Scan Points Per Step"; 
   case GPSD_EXTRA_COMMAND:
-    cmdString="Extra GPSd command"; break;
+    return "Extra GPSd command"; 
   case SET_HK_TELEM_EVERY:
-    cmdString="Set Hk. Telem Every"; break;
+    return "Set Hk. Telem Every"; 
   case SIPD_CONTROL_COMMAND:
-    cmdString="SIPd Control command"; break;
+    return "SIPd Control command"; 
   case LOSD_CONTROL_COMMAND:
-    cmdString="LOSd Control command"; break;
+    return "LOSd Control command"; 
   case CLEAR_RAMDISK:
-    cmdString="Clear Ramdisk"; break;
+    return "Clear Ramdisk"; 
   case SAVE_CONFIG:
-    cmdString="Save config"; break;
+    return "Save config"; 
   case MONITORD_RAMDISK_KILL_ACQD:
-    cmdString="Ramdisk space when we stop Acqd"; break;
+    return "Ramdisk space when we stop Acqd"; 
   case MONITORD_RAMDISK_DUMP_DATA:
-    cmdString="Ramdisk space when we clear the ramdisk"; break;
+    return "Ramdisk space when we clear the ramdisk"; 
   case MONITORD_MAX_ACQD_WAIT:
-    cmdString="Max time to wait before restarting Acqd"; break;
+    return "Max time to wait before restarting Acqd"; 
   case MONITORD_PERIOD:
-    cmdString="Time between CPU Monitor packets"; break;
+    return "Time between CPU Monitor packets"; 
   case MONITORD_USB_THRESH:
-    cmdString="Threshold to switch USBs"; break;
+    return "Threshold to switch USBs"; 
     //  case MONITORD_SATA_THRESH:
-    //    cmdString="Threshold to switch SATAs"; break;
+    //    return "Threshold to switch SATAs"; 
   case MONITORD_MAX_QUEUE:
-    cmdString="Maximum inks before deleting in telem queues"; break;
+    return "Maximum inks before deleting in telem queues"; 
   case MONITORD_INODES_KILL_ACQD:
-    cmdString="Ramdisk inodes remaining before stopping Acqd"; break;
+    return "Ramdisk inodes remaining before stopping Acqd"; 
   case MONITORD_INODES_DUMP_DATA:
-    cmdString="Ramdisk inodes remaining before clearing"; break;
+    return "Ramdisk inodes remaining before clearing"; 
   case ACQD_EXTRA_COMMAND:
-    cmdString="Extra Acqd Commands"; break;
+    return "Extra Acqd Commands"; 
   case ACQD_RATE_COMMAND:
-    cmdString="Acqd Rate Control Command"; break;
+    return "Acqd Rate Control Command"; 
   case EVENTD_MATCH_GPS:
-    cmdString="Eventd Match GPS"; break;
+    return "Eventd Match GPS"; 
   case GPS_PHI_MASK_COMMAND:
-    cmdString="GPSd Phi Mask Command"; break;
+    return "GPSd Phi Mask Command"; 
   case PRIORITIZERD_COMMAND:
-    cmdString="Jim's Prioritizer Tweaking command"; break;
+    return "Jim's Prioritizer Tweaking command"; 
   case PLAYBACKD_COMMAND:
-    cmdString="Playback Command"; break;
+    return "Playback Command"; 
   default:
-    cmdString="Unknown Command";
-    break;
+    return "Unknown Command";
+    
 
-  }
-  return cmdString;    
+  }  
 } 
