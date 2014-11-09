@@ -1,5 +1,5 @@
-#include "AnitaConventions.h"
 #include "UsefulAnitaEvent.h"
+#include "AnitaConventions.h"
 #include "RawAnitaEvent.h"
 #include "TimedAnitaHeader.h"
 #include "PrettyAnitaHk.h"
@@ -17,6 +17,7 @@
 
 void exampleLoopAllEvents(int run);
 
+
 void exampleLoopAllEvents()
 {
    cout << "Usage: exampleLoopAllEvents(run no.)\n";
@@ -26,12 +27,12 @@ void exampleLoopAllEvents()
 
 void exampleLoopAllEvents(int run) {
 
-  char eventName[FILENAME_MAX];
-  char headerName[FILENAME_MAX];
-  char hkName[FILENAME_MAX];
-  sprintf(eventName,"/unix/anita1/newRootData/run%d/eventFile%d*.root",run,run);
-  sprintf(headerName,"/unix/anita1/newRootData/run%d/timedHeadFile%d.root",run,run);
-  sprintf(hkName,"/unix/anita1/newRootData/run%d/prettyHkFile%d.root",run,run);
+  char eventName[100];//FILENAME_MAX];
+  char headerName[100];//FILENAME_MAX];
+  char hkName[100];//FILENAME_MAX];
+  sprintf(eventName,"/anitaStorage/antarctica14/root/run%d/eventFile%d*.root",run,run);
+  sprintf(headerName,"/anitaStorage/antarctica14/root/run%d/timedHeadFile%d.root",run,run);
+  sprintf(hkName,"/anitaStorage/antarctica14/root/run%d/prettyHkFile%d.root",run,run);
 
   RawAnitaEvent *event = 0;
   TimedAnitaHeader *header =0;

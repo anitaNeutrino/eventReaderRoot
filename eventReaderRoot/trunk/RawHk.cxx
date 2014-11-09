@@ -32,8 +32,8 @@ RawHk::RawHk(Int_t trun, Int_t trealTime, HkDataStruct_t *hkPtr)
      hkPtr->gHdr.numBytes!=sizeof(HkDataStruct_t)) {
     std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HKD) << "\n" 
 	      << "code:\t" << hkPtr->gHdr.code << "\t" << PACKET_HKD 
-	      << "\nversion:\t" << hkPtr->gHdr.verId 
-	      << "\t" << VER_HK_FULL 
+	      << "\nversion:\t" << (int)hkPtr->gHdr.verId 
+	      << "\t" << (int)VER_HK_FULL 
 	      << "\nsize:\t" << hkPtr->gHdr.numBytes << "\t"
 	      << sizeof(HkDataStruct_t) << std::endl;
   }

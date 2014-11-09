@@ -44,13 +44,26 @@ const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
 const char *AnitaRing::ringAsString(AnitaRing::AnitaRing_t ring)
 {
   switch(ring) {
-  case kUpperRing: return "Upper";
-  case kLowerRing: return "Lower";
-  case kNadirRing: return "Nadir";
+  case kTopRing: return "Top";
+  case kMiddleRing: return "Middle";
+  case kBottomRing: return "Bottom";
   default:
     return "Unknown";
   }
   return "Unknown";
+}
+
+
+char AnitaRing::ringAsChar(AnitaRing::AnitaRing_t ring)
+{
+  switch(ring) {
+  case kTopRing: return 'T';
+  case kMiddleRing: return 'M';
+  case kBottomRing: return 'B';
+  default:
+    return 'U';
+  }
+  return 'U';
 }
 
 char AnitaPol::polAsChar(AnitaPol::AnitaPol_t pol)

@@ -218,6 +218,7 @@ namespace AnitaRing {
    } AnitaRing_t; ///< Ring enumeration
    
    const char *ringAsString(AnitaRing::AnitaRing_t ring); ///< Returns the ring as a character string
+   char ringAsChar(AnitaRing::AnitaRing_t ring); ///< Returns the ring as a character string
 }
 
 //!  AnitaPol -- Enumeration for the two polarisations

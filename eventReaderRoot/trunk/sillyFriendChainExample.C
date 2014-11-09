@@ -2,7 +2,7 @@
 
 void sillyFriendChainExample()
 {
-  sillyFriendChainExample(1033);
+  sillyFriendChainExample(10125);
 }
   
 
@@ -10,18 +10,18 @@ void sillyFriendChainExample(int run) {
   gSystem->Load("libAnitaEvent.so");
 
   //Filenames for the various trees
-  char eventName[FILENAME_MAX];
-  char headerName[FILENAME_MAX];
-  char hkName[FILENAME_MAX];
-  char gpsName[FILENAME_MAX];
+  char eventName[100];//FILENAME_MAX];
+  char headerName[100];//FILENAME_MAX];
+  char hkName[100];//FILENAME_MAX];
+  char gpsName[100];//FILENAME_MAX];
 
 
   //Note the * in the event file name, it's there to handle those runs which
   //have more than one event root file in them (2GB file limit)
-  sprintf(eventName,"/unix/anita1/webData/initial/run%d/eventFile%d*.root",run,run);
-  sprintf(headerName,"/unix/anita1/webData/initial/run%d/headFile%d.root",run,run);
-  sprintf(hkName,"/unix/anita1/webData/initial/run%d/prettyHkFile%d.root",run,run);
-  sprintf(gpsName,"/unix/anita1/webData/initial/run%d/gpsFile%d.root",run,run);
+  sprintf(eventName,"/anitaStorage/antarctica14/root/run%d/eventFile%d*.root",run,run);
+  sprintf(headerName,"/anitaStorage/antarctica14/root/run%d/headFile%d.root",run,run);
+  sprintf(hkName,"/anitaStorage/antarctica14/root/run%d/prettyHkFile%d.root",run,run);
+  sprintf(gpsName,"/anitaStorage/antarctica14/root/run%d/gpsFile%d.root",run,run);
   
   //Open the event chain
   TChain *eventChain = new TChain("eventTree");

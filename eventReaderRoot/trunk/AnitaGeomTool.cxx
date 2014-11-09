@@ -74,9 +74,52 @@ namespace AnitaGeom {
   int middlePhiNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
   int bottomPhiNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
    
+  int surfToPhiTriggerMap[ACTIVE_SURFS][2]={{-1,-1},{-1,-1},{0,4},{2,6},
+					    {1,5},{3,7},{15,11},{13,9},
+					    {14,10},{12,8},{-1,-1},{-1,-1}};
+  AnitaRing::AnitaRing_t surfTriggerChanToRing[SCALERS_PER_SURF]={AnitaRing::kTopRing,AnitaRing::kMiddleRing,AnitaRing::kBottomRing,AnitaRing::kTopRing,AnitaRing::kMiddleRing,AnitaRing::kBottomRing,AnitaRing::kTopRing,AnitaRing::kMiddleRing,AnitaRing::kBottomRing,AnitaRing::kTopRing,AnitaRing::kMiddleRing,AnitaRing::kBottomRing};
+  AnitaPol::AnitaPol_t surfTriggerChanToPol[SCALERS_PER_SURF]={AnitaPol::kVertical,AnitaPol::kVertical,AnitaPol::kVertical,AnitaPol::kVertical,AnitaPol::kVertical,AnitaPol::kVertical,AnitaPol::kHorizontal,AnitaPol::kHorizontal,AnitaPol::kHorizontal,AnitaPol::kHorizontal,AnitaPol::kHorizontal,AnitaPol::kHorizontal};
+
+  int phiToSurfTriggerMap[NUM_PHI]={2,4,3,5,2,4,3,5,9,7,8,6,9,7,8,6};
+  int phiToSurfHalf[NUM_PHI]={0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0};
+  //
+
+
 }
 
 AnitaGeomTool*  AnitaGeomTool::fgInstance = 0;
+
+
+
+int AnitaGeomTool::getPhiRingPolFromSurfChanTrigger(int surf,int chan, int &phi, AnitaRing::AnitaRing_t &ring,AnitaPol::AnitaPol_t &pol)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS) return -1;
+  if(chan<0 || chan>=SCALERS_PER_SURF) return -1;
+
+  int surfHalf=0;				
+  if((chan%6)>=3) surfHalf=1;
+  phi=AnitaGeom::surfToPhiTriggerMap[surf][surfHalf];
+  ring=AnitaGeom::surfTriggerChanToRing[chan];
+  pol=AnitaGeom::surfTriggerChanToPol[chan];
+
+  //Switched at SURF
+  if(surf==5 && chan==0) pol=AnitaPol::kHorizontal;
+  if(surf==5 && chan==6) pol=AnitaPol::kVertical;
+  return phi;
+}
+
+int AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(int phi,AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol ,int &surf, int &chan) {
+  if(phi<0 || phi>=NUM_PHI) return -1;
+  surf=AnitaGeom::phiToSurfTriggerMap[phi];
+  int surfHalf=AnitaGeom::phiToSurfHalf[phi];
+  chan = (6-6*pol)+ ring + 3*surfHalf; 
+
+  if(phi==3 && ring==AnitaRing::kTopRing) {     
+    if(pol==AnitaPol::kVertical) chan=6;
+    if(pol==AnitaPol::kHorizontal) chan=0;
+  }
+  return surf;
+}
 
 
 AnitaGeomTool::AnitaGeomTool()
@@ -400,7 +443,7 @@ void AnitaGeomTool::getThetaPartners(int rx,int& rxleft,int& rxright)
     rxright=AnitaGeom::middleAntNums[phiRight];
   }
   else{
-    int phi=AnitaGeom::bottomPhiNums[rx-16];
+    int phi=AnitaGeom::bottomPhiNums[rx-32];
     int phiLeft=phi-1;
     if(phiLeft<0) phiLeft=15;
     int phiRight=phi+1;
