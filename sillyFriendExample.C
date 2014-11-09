@@ -1,22 +1,22 @@
 //#include "AnitaConventions.h"
 
-void sillyFriendExample()
+void katieTest()
 {
-  sillyFriendExample(1023);
+  katieTest(10103);
 }
   
 
-void sillyFriendExample(int run) {
+void katieTest(int run) {
   gSystem->Load("libAnitaEvent.so");
 
-  char eventName[FILENAME_MAX];
-  char headerName[FILENAME_MAX];
-  char hkName[FILENAME_MAX];
-  char gpsName[FILENAME_MAX];
-  sprintf(eventName,"/unix/anita1/newRootData/run%d/eventFile%d.root",run,run);
-  sprintf(headerName,"/unix/anita1/newRootData/run%d/headFile%d.root",run,run);
-  sprintf(hkName,"/unix/anita1/newRootData/run%d/prettyHkFile%d.root",run,run);
-  sprintf(gpsName,"/unix/anita1/newRootData/run%d/gpsFile%d.root",run,run);
+  char eventName[100];//FILENAME_MAX];
+  char headerName[100];//FILENAME_MAX];
+  char hkName[100];//FILENAME_MAX];
+  char gpsName[100];//FILENAME_MAX];
+  sprintf(eventName,"/anitaStorage/antarctica14/root/run%d/eventFile%d.root",run,run);
+  sprintf(headerName,"/anitaStorage/antarctica14/root/run%d/headFile%d.root",run,run);
+  sprintf(hkName,"/anitaStorage/antarctica14/root/run%d/prettyHkFile%d.root",run,run);
+  sprintf(gpsName,"/anitaStorage/antarctica14/root/run%d/gpsFile%d.root",run,run);
   
   TFile *fpEvent = new TFile(eventName);
   TTree *eventTree = (TTree*) fpEvent->Get("eventTree");

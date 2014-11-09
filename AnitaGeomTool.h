@@ -173,6 +173,9 @@ class AnitaGeomTool
   
   //  static int getRFCMFromAnt(int ant); ///<Returns the RFCM number
   //  static int getRFCMChannelFromAntPol(int ant,AnitaPol::AnitaPol_t pol); ///< Returns the RFCM channel number
+  static int getPhiRingPolFromSurfChanTrigger(int surf,int chan, int &phi, AnitaRing::AnitaRing_t &ring,AnitaPol::AnitaPol_t &pol);
+  static int getSurfChanTriggerFromPhiRingPol(int phi,AnitaRing::AnitaRing_t ring ,AnitaPol::AnitaPol_t pol,int &surf, int &chan);
+
 
   static int getAntPolFromSurfChan(int surf,int chan,int &ant,AnitaPol::AnitaPol_t &pol); ///< Convert surf-chan to ant-pol
   
