@@ -21,7 +21,7 @@
 #endif
 
 //Clock Period Hard Coded
-Double_t clockPeriod=8;
+Double_t clockPeriod=1000/33.;
 
 //Fitting function
 Double_t funcSquareWave(Double_t *x, Double_t *par)
@@ -166,28 +166,12 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
   
   
    fApplyClockFudge=0;
-   if(calType==WaveCalType::kVTFullJWPlusFudge || calType==WaveCalType::kVTFullJWPlusFancyClockZero)
-     fApplyClockFudge=1;
    //   std::cout << "AnitaEventCalibrator::calibrateUsefulEvent():" << calType << std::endl;
    if(calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGFastClock || calType==WaveCalType::kVTFullAGCrossCorClock || calType==WaveCalType::kVTCalFilePlusSimon) {
      processEventAG(eventPtr);
    }
-   else if(calType==WaveCalType::kVTFullJW || calType==WaveCalType::kVTLabJW ||
-      calType==WaveCalType::kVTFullJWPlus || calType==WaveCalType::kVTLabJWPlus ||
-      calType==WaveCalType::kVTFullJWPlusClock || calType==WaveCalType::kVTLabJWPlusClock ||
-      calType==WaveCalType::kVTLabJWPlusClockZero || calType==WaveCalType::kVTFullJWPlusClockZero ||
-      calType==WaveCalType::kVTLabJWPlusFastClockZero || 
-      calType==WaveCalType::kVTFullJWPlusFastClockZero ||
-      calType==WaveCalType::kVTFullJWPlusFancyClockZero) {
-      //Do nothing
-      if(eventPtr->gotCalibTemp)
-	 processEventJW(eventPtr);
-      else
-	 processEventJW(eventPtr); //For now using fixed temp
-       // until I get the alligned trees set up.
-   }
    else {
-      processEventRG(eventPtr);
+     justBinByBinTimebase(eventPtr);
    }
 
    
@@ -197,27 +181,18 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
   }
    else { 
      //Clock Jitter correction
-     if(calType==WaveCalType::kVTLabJWPlusClock || calType==WaveCalType::kVTFullJWPlusClock ||
-	calType==WaveCalType::kVTLabClockRG || calType==WaveCalType::kVTFullClockRG ||
-	calType==WaveCalType::kVTLabJWPlusClockZero || calType==WaveCalType::kVTFullJWPlusClockZero) {
-       processClockJitter(eventPtr);
-     }
 
-     if(calType==WaveCalType::kVTLabJWPlusFastClockZero || calType==WaveCalType::kVTFullJWPlusFastClockZero || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTFullAGFastClock) {
+     if(calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTFullAGFastClock) {
        processClockJitterFast(eventPtr);
      }
    
-     if(calType==WaveCalType::kVTFullJWPlusFancyClockZero || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGCrossCorClock) {
+     if( calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGCrossCorClock) {
        processClockJitterCorrelation(eventPtr);
      }
    } 
 
    //Zero Mean
-   if(calType==WaveCalType::kVTLabClockZeroRG || calType==WaveCalType::kVTFullClockZeroRG ||
-      calType==WaveCalType::kVTLabJWPlusClockZero || calType==WaveCalType::kVTFullJWPlusClockZero ||
-      calType==WaveCalType::kVTLabJWPlusFastClockZero || 
-      calType==WaveCalType::kVTFullJWPlusFastClockZero || 
-      calType==WaveCalType::kVTFullJWPlusFancyClockZero || 
+   if(
       calType==WaveCalType::kVTLabAGCrossCorClock ||
       calType==WaveCalType::kVTFullAGCrossCorClock) {
 
@@ -526,7 +501,7 @@ void AnitaEventCalibrator::processClockJitterCorrelation(UsefulAnitaEvent *event
    // At this point we have filled the normalised voltage arrays and created TGraphs
    // we can now correlate  and extract the offsets
    Double_t deltaT=1./(2.6*fClockUpSampleFactor);
-   correlateTenClocks(grClockFiltered,deltaT);
+   correlateClocks(grClockFiltered,deltaT);
 
 
    for(int surf=0;surf<NUM_SURF;surf++) {
@@ -631,9 +606,11 @@ void AnitaEventCalibrator::zeroMean() {
 void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 {  
   //  std::cout << "processEventAG\n";
-  if(eventPtr->fC3poNum) {
-    clockPeriod=1e9/eventPtr->fC3poNum;
-  }
+
+  //C3PO num is no longer the clock in channel 9
+  //  if(eventPtr->fC3poNum) {
+  //    clockPeriod=1e9/eventPtr->fC3poNum;
+  //  }
   Double_t tempFactor=eventPtr->getTempCorrectionFactor();
   for(Int_t surf=0;surf<NUM_SURF;surf++) {
     for(Int_t chan=0;chan<NUM_CHAN;chan++) {
@@ -829,364 +806,6 @@ Int_t AnitaEventCalibrator::justBinByBinTimebase(UsefulAnitaEvent *eventPtr)
 }
 
 
-void AnitaEventCalibrator::processEventRG(UsefulAnitaEvent *eventPtr) {
-   //   std::cout << "processEventRG" << std::endl;
-   //Now we'll actually try and process the data
-   for(int surf=0;surf<NUM_SURF;surf++) {
-      for(int chan=0;chan<NUM_CHAN;chan++) {	 
-	    int goodPoints=0;
-	    int chanIndex=getChanIndex(surf,chan);
-	    int firstHitbus=eventPtr->getFirstHitBus(chanIndex);
-	    int lastHitbus=eventPtr->getLastHitBus(chanIndex);
-	    //	    int wrappedHitbus=((eventPtr->chipIdFlag[chanIndex])&0x8)>>3;
-	    int wrappedHitbus=eventPtr->getWrappedHitBus(chanIndex);
-	       	    
-	    int labChip=(eventPtr->chipIdFlag[chanIndex])&0x3;
-	    fLabChip[surf][chan]=labChip;
-	    int rcoBit=((eventPtr->chipIdFlag[chanIndex])&0x4)>>2;
-
-	    
-	    for(int samp=0;samp<NUM_SAMP;samp++) {
-	       rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
-	    }
-	    
-	    //Hack for sample zero weirdness
-	    //This should go away at some point
-	    if(chan==0) {
-	       rawArray[surf][chan][0]=rawArray[surf][chan][259];
-	    }
-    
-	    if(!wrappedHitbus) {
-		int numHitBus=1+lastHitbus-firstHitbus;
-		goodPoints=NUM_EFF_SAMP-numHitBus;
-	    }
-	    else {
-		goodPoints=lastHitbus-(firstHitbus+1);
-	    }
-	    
-	    int firstSamp,lastSamp;
-	    if(!wrappedHitbus) {
-		firstSamp=lastHitbus+1;
-		lastSamp=NUM_SAMP+lastHitbus;
-	    }
-	    else {
-		firstSamp=firstHitbus+1;
-		lastSamp=lastHitbus;	    
-	    }
-	    numPointsArray[surf][chan]=goodPoints;
-
-
-	    //Timebase calib
-	    double timeVal=0;
-
-	    //First we have to work out which phase we are in
-	    int startRco=rcoBit;
-	    if(!wrappedHitbus) 
-		startRco=1-startRco;
-	    if(firstSamp<rcoLatchCalib[surf][labChip] && !wrappedHitbus) 
-	       startRco=1-startRco;
-
-
-	    //Now we do the calibration
-	    double time255=0;
-	    for(int samp=firstSamp;samp<lastSamp;samp++) {
-		int currentRco=startRco;
-		int index=samp;
-		int subtractOffset=0;
-		if (index>=NUM_SAMP-1) {
-		    index-=NUM_SAMP-1;	
-		    subtractOffset=1;
-		    currentRco=1-startRco;
-		}
-		
-		unwrappedArray[surf][chan][samp-firstSamp]=rawArray[surf][chan][index];	       
-		mvArray[surf][chan][samp-firstSamp]=double(rawArray[surf][chan][index])*mvCalibVals[surf][chan][labChip]*2;
-
-		if(chan==8) {
-		   if(index==0) {
-		      //I think this works as we have switched rco's
-		      if(time255>0) 
-			 timeVal=time255+epsilonCalib[surf][labChip][currentRco];
-		   }		
-		   surfTimeArray[surf][samp-firstSamp]=timeVal;
-		   //		if(surf==0 && chan==8)
-		   //		   cout << samp-firstSamp << " " << timeVal << " " << timeBaseCalib[surf][labChip][currentRco] << " " << surf << " " << labChip << " " << currentRco << endl;
-		   
-		   timeVal+=1.0/timeBaseCalib[surf][labChip][currentRco];
-		   if(index==255) {
-		      time255=timeVal;
-		   }
-
-		   //		if(surf==0 && chan==8)
-		   //		   cout << samp-firstSamp << " " << timeVal << endl;
-		}
-	    }
-	    
-      }      	           
-   }
-     
-}
-
-
-void AnitaEventCalibrator::processEventJW(UsefulAnitaEvent *eventPtr)
-{  
-   //   std::cout << "processEventJW" << std::endl;
-   //  int word;
-  int chanIndex=0;
-  int labChip=0;    
-  double temp_scale=29.938/(31.7225-0.054*33.046);
-  if(eventPtr->gotCalibTemp) {
-     temp_scale=eventPtr->getTempCorrectionFactor();
-  }
-
-
-  for (int surf=0; surf<NUM_SURF; surf++){
-    for (int chan=0; chan<NUM_CHAN; chan++){ 
-      int goodPoints=0;
-      chanIndex=getChanIndex(surf,chan);
-      int firstHitbus=eventPtr->getFirstHitBus(chanIndex);
-      int lastHitbus=eventPtr->getLastHitBus(chanIndex);
-//      int wrappedHitbus=((eventPtr->chipIdFlag[chanIndex])&0x8)>>3;
-      int wrappedHitbus=eventPtr->getWrappedHitBus(chanIndex);
-      //Inset fix to sort out dodgy channel zero problems
-      if(chan==0 && firstHitbus==0) {
-	 firstHitbus=eventPtr->getFirstHitBus(chanIndex+1);
-	 lastHitbus=eventPtr->getLastHitBus(chanIndex+1);
-	 wrappedHitbus=eventPtr->getWrappedHitBus(chanIndex+1);
-      }
-
-	
-
-      labChip=(eventPtr->chipIdFlag[chanIndex])&0x3;
-      fLabChip[surf][chan]=labChip;       	    
-      int rcoBit=((eventPtr->chipIdFlag[chanIndex])&0x4)>>2;
-
-      //Ryans dodgy-ness
-      double fudgeScale=1;
-      if(fApplyClockFudge)
-	 fudgeScale=tcalFudgeFactor[surf][labChip][rcoBit];
-      //      std::cout << surf << "\t" << labChip << "\t" << rcoBit << "\t" << fudgeScale << "\n";
-
-      for(int samp=0;samp<NUM_SAMP;samp++) {
-	 rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
-      }
-
-      if(!wrappedHitbus) {
-	int numHitBus=1+lastHitbus-firstHitbus;
-	goodPoints=NUM_SAMP-numHitBus;
-      }
-      else {
-	goodPoints=lastHitbus-(firstHitbus+1);
-      }
-      
-      //      std::cout << surf << "\t" << chan << "\t" << firstHitbus << "\t" << lastHitbus << "\t" << wrappedHitbus << "\t" << goodPoints << "\n";
-      if(firstHitbus==lastHitbus ||goodPoints<100) {
-	 std::cout << "Something wrong with HITBUS of event:\t" << eventPtr->eventNumber << "\t" << surf 
-		   << "\t" << chan << "\n";
-	 //Something wrong add this hack	 
-	 for(int tempChan=chan+1;tempChan<chan+2;tempChan++) {
-	    Int_t tempChanIndex=getChanIndex(surf,tempChan);
-	    firstHitbus=eventPtr->getFirstHitBus(tempChanIndex);
-	    lastHitbus=eventPtr->getLastHitBus(tempChanIndex);
-	    wrappedHitbus=eventPtr->getWrappedHitBus(tempChanIndex);
-	    if(!wrappedHitbus) {
-	      int numHitBus=1+lastHitbus-firstHitbus;
-	      goodPoints=NUM_SAMP-numHitBus;
-	    }
-	    else {
-	      goodPoints=lastHitbus-(firstHitbus+1);
-	    }
-	    
-	    if(goodPoints) break;	       
-	 }
-      }
-
-
-//       if(surf==0 && chan==0) {
-// 	 std::cout << std::hex << (int)eventPtr->chipIdFlag[chanIndex] << "\n";
-// 	 std::cout << std::dec << firstHitbus << "\t" << lastHitbus << "\t" << wrappedHitbus
-// 		   << "\t" << goodPoints << std::endl; 
-//       }
-
-      int firstSamp,lastSamp;
-      if(!wrappedHitbus) {
-	firstSamp=lastHitbus+1;
-	//	lastSamp=(NUM_SAMP-1)+lastHitbus;//Ryan's error?
-	lastSamp=NUM_SAMP+firstHitbus;//My fix
-      }
-      else {
-	firstSamp=firstHitbus+1;
-	lastSamp=lastHitbus;
-      }
-
-      int startRco=rcoBit;
-      if(!wrappedHitbus) 
-	startRco=1-startRco;
-
-      //switch RCO info for RCO delay
-      if(firstHitbus<=tcalRcoDelayBin[surf][labChip][startRco] && !wrappedHitbus) startRco=1-startRco;
-
-      int ibin=0;
-      for(int samp=firstSamp;samp<lastSamp;samp++) {
-	int index=samp;
-	int irco=startRco;
-	if (index>=NUM_SAMP) { 
-	  index-=(NUM_SAMP);
-	  irco=1-startRco;
-	}
-	
-	if (index==0) { //temp. fix to skip sca=0 where unexpected voltage apears
-	   goodPoints--;
-	   continue;
-	}
-	
-	unwrappedArray[surf][chan][ibin]=rawArray[surf][chan][index];
-	mvArray[surf][chan][ibin]=double(rawArray[surf][chan][index])*mvCalibVals[surf][chan][labChip]*2;
-	scaArray[surf][chan][ibin]=index; 
-	rcobit[surf][chan][ibin]=irco;
-
-	if (chan==8){//timing calibraion
-	   double dt_bin=tcalTBin[surf][labChip][irco][index]*temp_scale*fudgeScale;	  
-	  int index_prev=index-1;
-	  if (index_prev==-1) index_prev=259;
-//	  double dt_bin_prev=tcalTBin[surf][labChip][irco][index_prev];
-
-	  if (ibin==0) surfTimeArray[surf][ibin]=dt_bin;       
-	  else surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin-1]+dt_bin;	
-
-	  if (index==1) {	  
-	    double epsilon_eff=tcalEpsilon[surf][labChip][irco];
-	    surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin]-epsilon_eff;
-	    //	    std::cout << surf << "\t" << chan << "\t" << labChip << "\t" << irco << "\t" << epsilon_eff << "\n";
-	    
-	    //////////////////////////////////////////////
-	    //swapping time and voltage for non-monotonic time.
-	    if (ibin>0 && surfTimeArray[surf][ibin-1]>surfTimeArray[surf][ibin]){
-	       double tmp_time=surfTimeArray[surf][ibin];
-	       surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin-1];
-	       surfTimeArray[surf][ibin-1]=tmp_time;
-	       for (int chan=0; chan<NUM_CHAN; chan++){ 
-		  double tmp_v=mvArray[surf][chan][ibin];		
-		  mvArray[surf][chan][ibin]=mvArray[surf][chan][ibin-1];
-		  mvArray[surf][chan][ibin-1]=tmp_v;
-		  tmp_v=unwrappedArray[surf][chan][ibin];		
-		  unwrappedArray[surf][chan][ibin]=unwrappedArray[surf][chan][ibin-1];
-		  unwrappedArray[surf][chan][ibin-1]=(int)tmp_v;
-	      }	      
-	    }
-	    //end of time swapping
-	    //////////////////////
-	    
-	    
-	  }
-	}
-	ibin++;	
-      }
-      
-      numPointsArray[surf][chan]=goodPoints;
-
-      
-      //2nd correction for RCO phase info. delay, RCO is determined by measuring clock period. 
-      //to day CPU time, this method is used only if around the boundary of tcalRcoDelayBin.
-      if (chan==8){
-	/** Check how many points we say we have.  Don't let it be more than the clock channel -
-	    that can cause problems.  SH **/
-	for (int chan_sub_index = 0; chan_sub_index < 8; ++chan_sub_index)
-	  if (numPointsArray[surf][chan_sub_index] > numPointsArray[surf][8])
-	    numPointsArray[surf][chan_sub_index] = numPointsArray[surf][8];
-
-
-	if (firstHitbus>tcalRcoDelayBin[surf][labChip][startRco] && 
-	    firstHitbus<=tcalRcoDelayBin[surf][labChip][startRco]+2 && !wrappedHitbus){
-	
-	double t_LE[3];
-	double t_TE[3];
-	int LE_count=0;
-	int TE_count=0;
-	int ibin=0;
-	for (ibin=0;ibin<goodPoints-1;ibin++){
-	  double mv1=unwrappedArray[surf][chan][ibin];
-	  double mv2=unwrappedArray[surf][chan][ibin+1];
-	  if (LE_count<3 && mv1<0 && mv2>=0){
-	    double t1=surfTimeArray[surf][ibin];
-	    double t2=surfTimeArray[surf][ibin+1];
-	    t_LE[LE_count]=Get_Interpolation_X(t1, mv1, t2, mv2, 0);
-	    LE_count++;
-	  }	    
-	  if (TE_count<3 && mv1>0 && mv2<=0){
-	    double t1=surfTimeArray[surf][ibin];
-	    double t2=surfTimeArray[surf][ibin+1];
-	    t_TE[TE_count]=Get_Interpolation_X(t1, mv1, t2, mv2, 0);
-	    TE_count++;
-	  }	    
-	}	  
-	
-	if (LE_count>2 && TE_count>2){	    
-
-	  double clock_pulse_width_LE=0;
-	  if (LE_count==2) clock_pulse_width_LE=t_LE[1]-t_LE[0];
-	  if (LE_count==3) clock_pulse_width_LE=(t_LE[2]-t_LE[0])/2.;
-	  double clock_pulse_width_TE=0;
-	  if (TE_count==2) clock_pulse_width_TE=t_TE[1]-t_TE[0];
-	  if (TE_count==3) clock_pulse_width_TE=(t_TE[2]-t_TE[0])/2.;
-	  double clock_pulse_width=(clock_pulse_width_LE+clock_pulse_width_TE)/2.;
-
-	  if (clock_pulse_width<29.75 || clock_pulse_width>30.2){
-	      for (int ibin=0;ibin<goodPoints;ibin++){
-		
-		  for (int ichan=0; ichan<NUM_CHAN; ichan++) {
-		      rcobit[surf][ichan][ibin]=1-rcobit[surf][ichan][ibin];
-		  }
-		  //may be one rcobit array per board might be enough, need to modify later./jwnam
-		int irco=rcobit[surf][chan][ibin];
-		int index=scaArray[surf][chan][ibin];
-		double dt_bin=tcalTBin[surf][labChip][irco][index]*temp_scale*fudgeScale;	  
-		if (ibin==0) surfTimeArray[surf][ibin]=dt_bin;       
-		else surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin-1]+dt_bin;	
-		if (index==1) {	  
-		  double epsilon_eff=tcalEpsilon[surf][labChip][irco];
-		  surfTimeArray[surf][ibin]=surfTimeArray[surf][ibin]-epsilon_eff;
-		}
-		
-	      }
-	    }
-	  }
-	}
-      } //if chan==8
-    } //chan loop        
-    /** Make certain that time is monotonically increasing in this surf! **/
-    bool did_swap = false;
-    do {
-      did_swap = false;
-      for(int samp=1;samp<numPointsArray[surf][8];samp++) {
-     
-   //////////////////////////////////////////////
-   //swapping time and voltage for non-monotonic time.
-   if (samp>0 && surfTimeArray[surf][samp-1]>surfTimeArray[surf][samp]){
-     did_swap = true;
-     double tmp_time=surfTimeArray[surf][samp];
-     surfTimeArray[surf][samp]=surfTimeArray[surf][samp-1];
-     surfTimeArray[surf][samp-1]=tmp_time;
-     for (int chan=0; chan<NUM_CHAN; chan++){ 
-       if (samp >= numPointsArray[surf][chan]) continue;
-       double tmp_v=mvArray[surf][chan][samp];      
-       mvArray[surf][chan][samp]=mvArray[surf][chan][samp-1];
-       mvArray[surf][chan][samp-1]=tmp_v;
-       tmp_v=unwrappedArray[surf][chan][samp];      
-       unwrappedArray[surf][chan][samp]=unwrappedArray[surf][chan][samp-1];
-       unwrappedArray[surf][chan][samp-1]=(int)tmp_v;
-     }         
-   }
-   //end of time swapping
-   //////////////////////
-      }
-    } while (did_swap);
-
-    
-  } //SURF loop
-}
-
-
 
 
 
@@ -1362,38 +981,7 @@ void AnitaEventCalibrator::loadCalib() {
       clockCrossCorr[surf][chip]=calib;
     }
 
-    //Load Jiwoo calibrations
-    sprintf(fileName,"%s/jiwoo_timecode/anita_surf_time_constant_epsilon.txt",calibDir);
-    std::ifstream JiwooEpsilonCalibFile(fileName);
-    while(JiwooEpsilonCalibFile >> surf >> chip >> rco >> calib) {
-	int tmpRco=1-rco;
-	tcalEpsilon[surf][chip][tmpRco]=calib;
-	//	cout << surf << " " << chip << " " << rco << "\t" << calib << endl;
-	   
-    }
-    sprintf(fileName,"%s/jiwoo_timecode/anita_surf_time_constant_differeniial.txt",calibDir);
-    std::ifstream JiwooDifferentialCalibFile(fileName);
-    while(JiwooDifferentialCalibFile >> surf >> chip >> rco) {
-	for(int samp=0;samp<NUM_SAMP;samp++) {
-	    JiwooDifferentialCalibFile >> calib;
-	    tcalTBin[surf][chip][rco][samp]=calib;
-	}
-    }
-    sprintf(fileName,"%s/jiwoo_timecode/anita_surf_time_constant_rco_delay.txt",calibDir);
-    std::ifstream JiwooRcoDelayCalibFile(fileName);
-    while(JiwooRcoDelayCalibFile>> surf >> chip >> rco >> calib) {
-	tcalRcoDelayBin[surf][chip][rco]=calib;
-    }
     
-    //Load Ryan's dodgy fudge factors
-    sprintf(fileName,"%s/clockFudgeFactors.dat",calibDir);
-    std::ifstream RyansFudgeFactorFile(fileName);
-    RyansFudgeFactorFile.getline(firstLine,179);
-    while(RyansFudgeFactorFile >> surf >> chip >> rco >> calib) {
-	tcalFudgeFactor[surf][chip][rco]=calib;
-	//	std::cout << surf << " " << chip << " " << rco << "\t" << calib << std::endl;
-	   
-    }
     
     sprintf(fileName,"%s/rfPowPeds.dat",calibDir);
     std::ifstream GaryRfPowPeds(fileName);
@@ -1445,7 +1033,7 @@ double AnitaEventCalibrator::Get_Interpolation_X(double x1, double y1, double x2
 }
 
 
-void AnitaEventCalibrator::correlateTenClocks(TGraph *grClock[NUM_SURF], Double_t deltaT)
+void AnitaEventCalibrator::correlateClocks(TGraph *grClock[NUM_SURF], Double_t deltaT)
 {
 #ifdef USE_FFT_TOOLS
   for(int surf=1;surf<NUM_SURF;surf++) {

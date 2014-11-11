@@ -21,7 +21,7 @@
 ClassImp(UsefulAnitaEvent);
 
 
-#define MAGIC_DELTAT 8 ///<This is the supposed clock period
+#define MAGIC_DELTAT 1000/33. ///<This is the supposed clock period
 
 Double_t getZeroCrossingPoint(Double_t x1, Double_t y1, Double_t x2, Double_t y2)
 {
@@ -53,7 +53,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr, WaveCalT
   fLastEventGuessed=calibratedPtr->eventNumber;
   gotCalibTemp=0;
   fTempFactorGuess=calibratedPtr->fTempFactorGuess;
-  for(int surf=0;surf<10;surf++) {
+  for(int surf=0;surf<NUM_SURF;surf++) {
     fRcoArray[surf]=calibratedPtr->fRcoArray[surf];
     fClockPhiArray[surf]=calibratedPtr->fClockPhiArray[surf];    
   }
@@ -177,7 +177,6 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
       }
     }
     break;
-  case WaveCalType::kVTLabRG:
   case WaveCalType::kVTLabAG:
     //All Abby's lovely numbers    
     for(int surf=0;surf<NUM_SURF;surf++) {
@@ -195,97 +194,9 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
     }
       
     break;
-  case WaveCalType::kVTFullRG:
-    //All my lovely numbers + cable delay
-    for(int surf=0;surf<NUM_SURF;surf++) {
-      for(int chan=0;chan<NUM_CHAN;chan++) {
-	int chanIndex=getChanIndex(surf,chan);
-	this->fNumPoints[chanIndex]=fCalibrator->numPointsArray[surf][chan];
-	memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
-	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
-	  this->fTimes[chanIndex][samp]=fCalibrator->surfTimeArray[surf][samp]+
-	    fCalibrator->groupDelayCalib[surf][chan];
-
-	}
-      }
-    }
-    break;
-  case WaveCalType::kVTLabJW:
-    //All Jiwoo's lovely numbers    
-    for(int surf=0;surf<NUM_SURF;surf++) {
-      for(int chan=0;chan<NUM_CHAN;chan++) {
-	int chanIndex=getChanIndex(surf,chan);
-	this->fNumPoints[chanIndex]=fCalibrator->numPointsArray[surf][chan];
-	memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
-	  this->fVolts[chanIndex][samp]=fCalibrator->unwrappedArray[surf][chan][samp];
-	  this->fTimes[chanIndex][samp]=fCalibrator->surfTimeArray[surf][samp];
-	}
-      }
-    }
-    break;
-  case WaveCalType::kVTFullJW:
-    //All Jiwoo's lovely numbers + cable delay
-    for(int surf=0;surf<NUM_SURF;surf++) {
-      for(int chan=0;chan<NUM_CHAN;chan++) {
-	int chanIndex=getChanIndex(surf,chan);
-	this->fNumPoints[chanIndex]=fCalibrator->numPointsArray[surf][chan];
-	memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
-	  this->fVolts[chanIndex][samp]=fCalibrator->unwrappedArray[surf][chan][samp];
-	  this->fTimes[chanIndex][samp]=fCalibrator->surfTimeArray[surf][samp]+
-	    fCalibrator->groupDelayCalib[surf][chan];
-	  //		if(chan==0) {
-	  //		   std::cout << surf << "\t" << chan << "\t" << samp << "\t"
-	  //			     << fCalibrator->surfTimeArray[surf][samp] << std::endl;
-	  //		}
-	}
-      }
-    }
-    break;
-  case WaveCalType::kVTLabJWPlus:
-    //All Jiwoo's lovely numbers    
-    for(int surf=0;surf<NUM_SURF;surf++) {
-      for(int chan=0;chan<NUM_CHAN;chan++) {
-	int chanIndex=getChanIndex(surf,chan);
-	this->fNumPoints[chanIndex]=fCalibrator->numPointsArray[surf][chan];
-	memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
-	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
-	  this->fTimes[chanIndex][samp]=fCalibrator->surfTimeArray[surf][samp];
-	}
-      }
-    }
-    break;
-  case WaveCalType::kVTFullJWPlus:
-  case WaveCalType::kVTFullJWPlusFudge:
-    //All Jiwoo's lovely numbers + cable delay
-    for(int surf=0;surf<NUM_SURF;surf++) {
-      for(int chan=0;chan<NUM_CHAN;chan++) {
-	int chanIndex=getChanIndex(surf,chan);
-	this->fNumPoints[chanIndex]=fCalibrator->numPointsArray[surf][chan];
-	memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
-	  //	       std::cout << fCalibrator->surfTimeArray[surf][samp] << "\t" 
-	  //		    << fCalibrator->mvArray[surf][chan][samp] << std::endl;
-	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
-	  this->fTimes[chanIndex][samp]=fCalibrator->surfTimeArray[surf][samp]+
-	    fCalibrator->groupDelayCalib[surf][chan];
-	}
-      }
-    }
-    break;
        
   case WaveCalType::kVTLabAGFastClock:
   case WaveCalType::kVTLabAGCrossCorClock:
-  case WaveCalType::kVTLabClockRG:
-  case WaveCalType::kVTLabClockZeroRG:
     // kVTLabRG + Clock Jitter Correction (+ Zero Mean)
     for(int surf=0;surf<NUM_SURF;surf++) {
       for(int chan=0;chan<NUM_CHAN;chan++) {
@@ -334,65 +245,6 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
       }
     }      
     break;
-
-  case WaveCalType::kVTFullClockRG:
-  case WaveCalType::kVTFullClockZeroRG:
-    // kVTFullRG + Clock Jitter Correction (+ Zero Mean)
-    for(int surf=0;surf<NUM_SURF;surf++) {
-      for(int chan=0;chan<NUM_CHAN;chan++) {
-	int chanIndex=getChanIndex(surf,chan);
-	this->fNumPoints[chanIndex]=fCalibrator->numPointsArray[surf][chan];
-	memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
-	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
-	  this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp]+
-	    fCalibrator->groupDelayCalib[surf][chan];
-	}
-      }
-    }      
-    break;
-       
-  case WaveCalType::kVTLabJWPlusClock:
-  case WaveCalType::kVTLabJWPlusClockZero: 
-  case WaveCalType::kVTLabJWPlusFastClockZero:
-    // kVTLabJWPlus + Clock Jitter Correction (+ Zero Mean) 
-    for(int surf=0;surf<NUM_SURF;surf++) {
-      for(int chan=0;chan<NUM_CHAN;chan++) {
-	int chanIndex=getChanIndex(surf,chan);
-	this->fNumPoints[chanIndex]=fCalibrator->numPointsArray[surf][chan];
-	memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
-	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
-	  this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp];
-	}
-      }
-    }
-    break;
-
-      
-
-  case WaveCalType::kVTFullJWPlusClock:              
-  case WaveCalType::kVTFullJWPlusClockZero:  
-  case WaveCalType::kVTFullJWPlusFastClockZero:
-  case WaveCalType::kVTFullJWPlusFancyClockZero:        
-    // kVTFullJWPlus + Clock Jitter Correction (+ Zero Mean)
-    for(int surf=0;surf<NUM_SURF;surf++) {
-      for(int chan=0;chan<NUM_CHAN;chan++) {
-	int chanIndex=getChanIndex(surf,chan);
-	this->fNumPoints[chanIndex]=fCalibrator->numPointsArray[surf][chan];
-	memset(&(this->fVolts[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	memset(&(this->fTimes[chanIndex][0]),0,NUM_SAMP*sizeof(double));
-	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
-	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
-	  this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp]+
-	    fCalibrator->groupDelayCalib[surf][chan];
-	}
-      }
-    }      
-    break;
-       
 
   case WaveCalType::kNoCalib:
   case WaveCalType::kADC:
@@ -451,9 +303,10 @@ TGraph *UsefulAnitaEvent::getGraph(AnitaRing::AnitaRing_t ring,
 
 Int_t UsefulAnitaEvent::guessRco(int chanIndex)
 {
- 
-  if(fLastEventGuessed!=this->eventNumber) 
-    analyseClocksForGuesses();
+  //RJN removed clock guessing for now.
+  //  if(fLastEventGuessed!=this->eventNumber) 
+  //    analyseClocksForGuesses();
+  //  if(
   return fRcoArray[chanIndex/9];
 }
 
@@ -464,9 +317,10 @@ Double_t UsefulAnitaEvent::getTempCorrectionFactor()
     return tempScale;
   }
   else {
-    if(fLastEventGuessed!=this->eventNumber) 
-      analyseClocksForGuesses();
-    return fTempFactorGuess;
+    //    if(fLastEventGuessed!=this->eventNumber) 
+    //      analyseClocksForGuesses();
+    //    return fTempFactorGuess;
+    return 1;
   }
 }
 

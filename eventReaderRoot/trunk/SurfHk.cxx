@@ -267,6 +267,16 @@ Int_t SurfHk::getSetThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::An
   return -1;
 }
 
+
+Int_t SurfHk::isMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol)
+{
+  Int_t surf,scl;
+  AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(phi,ring,pol,surf,scl);
+  if((surf>=0 && surf<ACTIVE_SURFS) && (scl>=0 && scl<SCALERS_PER_SURF))
+    return isBandMasked(surf,scl);
+  return -1;
+}
+
 Int_t SurfHk::getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol)
 {
    Int_t surf,scl;
@@ -311,3 +321,14 @@ Double_t SurfHk::getMeasuredRFPowerInK(int surf, int chan)
   Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adc);
   return kelvin;
 }
+
+Double_t SurfHk::getRawRFPower(int surf, int chan)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  if(chan<0 || chan>=RFCHAN_PER_SURF)
+    return -1;
+  Int_t adc=rfPower[surf][chan]&0x7FFF; //mask off top bit
+  return adc;
+}
+  
