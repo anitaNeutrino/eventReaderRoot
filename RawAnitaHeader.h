@@ -134,6 +134,7 @@ The second byte (reserved[1]) is currently reserved.
   UShort_t        upperL2TrigPattern; ///< Bit mask for upper ring l2 cluster triggers. eg. if the bit 1 (the lowest bit) is active it means the three antenna cluster centred on the upper ring antenna in phi sector 1 contributes an L2 trigger to the event.
   UShort_t        lowerL2TrigPattern; ///< Bit mask for lower ring l2 cluster triggers. eg. if the bit 1 (the lowest bit) is active it means the three antenna cluster centred on the lower ring antenna in phi sector 1 contributes an L2 trigger to the event.
   UShort_t        l3TrigPattern; ///< Bit mask for l3 global triggers. eg. if the bit 1 (the lowest bit) is active it means that phi sector 1 contributed an L3 trigger to the event.
+  UShort_t        l3TrigPatternH; ///< Bit mask for l3 global triggers. eg. if the bit 1 (the lowest bit) is active it means that phi sector 1 contributed an L3 trigger to the event.
   UShort_t        otherTrigPattern[3]; ///< Other trig patterns -- currently reserved
   UChar_t         nadirL1TrigPattern; ///< 8-bit trigger mask for L1 nadir triggers. Here bit 1 is antenna 33 (phi 1), bit 2 is antenna 34 (phi 3), bit 3 is antenna 35 (phi 5), bit 4 is antenna 36 (phi 7), bit 5 is antenna 37 (phi 9), bit 6 is antenna 38 (phi 11), bit 7 is antenna 39 (phi 13) and bit 8 is antenna 40 (phi 15).
   UChar_t         nadirL2TrigPattern; ///< 8-bit trigger mask for L2 nadir triggers. Nadir L2 triggers are for the even phi sectors and are just the OR of the neighbouring antennas. So bit 1 is phi sector 2 (the OR of phi 1 and phi 3), through to bit 8 is phi sector 16 (the OR of phi's 15 and 1).
@@ -142,9 +143,11 @@ The second byte (reserved[1]) is currently reserved.
   Int_t           goodTimeFlag; ///< 1 is good trigger time, 0 is bad trigger time
    
   const char *trigTypeAsString(); ///< Returns trigger type as string
-  int isInL3Pattern(int phi); ///< Returns 1 if phi sector had l3 trigger
-  int isInL2Pattern(int phi, AnitaRing::AnitaRing_t ring); ///< Returns 1 if given phi-ring had l2 trigger
-  int isInL1Pattern(int phi, AnitaRing::AnitaRing_t ring); ///< Returns 1 if given phi-ring had l1 trigger
+  //  int isInL3Pattern(int phi); ///< Returns 1 if phi sector had l3 trigger
+  //  int isInL2Pattern(int phi, AnitaRing::AnitaRing_t ring); ///< Returns 1 if given phi-ring had l2 trigger
+  int isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
+  int isInPhiMask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
+  int isInL1Mask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
   int getCurrentTurfBuffer(); ///< Returns the current TURF buffer number (0, 1, 2 or 3);
   unsigned int getCurrentTurfHolds(); ///< Returns a 4-bit bitmask corresponding to the currently held buffers.
   int getNumberOfCurrentTurfHolds(); ///< Returns the number of currently held TURF buffers (0-4)
@@ -153,7 +156,7 @@ The second byte (reserved[1]) is currently reserved.
   int getTurfEventNumber()
   { return (turfEventId&0xfffff);} ///< Returns the event number portion of the TURF event id.
 
-  ClassDef(RawAnitaHeader,33);
+  ClassDef(RawAnitaHeader,34);
 };
 
 

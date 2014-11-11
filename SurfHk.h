@@ -32,7 +32,7 @@ class SurfHk: public TObject
    SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer13_t *surfPtr); ///< Version 13 constructor 
    SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer12_t *surfPtr); ///< Version 12 constructor
 
-  SurfHk(Int_t           trun,
+   SurfHk(Int_t           trun,
 	 UInt_t          trealTime,
 	 UInt_t          tpayloadTime,
 	 UInt_t          tpayloadTimeUs,
@@ -77,6 +77,7 @@ class SurfHk: public TObject
    Int_t getScalerGoal(int surf, int scl); ///< Returns scaler goal of surf-scaler
    Double_t getRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
    Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
+   Double_t getRawRFPower(int surf, int chan); ///< Returns the measured adc value of the RF power while masking the top bit (the "phase" bit)
 
   ClassDef(SurfHk,31);
 };

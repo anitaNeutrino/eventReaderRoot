@@ -61,11 +61,6 @@ class AnitaEventCalibrator : public TObject
   int rcoLatchCalib[NUM_SURF][NUM_CHIP];
   Double_t epsilonCalib[NUM_SURF][NUM_CHIP][NUM_RCO]; //Note the rco is the end rco
 
-  //Variables Jiwoo Calib
-  Double_t tcalTBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
-  Double_t tcalEpsilon[NUM_SURF][NUM_CHIP][NUM_RCO];
-  Double_t tcalRcoDelayBin[NUM_SURF][NUM_CHIP][NUM_RCO];
-  Double_t tcalFudgeFactor[NUM_SURF][NUM_CHIP][NUM_RCO];
   
   //Variables for clock-based trigger jitter correction
   Double_t clockJitterOffset[NUM_SURF][NUM_CHIP];
@@ -112,8 +107,6 @@ class AnitaEventCalibrator : public TObject
   TGraph *grCorClock[NUM_SURF-1];
 
   int justBinByBinTimebase(UsefulAnitaEvent *eventPtr);
-  void processEventRG(UsefulAnitaEvent *eventPtr); ///< Worker function for the RG (defunct) calibrations
-  void processEventJW(UsefulAnitaEvent *eventPtr); ///< Worker function for the JW calibrations
   void zeroMean(); ///< Worker function for zero meaning the waveform
   void processClockJitter(UsefulAnitaEvent *eventPtr); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration
   void processClockJitterFast(UsefulAnitaEvent *eventPtr); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- fast method
@@ -140,7 +133,7 @@ class AnitaEventCalibrator : public TObject
  private:
   void loadCalib();
   Double_t Get_Interpolation_X(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Double_t y);
-  void correlateTenClocks(TGraph *grClock[NUM_SURF], Double_t deltaT);
+  void correlateClocks(TGraph *grClock[NUM_SURF], Double_t deltaT);
   void addPedestals();
   Int_t fClockUpSampleFactor;
   Double_t fEpsilonTempScale;

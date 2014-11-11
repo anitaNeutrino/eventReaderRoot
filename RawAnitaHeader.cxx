@@ -64,6 +64,7 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    bufferDepth=hdPtr->turfio.bufferDepth;
    turfioReserved=hdPtr->turfio.reserved[0];
    l3TrigPattern=hdPtr->turfio.l3TrigPattern;
+   l3TrigPatternH=hdPtr->turfio.l3TrigPatternH;
    memcpy(reserved,hdPtr->reserved,2*sizeof(UChar_t));
    run=trun;
    realTime=trealTime;
@@ -369,40 +370,43 @@ const char *RawAnitaHeader::trigTypeAsString()
 }
 
 
-int RawAnitaHeader::isInL3Pattern(int phi)
-{
-  if(phi<0 || phi>=PHI_SECTORS) return -1;
-  return (l3TrigPattern&(1<<phi) ? 1 : 0) ;
-}
  
-int RawAnitaHeader::isInL2Pattern(int phi, AnitaRing::AnitaRing_t ring)
-{
+int RawAnitaHeader::isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol)
+{ 
   if(phi<0 || phi>=PHI_SECTORS) return -1;
-  switch(ring) {
-  case AnitaRing::kUpperRing:
-    return  ((upperL2TrigPattern&(1<<(phi))) ? 1 : 0);
-  case AnitaRing::kLowerRing:
-    return  ((lowerL2TrigPattern&(1<<phi)) ? 1 : 0);
-  case AnitaRing::kNadirRing:
-    phi/=2;
-    return (nadirL2TrigPattern&(1<<phi) ? 1 : 0);
+  switch(pol) {
+  case AnitaPol::kVertical:
+    return  ((l3TrigPattern&(1<<(phi))) ? 1 :0);
+  case AnitaPol::kHorizontal:
+    return  ((l3TrigPatternH&(1<<phi)) ? 1 : 0);
   default:
     return -1;
   }      
   return -1;
+  
 }
- 
-int RawAnitaHeader::isInL1Pattern(int phi, AnitaRing::AnitaRing_t ring)
+int RawAnitaHeader::isInPhiMask(int phi, AnitaPol::AnitaPol_t pol)
 { 
   if(phi<0 || phi>=PHI_SECTORS) return -1;
-  switch(ring) {
-  case AnitaRing::kUpperRing:
-    return  ((upperL1TrigPattern&(1<<(phi))) ? 1 :0);
-  case AnitaRing::kLowerRing:
-    return  ((lowerL1TrigPattern&(1<<phi)) ? 1 : 0);
-  case AnitaRing::kNadirRing:
-    phi/=2;
-    return (nadirL1TrigPattern&(1<<phi) ? 1 : 0);
+  switch(pol) {
+  case AnitaPol::kVertical:
+    return  ((phiTrigMask&(1<<(phi))) ? 1 :0);
+  case AnitaPol::kHorizontal:
+    return  ((phiTrigMaskH&(1<<phi)) ? 1 : 0);
+  default:
+    return -1;
+  }      
+  return -1;
+  
+}
+int RawAnitaHeader::isInL1Mask(int phi, AnitaPol::AnitaPol_t pol)
+{ 
+  if(phi<0 || phi>=PHI_SECTORS) return -1;
+  switch(pol) {
+  case AnitaPol::kVertical:
+    return  ((l1TrigMask&(1<<(phi))) ? 1 :0);
+  case AnitaPol::kHorizontal:
+    return  ((l1TrigMaskH&(1<<phi)) ? 1 : 0);
   default:
     return -1;
   }      

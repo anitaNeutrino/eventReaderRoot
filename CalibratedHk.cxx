@@ -279,7 +279,10 @@ const char *extTempNames[NUM_EXT_TEMPS]={"PV 1 (phi 4)","PV 3 (phi 8)","A01V (RF
 
  const char *CalibratedHk::getInternalTempName(int index)
 {
-const char *intTempNames[NUM_INT_TEMPS]={"SURF 10","SURF 8","SURF 3","Top of CPU fcaeplate","Bottom of CPU faceplate","MTRON Box","125MHz Clock","Radiator Plate (near SURF 7)","Radiator Plate (near SURF 2)","SHORT 02","SHORT 24","SHORT 28","SHORT 31","IP Box","DC-DC Box"}; 
+  //ANITA2
+  //const char *intTempNames[NUM_INT_TEMPS]={"SURF 10","SURF 8","SURF 3","Top of CPU fcaeplate","Bottom of CPU faceplate","MTRON Box","125MHz Clock","Radiator Plate (near SURF 7)","Radiator Plate (near SURF 2)","SHORT 02","SHORT 24","SHORT 28","SHORT 31","IP Box","DC-DC Box"};
+  //ANITA3
+  const char *intTempNames[NUM_INT_TEMPS]={"SHORT - Phi 16","Radiator above DC-DC box","IRFCM A","Bottom of CPCI crate","NTU SSD box","DC-DC box","IP Box","SHORT - Phi 9","Top of CPCI, CPU side","SURF 8","IRFCM D","TURFIO faceplate","Housekeeping Box","He Drive 1 Enclosure","Bottom of Radiator Plate, beneath DC-DC Box"};
  if(index>=0 && index<NUM_INT_TEMPS) 
     return intTempNames[index];
  return "None";
