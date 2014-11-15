@@ -167,7 +167,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
   
    fApplyClockFudge=0;
    //   std::cout << "AnitaEventCalibrator::calibrateUsefulEvent():" << calType << std::endl;
-   if(calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGFastClock || calType==WaveCalType::kVTFullAGCrossCorClock || calType==WaveCalType::kVTCalFilePlusSimon) {
+   if(calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGFastClock || calType==WaveCalType::kVTFullAGCrossCorClock || calType==WaveCalType::kVTCalFilePlusSimon || calType==WaveCalType::kVoltageTime) {
      processEventAG(eventPtr);
    }
    else {
@@ -622,6 +622,9 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 
       Int_t earliestSample=eventPtr->getEarliestSample(chanIndex);
       Int_t latestSample=eventPtr->getLatestSample(chanIndex);
+
+      //      std::cout << "processEventAG: " <<  chanIndex << "\t" << labChip << "\t" << rco 
+      //		<< "\t" << earliestSample << "\t" << latestSample << "\n";
 
       if(earliestSample==0)
 	earliestSample++;
