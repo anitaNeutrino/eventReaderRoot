@@ -328,7 +328,89 @@ Double_t SurfHk::getRawRFPower(int surf, int chan)
     return -1;
   if(chan<0 || chan>=RFCHAN_PER_SURF)
     return -1;
-  Int_t adc=rfPower[surf][chan]&0x7FFF; //mask off top bit
+  UShort_t adc=rfPower[surf][chan]&0x7FFF; //mask off top bit
   return adc;
 }
   
+UInt_t SurfHk::getRFPowerTimeOffset(int surf, int chan)
+{
+
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  if(chan<0 || chan>=RFCHAN_PER_SURF)
+    return -1;
+
+  int zeroPhaseChan = 0;
+  UInt_t startPhase = rfPower[surf][0]&0x8000;
+  for (int chani =0; chani<=RFCHAN_PER_SURF; chani++) {
+    if ((rfPower[surf][chani]&0x8000) != startPhase) {
+      zeroPhaseChan = chani;
+      break;
+    }
+  }
+  UInt_t PhaseOffset = 0;
+  if (chan < zeroPhaseChan) {
+    PhaseOffset = zeroPhaseChan - chan; }
+  if (chan >= zeroPhaseChan) {
+    PhaseOffset = (zeroPhaseChan+8) - chan; }
+    
+  return PhaseOffset;
+
+}
+
+UInt_t SurfHk::getRFPowerPayloadTime(UInt_t surf, UInt_t chan)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  if(chan<0 || chan>=RFCHAN_PER_SURF)
+    return -1;
+
+  UInt_t zeroPhaseChan = 0;
+  UInt_t startPhase = rfPower[surf][0]&0x8000;
+  for (UInt_t chani =0; chani<=RFCHAN_PER_SURF; chani++) {
+    if ((rfPower[surf][chani]&0x8000) != startPhase) {
+      zeroPhaseChan = chani;
+      break;
+    }
+  }
+  UInt_t PhaseOffset = 0;
+  if (chan < zeroPhaseChan) {
+    PhaseOffset = zeroPhaseChan - chan; }
+  if (chan >= zeroPhaseChan) {
+    PhaseOffset = (zeroPhaseChan+8) - chan;}
+    
+  if (payloadTimeUs < 12500*PhaseOffset) {
+    return payloadTime - 1;}
+  else {
+    return payloadTime;}
+  
+}
+
+UInt_t SurfHk::getRFPowerPayloadTimeUs(UInt_t surf, UInt_t chan)
+{
+  if(surf<0 || surf>=ACTIVE_SURFS)
+    return -1;
+  if(chan<0 || chan>=RFCHAN_PER_SURF)
+    return -1;
+
+  UInt_t zeroPhaseChan = 0;
+  UInt_t startPhase = rfPower[surf][0]&0x8000;
+  for (UInt_t chani=0; chani<=RFCHAN_PER_SURF; chani++) {
+    if ((rfPower[surf][chani]&0x8000) != startPhase) {
+      zeroPhaseChan = chani;
+      break;
+    }
+  }
+  UInt_t PhaseOffset = 0;
+  if (chan < zeroPhaseChan) {
+    PhaseOffset = zeroPhaseChan - chan; }
+  if (chan >= zeroPhaseChan) {
+    PhaseOffset = (zeroPhaseChan+8) - chan;}
+    
+  if (payloadTimeUs < 12500*PhaseOffset) {
+    return (1e6-12500*PhaseOffset)+payloadTimeUs; }
+  else {
+    return payloadTimeUs+PhaseOffset; }
+
+  return 0;
+}

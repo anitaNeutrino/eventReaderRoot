@@ -22,6 +22,7 @@ ClassImp(UsefulAnitaEvent);
 
 
 #define MAGIC_DELTAT 1000/33. ///<This is the supposed clock period
+#define CLOCK_CLOSE 2  ///< How close to the correct period do we need to be
 
 Double_t getZeroCrossingPoint(Double_t x1, Double_t y1, Double_t x2, Double_t y2)
 {
@@ -304,10 +305,11 @@ TGraph *UsefulAnitaEvent::getGraph(AnitaRing::AnitaRing_t ring,
 Int_t UsefulAnitaEvent::guessRco(int chanIndex)
 {
   //RJN removed clock guessing for now.
-  //  if(fLastEventGuessed!=this->eventNumber) 
-  //    analyseClocksForGuesses();
+  if(fLastEventGuessed!=this->eventNumber) 
+    analyseClocksForGuesses();
   //  if(
   return fRcoArray[chanIndex/9];
+  //return getRCO(chanIndex);
 }
 
 Double_t UsefulAnitaEvent::getTempCorrectionFactor()
@@ -317,10 +319,10 @@ Double_t UsefulAnitaEvent::getTempCorrectionFactor()
     return tempScale;
   }
   else {
-    //    if(fLastEventGuessed!=this->eventNumber) 
-    //      analyseClocksForGuesses();
-    //    return fTempFactorGuess;
-    return 1;
+    if(fLastEventGuessed!=this->eventNumber) 
+      analyseClocksForGuesses();
+    return fTempFactorGuess;
+    //    return 1;
   }
 }
 
@@ -330,9 +332,9 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
   Double_t timeVals[NUM_SURF][NUM_SAMP][2]={{{0}}};
   Int_t labChip=this->getLabChip(8);
   Double_t clockPeriod=MAGIC_DELTAT;
-  if(fC3poNum>120e6 && fC3poNum<130e6) {
-    clockPeriod=1e9/Double_t(fC3poNum);
-  }
+  //  if(fC3poNum>120e6 && fC3poNum<130e6) {
+  //    clockPeriod=1e9/Double_t(fC3poNum);
+  //  }
   Double_t tempFactor=1;
   if(gotCalibTemp)
     tempFactor=getTempCorrectionFactor();
@@ -406,7 +408,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	  if(numZcDown>1) {	       
 	    for(int i=1;i<numZcDown;i++) {
 	      //	      std::cout << (posZcDown[i]-posZcDown[i-1]) << "\t" << clockPeriod << std::endl;
-	      if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-0.5) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+0.5)) {
+	      if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-2) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+2)) {
 		deltaTFirstRco[surf][rcoGuess]+=(posZcDown[i]-posZcDown[i-1]);
 		numDeltaTFirstRco[surf][rcoGuess]++;
 	      }
@@ -414,7 +416,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	  }
 	  if(numZcUp>1) {	       
 	    for(int i=1;i<numZcUp;i++) {
-	      if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-0.5) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+0.5)) {
+	      if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-2) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+2)) {
 		deltaTFirstRco[surf][rcoGuess]+=(posZcUp[i]-posZcUp[i-1]);
 		numDeltaTFirstRco[surf][rcoGuess]++;
 	      }
@@ -455,7 +457,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	    numDeltaTSecondRco[surf][rcoGuess]=0;
 	    if(numZcDown>1) {	       
 	      for(int i=1;i<numZcDown;i++) {
-		if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-0.5) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+0.5)) {
+		if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-CLOCK_CLOSE) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+CLOCK_CLOSE)) {
 		  deltaTSecondRco[surf][rcoGuess]+=(posZcDown[i]-posZcDown[i-1]);
 		  numDeltaTSecondRco[surf][rcoGuess]++;
 		}
@@ -463,7 +465,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	    }
 	    if(numZcUp>1) {	       
 	      for(int i=1;i<numZcUp;i++) {
-		if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-0.5) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+0.5)) {
+		if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-CLOCK_CLOSE) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+CLOCK_CLOSE)) {
 		  deltaTSecondRco[surf][rcoGuess]+=(posZcUp[i]-posZcUp[i-1]);
 		  numDeltaTSecondRco[surf][rcoGuess]++;
 		}
@@ -504,7 +506,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	deltaTFirstRco[surf][rcoGuess]=0;
 	if(numZcDown>1) {	       
 	  for(int i=1;i<numZcDown;i++) {
-	    if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-0.5) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+0.5)) {
+	    if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-CLOCK_CLOSE) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+CLOCK_CLOSE)) {
 	      deltaTFirstRco[surf][rcoGuess]+=(posZcDown[i]-posZcDown[i-1]);
 	      numDeltaTFirstRco[surf][rcoGuess]++;
 	    }
@@ -512,7 +514,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 	}
 	if(numZcUp>1) {	       
 	  for(int i=1;i<numZcUp;i++) {
-	    if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-0.5) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+0.5)) {
+	    if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-CLOCK_CLOSE) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+CLOCK_CLOSE)) {
 	      deltaTFirstRco[surf][rcoGuess]+=(posZcUp[i]-posZcUp[i-1]);
 	      numDeltaTFirstRco[surf][rcoGuess]++;
 	    }
@@ -793,7 +795,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 // 	  deltaTFirstRco=0;
 // 	  if(numZcDown>1) {	       
 // 	    for(int i=1;i<numZcDown;i++) {
-// 	      if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-0.5) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+0.5)) {
+// 	      if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-CLOCK_CLOSE) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+CLOCK_CLOSE)) {
 // 		deltaTFirstRco+=(posZcDown[i]-posZcDown[i-1]);
 // 		numDeltaTFirstRco++;
 // 	      }
@@ -801,7 +803,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 // 	  }
 // 	  if(numZcUp>1) {	       
 // 	    for(int i=1;i<numZcUp;i++) {
-// 	      if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-0.5) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+0.5)) {
+// 	      if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-CLOCK_CLOSE) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+CLOCK_CLOSE)) {
 // 		deltaTFirstRco+=(posZcUp[i]-posZcUp[i-1]);
 // 		numDeltaTFirstRco++;
 // 	      }
@@ -841,7 +843,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 // 	    deltaTSecondRco=0;
 // 	    if(numZcDown>1) {	       
 // 	      for(int i=1;i<numZcDown;i++) {
-// 		if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-0.5) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+0.5)) {
+// 		if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-CLOCK_CLOSE) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+CLOCK_CLOSE)) {
 // 		  deltaTSecondRco+=(posZcDown[i]-posZcDown[i-1]);
 // 		  numDeltaTSecondRco++;
 // 		}
@@ -849,7 +851,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 // 	    }
 // 	    if(numZcUp>1) {	       
 // 	      for(int i=1;i<numZcUp;i++) {
-// 		if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-0.5) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+0.5)) {
+// 		if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-CLOCK_CLOSE) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+CLOCK_CLOSE)) {
 // 		  deltaTSecondRco+=(posZcUp[i]-posZcUp[i-1]);
 // 		  numDeltaTSecondRco++;
 // 		}
@@ -889,7 +891,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 // 	deltaTFirstRco=0;
 // 	if(numZcDown>1) {	       
 // 	  for(int i=1;i<numZcDown;i++) {
-// 	    if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-0.5) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+0.5)) {
+// 	    if((posZcDown[i]-posZcDown[i-1])>(clockPeriod-CLOCK_CLOSE) && (posZcDown[i]-posZcDown[i-1])<(clockPeriod+CLOCK_CLOSE)) {
 // 	      deltaTFirstRco+=(posZcDown[i]-posZcDown[i-1]);
 // 	      numDeltaTFirstRco++;
 // 	    }
@@ -897,7 +899,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 // 	}
 // 	if(numZcUp>1) {	       
 // 	  for(int i=1;i<numZcUp;i++) {
-// 	    if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-0.5) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+0.5)) {
+// 	    if((posZcUp[i]-posZcUp[i-1])>(clockPeriod-CLOCK_CLOSE) && (posZcUp[i]-posZcUp[i-1])<(clockPeriod+CLOCK_CLOSE)) {
 // 	      deltaTFirstRco+=(posZcUp[i]-posZcUp[i-1]);
 // 	      numDeltaTFirstRco++;
 // 	    }

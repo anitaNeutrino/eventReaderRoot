@@ -48,7 +48,7 @@ CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL)
 LDFLAGS      += -g $(ROOTLDFLAGS) 
 
 
-LIBS          = $(ROOTLIBS) -lMathMore -lMinuit $(SYSLIBS) $(LD_ANITA_UTIL) $(FFTLIBS)
+LIBS          = $(ROOTLIBS) -lMathMore -lMinuit $(SYSLIBS) $(LD_ANITA_UTIL) $(FFTLIBS) -l profiler
 GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 #Now the bits we're actually compiling
@@ -59,7 +59,7 @@ CLASS_HEADERS = RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaH
 
 all : $(ROOT_LIBRARY)
 
-tests: printStructSizes
+tests: printStructSizes exampleEventLoop
 
 readRawData : $(ROOT_LIBRARY) readRawData.$(SRCSUF)
 	@echo "<**Compiling**> "  
@@ -79,6 +79,10 @@ exampleDumpHk : $(ROOT_LIBRARY) exampleDumpHk.$(SRCSUF)
 printStructSizes : $(ROOT_LIBRARY) printStructSizes.$(SRCSUF)
 	@echo "<**Compiling**> "  
 	$(LD)  $(CXXFLAGS) $(LDFLAGS) printStructSizes.$(SRCSUF) $(ROOT_LIBRARY) $(LIBS) -o $@
+
+exampleEventLoop : $(ROOT_LIBRARY) exampleEventLoop.$(SRCSUF)
+	@echo "<**Compiling**> "  
+	$(LD)  $(CXXFLAGS) $(LDFLAGS) exampleEventLoop.$(SRCSUF) $(ROOT_LIBRARY) $(LIBS) -o $@
 
 
 #The library
