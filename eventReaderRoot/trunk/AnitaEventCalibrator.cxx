@@ -167,7 +167,10 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
   
    fApplyClockFudge=0;
    //   std::cout << "AnitaEventCalibrator::calibrateUsefulEvent():" << calType << std::endl;
-   if(calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGFastClock || calType==WaveCalType::kVTFullAGCrossCorClock || calType==WaveCalType::kVTCalFilePlusSimon || calType==WaveCalType::kVoltageTime) {
+   if(calType==WaveCalType::kVoltageTime || calType==WaveCalType::kVTLabAG) {
+     processEventUnwrapFast(eventPtr);
+   }
+   else if( calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGFastClock || calType==WaveCalType::kVTFullAGCrossCorClock || calType==WaveCalType::kVTCalFilePlusSimon ) {
      processEventAG(eventPtr);
    }
    else {
@@ -603,6 +606,128 @@ void AnitaEventCalibrator::zeroMean() {
 
 }
 
+void AnitaEventCalibrator::processEventUnwrapFast(UsefulAnitaEvent *eventPtr)
+{  
+
+  for(Int_t surf=0;surf<NUM_SURF;surf++) {
+      Int_t chanIndex=eventPtr->getChanIndex(surf,8);
+      Int_t labChip=eventPtr->getLabChip(chanIndex);
+      Int_t rco=eventPtr->getRCO(chanIndex);
+      Int_t earliestSample=eventPtr->getEarliestSample(chanIndex);
+      Int_t latestSample=eventPtr->getLatestSample(chanIndex);
+      Double_t tempFactor=1;
+      
+      if(earliestSample==0)
+	earliestSample++;
+      
+      if(latestSample==0)
+	latestSample=259;
+
+      for(Int_t chan=0;chan<NUM_CHAN;chan++) {
+	Int_t chanIndex=eventPtr->getChanIndex(surf,chan);
+	//Raw array
+	for(Int_t samp=0;samp<NUM_SAMP;samp++) {
+	  rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
+	}
+	
+	//Now do the unwrapping
+	Int_t index=0;
+	Double_t time=0;
+	if(latestSample<earliestSample) {
+	  //	std::cout << "Two RCO's\t" << surf << "\t" << chan << "\n";
+	  //We have two RCOs
+	  Int_t nextExtra=256;
+	  Double_t extraTime=0;	
+	  if(earliestSample<256) {
+	    //Lets do the first segment up	
+	    for(Int_t samp=earliestSample;samp<256;samp++) {
+	      int binRco=1-rco;
+	      scaArray[surf][chan][index]=samp;
+	      unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
+	      mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+	      timeArray[surf][chan][index]=time;
+	      if(samp==255) {
+		extraTime=time+(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
+		
+	      }
+	      else {
+		time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
+	     
+	      }
+	      index++;
+	    }
+	    time+=epsilonFromAbby[surf][labChip][rco]*tempFactor*fEpsilonTempScale; ///<This is the time of the first capacitor.
+	  }
+	  else {
+	    //Will just ignore the first couple of samples.
+	    nextExtra=260;
+	    extraTime=0;
+	  }
+	  
+	  
+	  if(latestSample>=1) {
+	    //We are going to ignore sample zero for now
+	    time+=(justBinByBin[surf][labChip][rco][0])*tempFactor;
+	    //	  time+=0.5*(justBinByBin[surf][labChip][rco][0]+justBinByBin[surf][labChip][rco][1])*tempFactor;
+	    for(Int_t samp=1;samp<=latestSample;samp++) {
+	      int binRco=rco;
+	      if(nextExtra<260 && samp==1) {
+		if(extraTime<time-0.22) { ///This is Andres's 220ps minimum sample separation
+		  //Then insert the next extra capacitor
+		  binRco=1-rco;
+		  scaArray[surf][chan][index]=nextExtra;
+		  unwrappedArray[surf][chan][index]=rawArray[surf][chan][nextExtra];
+		  mvArray[surf][chan][index]=double(rawArray[surf][chan][nextExtra])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+		  timeArray[surf][chan][index]=extraTime;
+		  if(nextExtra<259) {
+		    extraTime+=(justBinByBin[surf][labChip][binRco][nextExtra])*tempFactor;
+		    //		extraTime+=0.5*(justBinByBin[surf][labChip][binRco][nextExtra]+justBinByBin[surf][labChip][binRco][nextExtra+1])*tempFactor;
+		  }
+		  nextExtra++;
+		  index++;	 
+		  samp--;
+		  continue;
+		}
+	      }
+	      scaArray[surf][chan][index]=samp;
+	      unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
+	      mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+	      timeArray[surf][chan][index]=time;
+	      if(samp<259) {
+		time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
+		//	      time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
+	      }
+	      index++;
+	    }
+	  }
+	}
+	else {
+	  //	std::cout << "One RCO\t" << surf << "\t" << chan << "\n";
+	  //Only one rco
+	  time=0;
+	  for(Int_t samp=earliestSample;samp<=latestSample;samp++) {
+	    int binRco=rco;
+	    scaArray[surf][chan][index]=samp;
+	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
+	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+	    timeArray[surf][chan][index]=time;
+	    if(samp<259) {
+	      time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
+	      //	    time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
+	    }
+	    index++;
+	  }
+	}
+	numPointsArray[surf][chan]=index;
+      }
+  
+      //And fill in surfTimeArray if we need it for anything
+      for(int samp=0;samp<numPointsArray[surf][8];samp++) {
+	surfTimeArray[surf][samp]=timeArray[surf][8][samp];
+      }    
+  }    
+}
+
 void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 {  
   //  std::cout << "processEventAG\n";
@@ -623,19 +748,14 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
       Int_t earliestSample=eventPtr->getEarliestSample(chanIndex);
       Int_t latestSample=eventPtr->getLatestSample(chanIndex);
 
-      //      std::cout << "processEventAG: " <<  chanIndex << "\t" << labChip << "\t" << rco 
-      //		<< "\t" << earliestSample << "\t" << latestSample << "\n";
 
       if(earliestSample==0)
 	earliestSample++;
-
+      
       if(latestSample==0)
 	latestSample=259;
-      
-      //      if(surf==7) 
-      //	std::cout << chan << "\t" << earliestSample << "\t" << latestSample 
-      //		  << "\n";
-
+      //      std::cerr << "processEventAG: " <<  chanIndex << "\t" << labChip << "\t" << rco 
+      //      		<< "\t" << earliestSample << "\t" << latestSample << "\n";
       //Raw array
       for(Int_t samp=0;samp<NUM_SAMP;samp++) {
 	rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
@@ -659,11 +779,11 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
 	    timeArray[surf][chan][index]=time;
 	    if(samp==255) {
 	      extraTime=time+(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-	      //	      extraTime=time+0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
+	     
 	    }
 	    else {
 	      time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-	      //	      time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
+	     
 	    }
 	    index++;
 	  }

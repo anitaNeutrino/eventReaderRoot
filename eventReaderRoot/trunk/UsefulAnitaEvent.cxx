@@ -347,8 +347,9 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
   Int_t numDeltaTSecondRco[NUM_SURF][2]={{0}};
 
   Int_t skipSurf[NUM_SURF]={0};
-      
+  
   for(int surf=0;surf<NUM_SURF;surf++) {
+    fRcoArray[surf]=getRCO(surf*9);
     //Fill in timebase
     
     Int_t countZeros=0;
