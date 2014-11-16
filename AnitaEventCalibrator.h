@@ -113,6 +113,7 @@ class AnitaEventCalibrator : public TObject
   void processClockJitterCorrelation(UsefulAnitaEvent *eventPtr); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- using cross-correlation
   void applyClockPhiCorrection(UsefulAnitaEvent *eventPtr); ///< Worker fucntion if we are dealing with CalibratedAnitaEvent
   void processEventAG(UsefulAnitaEvent *eventPtr);
+  void processEventUnwrapFast(UsefulAnitaEvent *eventPtr);
   
 
   Int_t getClockUpSampleFactor() 
