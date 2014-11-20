@@ -16,10 +16,10 @@
 
 
 #ifndef NUM_VOLTAGES
-#define NUM_VOLTAGES 11
+#define NUM_VOLTAGES 12
 #endif
 #ifndef NUM_CURRENTS
-#define NUM_CURRENTS 12
+#define NUM_CURRENTS 9
 #endif
 #ifndef NUM_INT_TEMPS
 #define NUM_INT_TEMPS 15
