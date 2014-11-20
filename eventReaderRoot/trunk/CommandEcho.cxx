@@ -107,39 +107,38 @@ const char * CommandEcho::getCommandAsString()
     return "Change Telem Waveform Format"; 
   case TELEM_PRI_ENC_TYPE: 
     return "Change Telem Encoding Type for Priority"; 
-  case CMD_TURN_GPS_ON: 
-    return "Turn GPS On"; 
-  case CMD_TURN_GPS_OFF: 
-    return "Turn GPS Off"; 
-  case CMD_TURN_RFCM_ON: 
-    return "Turn RFCM On"; 
-  case CMD_TURN_RFCM_OFF: 
-    return "Turn RFCM Off"; 
-  case CMD_TURN_CALPULSER_ON: 
-    return "Turn CalPulser On"; 
-  case CMD_TURN_CALPULSER_OFF: 
-    return "Turn CalPulser Off"; 
-  case CMD_TURN_VETO_ON: 
-    return "Turn Veto On"; 
-  case CMD_TURN_VETO_OFF: 
-    return "Turn Veto Off"; 
-  case CMD_TURN_ALL_ON: 
-    return "Turn All On"; 
-  case CMD_TURN_ALL_OFF: 
-    return "Turn All Off"; 
-  case SET_CALPULSER_SWITCH: 
-    return "Set CalPulser RF Switch to Port"; 
-  case SET_CALPULSER_ATTEN: 
-    return "Set CalPulser Attenuation to"; 
-  case SET_ATTEN_LOOP_PERIOD: 
-    return "Set CalPulser Attenuation Loop Period"; 
-  case SET_SWITCH_LOOP_PERIOD: 
-    return "Set CalPulser RF Switch Loop Period"; 
-  case SET_PULSER_OFF_PERIOD: 
-    return "Set CalPulser Off Period"; 
+
+  case CMD_TURN_AMPLITES_ON:
+    return "Turn  Amplites On";
+  case CMD_TURN_AMPLITES_OFF:
+    return "Turn  Amplites Off";
+  case CMD_TURN_BZ_AMPAS_ON:
+    return "Turn BZ AMPAS On";
+  case CMD_TURN_BZ_AMPAS_OFF:
+    return "Turn BZ AMPAS Off";
+  case CMD_TURN_NTU_AMPAS_ON:
+    return "Turn NTU AMPAS On";
+  case CMD_TURN_NTU_AMPAS_OFF:
+    return "Turn NTU AMPAS Off";
+  case CMD_TURN_SHORT_BOARDS_ON:
+    return "Turn Short Boards On";
+  case CMD_TURN_SHORT_BOARDS_OFF:
+    return "Turn Short Boards Off";
+  case CMD_TURN_NTU_SSD_5V_ON:
+    return "Turn NTU SSD 5V On";
+  case CMD_TURN_NTU_SSD_5V_OFF:    
+    return "Turn NTU SSD 5V Off";
+  case CMD_TURN_NTU_SSD_12V_ON:
+    return "Turn NTU SSD 12V On";
+  case CMD_TURN_NTU_SSD_12V_OFF:
+    return "Turn NTU SSD 12V Off";
+  case CMD_TURN_ALL_ON:
+    return "Turn All On";
+  case CMD_TURN_ALL_OFF:
+    return "Turn All Off";    
   case SET_CALIB_WRITE_PERIOD: 
-    return "Set Calibd Write Period"; 
-  case SET_ADU5_PAT_PERIOD: 
+    return "Set Calibd Write Period";
+  case SET_ADU5_PAT_PERIOD:
     return "Set ADU5 Attitude Readout Period"; 
   case SET_ADU5_SAT_PERIOD: 
     return "Set ADU5 Satellite Info Readout Period"; 

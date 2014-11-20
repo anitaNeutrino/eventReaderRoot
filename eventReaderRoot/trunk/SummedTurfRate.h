@@ -42,6 +42,7 @@ class SummedTurfRate: public TObject
    UShort_t         upperL2Rates[PHI_SECTORS]; ///< Summed l2 rates (upper)
    UShort_t         lowerL2Rates[PHI_SECTORS]; ///< Summed l2 rates (lower)
    UShort_t         l3Rates[PHI_SECTORS]; ///< Summed l3 rates
+   UShort_t         l3RatesH[PHI_SECTORS]; ///< Summed l3 rates
    UInt_t           nadirL1Rates[NADIR_ANTS]; ///< Summed l1 rates (nadir)
    UShort_t         nadirL2Rates[NADIR_ANTS]; ///< Summed l2 rates (nadir)
    UInt_t           antTrigMask; ///< Which (upper+lower) ants are excluded?
@@ -51,17 +52,18 @@ class SummedTurfRate: public TObject
    UChar_t          errorFlag; ///< Error flag
    Int_t            intFlag; ///< Interpolation flag -- zero for raw data
 
-   Int_t getL1Rate(int phi, int ring); ///< Returns the l1 rate for ring-phi
+   //   Int_t getL1Rate(int phi, int ring); ///< Returns the l1 rate for ring-phi
 
-   Int_t getL2Rate(int phi, int ring); ///< Returns the l2 rate for ring-phi
+   //   Int_t getL2Rate(int phi, int ring); ///< Returns the l2 rate for ring-phi
 
-   Int_t getL3Rate(int phi) ///< Returns the l3 rate for phi
-      {return l3Rates[phi];}
-   Int_t getNadirL12Rate(int phi); ///< Returns the nadir l1 + l2 rate fr phi
+   Int_t getL3Rate(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) ///< Returns the l3 rate for phi
+   {if(pol==AnitaPol::kVertical)return l3Rates[phi]; return l3Rates[phi];}
+   //   Int_t getNadirL12Rate(int phi); ///< Returns the nadir l1 + l2 rate fr phi
    Int_t isAntMasked(int phi, int ring); ///< Returns 1 if given ring-phi is maked off
-   Int_t isPhiMasked(int phi); ///< Returns 1 if given phi is masked off
+   Int_t isPhiMasked(int phi,AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi is masked off
+   Float_t getDeadTimeFrac() { return deadTime/(65535.*numRates);}
    
-  ClassDef(SummedTurfRate,16);
+  ClassDef(SummedTurfRate,18);
 };
 
 

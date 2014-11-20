@@ -40,7 +40,7 @@ namespace AnitaGeom {
 			       3,1,3,1,1,3,1,3,2,0,2,0,0,2,0,2};
    
   ///< 1 is normal orientation, -1 is 180 degree flip, -2 is 90 degree flip (so only H-channels need flipping).
-  int antOrientationMap[NUM_SEAVEYS]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  int antOrientationMap[NUM_SEAVEYS]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,//-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 				      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 				      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; 
 

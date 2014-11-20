@@ -27,7 +27,8 @@
 #define MONITORD_ID_MASK 0x400
 #define PLAYBACKD_ID_MASK 0x800
 #define LOGWATCHD_ID_MASK 0x1000
-#define NEOBRICKD_ID_MASK 0x2000
+#define NTUD_ID_MASK 0x2000
+#define OPENPORTD_ID_MASK 0x4000
 #define ALL_ID_MASK 0xffff
 
 
@@ -46,7 +47,8 @@ typedef enum {
     ID_MONITORD,
     ID_PLAYBACKD,
     ID_LOGWATCHD,
-    ID_NEOBRICKD,
+    ID_NTUD,
+    ID_OPENPORTD,
     ID_NOT_AN_ID
 } ProgramId_t;
 
@@ -82,7 +84,9 @@ typedef enum {
     TELEM_PRI_ENC_TYPE = 147,
     ARCHIVE_PPS_PRIORITIES = 148,
     ARCHIVE_PPS_DECIMATE = 149,
- 
+
+    /* Modified by BenS on 04/07/2014 to reflect anita-3 calibd.config contents */
+    /* These are the old things no longer in calibd.config...
     CMD_TURN_GPS_ON = 150,
     CMD_TURN_GPS_OFF = 151,
     CMD_TURN_RFCM_ON = 152,
@@ -93,6 +97,24 @@ typedef enum {
     CMD_TURN_VETO_OFF = 157,
     CMD_TURN_ALL_ON = 158,
     CMD_TURN_ALL_OFF = 159,
+    */
+    /* ...and here are the new options, reusing
+       the same Cmd array entries as far as possible
+    */
+    CMD_TURN_AMPLITES_ON = 150,
+    CMD_TURN_AMPLITES_OFF = 151,
+    CMD_TURN_BZ_AMPAS_ON = 152,
+    CMD_TURN_BZ_AMPAS_OFF = 153,
+    CMD_TURN_NTU_AMPAS_ON = 154,
+    CMD_TURN_NTU_AMPAS_OFF = 155,
+    CMD_TURN_SHORT_BOARDS_ON = 156,
+    CMD_TURN_SHORT_BOARDS_OFF = 157,
+    CMD_TURN_NTU_SSD_5V_ON = 158,
+    CMD_TURN_NTU_SSD_5V_OFF = 159,
+    CMD_TURN_NTU_SSD_12V_ON = 160,
+    CMD_TURN_NTU_SSD_12V_OFF = 161,
+    CMD_TURN_ALL_ON = 162,
+    CMD_TURN_ALL_OFF = 163,    
  
     SET_CALPULSER_SWITCH = 171,
     SET_CALPULSER_ATTEN = 172,
@@ -203,8 +225,7 @@ typedef enum {
 } AcqdExtraCommand_t;
   
   
-  
-  
+
 
 typedef enum {
     PRI_HORN_THRESH=1,
@@ -225,7 +246,7 @@ typedef enum {
     PRI_RMS_MAX=16,
     PRI_RMS_EVENTS=17,
     PRI_WINDOW_CUT=18,
-    PRI_BEGIN_WINDOW=19,
+    PRI_BEGIN_WINDOW=19, 
     PRI_END_WINDOW=20,
     PRI_METHOD_MASK=21,
     PRI_FFT_MAX_CHANNELS=22,
@@ -271,10 +292,10 @@ typedef enum {
 } LosdCommandCode_t;
   
 typedef enum {
-  LOG_REQUEST_MESSAGES = 1,
+  LOG_REQUEST_JOURNALCTL = 1,
   LOG_REQUEST_ANITA = 2,
   LOG_REQUEST_SECURITY = 3,
-  LOG_REQUEST_NEOBRICK = 4,
+  LOG_REQUEST_NTU = 4,
   LOG_REQUEST_BOOT = 5, 
   LOG_REQUEST_PROC_CPUINFO = 6,
   LOG_REQUEST_PROC_DEVICES = 7,
@@ -301,8 +322,20 @@ typedef enum {
   LOG_REQUEST_PROC_VMCORE = 28,
   LOG_REQUEST_PROC_VMSTAT = 29,
   LOG_REQUEST_PROC_ZONEINFO = 30,
-  LOG_REQUEST_NEOBRICK_STATUS = 31
+  LOG_REQUEST_NTU_STATUS = 31,
+  LOG_REQUEST_FILE=32
 } LogRequestCommand_t;
+
+
+typedef enum {
+  JOURNALCTL_OPT_COMM=0,
+  JOURNALCTL_OPT_EXE=1,
+  JOURNALCTL_OPT_PRIORITY=2,
+  JOURNALCTL_OPT_SYSLOG_FACILITY=3,
+  JOURNALCTL_OPT_SYSLOG_PID=4,
+  JOURNALCTL_OPT_REALTIME_TIMESTAMP=5,
+  JOURNALCTL_NO_OPT=6
+} JournalctlOptionCommand_t;
 
 
 typedef enum {

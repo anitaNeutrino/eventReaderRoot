@@ -46,7 +46,10 @@ SummedTurfRate::SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStruct
    //   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UInt_t)*PHI_SECTORS*2);
    //   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UShort_t)*PHI_SECTORS);
    //   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UShort_t)*PHI_SECTORS);
-   memcpy(l3Rates,turfPtr->l3Rates,sizeof(UShort_t)*PHI_SECTORS);
+   for(int phi=0;phi<PHI_SECTORS;phi++) {
+     l3Rates[phi]=turfPtr->l3Rates[phi][0];
+     l3RatesH[phi]=turfPtr->l3Rates[phi][1];
+   }
    //   memcpy(nadirL1Rates,turfPtr->nadirL1Rates,sizeof(UInt_t)*NADIR_ANTS);
    //   memcpy(nadirL2Rates,turfPtr->nadirL2Rates,sizeof(UShort_t)*NADIR_ANTS);
    //   antTrigMask=turfPtr->antTrigMask;
@@ -230,64 +233,56 @@ SummedTurfRate::SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStruct
 }
 
 
-Int_t SummedTurfRate::getL1Rate(int phi, int ring)
-{
-  if(phi<0 || phi>15) return -1;
-  switch(ring) {
-  case AnitaRing::kUpperRing:
-  case AnitaRing::kLowerRing:
-    return 16*l1Rates[phi][ring];
-  case AnitaRing::kNadirRing:
-    if(phi%2==0)
-      return 16*nadirL1Rates[phi/2]; //Might need to change handling of nadirs 
-  default:
-    return -1;
-  }
-  return -1;
-}
+// Int_t SummedTurfRate::getL1Rate(int phi, int ring)
+// {
+//   if(phi<0 || phi>15) return -1;
+//   switch(ring) {
+//   case AnitaRing::kUpperRing:
+//   case AnitaRing::kLowerRing:
+//     return 16*l1Rates[phi][ring];
+//   case AnitaRing::kNadirRing:
+//     if(phi%2==0)
+//       return 16*nadirL1Rates[phi/2]; //Might need to change handling of nadirs 
+//   default:
+//     return -1;
+//   }
+//   return -1;
+// }
 
-Int_t SummedTurfRate::getL2Rate(int phi, int ring)
-{ 
-  if(phi<0 || phi>15) return -1;
-  switch(ring) {
-  case AnitaRing::kUpperRing:
-    return 64*upperL2Rates[phi];
-  case AnitaRing::kLowerRing:
-    return 64*lowerL2Rates[phi];
-  case AnitaRing::kNadirRing:
-    if(phi%2==0)
-      return 64*nadirL2Rates[phi/2];
-  default:
-    return -1;
-  }
-  return -1;
-}
+// Int_t SummedTurfRate::getL2Rate(int phi, int ring)
+// { 
+//   if(phi<0 || phi>15) return -1;
+//   switch(ring) {
+//   case AnitaRing::kUpperRing:
+//     return 64*upperL2Rates[phi];
+//   case AnitaRing::kLowerRing:
+//     return 64*lowerL2Rates[phi];
+//   case AnitaRing::kNadirRing:
+//     if(phi%2==0)
+//       return 64*nadirL2Rates[phi/2];
+//   default:
+//     return -1;
+//   }
+//   return -1;
+// }
 
-Int_t SummedTurfRate::getNadirL12Rate(int phi) {
-  if(phi<0 || phi>15) return -1;
-  if(phi%2==0)
-    return 16*nadirL1Rates[phi/2];
-  else
-    return 64*nadirL2Rates[phi/2];
-}
+// Int_t SummedTurfRate::getNadirL12Rate(int phi) {
+//   if(phi<0 || phi>15) return -1;
+//   if(phi%2==0)
+//     return 16*nadirL1Rates[phi/2];
+//   else
+//     return 64*nadirL2Rates[phi/2];
+// }
 
-Int_t SummedTurfRate::isPhiMasked(int phi) {
+Int_t SummedTurfRate::isPhiMasked(int phi, AnitaPol::AnitaPol_t pol) {
   if(phi<0 || phi>15) return -1;
-  return (phiTrigMask & (1<<phi));
+  if(pol==AnitaPol::kVertical)
+    return (phiTrigMask & (1<<phi));
+  return (phiTrigMaskH & (1<<phi));
 }
 
 Int_t SummedTurfRate::isAntMasked(int phi, int ring)
 {
   if(phi<0 || phi>15) return -1;
-   switch(ring) {
-   case AnitaRing::kUpperRing:
-      return  (antTrigMask&(1<<(phi)));
-   case AnitaRing::kLowerRing:
-     return  (antTrigMask&(1<<(phi+16)));
-   case AnitaRing::kNadirRing:
-      phi/=2;
-      return nadirAntTrigMask&(1<<phi);
-   default:
-      return -1;
-   }      
+  return 0;
 }

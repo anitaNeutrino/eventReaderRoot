@@ -21,7 +21,10 @@ ClassImp(CalibratedHk);
 float calSlope[3][40]=
 {
     {1,1,100,1,1,1,1,1,1,1,1,100,1,1,1,100,100,100,100,100,1,1,1,1,100,1,1,1,100,1,1,1,1,1,1,100,100,100,100,100},
-    {2,1,2,-4,4,2,2,1,1,1,1,1,1,8,8,20,20,20,1,1,0.8,8,0.8,0.8,20*3,20,0.8,1,1,1,1,1,1,4,4,1,10.1377,18.252,100,400},
+    {2,1,2,-3.0075,4.02,2,2,1,1,1,   //40-49
+     1,1,1,8,8,30,30,20,1,1,    //50-59
+     0.8,8,-2,0.8,60,20,0.8,1,1,1, //60-69
+     1,1,1,4.02,2,2,10.1,19.25,100,400}, //70-79
     {100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100}
 };
 
@@ -191,9 +194,17 @@ Float_t   CalibratedHk::getSBSTemp(int index)
   return -273;
 }
 
+const char *CalibratedHk::getVoltageName(int index)
+{
+  const char *voltageNames[NUM_VOLTAGES]={"5.6V NTU","12V IP","+12 PCI","+24","PV","+5_PCI","+5M","+3.3","+1.5","-12 PCI","-5","+5V_IP??"};
+ if(index>=0 && index<NUM_VOLTAGES) 
+    return voltageNames[index];
+  return "None";
+
+}
 
 Float_t CalibratedHk::getVoltage(int index) {
-  int powerVoltChans[NUM_VOLTAGES]={74,73,44,76,77,46,42,45,41,43,40};
+  int powerVoltChans[NUM_VOLTAGES]={74,73,44,76,77,46,42,45,41,43,62,75};
   if(index>=0 && index<NUM_VOLTAGES) {
     return useful[powerVoltChans[index]/40][powerVoltChans[index]%40];
   }
@@ -201,11 +212,22 @@ Float_t CalibratedHk::getVoltage(int index) {
 }
 
 Float_t CalibratedHk::getCurrent(int index) {  
-  int powerAmpChans[NUM_CURRENTS]={54,53,56,57,61,64,60,63,66,62,65,55};
+  int powerAmpChans[NUM_CURRENTS]={53,56,57,61,64,63,66,65,55};
   if(index>=0 && index<NUM_CURRENTS) {
         return useful[powerAmpChans[index]/40][powerAmpChans[index]%40];
   }
   return -1;
+}
+
+ const char *CalibratedHk::getCurrentName(int index)
+{
+//const char *currentNames[NUM_CURRENTS]={"RF1","RF2","Batt","+24","PV","+1.5","+5S","-12","+12","+3.3","+5","-5"};
+const char *currentNames[NUM_CURRENTS]={"12V_IP","+24","PV","+5_M","+3.3","+12 PCI","+5NB","+5 PCI","Batt"};
+ if(index>=0 && index<NUM_CURRENTS) 
+    return currentNames[index];
+  return "None";
+
+
 }
 
 Float_t CalibratedHk::getPower(int index) {  
@@ -248,25 +270,7 @@ Float_t CalibratedHk::getAttitude(int index) {
 }
 
 
- const char *CalibratedHk::getCurrentName(int index)
-{
-//const char *currentNames[NUM_CURRENTS]={"RF1","RF2","Batt","+24","PV","+1.5","+5S","-12","+12","+3.3","+5","-5"};
-const char *currentNames[NUM_CURRENTS]={"RF1","RF2","+24","PV","+5M","+3.3","+1.5","+12","+5NB","-12","+5","Batt"};
- if(index>=0 && index<NUM_CURRENTS) 
-    return currentNames[index];
-  return "None";
 
-
-}
-
- const char *CalibratedHk::getVoltageName(int index)
-{
-const char *voltageNames[NUM_VOLTAGES]={"RF1","RF2","+12","+24","PV","+5","+5M","+3.3","+1.5","-12","-5"};
- if(index>=0 && index<NUM_VOLTAGES) 
-    return voltageNames[index];
-  return "None";
-
-}
 
  const char *CalibratedHk::getExternalTempName(int index)
 {
