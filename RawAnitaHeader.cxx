@@ -65,12 +65,19 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    turfioReserved=hdPtr->turfio.reserved[0];
    l3TrigPattern=hdPtr->turfio.l3TrigPattern;
    l3TrigPatternH=hdPtr->turfio.l3TrigPatternH;
-   memcpy(reserved,hdPtr->reserved,2*sizeof(UChar_t));
+   //   memcpy(reserved,hdPtr->reserved,2*sizeof(UChar_t));
    run=trun;
    realTime=trealTime;
    triggerTime=ttriggerTime;
    triggerTimeNs=ttriggerTimeNs;
    goodTimeFlag=tgoodTimeFlag;
+
+
+  //Prioritizer stuff
+  peakThetaBin=hdPtr->peakThetaBin;
+  imagePeak=hdPtr->imagePeak;
+  coherentSumPeak=hdPtr->coherentSumPeak;
+  prioritizerStuff=hdPtr->prioritizerStuff;
 }
 
 
