@@ -30,12 +30,12 @@ namespace AnitaGeom {
 				  6,0,7,1,6,1,7,0,6,0,7,1,6,1,7,0};
 
 				  
-  int hAntToChan[NUM_SEAVEYS]={7,5,7,5,5,7,5,7,6,4,6,4,4,6,4,6,
+  int hAntToChan[NUM_SEAVEYS]={7,5,7,1,5,7,5,7,6,4,6,4,4,6,4,6,
 			       5,7,5,7,7,5,7,5,4,6,4,6,6,4,6,4,
 			       7,5,7,5,5,7,5,7,6,4,6,4,4,6,4,6};
   
   
-  int vAntToChan[NUM_SEAVEYS]={3,1,3,1,1,3,1,3,2,0,2,0,0,2,0,2,
+  int vAntToChan[NUM_SEAVEYS]={3,1,3,5,1,3,1,3,2,0,2,0,0,2,0,2,
 			       1,3,1,3,3,1,3,1,0,2,0,2,2,0,2,0,
 			       3,1,3,1,1,3,1,3,2,0,2,0,0,2,0,2};
    
@@ -45,9 +45,9 @@ namespace AnitaGeom {
 				      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; 
 
 
-  // SEAVEYS that this array uses antenna number 1-42 as it needs
+  // SEAVEYS that this array uses antenna number 1-48 as it needs
   // the negative sign to indicate polarization
-   // Note that this array uses antenna number 1-42 as it needs
+   // Note that this array uses antenna number 1-48 as it needs
    // the negative sign to indicate polarization (-ve is vertical)
 
   int surfToAntMap[ACTIVE_SURFS][RFCHAN_PER_SURF]=
@@ -55,7 +55,7 @@ namespace AnitaGeom {
      {-44,-36,-46,-38,44,36,46,38},
      {-32,-24,-28,-20,32,24,28,20},
      {-30,-22,-26,-18,30,22,26,18},
-     {-12,-4,-14,-6,12,4,14,6},
+     {-12,4,-14,-6,12,-4,14,6},
      {-10,-2,-16,-8,10,2,16,8},
      {-45,-37,-41,-33,45,37,41,33},
      {-47,-39,-43,-35,47,39,43,35},
