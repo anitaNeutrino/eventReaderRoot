@@ -96,7 +96,18 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
 
   UShort_t        phiTrigMask; ///< 16-bit phi mask (from TURF)
   UShort_t        phiTrigMaskH; ///< 16-bit phi mask (from TURF)
-  //!  Reserved bytes
+  
+
+  //Prioritizer stuff
+  UChar_t peakThetaBin;
+  UShort_t imagePeak;
+  UShort_t coherentSumPeak;
+  UShort_t prioritizerStuff;
+
+  
+
+
+  //!  Reserved bytes --- Deprecated
   /*!
     The lower four bits of the first byte (reserved[0]&0xf) show the TURF hold issued for this trigger. There should be only one buffer held per trigger and it should match the SURF labrador readout for the event.
     Here we are coutning bits from 1 to 4
@@ -156,7 +167,7 @@ The second byte (reserved[1]) is currently reserved.
   int getTurfEventNumber()
   { return (turfEventId&0xfffff);} ///< Returns the event number portion of the TURF event id.
 
-  ClassDef(RawAnitaHeader,34);
+  ClassDef(RawAnitaHeader,35);
 };
 
 
