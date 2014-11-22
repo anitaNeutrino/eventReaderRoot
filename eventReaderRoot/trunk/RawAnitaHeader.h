@@ -102,6 +102,13 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
   UChar_t peakThetaBin;
   UShort_t imagePeak;
   UShort_t coherentSumPeak;
+
+//!  Prioritizer stuff
+  /*!
+    Here we are coutning bits from 1 to 8
+    -  "LSB" Polarisation 1 is VPol
+    -  "Bit 2-11" is peak phi bin
+  */
   UShort_t prioritizerStuff;
 
   
@@ -166,6 +173,15 @@ The second byte (reserved[1]) is currently reserved.
   { return (((turfEventId&0xfff00000)>>20));} ///< Returns the run number portion of the TURF event id
   int getTurfEventNumber()
   { return (turfEventId&0xfffff);} ///< Returns the event number portion of the TURF event id.
+
+  Float_t getPeakThetaRad();
+  Float_t getPeakPhiRad();
+  Float_t getPeakThetaDeg();
+  Float_t getPeakPhiDeg();
+  Float_t getImagePeak();
+  Float_t getCoherentSumPeak();
+  AnitaPol::AnitaPol_t getPeakPol();
+  
 
   ClassDef(RawAnitaHeader,35);
 };
