@@ -998,7 +998,7 @@ void AnitaEventCalibrator::loadCalib() {
 	  calib*=-1;
 
       //The bastards switched the antenna orientation
-      Double_t orient=AnitaGeomTool::getAntOrientation(realAnt);
+      Int_t orient=AnitaGeomTool::getAntOrientation(realAnt);
       if(orient==-1) 
 	 calib*=-1;
       if(orient==-2 && realPol==AnitaPol::kHorizontal) //Even Orient have never scored -2 goals
