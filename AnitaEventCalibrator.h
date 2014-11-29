@@ -52,7 +52,18 @@ class AnitaEventCalibrator : public TObject
 
   //Some flags that do things
   Int_t fApplyClockFudge; //Should we use my silly clock fudge factor
-  
+
+
+  // Variables for BS calib 
+  Int_t rcoLatchStart[NUM_SURF][NUM_CHIP];
+  Int_t rcoLatchEnd[NUM_SURF][NUM_CHIP];
+  Int_t fReadRcoFromFirmware;
+#define NUM_EVENTS_TO_AVERAGE_TEMP_OVER 1000
+  Double_t fAllSurfAverageClockDeltaTs[NUM_EVENTS_TO_AVERAGE_TEMP_OVER]; ///< For rolling average
+  Int_t fAllSurfAverageClockNumDeltaTs[NUM_EVENTS_TO_AVERAGE_TEMP_OVER]; ///< For rolling average
+  Int_t fTempEventInd; ///< Current index of rolling average arrays
+  UInt_t fLastEventNumber; ///< If doing a rolling average makes sense to check we are being sequential
+  Int_t fNumEventsAveraged;
 
 
   //Variables for RG Calib
@@ -112,7 +123,13 @@ class AnitaEventCalibrator : public TObject
   void processClockJitterFast(UsefulAnitaEvent *eventPtr); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- fast method
   void processClockJitterCorrelation(UsefulAnitaEvent *eventPtr); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- using cross-correlation
   void applyClockPhiCorrection(UsefulAnitaEvent *eventPtr); ///< Worker fucntion if we are dealing with CalibratedAnitaEvent
-  void processEventAG(UsefulAnitaEvent *eventPtr);
+  //void processEventAG(UsefulAnitaEvent *eventPtr);
+  void processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGetTempFactorInProcessEventAG, Int_t fUseRolloingTempAverage, Int_t fReadRcoFromFirmware);
+  void processEventBS(UsefulAnitaEvent* eventPtr);
+
+  void updateRollingAverageClockDeltaT(UsefulAnitaEvent* eventPtr, Double_t allSurfMeanUpDt, Int_t allSurfNumUpDt);
+
+
   void processEventUnwrapFast(UsefulAnitaEvent *eventPtr);
   
 

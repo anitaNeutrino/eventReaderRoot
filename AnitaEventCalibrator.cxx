@@ -21,7 +21,8 @@
 #endif
 
 //Clock Period Hard Coded
-Double_t clockPeriod=1000/33.;
+//Double_t clockPeriod=1000/33.;
+Double_t clockPeriod=29.9964121338995078;
 
 //Fitting function
 Double_t funcSquareWave(Double_t *x, Double_t *par)
@@ -134,6 +135,10 @@ AnitaEventCalibrator::AnitaEventCalibrator()
    for(int surf=1;surf<NUM_SURF;surf++) {
      grCorClock[surf-1]=0;
    }
+   fLastEventNumber = 0; /* Keep track of rolling events starting from first instance */
+   fTempEventInd = 0;
+   fNumEventsAveraged = 0;
+
 }
 
 AnitaEventCalibrator::~AnitaEventCalibrator()
@@ -151,6 +156,7 @@ AnitaEventCalibrator*  AnitaEventCalibrator::Instance()
     return fgInstance;
 
   fgInstance = new AnitaEventCalibrator();
+
   return fgInstance;
   //   return (fgInstance) ? (AnitaEventCalibrator*) fgInstance : new AnitaEventCalibrator();
 }
@@ -158,9 +164,7 @@ AnitaEventCalibrator*  AnitaEventCalibrator::Instance()
 
 
 int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveCalType::WaveCalType_t calType)
-{
-
-  
+{  
   if(calType==WaveCalType::kJustTimeNoUnwrap)
     return justBinByBinTimebase(eventPtr);
   
@@ -171,7 +175,11 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
      processEventUnwrapFast(eventPtr);
    }
    else if( calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGFastClock || calType==WaveCalType::kVTFullAGCrossCorClock || calType==WaveCalType::kVTCalFilePlusSimon ) {
-     processEventAG(eventPtr);
+     //processEventAG(eventPtr);
+     processEventAG(eventPtr, 1, 0, 0); /* New args tweak timing calibration, 1,0,0 means same as before. */
+   }
+   else if(calType==WaveCalType::kVTBenS || calType==WaveCalType::kVTBenSNoClockJitterNoZeroMean){
+     processEventBS(eventPtr);
    }
    else {
      justBinByBinTimebase(eventPtr);
@@ -189,7 +197,8 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
        processClockJitterFast(eventPtr);
      }
    
-     if( calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGCrossCorClock) {
+     if( calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGCrossCorClock 
+	 || calType==WaveCalType::kVTBenS) {
        processClockJitterCorrelation(eventPtr);
      }
    } 
@@ -197,7 +206,8 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
    //Zero Mean
    if(
       calType==WaveCalType::kVTLabAGCrossCorClock ||
-      calType==WaveCalType::kVTFullAGCrossCorClock) {
+      calType==WaveCalType::kVTFullAGCrossCorClock ||
+      calType==WaveCalType::kVTBenS) {
 
       zeroMean();
    }
@@ -728,21 +738,54 @@ void AnitaEventCalibrator::processEventUnwrapFast(UsefulAnitaEvent *eventPtr)
   }    
 }
 
-void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr)
-{  
-  //  std::cout << "processEventAG\n";
+
+
+void AnitaEventCalibrator::processEventBS(UsefulAnitaEvent* eventPtr){
+  processEventAG(eventPtr, 0, 0, 1);
+  eventPtr->analyseClocksForTempGuessBen();
+
+  /* Then apply bin-by-bin timing correction*/
+  for(int surfInd=0; surfInd<NUM_SURF; surfInd++){
+    for(int chanInd=0; chanInd<NUM_CHAN; chanInd++){
+      for(int samp=0; samp<numPointsArray[surfInd][chanInd]; samp++){
+      timeArray[surfInd][chanInd][samp]*=eventPtr->fRollingAverageTempFactor;
+      }
+    }
+  }
+}
+
+
+  /* Don't want to copy and paste this code multiple times...*/
+void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGetTempFactorInProcessEventAG, Int_t fUseRollingTempAverage, Int_t fReadRcoFromFirmware){
+   // std::cout << "processEventAG\n";
 
   //C3PO num is no longer the clock in channel 9
   //  if(eventPtr->fC3poNum) {
   //    clockPeriod=1e9/eventPtr->fC3poNum;
   //  }
-  Double_t tempFactor=eventPtr->getTempCorrectionFactor();
+
+  Double_t tempFactor = 1;
+  if(fGetTempFactorInProcessEventAG && !fUseRollingTempAverage){
+    tempFactor=eventPtr->getTempCorrectionFactor();
+  }
+  else if(fGetTempFactorInProcessEventAG && fUseRollingTempAverage){
+    tempFactor=eventPtr->fRollingAverageTempFactor;
+  }
+
   for(Int_t surf=0;surf<NUM_SURF;surf++) {
     for(Int_t chan=0;chan<NUM_CHAN;chan++) {
       Int_t chanIndex=eventPtr->getChanIndex(surf,chan);
       Int_t labChip=eventPtr->getLabChip(chanIndex);
       fLabChip[surf][chan]=labChip;
-      Int_t rco=eventPtr->guessRco(chanIndex);
+      //      Int_t rco=eventPtr->guessRco(chanIndex);
+      Int_t rco = -1;
+      if(fReadRcoFromFirmware){
+	rco=eventPtr->getRcoCorrected(chanIndex);
+      }
+      else{
+	rco=eventPtr->guessRco(chanIndex);
+      }
+
       
 
       Int_t earliestSample=eventPtr->getEarliestSample(chanIndex);
@@ -1037,7 +1080,8 @@ void AnitaEventCalibrator::loadCalib() {
     }
 
 
-    sprintf(fileName,"%s/epsilonFromAbby.dat",calibDir);
+    //sprintf(fileName,"%s/epsilonFromAbby.dat",calibDir);
+    sprintf(fileName,"%s/epsilonFromBenS.dat",calibDir);
     std::ifstream EpsilonAbbyFile(fileName);
     EpsilonAbbyFile.getline(firstLine,179);
     while(EpsilonAbbyFile >> surf >> chip >> rco >> calib) {
@@ -1307,4 +1351,43 @@ Double_t AnitaEventCalibrator::convertRfPowToKelvinMeasured(int surf, int chan, 
   Double_t DA=adc-ped;
   Double_t kelvin=refTemp*TMath::Power(10,(a*DA/10.));
   return kelvin;  
+}
+
+void AnitaEventCalibrator::updateRollingAverageClockDeltaT(UsefulAnitaEvent* eventPtr, Double_t allSurfMeanUpDt, Int_t allSurfNumUpDt){
+
+  /* Probably sensible to check this really is a rolling average */
+  if(eventPtr->eventNumber!=fLastEventNumber+1 && fLastEventNumber!=0){
+    std::cerr << "Careful! Processing non-sequential events may screw up rolling average temperature correction!";
+    std::cerr << " Last event " << fLastEventNumber << ", this event " << eventPtr->eventNumber << std::endl;
+    /* Let the user think about it but don't kill the program... */
+  }
+  
+  fAllSurfAverageClockDeltaTs[fTempEventInd] = allSurfMeanUpDt;
+  fAllSurfAverageClockNumDeltaTs[fTempEventInd] = allSurfNumUpDt;
+
+  fTempEventInd++;
+  if(fTempEventInd==NUM_EVENTS_TO_AVERAGE_TEMP_OVER){
+    fTempEventInd=0;
+  }
+  if(fNumEventsAveraged<NUM_EVENTS_TO_AVERAGE_TEMP_OVER){
+    fNumEventsAveraged++;
+  }
+
+  // std::cout << fTempEventInd << " " << fNumEventsAveraged << " " << fLastEventNumber << std::endl;
+  /* Sum over events to get rolling average */
+  allSurfMeanUpDt /= allSurfNumUpDt;
+
+  Double_t allSurfNEventAverageUpDt = 0;
+  Int_t allSurfNEventAverageNumUpDt = 0;
+
+  for(int i=0; i<fNumEventsAveraged; i++){
+    allSurfNEventAverageUpDt += fAllSurfAverageClockDeltaTs[i];
+    allSurfNEventAverageNumUpDt += fAllSurfAverageClockNumDeltaTs[i];
+  }
+  allSurfNEventAverageUpDt/=allSurfNEventAverageNumUpDt;
+
+  /* Give the UsefulAnitaEvent it's temperature calibration numbers */
+  eventPtr->fTempFactorGuess = clockPeriod/allSurfMeanUpDt;
+  eventPtr->fRollingAverageTempFactor = clockPeriod/allSurfNEventAverageUpDt;
+  fLastEventNumber = eventPtr->eventNumber;
 }
