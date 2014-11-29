@@ -48,10 +48,11 @@ class UsefulAnitaEvent: public RawAnitaEvent
   TGraph *getGraph(AnitaRing::AnitaRing_t ring,
 		   int phi,
 		   AnitaPol::AnitaPol_t pol); ///< Returns a voltage-time waveform for given ring-phi-pol
-
   Int_t guessRco(int chanIndex); ///< Looks at clock channel to try and guess which RCO phase we are in.
+  Int_t getRcoCorrected(int chanIndex); ///< Returns firmware RCO after correcting for latch delay (and factor of -1 for different definitions of which phase getRCO and guessRCO return)
   Double_t getTempCorrectionFactor(); ///< Returns the temperature correction factor (or guesses at it using clock periods if necessary)
   void analyseClocksForGuesses();
+  void analyseClocksForTempGuessBen();
 
 
   //The calibrated numbers
@@ -67,6 +68,7 @@ class UsefulAnitaEvent: public RawAnitaEvent
   UInt_t fLastEventGuessed; ///< Internal variable to see if we've already tried to guess the RCO and temp correction factors for this event
   Int_t fRcoArray[NUM_SURF];   ///< An array to store the guessed at RCO values;
   Double_t fTempFactorGuess;  ///< A holder variable to cling on to the temperature correction factor that we are guessing at.
+  Double_t fRollingAverageTempFactor; ///< Set by AnitaEventCalibrator, similar to fTempGuessFactor but averages unwrapped clock over a number of (hopefully) sequential events
   Double_t fClockPhiArray[NUM_SURF]; ///< An array to store the derived clock calibration numbers (from aligning the clocks)
 
   AnitaEventCalibrator *fCalibrator; ///< Pointer to the AnitaEventCalibrator

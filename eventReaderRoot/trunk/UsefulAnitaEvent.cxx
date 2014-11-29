@@ -312,6 +312,25 @@ Int_t UsefulAnitaEvent::guessRco(int chanIndex)
   //return getRCO(chanIndex);
 }
 
+Int_t UsefulAnitaEvent::getRcoCorrected(int chanIndex)
+
+{
+  int fhb = this->getFirstHitBus(chanIndex);
+  int lab = this->getLabChip(chanIndex);
+  int rcoFirm = this->getRCO(chanIndex);
+  int rcoSoft = 1-rcoFirm; ///< Factor of -1 in definition...
+  int wrappedHitBus = getWrappedHitBus(chanIndex);
+  
+  // Correct for latch delay
+  AnitaEventCalibrator *myCally = AnitaEventCalibrator::Instance();
+  if(fhb >= myCally->rcoLatchStart[chanIndex/9][lab] && fhb <= myCally->rcoLatchEnd[chanIndex/9][lab] && !wrappedHitBus){
+    return 1-rcoSoft;
+  }
+  else{
+    return rcoSoft;
+  }
+}
+
 Double_t UsefulAnitaEvent::getTempCorrectionFactor()
 {
   if(gotCalibTemp) {
@@ -324,6 +343,83 @@ Double_t UsefulAnitaEvent::getTempCorrectionFactor()
     return fTempFactorGuess;
     //    return 1;
   }
+}
+
+void UsefulAnitaEvent::analyseClocksForTempGuessBen(){
+  /* 
+     Assumes RCO phases got from firmware so no need to guess them here.
+     Assumes event has been calibrated with AG method w/o temp correction.
+  */
+
+  AnitaEventCalibrator *myCally = AnitaEventCalibrator::Instance();
+
+  Double_t meanUpDt[NUM_SURF] = {0};
+  Int_t numUpDt[NUM_SURF] = {0};
+
+  /* Now get clocks and count zero crossings */
+  const int clockInd = 8;
+  for(int surfInd=0; surfInd<NUM_SURF; surfInd++){
+    // TGraph* gr = this->getGraphFromSurfAndChan(surfInd, 8);
+    
+    TGraph* gr = new TGraph(myCally->numPointsArray[surfInd][clockInd],
+			    myCally->timeArray[surfInd][clockInd],
+			    myCally->mvArray[surfInd][clockInd]);
+
+    std::vector<Double_t> upGoingZCs;
+    for(int samp=0; samp<gr->GetN()-1; samp++){
+      double y1 = gr->GetY()[samp];
+      double y2 = gr->GetY()[samp+1];
+      if(y1 < 0 && y2 >= 0){
+	double t1 = gr->GetX()[samp];
+	double t2 = gr->GetX()[samp+1];
+	upGoingZCs.push_back(getZeroCrossingPoint(t1, y1, t2, y2));
+      }
+    }
+
+    /* Get deltaTs from zero crossings */
+    meanUpDt[surfInd] = 0;
+    numUpDt[surfInd] = 0;
+
+    // std::cout << eventNumber << " " << surfInd << " " << upGoingZCs.size() << std::endl;
+    // if(upGoingZCs.size()<2){
+    //   std::cerr << "I can't believe there's less than one clock period..." << std::endl;
+    //   for(int samp=0; samp<gr->GetN()-1; samp++){
+    // 	double y1 = gr->GetY()[samp];
+    // 	double t1 = gr->GetX()[samp];
+    // 	std::cerr << t1 <<" " << y1 << std::endl;
+    //   }
+    // }
+
+
+    if(upGoingZCs.size()>=2){
+      for(unsigned int i=0; i<upGoingZCs.size()-1; i++){
+	double dt = upGoingZCs.at(i+1) - upGoingZCs.at(i);
+	meanUpDt[surfInd] += dt;
+	numUpDt[surfInd]++;
+      }
+    }
+    else{
+      /* Make user aware, but carry on... */
+      std::cerr << "\nI can't believe there's less than one clock period... " 
+		<< "eventNumber " << eventNumber << ", surf " << surfInd 
+		<< " clock has " << gr->GetN() << " samples" << std::endl;
+    }
+    delete gr;
+  }
+  
+
+  /* Sum over all surfs to get event average */
+  Double_t allSurfMeanUpDt = 0;
+  Double_t allSurfNumUpDt = 0;
+
+  for(int surfInd=0; surfInd<NUM_SURF; surfInd++){
+    allSurfMeanUpDt += meanUpDt[surfInd];
+    allSurfNumUpDt += numUpDt[surfInd];
+    meanUpDt[surfInd]/=numUpDt[surfInd];
+  }
+  /* Add this event average to rolling many event rolling average */
+  myCally->updateRollingAverageClockDeltaT(this, allSurfMeanUpDt, allSurfNumUpDt);
+
 }
 
 void UsefulAnitaEvent::analyseClocksForGuesses() 
