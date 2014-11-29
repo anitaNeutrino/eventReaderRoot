@@ -168,7 +168,6 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
   if(calType==WaveCalType::kJustTimeNoUnwrap)
     return justBinByBinTimebase(eventPtr);
   
-  
    fApplyClockFudge=0;
    //   std::cout << "AnitaEventCalibrator::calibrateUsefulEvent():" << calType << std::endl;
    if(calType==WaveCalType::kVoltageTime || calType==WaveCalType::kVTLabAG) {
