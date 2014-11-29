@@ -247,6 +247,35 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
     }      
     break;
 
+
+
+  case WaveCalType::kVTBenS:    
+    // New version of kVTLabAG for ANITA-3 reading RCO from firmware + Clock Jitter Correction (+ Zero Mean)
+  case WaveCalType::kVTBenSNoClockJitterNoZeroMean:    
+    // Just the bin-to-bin timing calibration, no interchannel or zero meaning...
+    for(int surf=0;surf<NUM_SURF;surf++) {
+      for(int chan=0;chan<NUM_CHAN;chan++) {
+	int chanIndex=getChanIndex(surf,chan);
+	this->fNumPoints[chanIndex]=fCalibrator->numPointsArray[surf][chan];
+	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
+	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
+	  this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp];
+	  //-fCalibrator->chipByChipDeltats[surf][chan][getLabChip(chanIndex)];	  
+	  // if(calType==WaveCalType::kVTCalFilePlusSimon) {
+	  //   this->fTimes[chanIndex][samp]+=fCalibrator->simonsDeltaT[surf][chan];
+	  //	    std::cout << chanIndex << "\t" << surf << "\t" << chan << "\t" << this->fTimes[chanIndex][samp] << "\t" << fCalibrator->simonsDeltaT[surf][chan] << "\n";
+	  // }
+	  //	  std::cout << surf << "\t" << chan << "\t" << fCalibrator->chipByChipDeltats[surf][chan][getLabChip(chanIndex)] <<"\n";
+	  this->fCapacitorNum[chanIndex][samp]=fCalibrator->scaArray[surf][chan][samp];
+	}
+	for(int samp=this->fNumPoints[chanIndex];samp<NUM_SAMP;samp++) {
+	  this->fVolts[chanIndex][samp]=0;
+	  this->fTimes[chanIndex][samp]=0;
+	}
+      }
+    }      
+    break;
+
   case WaveCalType::kNoCalib:
   case WaveCalType::kADC:
   default: 
