@@ -1534,7 +1534,7 @@ Double_t AnitaEventCalibrator::convertRfPowToKelvinMeasured(int surf, int chan, 
 void AnitaEventCalibrator::updateRollingAverageClockDeltaT(UsefulAnitaEvent* eventPtr, Double_t allSurfMeanUpDt, Int_t allSurfNumUpDt){
 
   /* Probably sensible to check this really is a rolling average */
-  if(eventPtr->eventNumber!=fLastEventNumber+1 && fLastEventNumber!=0){
+  if(eventPtr->eventNumber - fLastEventNumber>NUM_EVENTS_TO_AVERAGE_TEMP_OVER && fLastEventNumber!=0){
     std::cerr << "Careful! Processing non-sequential events may screw up rolling average temperature correction!";
     std::cerr << " Last event " << fLastEventNumber << ", this event " << eventPtr->eventNumber << std::endl;
     /* Let the user think about it but don't kill the program... */
