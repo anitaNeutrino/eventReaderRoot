@@ -742,7 +742,7 @@ void AnitaEventCalibrator::processEventUnwrapFast(UsefulAnitaEvent *eventPtr)
 void AnitaEventCalibrator::processEventBS(UsefulAnitaEvent* eventPtr){
   processEventAG(eventPtr, 0, 0, 1);
   eventPtr->analyseClocksForTempGuessBen();
-  std::cout << eventPtr->fRollingAverageTempFactor << std::endl;
+  //  std::cout << eventPtr->fRollingAverageTempFactor << std::endl;
 
   /* Then apply bin-by-bin timing correction*/
   for(int surfInd=0; surfInd<NUM_SURF; surfInd++){
