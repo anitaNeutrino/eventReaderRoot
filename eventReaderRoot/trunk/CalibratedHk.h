@@ -28,7 +28,7 @@
 #define NUM_SBS_TEMPS 4
 #endif
 #ifndef NUM_EXT_TEMPS
-#define NUM_EXT_TEMPS 25
+#define NUM_EXT_TEMPS 15
 #endif
 #ifndef NUM_POWERS
 #define NUM_POWERS 5

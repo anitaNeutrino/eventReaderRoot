@@ -179,7 +179,7 @@ Float_t   CalibratedHk::getInternalTemp(int index)
 
 Float_t   CalibratedHk::getExternalTemp(int index)
 {  
-  int externalTempChans[NUM_EXT_TEMPS]={112,93,113,94,114,95,115,96,116,97,117,98,118,99,119,39,19,38,18,37,17,36,16,35,15};
+  int externalTempChans[NUM_EXT_TEMPS]={112,93,113,94,114,95,115,96,116,97,117,98,118,99,119};//,39,19,38,18,37,17,36,16,35,15};
   //  int externalTempChans[NUM_EXT_TEMPS]={32,13,33,14,34,15,35,16,36,17,37,18,38,19,39};
   if(index>=0 && index<NUM_EXT_TEMPS)
     return useful[externalTempChans[index]/40][externalTempChans[index]%40];
@@ -286,7 +286,7 @@ Float_t CalibratedHk::getAttitude(int index) {
  const char *CalibratedHk::getExternalTempName(int index)
 {
 
-const char *extTempNames[NUM_EXT_TEMPS]={"PV 1 (phi 4)","PV 3 (phi 8)","A01V (RFCM02)","A10V (RFCM07)","A03V (RFCM08)","A12V (RFCM12)","A05V (RFCM13)","A14V (RFCM14)","A07V (RFCM15)","A16V (RFCM16)","A17V (RFCM10)","A19V (RFCM03)","A21V (RFCM05)","A23V (RFCM06)","A25V (RFCM09)","A27V (RFCM11)","A29V (RFCM04)","A31V (RFCM01)","A??V (RFCM 17)","A??V (RFCM18)","A??V (RFCM19)","A??V (RFCM20)","Radiator Plate","PV 5 (phi 12)","PV 7 (phi 16)"};
+  const char *extTempNames[NUM_EXT_TEMPS]={"PV 1 (phi 4)","PV 3 (phi 8)","A01V (RFCM02)","A10V (RFCM07)","A03V (RFCM08)","A12V (RFCM12)","A05V (RFCM13)","A14V (RFCM14)","A07V (RFCM15)","A16V (RFCM16)","A17V (RFCM10)","A19V (RFCM03)","A21V (RFCM05)","A23V (RFCM06)","A25V (RFCM09)"};//,"A27V (RFCM11)","A29V (RFCM04)","A31V (RFCM01)","A??V (RFCM 17)","A??V (RFCM18)","A??V (RFCM19)","A??V (RFCM20)","Radiator Plate","PV 5 (phi 12)","PV 7 (phi 16)"};
  if(index>=0 && index<NUM_EXT_TEMPS) 
     return extTempNames[index];
   return "None";
