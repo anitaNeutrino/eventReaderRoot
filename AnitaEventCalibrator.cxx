@@ -1191,9 +1191,10 @@ void AnitaEventCalibrator::loadCalib() {
     
    
     int surf,chan,chip,rco,samp;
-    int ant;
-    char pol;
-    double mean,rms,calib;
+//    int ant;
+//    char pol;
+//    double mean,rms,calib;
+  double rms,calib;
     int numEnts;
     int icalib;
     //    sprintf(fileName,"%s/rfcmCalibFile.txt",calibDir);
