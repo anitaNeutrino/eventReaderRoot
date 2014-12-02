@@ -653,7 +653,7 @@ void AnitaEventCalibrator::processEventUnwrapFast(UsefulAnitaEvent *eventPtr)
 	      int binRco=1-rco;
 	      scaArray[surf][chan][index]=samp;
 	      unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-	      mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+	      mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
 	      timeArray[surf][chan][index]=time;
 	      if(samp==255) {
 		extraTime=time+(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
@@ -686,7 +686,7 @@ void AnitaEventCalibrator::processEventUnwrapFast(UsefulAnitaEvent *eventPtr)
 		  binRco=1-rco;
 		  scaArray[surf][chan][index]=nextExtra;
 		  unwrappedArray[surf][chan][index]=rawArray[surf][chan][nextExtra];
-		  mvArray[surf][chan][index]=double(rawArray[surf][chan][nextExtra])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+		  mvArray[surf][chan][index]=double(rawArray[surf][chan][nextExtra])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
 		  timeArray[surf][chan][index]=extraTime;
 		  if(nextExtra<259) {
 		    extraTime+=(justBinByBin[surf][labChip][binRco][nextExtra])*tempFactor;
@@ -700,7 +700,7 @@ void AnitaEventCalibrator::processEventUnwrapFast(UsefulAnitaEvent *eventPtr)
 	      }
 	      scaArray[surf][chan][index]=samp;
 	      unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-	      mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+	      mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
 	      timeArray[surf][chan][index]=time;
 	      if(samp<259) {
 		time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
@@ -718,7 +718,7 @@ void AnitaEventCalibrator::processEventUnwrapFast(UsefulAnitaEvent *eventPtr)
 	    int binRco=rco;
 	    scaArray[surf][chan][index]=samp;
 	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
 	    timeArray[surf][chan][index]=time;
 	    if(samp<259) {
 	      time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
@@ -820,7 +820,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGet
 	    int binRco=1-rco;
 	    scaArray[surf][chan][index]=samp;
 	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
 	    timeArray[surf][chan][index]=time;
 	    if(samp==255) {
 	      extraTime=time+(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
@@ -853,7 +853,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGet
 		binRco=1-rco;
 		scaArray[surf][chan][index]=nextExtra;
 		unwrappedArray[surf][chan][index]=rawArray[surf][chan][nextExtra];
-		mvArray[surf][chan][index]=double(rawArray[surf][chan][nextExtra])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+		mvArray[surf][chan][index]=double(rawArray[surf][chan][nextExtra])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
 		timeArray[surf][chan][index]=extraTime;
 		if(nextExtra<259) {
 		  extraTime+=(justBinByBin[surf][labChip][binRco][nextExtra])*tempFactor;
@@ -868,7 +868,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGet
 	    }
 	    scaArray[surf][chan][index]=samp;
 	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
 	    timeArray[surf][chan][index]=time;
 	    if(samp<259) {
 	      time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
@@ -886,7 +886,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGet
 	  int binRco=rco;
 	  scaArray[surf][chan][index]=samp;
 	  unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-	  mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+	  mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
 	  timeArray[surf][chan][index]=time;
 	  if(samp<259) {
 	    time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
@@ -987,7 +987,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGet
 // 	    int binRco=1-rco;
 // 	    scaArray[surf][chan][index]=samp;
 // 	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-// 	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+// 	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
 // 	    timeArray[surf][chan][index]=time;
 // 	    if(samp==255) {
 // 	      extraTime=time+(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
@@ -1020,7 +1020,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGet
 // 	      binRco=1-rco;
 // 	      scaArray[surf][chan][index]=nextExtra;
 // 	      unwrappedArray[surf][chan][index]=rawArray[surf][chan][nextExtra];
-// 	      mvArray[surf][chan][index]=double(rawArray[surf][chan][nextExtra])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+// 	      mvArray[surf][chan][index]=double(rawArray[surf][chan][nextExtra])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
 // 	      timeArray[surf][chan][index]=extraTime;
 // 	      if(nextExtra<259) {
 // 		extraTime+=(justBinByBin[surf][labChip][binRco][nextExtra])*tempFactor;
@@ -1034,7 +1034,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGet
 // 	    }
 // 	    scaArray[surf][chan][index]=samp;
 // 	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-// 	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+// 	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
 // 	    timeArray[surf][chan][index]=time;
 // 	    if(samp<259) {
 // 	      time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
@@ -1052,7 +1052,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGet
 // 	  int binRco=rco;
 // 	  scaArray[surf][chan][index]=samp;
 // 	  unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-// 	  mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])*2*mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
+// 	  mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
 // 	  timeArray[surf][chan][index]=time;
 // 	  if(samp<259) {
 // 	    time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
@@ -1197,28 +1197,32 @@ void AnitaEventCalibrator::loadCalib() {
     int numEnts;
     int icalib;
     //    sprintf(fileName,"%s/rfcmCalibFile.txt",calibDir);
-    sprintf(fileName,"%s/mattsFirstGainCalib.dat",calibDir);
+//    sprintf(fileName,"%s/mattsFirstGainCalib.dat",calibDir);
+  sprintf(fileName,"%s/simpleVoltageCalibrationHarm.txt",calibDir);
     std::ifstream CalibFile(fileName);
     char firstLine[180];
     CalibFile.getline(firstLine,179);
-    while(CalibFile >> surf >> chan >> chip >> ant >> pol >> mean >> rms >> calib) {      
-       Int_t realAnt;
-       AnitaPol::AnitaPol_t realPol;
 
-       AnitaGeomTool::getAntPolFromSurfChan(surf-1,chan-1,realAnt,realPol);
-       if(realPol==AnitaPol::kHorizontal) 
-	  calib*=-1;
+    //OLD: while(CalibFile >> surf >> chan >> chip >> ant >> pol >> mean >> rms >> calib) {
+  while(CalibFile >> surf >> chan >> chip >> calib) {
+    Int_t realAnt;
+    AnitaPol::AnitaPol_t realPol;
+    
+    AnitaGeomTool::getAntPolFromSurfChan(surf,chan,realAnt,realPol);
+    //OLD:    AnitaGeomTool::getAntPolFromSurfChan(surf-1,chan-1,realAnt,realPol);
+    if(realPol==AnitaPol::kHorizontal)
+      calib*=-1;
 
-      //The bastards switched the antenna orientation
-      Int_t orient=AnitaGeomTool::getAntOrientation(realAnt);
-      if(orient==-1) 
-	 calib*=-1;
-      if(orient==-2 && realPol==AnitaPol::kHorizontal) //Even Orient have never scored -2 goals
-	 calib*=-1;
+    //The bastards switched the antenna orientation
+    Int_t orient=AnitaGeomTool::getAntOrientation(realAnt);
+    if(orient==-1)
+      calib*=-1;
+    if(orient==-2 && realPol==AnitaPol::kHorizontal) //Even Orient have never scored -2 goals
+      calib*=-1;
       
-
-      mvCalibVals[surf-1][chan-1][chip-1]=calib;
-      //	cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
+    //OLD: mvCalibVals[surf-1][chan-1][chip-1]= 2 * calib;
+    mvCalibVals[surf][chan][chip]= calib;//calib;
+                                           //	cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
     }
 //    cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
 //    exit(0);
