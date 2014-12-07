@@ -25,7 +25,10 @@
 #define NUM_INT_TEMPS 15
 #endif
 #ifndef NUM_SBS_TEMPS
-#define NUM_SBS_TEMPS 4
+#define NUM_SBS_TEMPS 3
+#endif
+#ifndef NUM_NTU_TEMPS
+#define NUM_NTU_TEMPS 7
 #endif
 #ifndef NUM_EXT_TEMPS
 #define NUM_EXT_TEMPS 15
@@ -73,10 +76,12 @@ class CalibratedHk: public TObject
    Float_t         magX; ///< Magnetometer x direction
    Float_t         magY; ///< Magnetometer y direction
    Float_t         magZ; ///< Magnetometer z direction
-   Short_t         sbsTemp[4]; ///< The four onboard temperature sensors
+   Short_t         sbsTemp[3]; ///< The three onboard temperature sensors
+   Short_t         ntuTemp[3]; ///< The 7 (packed) NTU temperature sensors
    
    Float_t   getInternalTemp(int index); ///< Returns internal temperature in degrees (0:14)
    Float_t   getSBSTemp(int index); ///< Returns SBS temperature in degrees (0:3)
+   Float_t   getNTUTemp(int index); ///< Returns NTU temperature in degrees (0:3)
    Float_t   getExternalTemp(int index); ///< Returns external temperature in degrees (0:24)
    Float_t   getVoltage(int index); ///< Returns voltage (0:10)
    Float_t   getCurrent(int index); ///< Returns current (0:11)
@@ -103,9 +108,10 @@ class CalibratedHk: public TObject
    static const char *getExternalTempName(int index); ///< Return char string name of external temperature sensor
    static const char *getInternalTempName(int index); ///< Return char string name of internal temperature sensor
    static const char *getSBSTempName(int index); ///< Return char string name of SBS temperature sensor
+   static const char *getNTUTempName(int index); ///< Return char string name of SBS temperature sensor
    static const char *getAttitudeName(int index); ///< Return char string name of attitude sensor
 
-  ClassDef(CalibratedHk,10);
+  ClassDef(CalibratedHk,11);
 };
 
 

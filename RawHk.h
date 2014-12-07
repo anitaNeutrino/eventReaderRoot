@@ -38,9 +38,10 @@ class RawHk: public TObject
    Float_t         magX; ///< Magnetometer x value
    Float_t         magY; ///< Magnetometer y value
    Float_t         magZ; ///< Magnetometer z value
-   Short_t         sbsTemp[4]; ///<SBS temperatures multiplied by 25
+   Short_t         sbsTemp[3]; ///<SBS temperatures multiplied by 10
+   Short_t         ntuTemp[3]; ///<NTU temperatures in some crazy scheme
    
-  ClassDef(RawHk,10);
+  ClassDef(RawHk,11);
 };
 
 
