@@ -34,6 +34,7 @@
 #pragma link C++ class RawSSHk+;
 #pragma link C++ class CalibratedSSHk+;
 #pragma link C++ class SlowRate+;
+#pragma link C++ class GpuPowerSpectra+;
 
 #pragma link C++ namespace     WaveCalType;
 #pragma link C++ enum          WaveCalType::EWaveCalType;

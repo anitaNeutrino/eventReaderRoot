@@ -50,5 +50,6 @@ RawHk::RawHk(Int_t trun, Int_t trealTime, HkDataStruct_t *hkPtr)
   magZ=hkPtr->mag.z;
   memcpy(sbsTemp,hkPtr->sbs.temp,sizeof(Short_t)*3);
   memcpy(ntuTemp,&hkPtr->sbs.temp[3],sizeof(Short_t)*3);
+
 }
 
