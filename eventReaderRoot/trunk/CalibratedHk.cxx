@@ -84,7 +84,8 @@ CalibratedHk::CalibratedHk(RawHk *hkPtr, RawHk *avzPtr, RawHk *calPtr)
   magX=hkPtr->magX;
   magY=hkPtr->magY;
   magZ=hkPtr->magZ;
-  memcpy(sbsTemp,hkPtr->sbsTemp,sizeof(Short_t)*4);
+  memcpy(sbsTemp,hkPtr->sbsTemp,sizeof(Short_t)*3);
+  memcpy(ntuTemp,hkPtr->ntuTemp,sizeof(Short_t)*3);
 
   //Now calibrate voltage
   for(int board=0;board<3;board++) {
@@ -188,11 +189,27 @@ Float_t   CalibratedHk::getExternalTemp(int index)
 
 Float_t   CalibratedHk::getSBSTemp(int index)
 {
-  Int_t sbsMagicAdd[NUM_SBS_TEMPS]={0,0,15,15};
+  Int_t sbsMagicAdd[NUM_SBS_TEMPS]={0,0,0};
   if(index>=0 && index<NUM_SBS_TEMPS)
-    return (25e-3*sbsTemp[index]) + sbsMagicAdd[index];
+    return (0.1*sbsTemp[index]) + sbsMagicAdd[index];
   return -273;
 }
+
+
+Float_t   CalibratedHk::getNTUTemp(int index)
+{
+  if(index==0) return (0.1*ntuTemp[index]);
+  if(index==1) return (ntuTemp[1]&0x1f)*2;
+  if(index==2) return ((ntuTemp[1]&0x3e0)>>5)*2;
+  if(index==3) return ((ntuTemp[1]&0x7c00)>>10)*2;
+  if(index==4) return (ntuTemp[2]&0x1f)*2;
+  if(index==5) return ((ntuTemp[2]&0x3e0)>>5)*2;
+  if(index==6) return ((ntuTemp[2]&0x7c00)>>10)*2;
+ 
+  return -273;
+}
+
+
 
 const char *CalibratedHk::getVoltageName(int index)
 {
@@ -303,10 +320,19 @@ Float_t CalibratedHk::getAttitude(int index) {
  return "None";
 }
 
- const char *CalibratedHk::getSBSTempName(int index)
+const char *CalibratedHk::getSBSTempName(int index)
 {
-  const char *sbsTempNames[NUM_SBS_TEMPS]={"CPU","CPU","Core1","Core2"};
+  const char *sbsTempNames[NUM_SBS_TEMPS]={"CPU","Core1","Core2"};
   if(index>=0 && index<NUM_SBS_TEMPS) 
+   return sbsTempNames[index];
+  return "None";
+}
+
+
+const char *CalibratedHk::getNTUTempName(int index)
+{
+  const char *sbsTempNames[NUM_NTU_TEMPS]={"CPU","Disk0","Disk1","Disk2","Disk3","Disk4","Disk5"};
+  if(index>=0 && index<NUM_NTU_TEMPS) 
    return sbsTempNames[index];
   return "None";
 }
