@@ -34,8 +34,8 @@ void exampleLoopAllEvents(int run) {
 
   char eventName[FILENAME_MAX];
   char headerName[FILENAME_MAX];
-  sprintf(eventName,"/anitaStorage/antarctica14/root/run%d/eventFile%d.root",run,run);
-  sprintf(headerName,"/anitaStorage/antarctica14/root/run%d/headFile%d.root",run,run);
+  sprintf(eventName,"http://192.168.1.2/antarctica14/root/run%d/eventFile%d.root",run,run);
+  sprintf(headerName,"http://192.168.1.2/antarctica14/root/run%d/headFile%d.root",run,run);
 
   RawAnitaEvent *event = 0;
   RawAnitaHeader *header =0;
@@ -57,7 +57,7 @@ void exampleLoopAllEvents(int run) {
   
   std::cout << "There are " << numEntries << " in run " << run << std::endl;
   std::cout << "eventTree->GetEntries()\t" << eventTree->GetEntries() << std::endl;
-  if(numEntries>100)numEntries=100;
+  if(numEntries>1000)numEntries=1000;
 
   //  eventTree->GetEntry(0);
   for(UInt_t entry=0;entry<numEntries;entry++) {
