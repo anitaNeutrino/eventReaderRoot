@@ -46,8 +46,12 @@ class CalibratedSSHk: public TObject
    Int_t getSSYRatio(int ssInd, Float_t *yRatio); ///< Get sunsensor y-ratio
    Int_t getFancySS(int ssInd, Float_t pos[3], Float_t *azimuth,
 		    Float_t *elevation, Float_t *relAzimuth); ///< Convert sunsensor data to elevation and azimuth
+   Float_t getSSAzimuth(int ssInd);
+   Float_t getSSAzimuthAdu5(int ssInd);
+   Float_t getSSElevation(int ssInd);
 
    Float_t   getRawSunsensor(int ssInd, int type); ///< Returns raw sunsensor stuff, here type goes x1,x2,y1,y2,T
+   const char *getName(int ssInd);
 
   ClassDef(CalibratedSSHk,10);
 };
