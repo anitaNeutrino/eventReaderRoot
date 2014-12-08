@@ -44,7 +44,7 @@ float ssOffset[4][2]={{0.08,-0.1572},{-0.32940,-0.17477},
 		      {0.05541,-0.08458},{-0.23773,-0.50356}};
 float ssGain[4][2]={{5.0288,5.0},{4.8515,5.0},{5.0599,5.0},{5.0288,5.0}};
 float ssSep[4]={3.704391,3.618574,3.512025,3.554451};
-float ssAzRel[4]={45,-45,-135,135};
+float ssAzRel[4]={0,0,270,90};
 float ssGammaFactor[4]={0.4,0.2,0.3,0.5};
 const float globalGamma=67;
 }
@@ -104,7 +104,15 @@ CalibratedSSHk::CalibratedSSHk(RawSSHk *hkPtr, RawSSHk *avzPtr, RawSSHk *calPtr)
 }
 
 
-
+const char *CalibratedSSHk::getName(int ssInd)
+{
+  switch(ssInd) {
+  case 2: return "SS2B";
+  case 3: return "SS4B";
+  default:
+    return "n/c";
+  }
+}
 
 
 void CalibratedSSHk::getSSMagnitude(int ssInd, Float_t *magnitude, Float_t *magX, Float_t *magY) {
@@ -156,12 +164,45 @@ Int_t CalibratedSSHk::getSSYRatio(int ssInd, Float_t *yRatio)
   }
   return 0;    
 }
+
+
+Float_t CalibratedSSHk::getSSAzimuth(int ssInd) 
+{
+  Float_t azimuth,elevation,relAzimuth;
+  Float_t pos[3];
+  getFancySS(ssInd,pos,&azimuth,&elevation,&relAzimuth);
+  return azimuth;
+}
+
+
+Float_t CalibratedSSHk::getSSAzimuthAdu5(int ssInd)
+{
+  Float_t azimuth,elevation,relAzimuth;
+  Float_t pos[3];
+  getFancySS(ssInd,pos,&azimuth,&elevation,&relAzimuth);
+  return relAzimuth;
+}
+
+Float_t CalibratedSSHk::getSSElevation(int ssInd) 
+{
+
+  Float_t azimuth,elevation,relAzimuth;
+  Float_t pos[3];
+  getFancySS(ssInd,pos,&azimuth,&elevation,&relAzimuth);
+  return elevation;
+
+}
+
   
 
 
 Int_t CalibratedSSHk::getFancySS(int ssInd, Float_t pos[3], Float_t *azimuth,
 			       Float_t *elevation, Float_t *relAzimuth) {
   
+  //Currently 0 & 1 are broken
+  if(ssInd<=1 || ssInd>=4) return 0;
+
+
   Float_t magnitude=0,magX=0,magY=0;
   this->getSSMagnitude(ssInd,&magnitude,&magX,&magY);
   
