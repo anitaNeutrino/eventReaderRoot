@@ -200,7 +200,7 @@ typedef enum {
     PACKET_GPSD_START = 0xc00, ///< GpsdStartStruct_t -- Yes
     PACKET_LOGWATCHD_START = 0xc01, ///< LogWatchdStart_t -- Yes
     PACKET_ACQD_START = 0xc02, ///<AcqdStartStruct_t -- Yes
-    PACKET_GPU_AVE_POW_SPEC = 0xd ///<GpuPhiSectorPowerSpectrum_t -- Yes
+    PACKET_GPU_AVE_POW_SPEC = 0xd ///<GpuPhiSectorPowerSpectrumStruct_t -- Yes
     
 } PacketCode_t;
 
@@ -695,7 +695,7 @@ typedef struct {
 typedef struct {
     unsigned int eventNumber;
     unsigned char rfPwrAvg[ACTIVE_SURFS][RFCHAN_PER_SURF];
-    unsigned char avgScalerRates[TRIGGER_SURFS][TRIGGERS_PER_SURF]; ///< * 2^7
+    unsigned char avgScalerRates[TRIGGER_SURFS][SCALERS_PER_SURF]; ///< * 2^7
   //unsigned char rmsScalerRates[TRIGGER_SURFS][TRIGGERS_PER_SURF];
   //    unsigned char avgL1Rates[TRIGGER_SURFS]; ///< 3 of 8 counters --fix later
   //    unsigned char avgL2Rates[PHI_SECTORS]; ///< average of upper and lower
