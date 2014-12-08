@@ -47,8 +47,7 @@ endif
 CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL)
 LDFLAGS      += -g $(ROOTLDFLAGS) 
 
-
-LIBS          = $(ROOTLIBS) -lMathMore -lMinuit $(SYSLIBS) $(LD_ANITA_UTIL) $(FFTLIBS) -l profiler
+LIBS          = $(ROOTLIBS) $(FFTLIBS) -lMathMore -lMinuit $(SYSLIBS) $(LD_ANITA_UTIL)  -l profiler
 GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 #Now the bits we're actually compiling

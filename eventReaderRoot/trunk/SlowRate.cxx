@@ -52,11 +52,7 @@ SlowRate::SlowRate(Int_t trun, UInt_t trealTime, SlowRateFull_t *slowPtr)
    altitude=slowPtr->hk.altitude;
 
    memcpy(rfPwrAvg,&(slowPtr->rf.rfPwrAvg[0][0]),sizeof(UChar_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
-   memcpy(avgScalerRates,&(slowPtr->rf.avgScalerRates[0][0]),sizeof(UChar_t)*TRIGGER_SURFS*ANTS_PER_SURF);
-   //   memcpy(rmsScalerRates,&(slowPtr->rf.rmsScalerRates[0][0]),sizeof(UChar_t)*TRIGGER_SURFS*ANTS_PER_SURF);
-   //   memcpy(avgL1Rates,&(slowPtr->rf.avgL1Rates[0]),sizeof(UChar_t)*TRIGGER_SURFS);
-   //   memcpy(avgL2Rates,&(slowPtr->rf.avgL2Rates[0]),sizeof(UChar_t)*PHI_SECTORS);
-   //   memcpy(avgL3Rates,&(slowPtr->rf.avgL3Rates[0]),sizeof(UChar_t)*PHI_SECTORS);
+   memcpy(avgScalerRates,&(slowPtr->rf.avgScalerRates[0][0]),sizeof(UChar_t)*TRIGGER_SURFS*SCALERS_PER_SURF);
 
    memcpy(temps,&(slowPtr->hk.temps[0]),sizeof(UChar_t)*4);
    memcpy(powers,&(slowPtr->hk.powers[0]),sizeof(UChar_t)*4);
@@ -95,39 +91,6 @@ Int_t SlowRate::getAvgScaler(int surf, int ant)
     return -1; 
   return Int_t(avgScalerRates[surf][ant])*128;
 
-}
-
-Int_t SlowRate::getRmsScaler(int surf, int ant)
-{
-
- if(surf<0 || surf>=ACTIVE_SURFS)
-    return -1;
- if(ant<0 || ant>=ANTS_PER_SURF) 
-   return -1; 
- return Int_t(rmsScalerRates[surf][ant])*32;
-}
-
-Int_t SlowRate::getL1Rate(int surf)
-{
-  if(surf<0 || surf>=ACTIVE_SURFS)
-    return -1;
-  return Int_t(avgL1Rates[surf])*256*16;
-}
- 
-Int_t SlowRate::getL2Rate(int phi)
-{
-  if(phi<0 || phi>=PHI_SECTORS)
-    return -1;
-  return Int_t(avgL2Rates[phi])*64;
-}
-
-Float_t SlowRate::getL3Rate(int phi)
-{
-  if(phi<0 || phi>=PHI_SECTORS)
-    return -1;
-  Float_t val=avgL3Rates[phi];
-  val/=32;
-  return val;
 }
 
 Float_t SlowRate::getAltitude()
