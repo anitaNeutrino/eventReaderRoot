@@ -40,15 +40,14 @@ class AveragedSurfHk: public TObject
    UInt_t          hadError; ///< Flag for errors
    UShort_t        globalThreshold; ///< Global trheshold (if in global threshold mode)
    UShort_t        reserved; ///< Reserved for future expansion
-   UShort_t        scalerGoals[BANDS_PER_ANT]; ///< The scaler goals for the four bands
-   UShort_t        scalerGoalsNadir[BANDS_PER_ANT]; ///< The scaler goals for the four bands of the andir ring
+   UShort_t        scalerGoals[3]; ///< The scaler goals for the four bands
    UShort_t        upperWords[ACTIVE_SURFS]; ///< The upper words -- contains debugging info
-   UShort_t        avgScaler[ACTIVE_SURFS][SCALERS_PER_SURF_V30]; ///< The mean scaler value per channel
-   UShort_t        rmsScaler[ACTIVE_SURFS][SCALERS_PER_SURF_V30]; ///< The rms scaler value per channel
+   UShort_t        avgScaler[ACTIVE_SURFS][SCALERS_PER_SURF]; ///< The mean scaler value per channel
+   UShort_t        rmsScaler[ACTIVE_SURFS][SCALERS_PER_SURF]; ///< The rms scaler value per channel
    UShort_t        avgL1[ACTIVE_SURFS][L1S_PER_SURF]; ///< The mean scaler value per channel
    UShort_t        rmsL1[ACTIVE_SURFS][L1S_PER_SURF]; ///< The rms scaler value per channel
-   UShort_t        avgThresh[ACTIVE_SURFS][SCALERS_PER_SURF_V30]; ///< The mean threshold value per channel
-   UShort_t        rmsThresh[ACTIVE_SURFS][SCALERS_PER_SURF_V30]; ///< The rms threhsold value per channel
+   UShort_t        avgThresh[ACTIVE_SURFS][SCALERS_PER_SURF]; ///< The mean threshold value per channel
+   UShort_t        rmsThresh[ACTIVE_SURFS][SCALERS_PER_SURF]; ///< The rms threhsold value per channel
 
    UShort_t        avgRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF]; ///< The mean RF power value per channel
    UShort_t        rmsRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF]; ///< The rms RF power value per channel
@@ -67,8 +66,8 @@ class AveragedSurfHk: public TObject
    Int_t getScalerGoal(int surf, int scl); ///< Get scaler goal for given surf-scaler
    Double_t getRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
    Double_t getRMSRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
-   Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
-   Double_t getMeasuredRMSRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
+   //   Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
+   //   Double_t getMeasuredRMSRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
   ClassDef(AveragedSurfHk,31);
 };
 
