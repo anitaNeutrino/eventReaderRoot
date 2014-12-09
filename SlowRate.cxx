@@ -83,13 +83,17 @@ Double_t SlowRate::getMeasuredRFPowerInK(int surf, int chan)
   return kelvin;
 }
 
+Double_t SlowRate::getRawRFPower(int surf,int chan) {
+  return rfPwrAvg[surf][chan]*128; 
+}
+
 Int_t SlowRate::getAvgScaler(int surf, int ant)
 {
   if(surf<0 || surf>=ACTIVE_SURFS)
     return -1;
   if(ant<0 || ant>=ANTS_PER_SURF) 
     return -1; 
-  return Int_t(avgScalerRates[surf][ant])*128;
+  return Int_t(avgScalerRates[surf][ant])*4;
 
 }
 
@@ -126,7 +130,7 @@ Float_t SlowRate::getTemp(int tempInd)
 
 const char *SlowRate::getPowerName(int powerInd)
 {
-  const char *slowPowerNames[4]={"PV V","24 V","Batt I","24 I"};
+  const char *slowPowerNames[4]={"PV V","24 V","PV I","24 I"};
   if(powerInd<0 || powerInd>3)
     return NULL;
   return slowPowerNames[powerInd];
