@@ -305,8 +305,14 @@ Double_t SurfHk::getRFPowerInK(int surf, int chan)
     return -1;
   if(chan<0 || chan>=RFCHAN_PER_SURF)
     return -1;
-  Int_t adc=rfPower[surf][chan];
+  Int_t adc=rfPower[surf][chan]&0x7fff
+;
+  if(adc==0) return 290;
+
   Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvin(surf,chan,adc);
+  if(TMath::IsNaN(kelvin)) return 290;
+  if(kelvin<0) return 290;
+  if(kelvin>1e6) return 290;
   return kelvin;
 }
 

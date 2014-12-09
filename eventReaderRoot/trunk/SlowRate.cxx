@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 
+#include "TMath.h"
 #include "SlowRate.h"
 #include "AnitaPacketUtil.h"
 #include "AnitaEventCalibrator.h"
@@ -65,8 +66,11 @@ Double_t SlowRate::getRFPowerInK(int surf, int chan)
   if(chan<0 || chan>=RFCHAN_PER_SURF)
     return -1;
   Int_t adc=rfPwrAvg[surf][chan];
-  adc*=4;
+  adc*=128;
   Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvin(surf,chan,adc);
+  if(TMath::IsNaN(kelvin)) return 290;
+  if(kelvin<0) return 290;
+  if(kelvin>1e6) return 290;
   return kelvin;
 }
 
