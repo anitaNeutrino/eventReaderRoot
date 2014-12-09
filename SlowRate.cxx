@@ -91,7 +91,7 @@ Int_t SlowRate::getAvgScaler(int surf, int ant)
 {
   if(surf<0 || surf>=ACTIVE_SURFS)
     return -1;
-  if(ant<0 || ant>=ANTS_PER_SURF) 
+  if(ant<0 || ant>=SCALERS_PER_SURF) 
     return -1; 
   return Int_t(avgScalerRates[surf][ant])*4;
 

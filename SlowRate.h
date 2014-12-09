@@ -47,6 +47,9 @@ class SlowRate: public TObject
    Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
    Double_t getRawRFPower(int surf, int chan);
    Int_t getAvgScaler(int surf, int ant); ///< Returns the averaged scaler value
+
+   Double_t getEventRate1Min() {return 0.5*eventRate1Min;}
+   Double_t getEventRate10Min() {return 0.5*eventRate10Min;}
   
    Float_t getLatitude() {return latitude;} ///< Returns the latitude
    Float_t getLongitude() {return longitude;} ///< Returns the longitude
