@@ -1332,20 +1332,25 @@ void AnitaEventCalibrator::loadCalib() {
     }
 
     
-    
-    sprintf(fileName,"%s/rfPowPeds.dat",calibDir);
-    std::ifstream GaryRfPowPeds(fileName);
-    GaryRfPowPeds.getline(firstLine,179);
-    Int_t iant,ipol;
-    Double_t rfPed,rfTSys,rfT300,rfSlope;
-    while(GaryRfPowPeds >> iant >> ipol >> surf >> chan >> rfT300 >> rfTSys >> rfPed >> rfSlope) {
-      rfPowPed[surf][chan]=rfPed;
-      garysRfPowT300K[surf][chan]=rfT300;
-      garysRfPowTSys[surf][chan]=rfTSys;
-      garysRfPowSlope[surf][chan]=rfSlope;
-      //      std::cout << surf << "\t" << chan << "\t" << calib << "\n";
+
+
+    sprintf(fileName,"%s/RFCalibration_BRotter.txt",calibDir);
+    std::ifstream BRotterRfPowPeds(fileName);
+    std::string chanName;
+    Double_t rfYInt,ampNoise,chanGain,rfSlope;
+    int surfi,chani;
+    BRotterRfPowPeds.getline(firstLine,179);
+    //    std::cout << firstLine << std::endl;
+    while(BRotterRfPowPeds >> chanName >> surfi >> chani >> rfSlope >> rfYInt >> ampNoise >> chanGain) {
+      RfPowYInt[surfi-1][chani-1]=rfYInt;
+      RfPowSlope[surfi-1][chani-1]=rfSlope;
+      //      std::cout << chanName << " "  << surfi << "\t" << chani << "\t" << rfSlope << "\t" << rfYInt << "\n";
     }
 
+
+
+    
+    Int_t iant;
 
     sprintf(fileName,"%s/simonsPositionAndTimingOffsets.dat",calibDir);
     std::ifstream SimonsOffsets(fileName);
@@ -1517,24 +1522,6 @@ void AnitaEventCalibrator::correlateClocks(TGraph *grClock[NUM_SURF], Double_t d
 #endif
 }
 
-Double_t AnitaEventCalibrator::convertRfPowToKelvin(int surf, int chan, int adc) 
-{
-  Double_t tMeas=convertRfPowToKelvinMeasured(surf,chan,adc);
-  return tMeas-garysRfPowTSys[surf][chan];
-}
-
-
-Double_t AnitaEventCalibrator::convertRfPowToKelvinMeasured(int surf, int chan, int adc) 
-{
-  //  std::cout << surf << "\t" << chan << "\t" << rfPowPed[surf][chan] << "\n";
-  Double_t ped=rfPowPed[surf][chan]; 
-  Double_t a=garysRfPowSlope[surf][chan];
-  Double_t refTemp=garysRfPowT300K[surf][chan];
-  
-  Double_t DA=adc-ped;
-  Double_t kelvin=refTemp*TMath::Power(10,(a*DA/10.));
-  return kelvin;  
-}
 
 void AnitaEventCalibrator::updateRollingAverageClockDeltaT(UsefulAnitaEvent* eventPtr, Double_t allSurfMeanUpDt, Int_t allSurfNumUpDt){
 
@@ -1573,4 +1560,23 @@ void AnitaEventCalibrator::updateRollingAverageClockDeltaT(UsefulAnitaEvent* eve
   eventPtr->fTempFactorGuess = clockPeriod/allSurfMeanUpDt;
   eventPtr->fRollingAverageTempFactor = clockPeriod/allSurfNEventAverageUpDt;
   fLastEventNumber = eventPtr->eventNumber;
+}
+
+
+Double_t AnitaEventCalibrator::convertRfPowTodBm(int surf, int chan, int adc)
+{
+  //  std::cout << surf << "\t" << chan << "\t" << bensRfPowYInt[surf][chan]
+  //    << "\t" << bensRfPowSlope[surf][chan] << "\n";
+  return (double(adc)-RfPowYInt[surf][chan])/RfPowSlope[surf][chan];
+}
+
+Double_t AnitaEventCalibrator::convertRfPowToKelvin(int surf, int chan, int adc)
+{
+  double dBm = AnitaEventCalibrator::convertRfPowTodBm(surf, chan, adc);
+  
+  double mW = TMath::Power(10,dBm/10.);
+
+  double K = (mW/(1000.*1.38e-23*1e9));
+
+  return K;
 }

@@ -46,9 +46,12 @@ AveragedSurfHk::AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct
   deltaT=surfPtr->deltaT;
   hadError=surfPtr->hadError;
   globalThreshold=surfPtr->globalThreshold;
-  //  reserved=surfPtr->reserved;
   memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*NUM_ANTENNA_RINGS);
   memcpy(avgScaler,surfPtr->avgScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+
+ 
+  
+
   memcpy(rmsScaler,surfPtr->rmsScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
   memcpy(avgL1,surfPtr->avgL1,sizeof(UShort_t)*ACTIVE_SURFS*L1S_PER_SURF);
   memcpy(rmsL1,surfPtr->rmsL1,sizeof(UShort_t)*ACTIVE_SURFS*L1S_PER_SURF);
@@ -58,6 +61,15 @@ AveragedSurfHk::AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct
   memcpy(rmsRFPower,surfPtr->rmsRFPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
   memcpy(surfTrigBandMask,surfPtr->surfTrigBandMask,sizeof(UShort_t)*ACTIVE_SURFS);
   intFlag=0;
+ // std::cout << payloadTime << "\t" << numHks << "\n";
+ //  for(int surf=0;surf<ACTIVE_SURFS;surf++) {
+ //    for(int chan=0;chan<SCALERS_PER_SURF;chan++) {
+ //      //      std::cout << surfPtr->avgScaler[surf][chan] << "\t";
+ //      std::cout << avgScaler[surf][chan] << "\t";
+ //    }
+ //    std::cout << "\n";
+ //  }
+ //  std::cout << "\n";
 }
 
 
@@ -84,7 +96,7 @@ AveragedSurfHk::AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct
   globalThreshold=surfPtr->globalThreshold;
   reserved=surfPtr->reserved;
   memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*BANDS_PER_ANT);
-  memcpy(scalerGoalsNadir,surfPtr->scalerGoalsNadir,sizeof(UShort_t)*BANDS_PER_ANT);
+  //  memcpy(scalerGoalsNadir,surfPtr->scalerGoalsNadir,sizeof(UShort_t)*BANDS_PER_ANT);
   memcpy(avgScaler,surfPtr->avgScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
   memcpy(rmsScaler,surfPtr->rmsScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
   memcpy(avgThresh,surfPtr->avgThresh,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
@@ -118,7 +130,7 @@ AveragedSurfHk::AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct
   globalThreshold=surfPtr->globalThreshold;
   reserved=surfPtr->reserved;
   memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*BANDS_PER_ANT);
-  memcpy(scalerGoalsNadir,surfPtr->scalerGoalsNadir,sizeof(UShort_t)*BANDS_PER_ANT);
+  //  memcpy(scalerGoalsNadir,surfPtr->scalerGoalsNadir,sizeof(UShort_t)*BANDS_PER_ANT);
   memcpy(avgScaler,surfPtr->avgScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
   memcpy(rmsScaler,surfPtr->rmsScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
   memcpy(avgThresh,surfPtr->avgThresh,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
@@ -152,8 +164,8 @@ AveragedSurfHk::AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct
   globalThreshold=surfPtr->globalThreshold;
   reserved=0;
   memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*BANDS_PER_ANT);
-  for(int band=0;band<BANDS_PER_ANT;band++)
-     scalerGoalsNadir[band]=scalerGoals[band];
+  //  for(int band=0;band<BANDS_PER_ANT;band++)
+  //     scalerGoalsNadir[band]=scalerGoals[band];
   memcpy(avgScaler,surfPtr->avgScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
   memcpy(rmsScaler,surfPtr->rmsScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
   memcpy(avgThresh,surfPtr->avgThresh,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
@@ -186,10 +198,10 @@ AveragedSurfHk::AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct
   hadError=surfPtr->hadError;
   globalThreshold=surfPtr->globalThreshold;
   reserved=0;
-  for(int band=0;band<BANDS_PER_ANT;band++) {
-     scalerGoals[band]=surfPtr->scalerGoal;
-     scalerGoalsNadir[band]=surfPtr->scalerGoal;
-  }
+  //  for(int band=0;band<BANDS_PER_ANT;band++) {
+    //     scalerGoals[band]=surfPtr->scalerGoal;
+     //     scalerGoalsNadir[band]=surfPtr->scalerGoal;
+  //  }
   memcpy(avgScaler,surfPtr->avgScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
   memcpy(rmsScaler,surfPtr->rmsScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
   memcpy(avgThresh,surfPtr->avgThresh,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF_V30);
@@ -285,7 +297,7 @@ Int_t AveragedSurfHk::getScalerGoal(int surf, int scl)
   }
   else if(surf<ACTIVE_SURFS) {
     //Nadir Ring
-    return scalerGoalsNadir[band];
+    //    return scalerGoalsNadir[band];
   }
   return -1;
 }
@@ -321,30 +333,30 @@ Double_t AveragedSurfHk::getRMSRFPowerInK(int surf, int chan)
 
 
 
-Double_t AveragedSurfHk::getMeasuredRFPowerInK(int surf, int chan)
-{
-  if(surf<0 || surf>=ACTIVE_SURFS)
-    return -1;
-  if(chan<0 || chan>=RFCHAN_PER_SURF)
-    return -1;
-  Int_t adc=avgRFPower[surf][chan];
+// Double_t AveragedSurfHk::getMeasuredRFPowerInK(int surf, int chan)
+// {
+//   if(surf<0 || surf>=ACTIVE_SURFS)
+//     return -1;
+//   if(chan<0 || chan>=RFCHAN_PER_SURF)
+//     return -1;
+//   Int_t adc=avgRFPower[surf][chan];
 
-  Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adc);
-  return kelvin;
+//   Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adc);
+//   return kelvin;
 
-}
+// }
 
 
-Double_t AveragedSurfHk::getMeasuredRMSRFPowerInK(int surf, int chan)
-{
-  if(surf<0 || surf>=ACTIVE_SURFS)
-    return -1;
-  if(chan<0 || chan>=RFCHAN_PER_SURF)
-    return -1;
-  Int_t adcLow=avgRFPower[surf][chan]-rmsRFPower[surf][chan];
-  Int_t adcHigh=avgRFPower[surf][chan]+rmsRFPower[surf][chan];
-  Double_t kelvinHigh=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adcHigh);
-  Double_t kelvinLow=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adcLow);  
-  return (kelvinHigh-kelvinLow)/2;
+// Double_t AveragedSurfHk::getMeasuredRMSRFPowerInK(int surf, int chan)
+// {
+//   if(surf<0 || surf>=ACTIVE_SURFS)
+//     return -1;
+//   if(chan<0 || chan>=RFCHAN_PER_SURF)
+//     return -1;
+//   Int_t adcLow=avgRFPower[surf][chan]-rmsRFPower[surf][chan];
+//   Int_t adcHigh=avgRFPower[surf][chan]+rmsRFPower[surf][chan];
+//   Double_t kelvinHigh=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adcHigh);
+//   Double_t kelvinLow=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adcLow);  
+//   return (kelvinHigh-kelvinLow)/2;
 
-}
+// }

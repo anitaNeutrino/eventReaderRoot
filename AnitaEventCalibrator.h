@@ -47,8 +47,10 @@ class AnitaEventCalibrator : public TObject
   static int getChanIndex(int surf, int chan)
      {return chan+(9*surf);}   ///<Generally useful function
 
+  //Ben Rotter's rfPower calibration :)
+  Double_t convertRfPowTodBm(int surf, int chan, int adc);
   Double_t convertRfPowToKelvin(int surf, int chan, int adc);
-  Double_t convertRfPowToKelvinMeasured(int surf, int chan, int adc);
+
 
   //Some flags that do things
   Int_t fApplyClockFudge; //Should we use my silly clock fudge factor
@@ -90,11 +92,10 @@ class AnitaEventCalibrator : public TObject
   //Simon's deltat values
   Double_t simonsDeltaT[NUM_SURF][NUM_CHAN];
 
-  //RF power calibration
-  Double_t rfPowPed[NUM_SURF][NUM_CHAN];
-  Double_t garysRfPowT300K[NUM_SURF][NUM_CHAN];
-  Double_t garysRfPowTSys[NUM_SURF][NUM_CHAN];
-  Double_t garysRfPowSlope[NUM_SURF][NUM_CHAN];
+  //Ben's RF power calibration  
+  Double_t RfPowYInt[NUM_SURF][NUM_CHAN];
+  Double_t RfPowSlope[NUM_SURF][NUM_CHAN];
+
 
 
   //Temporary variables that don't really need to be part of the class

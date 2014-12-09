@@ -76,7 +76,7 @@ class SurfHk: public TObject
    Int_t getScalerGoalRing(AnitaRing::AnitaRing_t ring);
    Int_t getScalerGoal(int surf, int scl); ///< Returns scaler goal of surf-scaler
    Double_t getRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
-   Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
+   //   Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
    Double_t getRawRFPower(int surf, int chan); ///< Returns the measured adc value of the RF power while masking the top bit (the "phase" bit)
    UInt_t getRFPowerTimeOffset(int surf, int chan); //returns the us time-since-measured of the power monitor
    UInt_t getRFPowerPayloadTime(UInt_t surf, UInt_t chan); //returns the corrected payloadTime of the measured power monitor sample

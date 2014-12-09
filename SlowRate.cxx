@@ -71,17 +71,17 @@ Double_t SlowRate::getRFPowerInK(int surf, int chan)
 }
 
 
-Double_t SlowRate::getMeasuredRFPowerInK(int surf, int chan)
-{
-  if(surf<0 || surf>=ACTIVE_SURFS)
-    return -1;
-  if(chan<0 || chan>=RFCHAN_PER_SURF)
-    return -1;
-  Int_t adc=rfPwrAvg[surf][chan];
-  adc*=4;
-  Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adc);
-  return kelvin;
-}
+// Double_t SlowRate::getMeasuredRFPowerInK(int surf, int chan)
+// {
+//   if(surf<0 || surf>=ACTIVE_SURFS)
+//     return -1;
+//   if(chan<0 || chan>=RFCHAN_PER_SURF)
+//     return -1;
+//   Int_t adc=rfPwrAvg[surf][chan];
+//   adc*=4;
+//   Double_t kelvin=AnitaEventCalibrator::Instance()->convertRfPowToKelvinMeasured(surf,chan,adc);
+//   return kelvin;
+// }
 
 Double_t SlowRate::getRawRFPower(int surf,int chan) {
   return rfPwrAvg[surf][chan]*128; 

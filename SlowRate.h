@@ -44,7 +44,7 @@ class SlowRate: public TObject
    UChar_t powers[4]; ///<{PV V, +24V, PV I, 24 I}
 
    Double_t getRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
-   Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
+   //   Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
    Double_t getRawRFPower(int surf, int chan);
    Int_t getAvgScaler(int surf, int ant); ///< Returns the averaged scaler value
 
