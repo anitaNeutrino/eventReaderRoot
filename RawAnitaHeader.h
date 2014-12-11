@@ -108,6 +108,11 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
     Here we are coutning bits from 1 to 8
     -  "LSB" Polarisation 1 is VPol
     -  "Bit 2-11" is peak phi bin
+    -  "Bit 12 unused"
+    -  "Bit 13 is filtering flag - above max power"
+    -  "Bit 14 is filtering flag - bin-to-bin increase"
+    -  "Bit 15 is saturation flag"
+    -  "Bit 16 unused"
   */
   UShort_t prioritizerStuff;
 
@@ -174,6 +179,9 @@ The second byte (reserved[1]) is currently reserved.
   int getTurfEventNumber()
   { return (turfEventId&0xfffff);} ///< Returns the event number portion of the TURF event id.
 
+  Int_t getAboveThresholdFlag();
+  Int_t getBinToBinIncreaseFlag();
+  Int_t getSaturationFlag();
   Float_t getPeakThetaRad();
   Float_t getPeakPhiRad();
   Float_t getPeakThetaDeg();
