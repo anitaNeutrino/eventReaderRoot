@@ -511,3 +511,15 @@ AnitaPol::AnitaPol_t RawAnitaHeader::getPeakPol()
   return AnitaPol::kHorizontal;
 }
   
+Int_t RawAnitaHeader::getAboveThresholdFlag()
+{
+  return ((this->prioritizerStuff & 0x1000)>>12);
+}
+Int_t RawAnitaHeader::getBinToBinIncreaseFlag()
+{
+  return ((this->prioritizerStuff & 0x2000)>>13);
+}
+Int_t RawAnitaHeader::getSaturationFlag()
+{
+  return ((this->prioritizerStuff & 0x4000)>>14);
+}
