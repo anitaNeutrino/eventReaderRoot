@@ -61,6 +61,8 @@ const char * CommandEcho::getCommandAsString()
     return "tail /var/log/anita.log"; 
   case LOG_REQUEST_COMMAND:
     return "log request "; 
+  case JOURNALCTL_REQUEST_COMMAND:
+    return "journalctl request"; 
   case CMD_START_NEW_RUN: 
     return "Start New Run"; 
   case CMD_SHUTDOWN_HALT: 
@@ -184,8 +186,6 @@ const char * CommandEcho::getCommandAsString()
     return "Start Threshold Scan"; 
   case ACQD_REPROGRAM_TURF: 
     return "Enable TURF Reprogramming"; 
-  case ACQD_SURFHK_PERIOD: 
-    return "Set SurfHk Write Period"; 
   case ACQD_SURFHK_TELEM_EVERY: 
     return "Set SurfHK Telemetry Duty Factor"; 
   case ACQD_TURFHK_TELEM_EVERY:
@@ -235,7 +235,7 @@ const char * CommandEcho::getCommandAsString()
   case GPS_PHI_MASK_COMMAND:
     return "GPSd Phi Mask Command"; 
   case PRIORITIZERD_COMMAND:
-    return "Jim's Prioritizer Tweaking command"; 
+    return "Prioritizer Tweaking command"; 
   case PLAYBACKD_COMMAND:
     return "Playback Command"; 
   default:
