@@ -277,8 +277,8 @@ SummedTurfRate::SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStruct
 Int_t SummedTurfRate::isPhiMasked(int phi, AnitaPol::AnitaPol_t pol) {
   if(phi<0 || phi>15) return -1;
   if(pol==AnitaPol::kVertical)
-    return (phiTrigMask & (1<<phi));
-  return (phiTrigMaskH & (1<<phi));
+    return ((phiTrigMask & (1<<phi))?1:0);
+  return ((phiTrigMaskH & (1<<phi))?1:0);
 }
 
 Int_t SummedTurfRate::isAntMasked(int phi, int ring)
