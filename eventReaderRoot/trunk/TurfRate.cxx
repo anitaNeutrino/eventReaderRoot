@@ -337,13 +337,25 @@ Int_t TurfRate::getNadirL12Rate(int phi) {
     return 64*nadirL2Rates[phi/2];
 }
 
+//((l3TrigPattern&(1<<(phi))) ? 1 :0);
+
 Int_t TurfRate::isPhiMasked(int phi) {
   if(phi<0 || phi>15) return -1;
-  return (phiTrigMask & (1<<phi));
+  return ((phiTrigMask & (1<<phi)) ? 1 :0);
 }
 Int_t TurfRate::isPhiMaskedHPol(int phi) {
   if(phi<0 || phi>15) return -1;
-  return (phiTrigMaskH & (1<<phi));
+  return ((phiTrigMaskH & (1<<phi)) ? 1:0);
+}
+
+
+Int_t TurfRate::isL1Masked(int phi) {
+  if(phi<0 || phi>15) return -1;
+  return ((l1TrigMask & (1<<phi)) ? 1 :0);
+}
+Int_t TurfRate::isL1MaskedHPol(int phi) {
+  if(phi<0 || phi>15) return -1;
+  return ((l1TrigMaskH & (1<<phi)) ? 1:0);
 }
 
 Int_t TurfRate::isAntMasked(int phi, int ring)
@@ -351,9 +363,9 @@ Int_t TurfRate::isAntMasked(int phi, int ring)
   if(phi<0 || phi>15) return -1;
    switch(ring) {
    case AnitaRing::kUpperRing:
-     return  (antTrigMask&(1<<(phi)));
+     return  ((antTrigMask&(1<<(phi)))?1:0);
    case AnitaRing::kLowerRing:
-     return  (antTrigMask&(1<<(phi+16)));
+     return  ((antTrigMask&(1<<(phi+16)))?1:0);
    case AnitaRing::kNadirRing:
       phi/=2;
       return nadirAntTrigMask&(1<<phi);
