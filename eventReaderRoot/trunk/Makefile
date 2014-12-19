@@ -7,7 +7,7 @@ include Makefile.arch
 
 #Site Specific  Flags
 SYSINCLUDES	= #-DANITA_2_DATA
-SYSLIBS         = -l profiler
+SYSLIBS         = 
 DLLSUF = ${DllSuf}
 OBJSUF = ${ObjSuf}
 SRCSUF = ${SrcSuf}
@@ -47,7 +47,9 @@ endif
 CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL)
 LDFLAGS      += -g $(ROOTLDFLAGS) 
 
-LIBS          = $(ROOTLIBS) $(FFTLIBS) -lMathMore -lMinuit $(SYSLIBS) $(LD_ANITA_UTIL)  -l profiler
+
+LIBS          = $(ROOTLIBS) $(FFTLIBS) -lMathMore -lMinuit $(SYSLIBS) $(LD_ANITA_UTIL) 
+
 GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 #Now the bits we're actually compiling
