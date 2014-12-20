@@ -170,7 +170,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
   
    fApplyClockFudge=0;
    //   std::cout << "AnitaEventCalibrator::calibrateUsefulEvent():" << calType << std::endl;
-   if(calType==WaveCalType::kVoltageTime || calType==WaveCalType::kVTLabAG) {
+   if(calType==WaveCalType::kVoltageTime || calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTFast) {
      processEventUnwrapFast(eventPtr);
    }
    else if( calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGFastClock || calType==WaveCalType::kVTFullAGCrossCorClock || calType==WaveCalType::kVTCalFilePlusSimon ) {
@@ -186,8 +186,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
 
    
    if(calType>=WaveCalType::kVTInCalibratedFile && eventPtr->fFromCalibratedAnitaEvent==1) {
-     applyClockPhiCorrection(eventPtr);
-     
+     applyClockPhiCorrection(eventPtr);     
   }
    else { 
      //Clock Jitter correction
@@ -206,7 +205,7 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
    if(
       calType==WaveCalType::kVTLabAGCrossCorClock ||
       calType==WaveCalType::kVTFullAGCrossCorClock ||
-      calType==WaveCalType::kVTBenS) {
+      calType==WaveCalType::kVTBenS || calType==WaveCalType::kVTFast) {
 
       zeroMean();
    }

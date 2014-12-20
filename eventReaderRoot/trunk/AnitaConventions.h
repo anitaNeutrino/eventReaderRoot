@@ -79,6 +79,7 @@ namespace WaveCalType {
     kVTBenSNoClockJitterNoZeroMean   = 0x1d, ///< Ben's timing calibration, with no clock correction or zero-mean
     kVTBenS                          = 0x1e, ///< Ben's timing calibration.    
     kDefault                         = 0x1e, ///< Is now the default calibration if you don't specify anything
+    kVTFast                          = 0x20, ///< Tries to get voltage and time fast for online processing
     kAddPeds                         = 0x40, ///< New thing
     kNotACalib ///< Useful for looping over all calibrations 
   } WaveCalType_t; ///< The calibration enumeration type
