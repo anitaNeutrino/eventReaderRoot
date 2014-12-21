@@ -121,6 +121,21 @@ int AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(int phi,AnitaRing::AnitaRing
   return surf;
 }
 
+int AnitaGeomTool::getSurfL1TriggerChanFromPhiPol(int phi, AnitaPol::AnitaPol_t pol, int &surf, int &l1Chan) 
+{
+  if(phi<0 || phi>=NUM_PHI) return -1;
+  surf=AnitaGeom::phiToSurfTriggerMap[phi];
+  int surfHalf=AnitaGeom::phiToSurfHalf[phi];
+  if(pol==AnitaPol::kVertical) {
+    l1Chan=surfHalf;
+  }
+  else {
+    l1Chan=2+surfHalf;
+  }
+  return surf;
+}
+
+
 
 AnitaGeomTool::AnitaGeomTool()
 {

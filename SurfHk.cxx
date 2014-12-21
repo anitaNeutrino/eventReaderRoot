@@ -239,6 +239,16 @@ SurfHk::SurfHk(Int_t           trun,
 
 }
 
+Int_t SurfHk::getL1Scaler(int phi, AnitaPol::AnitaPol_t pol) 
+{
+  Int_t surf, l1Scl;
+  AnitaGeomTool::getSurfL1TriggerChanFromPhiPol(phi,pol,surf,l1Scl);
+  if((surf>=0 && surf<ACTIVE_SURFS) && (l1Scl>=0 && l1Scl<4)) {
+    return l1Scaler[surf][l1Scl];
+  }
+  return -1;
+}
+
 Int_t SurfHk::getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol)
 {
    Int_t surf,scl;
@@ -366,9 +376,9 @@ UInt_t SurfHk::getRFPowerTimeOffset(int surf, int chan)
 
 UInt_t SurfHk::getRFPowerPayloadTime(UInt_t surf, UInt_t chan)
 {
-  if(surf<0 || surf>=ACTIVE_SURFS)
+  if( surf>=ACTIVE_SURFS)
     return -1;
-  if(chan<0 || chan>=RFCHAN_PER_SURF)
+  if( chan>=RFCHAN_PER_SURF)
     return -1;
 
   UInt_t zeroPhaseChan = 0;
@@ -394,9 +404,9 @@ UInt_t SurfHk::getRFPowerPayloadTime(UInt_t surf, UInt_t chan)
 
 UInt_t SurfHk::getRFPowerPayloadTimeUs(UInt_t surf, UInt_t chan)
 {
-  if(surf<0 || surf>=ACTIVE_SURFS)
+  if(surf>=ACTIVE_SURFS)
     return -1;
-  if(chan<0 || chan>=RFCHAN_PER_SURF)
+  if(chan>=RFCHAN_PER_SURF)
     return -1;
 
   UInt_t zeroPhaseChan = 0;
