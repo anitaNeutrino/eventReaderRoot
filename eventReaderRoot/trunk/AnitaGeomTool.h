@@ -176,6 +176,8 @@ class AnitaGeomTool
   static int getPhiRingPolFromSurfChanTrigger(int surf,int chan, int &phi, AnitaRing::AnitaRing_t &ring,AnitaPol::AnitaPol_t &pol);
   static int getSurfChanTriggerFromPhiRingPol(int phi,AnitaRing::AnitaRing_t ring ,AnitaPol::AnitaPol_t pol,int &surf, int &chan);
 
+  static int getSurfL1TriggerChanFromPhiPol(int phi, AnitaPol::AnitaPol_t pol, int &surf, int &l1Chan);
+
 
   static int getAntPolFromSurfChan(int surf,int chan,int &ant,AnitaPol::AnitaPol_t &pol); ///< Convert surf-chan to ant-pol
   
