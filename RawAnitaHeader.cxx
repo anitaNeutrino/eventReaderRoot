@@ -459,7 +459,7 @@ Float_t RawAnitaHeader::getPeakThetaDeg()
 {
 #define THETA_RANGE 150
 #define NUM_BINS_THETA 256
-  return THETA_RANGE*((Float_t)peakThetaBin/NUM_BINS_THETA - 0.5);
+  return -1*THETA_RANGE*((Float_t)peakThetaBin/NUM_BINS_THETA - 0.5);
   
 }
 
