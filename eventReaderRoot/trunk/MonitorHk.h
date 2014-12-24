@@ -90,7 +90,8 @@ class MonitorHk: public TObject
 
    const char *getDriveName(int driveInd); ///< Returns drive name by index
    int getDriveCapacity(int driveInd); ///< Returns drive capacity by index
-   int getDiskSpaceAvailable(int driveInd); ///< Returns drive capacity by index
+   int getDiskSpaceAvailable(int driveInd); ///< Returns disk space available by index
+   float getDiskSpacePercentage(int driveInd); ///< Returns disk percentage by index
    const char *getHkQueueName(int hkInd); ///< Returns Hk Queue name
    const char *getProcName(int procInd); ///< Returns process name
 

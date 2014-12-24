@@ -69,6 +69,13 @@ int MonitorHk::getDriveCapacity(int driveInd)
   return diskMax[driveInd];
 }
 
+
+float MonitorHk::getDiskSpacePercentage(int driveInd) {
+  if(driveInd<0 || driveInd>7)
+    return -1;
+  return float(getDiskSpaceAvailable(driveInd))/getDriveCapacity(driveInd);
+}
+
 int MonitorHk::getDiskSpaceAvailable(int driveInd)
 {
 
