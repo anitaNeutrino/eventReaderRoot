@@ -112,7 +112,7 @@ Float_t SlowRate::getAltitude()
 
 Float_t SlowRate::getPower(int powerInd)
 {
-  float powerCal[4]={18.252,10.1377,20,20};
+  float powerCal[4]={19.252,10.1377,20,20};
   if(powerInd<0 || powerInd>3)
     return 0;
 
