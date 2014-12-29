@@ -126,6 +126,7 @@ Float_t SlowRate::getTemp(int tempInd)
 {
   if(tempInd<0 || tempInd>3)
     return -273.15;
+  if(tempInd==0) return 4*temps[tempInd];
   float adc=temps[tempInd];
   float reading=((10*adc)/255.)-5;
   float value=(reading*100)-273.15;
