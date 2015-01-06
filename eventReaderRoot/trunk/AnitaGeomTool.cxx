@@ -90,6 +90,30 @@ namespace AnitaGeom {
 AnitaGeomTool*  AnitaGeomTool::fgInstance = 0;
 
 
+void AnitaGeomTool::fillAntPositionsFromPrioritizerdConfig() {
+  Double_t phiArrayDeg[48]={0,22.5,45,67.5,90,112.5,135,157.5,180,202.5,225,247.5,270,292.5,315,337.5,0,22.5,45,67.5,90,112.5,135,157.5,180,202.5,225,247.5,270,292.5,315,337.5,0,22.5,45,67.5,90,112.5,135,157.5,180,202.5,225,247.5,270,292.5,315,337.5};
+  Double_t rArray[48]={0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447};
+  Double_t zArray[48]={-1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951};
+
+
+  for(int ant=0;ant<48;ant++) {
+    for(int pol=0;pol<2;pol++) {
+      zPhaseCentreFromVerticalHorn[ant][pol]=zArray[ant];
+      rPhaseCentreFromVerticalHorn[ant][pol]=rArray[ant];
+      azPhaseCentreFromVerticalHorn[ant][pol]=phiArrayDeg[ant]*TMath::DegToRad();
+      xPhaseCentreFromVerticalHorn[ant][pol]=rArray[ant]*TMath::Cos(azPhaseCentreFromVerticalHorn[ant][pol]);
+      yPhaseCentreFromVerticalHorn[ant][pol]=rArray[ant]*TMath::Sin(azPhaseCentreFromVerticalHorn[ant][pol]);
+    }
+  }
+
+  aftForeOffsetAngleVertical=TMath::DegToRad()*45;
+
+  fHeadingRotationAxis.SetXYZ(0.,0.,1.);
+  fPitchRotationAxis.SetXYZ(0.,1.,0.);
+  fRollRotationAxis=fPitchRotationAxis.Cross(fHeadingRotationAxis);
+
+}
+
 
 int AnitaGeomTool::getPhiRingPolFromSurfChanTrigger(int surf,int chan, int &phi, AnitaRing::AnitaRing_t &ring,AnitaPol::AnitaPol_t &pol)
 {
@@ -150,9 +174,9 @@ int AnitaGeomTool::getSurfL1TriggerChanFromPhiPol(int phi, AnitaPol::AnitaPol_t 
 AnitaGeomTool::AnitaGeomTool()
 {
   //Default constructor
-   ringPhaseCentreOffset[0]=0.2-0.042685;
-   ringPhaseCentreOffset[1]=0.2+0.00653;
-   ringPhaseCentreOffset[2]=0.2+0.1927;
+  ringPhaseCentreOffset[0]=0.2-0.042685;
+  ringPhaseCentreOffset[1]=0.2+0.00653;
+  ringPhaseCentreOffset[2]=0.2+0.1927;
 //  ringPhaseCentreOffset[0]=0.2;
 //  ringPhaseCentreOffset[1]=0.2;
 //  ringPhaseCentreOffset[2]=0.2;
@@ -167,6 +191,7 @@ AnitaGeomTool::AnitaGeomTool()
 
   //std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
   //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
+  fillAntPositionsFromPrioritizerdConfig();
   fgInstance=this;
 }
 
