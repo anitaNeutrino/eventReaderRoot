@@ -87,7 +87,8 @@ class AnitaEventCalibrator : public TObject
   Double_t chipByChipDeltats[NUM_SURF][NUM_CHAN][NUM_CHIP]; ///< Cable + chip-to-chip delays
 
   //Cable Length Calib
-  Double_t groupDelayCalib[NUM_SURF][NUM_CHAN];
+  //  Double_t groupDelayCalib[NUM_SURF][NUM_CHAN];
+  Double_t relativeChannelDelays[NUM_SURF][NUM_CHAN];
 
   //Simon's deltat values
   Double_t simonsDeltaT[NUM_SURF][NUM_CHAN];

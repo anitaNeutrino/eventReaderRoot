@@ -21,8 +21,8 @@
 #endif
 
 //Clock Period Hard Coded
-//Double_t clockPeriod=1000/33.;
-Double_t clockPeriod=29.9964121338995078;
+Double_t clockPeriod=1000/33.;
+//Double_t clockPeriod=29.9964121338995078;
 
 //Fitting function
 Double_t funcSquareWave(Double_t *x, Double_t *par)
@@ -314,10 +314,13 @@ void AnitaEventCalibrator::processClockJitter(UsefulAnitaEvent *eventPtr) {
       for(int chan=0;chan<NUM_CHAN;chan++) {
 	 for(int samp=0;samp<numPoints;samp++) {
 	    if(chan<8) {
-	       timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockPhiArray[surf];
+	      //timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockPhiArray[surf];
+	      timeArray[surf][chan][samp]=timeArray[surf][chan][samp]-clockPhiArray[surf];
 	    }
-	    else
-	       timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockCor;
+	    else{
+	      //timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockCor;
+	      timeArray[surf][chan][samp]=timeArray[surf][chan][samp]-clockCor;
+	    }
 	 }
       }
 
@@ -496,12 +499,13 @@ void AnitaEventCalibrator::processClockJitterCorrelation(UsefulAnitaEvent *event
 // 	    volts[surf][i]=-1;
 // 	 else {
 	 volts[surf][i]=tempV/maxVal;
-	    //	 }	 
+	    //	 }
       }
       grClock[surf] = new TGraph(numPoints,times[surf],volts[surf]);
       if(numPoints>100) {
 	TGraph *grTemp = FFTtools::getInterpolatedGraph(grClock[surf],1./2.6);
-	grClockFiltered[surf]=FFTtools::simplePassBandFilter(grTemp,0,400);
+	//	grClockFiltered[surf]=FFTtools::simplePassBandFilter(grTemp,0,400);
+	grClockFiltered[surf]=FFTtools::simplePassBandFilter(grTemp,0,150);
 	delete grTemp;
       }
       else {
@@ -524,9 +528,14 @@ void AnitaEventCalibrator::processClockJitterCorrelation(UsefulAnitaEvent *event
 	  Double_t peakVal,phiDiff;
 	  grCor->GetPoint(dtInt,phiDiff,peakVal);
 	  clockCor=phiDiff;
+	  // std::cout << "clockJitters... surf " << surf << std::endl;
+	  // std::cout << "MaxInd = " << dtInt << ", clockCor = " << clockCor << ", n = " << grCor->GetN() << "\n";
+
 	  if(TMath::Abs(clockCor-clockCrossCorr[surf][fLabChip[surf][8]])>clockPeriod/2) {
+	    // std::cout << "But need to try again... Abs(" << clockCor << " - " << clockCrossCorr[surf][fLabChip[surf][8]] <<") > " << clockPeriod/2 << "\n";
 	    //Need to try again
 	    if(clockCor>clockCrossCorr[surf][fLabChip[surf][8]]) {
+	      std::cout << "clockCor > clockCrossCorr[surf][fLabChip[surf][8]]" << std::endl;
 	      if(dtInt>2*fClockUpSampleFactor) {
 		Int_t dt2ndInt=FFTtools::getPeakBin(grCor,0,dtInt-(2*fClockUpSampleFactor));
 	       grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
@@ -540,7 +549,7 @@ void AnitaEventCalibrator::processClockJitterCorrelation(UsefulAnitaEvent *event
 	      if(dtInt<(grCor->GetN()-2*fClockUpSampleFactor)) {
 		Int_t dt2ndInt=FFTtools::getPeakBin(grCor,dtInt+(2*fClockUpSampleFactor),grCor->GetN());
 		grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
-	       clockCor=phiDiff;
+		clockCor=phiDiff;
 	      }
 	      else {
 		std::cerr << "What's going on here then??\n";
@@ -559,7 +568,7 @@ void AnitaEventCalibrator::processClockJitterCorrelation(UsefulAnitaEvent *event
 	 
       clockPhiArray[surf]=clockCor-fancyClockJitterOffset[surf][fLabChip[surf][8]];
       eventPtr->fClockPhiArray[surf]=clockPhiArray[surf];
-      
+
       //Now can actually shift times
       // Normal channels are corrected by DeltaPhi - <DeltaPhi>
       // Clock channels are corrected by DeltaPhi (just so the clocks line up)
@@ -568,14 +577,19 @@ void AnitaEventCalibrator::processClockJitterCorrelation(UsefulAnitaEvent *event
       for(int chan=0;chan<NUM_CHAN;chan++) {
 	 for(int samp=0;samp<numPoints;samp++) {
 	    if(chan<8) {
-	       timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockPhiArray[surf];
+	       timeArray[surf][chan][samp]=timeArray[surf][chan][samp]-clockPhiArray[surf];
+	       //timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockPhiArray[surf];
 	    }
-	    else
-	       timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockCor;
+	    else{
+	       timeArray[surf][chan][samp]=timeArray[surf][chan][samp]-clockCor;	    
+	       //timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockCor;	    
+	       // if(samp==0){
+	       // 	 std::cout << "clockJitter... " << surf << " " << chan << " " << samp << " " 
+	       // 		   << timeArray[surf][chan][samp] << " " << clockCor << std::endl;
+	       // }
+	    }
 	 }
       }
-      
-      
    }
 
    for(int surf=0;surf<NUM_SURF;surf++) {
@@ -747,7 +761,7 @@ void AnitaEventCalibrator::processEventBS(UsefulAnitaEvent* eventPtr){
   for(int surfInd=0; surfInd<NUM_SURF; surfInd++){
     for(int chanInd=0; chanInd<NUM_CHAN; chanInd++){
       for(int samp=0; samp<numPointsArray[surfInd][chanInd]; samp++){
-	timeArray[surfInd][chanInd][samp]*=eventPtr->fRollingAverageTempFactor;
+	timeArray[surfInd][chanInd][samp]*=1; //eventPtr->fRollingAverageTempFactor;
       }
     }
   }
@@ -808,6 +822,9 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGet
       //Now do the unwrapping
       Int_t index=0;
       Double_t time=0;
+      if(chan!=8){
+	time = relativeChannelDelays[surf][chan];
+      }
       if(latestSample<earliestSample) {
 	//	std::cout << "Two RCO's\t" << surf << "\t" << chan << "\n";
 	//We have two RCOs
@@ -908,6 +925,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGet
 	for(int samp=0;samp<numPointsArray[surf][8];samp++) {
 	     
 	  timeArray[surf][chan][samp]=timeArray[surf][8][samp];
+	  // std::cout << "here 1 " << std::endl;
 	  //	     std::cout << "Fix: " << surf << "\t" << chan << "\t" << samp
 	  //		       << "\t" << timeArray[surf][chan][samp] << "\n";
 	}    
@@ -918,6 +936,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGet
 	for(int samp=0;samp<numPointsArray[surf][8];samp++) {
 	  //	     std::cout << "Fix: " << surf << "\t" << chan << "\t" << samp
 	  //		       << "\t" << timeArray[surf][chan][samp] << "\n";
+	  // std::cout << "here 2 " << std::endl;
 	  timeArray[surf][chan][samp]=timeArray[surf][8][samp];
 	}    	
       }
@@ -927,7 +946,7 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGet
     //And fill in surfTimeArray if we need it for anything
     for(int samp=0;samp<numPointsArray[surf][8];samp++) {
       surfTimeArray[surf][samp]=timeArray[surf][8][samp];
-    }    
+    }
   }	  		  	  
 }
 
@@ -1103,23 +1122,23 @@ Int_t AnitaEventCalibrator::justBinByBinTimebase(UsefulAnitaEvent *eventPtr)
 //       fFakeTemp= new TF1("fFakeTemp","[0] + [1]*exp(-x*[2])",0,100000);
 //       fFakeTemp->SetParameters(8.07,0.13,1./30000);
 //    }
-//    Double_t tempFactor=1;
+  Double_t tempFactor=1;
 //    if(doFakeTemp) {
 //       tempFactor=fFakeTemp->Eval(100000)/fFakeTemp->Eval(eventPtr->eventNumber-refEvNum);
 //    }
-  Double_t tempFactor=eventPtr->getTempCorrectionFactor();
+//  Double_t tempFactor=eventPtr->getTempCorrectionFactor();
         
 
    for(int surf=0;surf<NUM_SURF;surf++) {
-      for(int chan=0;chan<NUM_CHAN;chan++) {	 	 
+      for(int chan=0;chan<NUM_CHAN;chan++) {
 	 int chanIndex=getChanIndex(surf,chan);
 	 int labChip=eventPtr->getLabChip(chanIndex);
-	 int rco=eventPtr->guessRco(chanIndex); ///< Is this the right thing to do??
+	 int rco=1-eventPtr->getRCO(chanIndex); ///< Is this the right thing to do??
+	 //int rco=eventPtr->guessRco(chanIndex); ///< Is this the right thing to do??
 	 
 	 Int_t earliestSample=eventPtr->getEarliestSample(chanIndex);
 	 Int_t latestSample=eventPtr->getLatestSample(chanIndex);
 	 
-
 	 double time=0;
 	 for(int samp=0;samp<NUM_SAMP;samp++) {
 	   int binRco=rco;
@@ -1205,27 +1224,37 @@ void AnitaEventCalibrator::loadCalib() {
 
     //OLD: while(CalibFile >> surf >> chan >> chip >> ant >> pol >> mean >> rms >> calib) {
   while(CalibFile >> surf >> chan >> chip >> calib) {
-    Int_t realAnt;
-    AnitaPol::AnitaPol_t realPol;
+    // Int_t realAnt;
+    // AnitaPol::AnitaPol_t realPol;
     
-    AnitaGeomTool::getAntPolFromSurfChan(surf,chan,realAnt,realPol);
-    //OLD:    AnitaGeomTool::getAntPolFromSurfChan(surf-1,chan-1,realAnt,realPol);
-    if(realPol==AnitaPol::kHorizontal)
-      calib*=-1;
+    // AnitaGeomTool::getAntPolFromSurfChan(surf,chan,realAnt,realPol);
+    // //OLD:    AnitaGeomTool::getAntPolFromSurfChan(surf-1,chan-1,realAnt,realPol);
+    // if(realPol==AnitaPol::kHorizontal)
+    //   calib*=-1;
 
-    //The bastards switched the antenna orientation
-    Int_t orient=AnitaGeomTool::getAntOrientation(realAnt);
-    if(orient==-1)
-      calib*=-1;
-    if(orient==-2 && realPol==AnitaPol::kHorizontal) //Even Orient have never scored -2 goals
-      calib*=-1;
+    // //The bastards switched the antenna orientation
+    // Int_t orient=AnitaGeomTool::getAntOrientation(realAnt);
+    // if(orient==-1)
+    //   calib*=-1;
+    // if(orient==-2 && realPol==AnitaPol::kHorizontal) //Even Orient have never scored -2 goals
+    //   calib*=-1;
       
     //OLD: mvCalibVals[surf-1][chan-1][chip-1]= 2 * calib;
-    mvCalibVals[surf][chan][chip]= calib;//calib;
+    mvCalibVals[surf][chan][chip]= calib;
+    
+    // accounts for factor of -1 in the top ring since the seaveys are flipped
+    int ant;
+    AnitaPol::AnitaPol_t pol;
+    AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant, pol);
+    // std::cout << ant << " " << AnitaGeomTool::getAntOrientation(ant) << std::endl; // ant-1 since surf->ant map goes 1->48 not 0->47
+    mvCalibVals[surf][chan][chip] *= AnitaGeomTool::getAntOrientation(ant); // ant-1 since surf->ant map goes 1->48 not 0->47
+
                                            //	cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
     }
 //    cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
 //    exit(0);
+
+
 
     sprintf(fileName,"%s/firstPassDeltaT.dat",calibDir);
     std::ifstream DeltaTCalibFile(fileName);
@@ -1280,12 +1309,20 @@ void AnitaEventCalibrator::loadCalib() {
     }
 
 
-    sprintf(fileName,"%s/groupDelayCalibFile.dat",calibDir);
-    std::ifstream GroupDelayCalibFile(fileName);
-    GroupDelayCalibFile.getline(firstLine,179);
-    while(GroupDelayCalibFile >> surf >> chan >> calib) {
-       groupDelayCalib[surf][chan]=calib;
-       //       std::cout << surf <<  " " << chan << " " << calib << std::endl;
+    // sprintf(fileName,"%s/groupDelayCalibFile.dat",calibDir);
+    // std::ifstream GroupDelayCalibFile(fileName);
+    // GroupDelayCalibFile.getline(firstLine,179);
+    // while(GroupDelayCalibFile >> surf >> chan >> calib) {
+    //    groupDelayCalib[surf][chan]=calib;
+    //    //       std::cout << surf <<  " " << chan << " " << calib << std::endl;
+    // }
+
+    sprintf(fileName,"%s/relativeCableDelays.dat",calibDir);
+    std::ifstream relativeChannelDelaysFile(fileName);
+    relativeChannelDelaysFile.getline(firstLine,179);
+    while(relativeChannelDelaysFile >> surf >> chan >> calib) {
+       relativeChannelDelays[surf][chan]=calib;
+       // std::cout << surf <<  " " << chan << " " << calib << std::endl;
     }
 
     sprintf(fileName,"%s/rcoLatchDelay.dat",calibDir);
@@ -1528,7 +1565,6 @@ void AnitaEventCalibrator::updateRollingAverageClockDeltaT(UsefulAnitaEvent* eve
   if(eventPtr->eventNumber - fLastEventNumber>NUM_EVENTS_TO_AVERAGE_TEMP_OVER && fLastEventNumber!=0){
     std::cerr << "Careful! Processing non-sequential events may screw up rolling average temperature correction!";
     std::cerr << " Last event " << fLastEventNumber << ", this event " << eventPtr->eventNumber << std::endl;
-    /* Let the user think about it but don't kill the program... */
   }
   
   fAllSurfAverageClockDeltaTs[fTempEventInd] = allSurfMeanUpDt;

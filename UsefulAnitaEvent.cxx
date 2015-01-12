@@ -261,6 +261,10 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 	for(int samp=0;samp<this->fNumPoints[chanIndex];samp++) {
 	  this->fVolts[chanIndex][samp]=fCalibrator->mvArray[surf][chan][samp];
 	  this->fTimes[chanIndex][samp]=fCalibrator->timeArray[surf][chan][samp];
+	  // if(samp==0){
+	  //   std::cout << "surf " << surf << ", chan " << chan << ", clockJitter " << fClockPhiArray[surf] 
+	  // 	      << ", t0 " << fTimes[chanIndex][samp] << std::endl;
+	  // }
 	  //-fCalibrator->chipByChipDeltats[surf][chan][getLabChip(chanIndex)];	  
 	  // if(calType==WaveCalType::kVTCalFilePlusSimon) {
 	  //   this->fTimes[chanIndex][samp]+=fCalibrator->simonsDeltaT[surf][chan];
@@ -390,22 +394,27 @@ void UsefulAnitaEvent::analyseClocksForTempGuessBen(){
   const int clockInd = 8;
   for(int surfInd=0; surfInd<NUM_SURF; surfInd++){
     // TGraph* gr = this->getGraphFromSurfAndChan(surfInd, 8);
-    
+
+    if(myCally->numPointsArray[surfInd][clockInd] <100){
+      continue;
+    }
     TGraph* gr = new TGraph(myCally->numPointsArray[surfInd][clockInd],
 			    myCally->timeArray[surfInd][clockInd],
 			    myCally->mvArray[surfInd][clockInd]);
 
     std::vector<Double_t> upGoingZCs;
-    for(int samp=0; samp<gr->GetN()-1; samp++){
-      double y1 = gr->GetY()[samp];
-      double y2 = gr->GetY()[samp+1];
-      if(y1 < 0 && y2 >= 0){
-	double t1 = gr->GetX()[samp];
-	double t2 = gr->GetX()[samp+1];
-	upGoingZCs.push_back(getZeroCrossingPoint(t1, y1, t2, y2));
+    int n = gr->GetN();
+    if(n > 0){ // protect against empty channels
+      for(int samp=0; samp<gr->GetN()-1; samp++){
+	double y1 = gr->GetY()[samp];
+	double y2 = gr->GetY()[samp+1];
+	if(y1 < 0 && y2 >= 0){
+	  double t1 = gr->GetX()[samp];
+	  double t2 = gr->GetX()[samp+1];
+	  upGoingZCs.push_back(getZeroCrossingPoint(t1, y1, t2, y2));
+	}
       }
     }
-
     /* Get deltaTs from zero crossings */
     meanUpDt[surfInd] = 0;
     numUpDt[surfInd] = 0;
@@ -419,7 +428,6 @@ void UsefulAnitaEvent::analyseClocksForTempGuessBen(){
     // 	std::cerr << t1 <<" " << y1 << std::endl;
     //   }
     // }
-
 
     if(upGoingZCs.size()>=2){
       for(unsigned int i=0; i<upGoingZCs.size()-1; i++){
@@ -437,7 +445,6 @@ void UsefulAnitaEvent::analyseClocksForTempGuessBen(){
     delete gr;
   }
   
-
   /* Sum over all surfs to get event average */
   Double_t allSurfMeanUpDt = 0;
   Double_t allSurfNumUpDt = 0;
@@ -448,8 +455,9 @@ void UsefulAnitaEvent::analyseClocksForTempGuessBen(){
     meanUpDt[surfInd]/=numUpDt[surfInd];
   }
   /* Add this event average to rolling many event rolling average */
-  myCally->updateRollingAverageClockDeltaT(this, allSurfMeanUpDt, allSurfNumUpDt);
-
+  if(allSurfMeanUpDt>0){ // some events dropped eveything...
+    myCally->updateRollingAverageClockDeltaT(this, allSurfMeanUpDt, allSurfNumUpDt);
+  }
 }
 
 void UsefulAnitaEvent::analyseClocksForGuesses() 
