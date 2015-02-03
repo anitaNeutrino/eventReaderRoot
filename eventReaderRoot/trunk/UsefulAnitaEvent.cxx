@@ -864,6 +864,10 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 }
 
 
+std::vector<Double_t> UsefulAnitaEvent::getNeighbouringClockCorrelations(Double_t lowPassClockFilterFreq){
+  return fCalibrator->getNeighbouringClockCorrelations(this, lowPassClockFilterFreq);
+}
+
 // Int_t UsefulAnitaEvent::guessRcoRun3871Old(int chanIndex)
 // {
 // #define START_EVENT 31853801

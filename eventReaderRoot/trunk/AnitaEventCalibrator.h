@@ -117,7 +117,7 @@ class AnitaEventCalibrator : public TObject
   TF1 *fSquareWave;
   TF1 *fFakeTemp;
 
-  TGraph *grCorClock[NUM_SURF-1];
+  TGraph *grCorClock[NUM_SURF];
 
   int justBinByBinTimebase(UsefulAnitaEvent *eventPtr);
   void zeroMean(); ///< Worker function for zero meaning the waveform
@@ -126,8 +126,8 @@ class AnitaEventCalibrator : public TObject
   void processClockJitterCorrelation(UsefulAnitaEvent *eventPtr); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- using cross-correlation
   void applyClockPhiCorrection(UsefulAnitaEvent *eventPtr); ///< Worker fucntion if we are dealing with CalibratedAnitaEvent
   //void processEventAG(UsefulAnitaEvent *eventPtr);
-  void processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGetTempFactorInProcessEventAG, Int_t fUseRolloingTempAverage, Int_t fReadRcoFromFirmware);
-  void processEventBS(UsefulAnitaEvent* eventPtr);
+  void processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGetTempFactorInProcessEventAG, Int_t fUseRolloingTempAverage, Int_t fReadRcoFromFirmware, Int_t fApplyRelativeChannelDelays);
+  void processEventBS(UsefulAnitaEvent* eventPtr, Int_t fApplyRelativeChannelDelays);
 
   void updateRollingAverageClockDeltaT(UsefulAnitaEvent* eventPtr, Double_t allSurfMeanUpDt, Int_t allSurfNumUpDt);
 
@@ -145,6 +145,7 @@ class AnitaEventCalibrator : public TObject
   void setEpsilonTempScale(Double_t scale)
   { fEpsilonTempScale=scale;} ///< Sets the factor by which we multiply the temperature scale for the epsilon part
 
+  std::vector<Double_t> getNeighbouringClockCorrelations(UsefulAnitaEvent* eventPtr, Double_t lowPassClockFilterFreq); ///< Used to assess calibration accuracy
 
  protected:
    static AnitaEventCalibrator *fgInstance;  

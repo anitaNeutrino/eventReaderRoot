@@ -55,6 +55,9 @@ class UsefulAnitaEvent: public RawAnitaEvent
   void analyseClocksForTempGuessBen();
 
 
+  std::vector<Double_t> getNeighbouringClockCorrelations(Double_t lowPassClockFilterFreq);
+
+
   //The calibrated numbers
   Int_t fFromCalibratedAnitaEvent; ///< Flag used in determining whether the event came from a CalibratedAnitaEvent
   UInt_t fC3poNum; ///< Used to monitor the clock period.
