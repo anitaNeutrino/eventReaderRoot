@@ -77,8 +77,9 @@ namespace WaveCalType {
     kVTInCalibratedFile              = 0x1b, ///< For use particularly with the new CalibratedAnitaEvent files
     kVTCalFilePlusSimon              = 0x1c, ///< As above with Simon's deltaT's
     kVTBenSNoClockJitterNoZeroMean   = 0x1d, ///< Ben's timing calibration, with no clock correction or zero-mean
-    kVTBenS                          = 0x1e, ///< Ben's timing calibration.    
-    kDefault                         = 0x1e, ///< Is now the default calibration if you don't specify anything
+    kVTBenSNoChannelToChannelDelays  = 0x1e, ///< For calibration: turn off channel-to-channel delays with a flag, zero-mean + clock-jitter is on.
+    kVTBenS                          = 0x1f, ///< Ben's timing calibration.    
+    kDefault                         = 0x1f, ///< Is now the default calibration if you don't specify anything
     kVTFast                          = 0x20, ///< Tries to get voltage and time fast for online processing
     kAddPeds                         = 0x40, ///< New thing
     kNotACalib ///< Useful for looping over all calibrations 
@@ -241,20 +242,22 @@ namespace AnitaBand {
   \ingroup rootclasses
 */
 namespace AnitaLocations { 
-   const double LONGITUDE_SURF_SEAVEY=167.0564667; ///< Longitude of surface seavey.
-   const double LATITUDE_SURF_SEAVEY=-77.86185; ///< Latitude of surface seavey.
-   const double ALTITUDE_SURF_SEAVEY=15.0; ///< Altitude of surface seavey.
+  const double LONGITUDE_SURF_SEAVEY=167.0564667; ///< Longitude of surface seavey.
+  const double LATITUDE_SURF_SEAVEY=-77.86185; ///< Latitude of surface seavey.
+  const double ALTITUDE_SURF_SEAVEY=15.0; ///< Altitude of surface seavey.
    
-   const double LONGITUDE_BH=167.06679444; ///< Longitude of borehole antenna.
-   const double LATITUDE_BH=-77.861936111; ///< Latitude if borehole antenna.
-   const double ALTITUDE_BH=-33.67; ///< Altitude of borehole antenna.
+  const double LONGITUDE_BH=167.06679444; ///< Longitude of borehole antenna.
+  const double LATITUDE_BH=-77.861936111; ///< Latitude if borehole antenna.
+  const double ALTITUDE_BH=-33.67; ///< Altitude of borehole antenna.
 
-   //   const double LONGITUDE_TD=158.4564333333; ///< Longitude of Taylor Dome antenna.
-   //   const double LATITUDE_TD=77.88116666666; ///< Latitude of Taylor Dome antenna.
-   //   const double ALTITUDE_TD=2712.72; ///< Altitude of Taylor Dome antenna.
-   const double LONGITUDE_TD=158.45925;
-   const double LATITUDE_TD=-77.8803;
-   const double ALTITUDE_TD=2260-97.;
+  //   const double LONGITUDE_TD=158.4564333333; ///< Longitude of Taylor Dome antenna.
+  //   const double LATITUDE_TD=77.88116666666; ///< Latitude of Taylor Dome antenna.
+  //   const double ALTITUDE_TD=2712.72; ///< Altitude of Taylor Dome antenna.
+  const double LONGITUDE_TD=158.45925;
+  const double LATITUDE_TD=-77.8803;
+  const double ALTITUDE_TD=2260-97.;
+
+
 };
 
 
