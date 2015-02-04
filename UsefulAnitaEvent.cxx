@@ -251,6 +251,8 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 
   case WaveCalType::kVTBenS:    
   case WaveCalType::kVTFast:
+    // No channel to channel delays but does everything else...
+  case WaveCalType::kVTBenSNoChannelToChannelDelays:    
     // New version of kVTLabAG for ANITA-3 reading RCO from firmware + Clock Jitter Correction (+ Zero Mean)
   case WaveCalType::kVTBenSNoClockJitterNoZeroMean:    
     // Just the bin-to-bin timing calibration, no interchannel or zero meaning...
