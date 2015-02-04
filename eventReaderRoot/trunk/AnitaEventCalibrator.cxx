@@ -179,11 +179,11 @@ int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveC
      processEventAG(eventPtr, 1, 0, 0, 1); /* New args tweak timing calibration, 1,0,0,1 means same as before. */
    }
    else if(calType==WaveCalType::kVTBenS || calType==WaveCalType::kVTBenSNoClockJitterNoZeroMean || calType==WaveCalType::kVTBenSNoChannelToChannelDelays){
-     if(WaveCalType::kVTBenSNoChannelToChannelDelays){
-       processEventBS(eventPtr, 1);       
+     if(calType==WaveCalType::kVTBenSNoChannelToChannelDelays){
+       processEventBS(eventPtr, 0);
      }
      else{
-       processEventBS(eventPtr, 0);
+       processEventBS(eventPtr, 1);
      }
    }
    else {
@@ -832,6 +832,8 @@ void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGet
       if(chan!=8 && fApplyRelativeChannelDelays!=0){
 	time = relativeChannelDelays[surf][chan];
       }
+      // std::cout << surf << ", " << chan << ", t0 = " << time 
+      // 		<< ", fApply = " << fApplyRelativeChannelDelays << std::endl;
       if(latestSample<earliestSample) {
 	//	std::cout << "Two RCO's\t" << surf << "\t" << chan << "\n";
 	//We have two RCOs
