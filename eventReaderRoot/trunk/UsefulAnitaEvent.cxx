@@ -866,7 +866,7 @@ void UsefulAnitaEvent::analyseClocksForGuesses()
 }
 
 
-std::vector<Double_t> UsefulAnitaEvent::getNeighbouringClockCorrelations(Double_t lowPassClockFilterFreq){
+std::vector<std::vector<Double_t> > UsefulAnitaEvent::getNeighbouringClockCorrelations(Double_t lowPassClockFilterFreq){
   return fCalibrator->getNeighbouringClockCorrelations(this, lowPassClockFilterFreq);
 }
 

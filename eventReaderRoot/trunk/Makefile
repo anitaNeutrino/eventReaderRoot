@@ -44,7 +44,7 @@ SYSLIBS +=-lprofiler
 endif
 
 #Generic and Site Specific Flags
-CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL)
+CXXFLAGS     += -g $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL)
 LDFLAGS      += -g $(ROOTLDFLAGS) 
 
 

@@ -145,7 +145,8 @@ class AnitaEventCalibrator : public TObject
   void setEpsilonTempScale(Double_t scale)
   { fEpsilonTempScale=scale;} ///< Sets the factor by which we multiply the temperature scale for the epsilon part
 
-  std::vector<Double_t> getNeighbouringClockCorrelations(UsefulAnitaEvent* eventPtr, Double_t lowPassClockFilterFreq); ///< Used to assess calibration accuracy
+  std::vector<std::vector<Double_t> > getNeighbouringClockCorrelations(UsefulAnitaEvent* eventPtr, Double_t lowPassClockFilterFreq); ///< Used to assess calibration accuracy
+
 
  protected:
    static AnitaEventCalibrator *fgInstance;  

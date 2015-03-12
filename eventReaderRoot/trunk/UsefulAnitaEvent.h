@@ -55,7 +55,7 @@ class UsefulAnitaEvent: public RawAnitaEvent
   void analyseClocksForTempGuessBen();
 
 
-  std::vector<Double_t> getNeighbouringClockCorrelations(Double_t lowPassClockFilterFreq);
+  std::vector<std::vector<Double_t> > getNeighbouringClockCorrelations(Double_t lowPassClockFilterFreq);
 
 
   //The calibrated numbers
