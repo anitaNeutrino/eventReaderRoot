@@ -1433,8 +1433,8 @@ double AnitaEventCalibrator::Get_Interpolation_X(double x1, double y1, double x2
 }
 
 
-std::vector<Double_t> AnitaEventCalibrator::getNeighbouringClockCorrelations(UsefulAnitaEvent* eventPtr, Double_t lowPassClockFilterFreq){
-  // std::cout << "AnitaEventCalibrator::getNeighbouringClockCorrelations" << std::endl;
+std::vector<std::vector<Double_t> > AnitaEventCalibrator::getNeighbouringClockCorrelations(UsefulAnitaEvent* eventPtr, Double_t lowPassClockFilterFreq){
+
   /* 
      Function to assess accuracy of clock cross correlation.
      Correlates clock 0->NUM_SURF-1, 1->0, 2->1, 3->2 etc.
@@ -1443,7 +1443,8 @@ std::vector<Double_t> AnitaEventCalibrator::getNeighbouringClockCorrelations(Use
   */
 
   // size is NUM_SURFS, default value is -1001
-  std::vector<Double_t> circularOffsets(NUM_SURF, -1001);
+  //vector<vector<int>> A(dimension, vector<int>(dimension));
+  std::vector<std::vector<Double_t> > circularOffsets(NUM_SURF, std::vector<Double_t>(NUM_SURF, -1001));
 
   // This calibration works by first normalising the clock to be between -1 and 1
   // then calculates the cross-correlation between SURF 0 and the other SURFs
@@ -1452,15 +1453,12 @@ std::vector<Double_t> AnitaEventCalibrator::getNeighbouringClockCorrelations(Use
 
   Double_t fLowArray[NUM_SAMP];
   Double_t fHighArray[NUM_SAMP];
-   
+
   Double_t times[NUM_SURF][NUM_SAMP];
   Double_t volts[NUM_SURF][NUM_SAMP];
   TGraph *grClock[NUM_SURF];
   TGraph *grClockFiltered[NUM_SURF];
   for(int surf=0;surf<NUM_SURF;surf++) {
-    //First up we normalise the signals
-
-    //By filling temp arrays
     Int_t numPoints=numPointsArray[surf][8];
     Int_t numHigh=0;
     Int_t numLow=0;
@@ -1474,36 +1472,19 @@ std::vector<Double_t> AnitaEventCalibrator::getNeighbouringClockCorrelations(Use
 	numLow++;
       }
     }
-    //Calculating the min, max and midpoints.
     Double_t meanHigh=TMath::Mean(numHigh,fHighArray);
     Double_t meanLow=TMath::Mean(numLow,fLowArray);
     Double_t offset=(meanHigh+meanLow)/2;
     Double_t maxVal=meanHigh-offset;
-    //      Double_t minVal=meanLow-offset;
 
-    //       cout << maxVal << "\t" << minVal << endl;
-    //       std::cout << offset << "\t" << maxVal << "\t" << minVal << std::endl;
-      
-    // std::cout << "surfTimeArray... ";
     for(int i=0;i<numPoints;i++) {
       times[surf][i]=surfTimeArray[surf][i];
-      // if(i <=4){
-      // 	std::cout << surfTimeArray[surf][i] << ",";
-      // }
       Double_t tempV=mvArray[surf][8][i]-offset;	
-      // This might be reinstated but I need to test to see if the correlation works better
-      // with or without stamping on the overshoot
-      // 	 if(tempV>maxVal*0.9)
-      // 	    volts[surf][i]=1;
-      // 	 else if(tempV<minVal*0.9)
-      // 	    volts[surf][i]=-1;
-      // 	 else {
       volts[surf][i]=tempV/maxVal;
-      //	 }
     }
-    // std::cout << std::endl;
+
     grClock[surf] = new TGraph(numPoints,times[surf],volts[surf]);
-    if(numPoints>100) {
+    if(numPoints>100 && lowPassClockFilterFreq > 0) {
       TGraph *grTemp = FFTtools::getInterpolatedGraph(grClock[surf],1./2.6);
       grClockFiltered[surf]=FFTtools::simplePassBandFilter(grTemp,0,lowPassClockFilterFreq);
       delete grTemp;
@@ -1519,63 +1500,63 @@ std::vector<Double_t> AnitaEventCalibrator::getNeighbouringClockCorrelations(Use
   // std::cout << "deltaT things" << deltaT << " " << fClockUpSampleFactor << std::endl;
 
 #ifdef USE_FFT_TOOLS
-  for(int surf=0;surf<NUM_SURF;surf++) {
-    if(grClockFiltered[surf]->GetN()>100) {
-      Int_t surf2 = surf == 0 ? NUM_SURF - 1 : surf - 1;
-      grCorClock[surf]= FFTtools::getInterpolatedCorrelationGraph(grClockFiltered[surf],grClockFiltered[surf2],deltaT);
-      // std::cout << surf << " " << surf2 << " " << grCorClock[surf]->GetN() << " " << grClockFiltered[surf]->GetN() << std::endl;
-      // for(int i=0; i<4; i++){
-      // 	std::cout << "(" << grCorClock[surf]->GetX()[i] << "," << grCorClock[surf]->GetY()[i] << ") ";	  
-      // }
-      // std::cout << std::endl;
-    }
-    else {
-      std::cout << "Missing clock for SURF " << surf+1 << "\n";
-    }
-  }
-#endif
-
-  for(int surf=0; surf<NUM_SURF; surf++){
-    Double_t clockCor=0;
-    TGraph *grCor = grCorClock[surf];
-    if(grCor) {
-      Int_t dtInt=FFTtools::getPeakBin(grCor);
-      Double_t peakVal,phiDiff;
-      grCor->GetPoint(dtInt,phiDiff,peakVal);
-      clockCor=phiDiff;
-      if(TMath::Abs(clockCor-clockCrossCorr[surf][fLabChip[surf][8]])>clockPeriod/2) {
-	//Need to try again
-	if(clockCor>clockCrossCorr[surf][fLabChip[surf][8]]) {
-	  // std::cout << "clockCor > clockCrossCorr[surf][fLabChip[surf][8]]" << std::endl;
-	  if(dtInt>2*fClockUpSampleFactor) {
-	    Int_t dt2ndInt=FFTtools::getPeakBin(grCor,0,dtInt-(2*fClockUpSampleFactor));
-	    grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
-	    clockCor=phiDiff;		 
-	  }
-	  else {
-	    std::cerr << "What's going on here then??\n";
-	  }
-	}
-	else {
-	  if(dtInt<(grCor->GetN()-2*fClockUpSampleFactor)) {
-	    Int_t dt2ndInt=FFTtools::getPeakBin(grCor,dtInt+(2*fClockUpSampleFactor),grCor->GetN());
-	    grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
-	    clockCor=phiDiff;
-	  }
-	  else {
-	    std::cerr << "What's going on here then??\n";
-	  }
-	}	     	       	   	    	   
+  for(int surf2=0;surf2<NUM_SURF;surf2++) {
+    for(int surf=0; surf<NUM_SURF; surf++){
+      if(grClockFiltered[surf]->GetN()>100) {
+	// Int_t surf2 = surf == 0 ? NUM_SURF - 1 : surf - 1;
+	grCorClock[surf]= FFTtools::getInterpolatedCorrelationGraph(grClockFiltered[surf],grClockFiltered[surf2],deltaT);
+      }
+      else {
+	std::cout << "Missing clock for SURF " << surf+1 << "\n";
       }
     }
-    else {
-      clockCor=0;
-      std::cout << "Clock is broken for SURF " << surf+1 << "\tevent " 
-		<< eventPtr->eventNumber << "\n";
-    }	
+#endif
 
-    circularOffsets.at(surf) = clockCor;
-
+    for(int surf=0; surf<NUM_SURF; surf++){
+      Double_t clockCor=0;
+      TGraph *grCor = grCorClock[surf];
+      if(grCor) {
+	Int_t dtInt=FFTtools::getPeakBin(grCor);
+	Double_t peakVal,phiDiff;
+	grCor->GetPoint(dtInt,phiDiff,peakVal);
+	clockCor=phiDiff;
+	if(TMath::Abs(clockCor-clockCrossCorr[surf][fLabChip[surf][8]])>clockPeriod/2) {
+	  //Need to try again
+	  if(clockCor>clockCrossCorr[surf][fLabChip[surf][8]]) {
+	    // std::cout << "clockCor > clockCrossCorr[surf][fLabChip[surf][8]]" << std::endl;
+	    if(dtInt>2*fClockUpSampleFactor) {
+	      Int_t dt2ndInt=FFTtools::getPeakBin(grCor,0,dtInt-(2*fClockUpSampleFactor));
+	      grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
+	      clockCor=phiDiff;		 
+	    }
+	    else {
+	      std::cerr << "What's going on here then??\n";
+	    }
+	  }
+	  else {
+	    if(dtInt<(grCor->GetN()-2*fClockUpSampleFactor)) {
+	      Int_t dt2ndInt=FFTtools::getPeakBin(grCor,dtInt+(2*fClockUpSampleFactor),grCor->GetN());
+	      grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
+	      clockCor=phiDiff;
+	    }
+	    else {
+	      std::cerr << "What's going on here then??\n";
+	    }
+	  }	     	       	   	    	   
+	}
+      }
+      else {
+	clockCor=0;
+	std::cout << "Clock is broken for SURF " << surf+1 << "\tevent " 
+		  << eventPtr->eventNumber << "\n";
+      }	
+      circularOffsets.at(surf).at(surf2) = clockCor;
+    }
+    for(int surf=0;surf<NUM_SURF;surf++) {
+      if(grCorClock[surf])
+	delete grCorClock[surf];
+      grCorClock[surf]=NULL;
+    }
   }
 
   for(int surf=0;surf<NUM_SURF;surf++) {
@@ -1587,9 +1568,6 @@ std::vector<Double_t> AnitaEventCalibrator::getNeighbouringClockCorrelations(Use
       delete grClockFiltered[surf];
       grClockFiltered[surf] = NULL;
     }
-    if(grCorClock[surf])
-      delete grCorClock[surf];
-    grCorClock[surf]=NULL;
   }
 
   return circularOffsets;
