@@ -26,7 +26,6 @@ ClassImp(CalibratedAnitaEvent);
 CalibratedAnitaEvent::CalibratedAnitaEvent() 
   : RawAnitaEvent()
 {
-  fC3poNum=0;
   fTempFactorGuess=0;
   for(int surf=0;surf<NUM_SURF;surf++) {
     fRcoArray[surf]=0;
@@ -37,12 +36,12 @@ CalibratedAnitaEvent::CalibratedAnitaEvent()
 }
 
 CalibratedAnitaEvent::CalibratedAnitaEvent(UsefulAnitaEvent *usefulPtr) 
-  : RawAnitaEvent(*((RawAnitaEvent*)usefulPtr))
+ : RawAnitaEvent(*((RawAnitaEvent*)usefulPtr))
 {
   fCalType=usefulPtr->fCalType;
-  fC3poNum=usefulPtr->fC3poNum;
   fTempFactorGuess=usefulPtr->fTempFactorGuess;
   for(int surf=0;surf<NUM_SURF;surf++) {
+    // std::cout << usefulPtr->fRcoArray[surf] << std::endl;
     fRcoArray[surf]=usefulPtr->fRcoArray[surf];
     fClockPhiArray[surf]=usefulPtr->fClockPhiArray[surf];
   }

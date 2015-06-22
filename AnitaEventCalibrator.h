@@ -9,12 +9,27 @@
 #ifndef ANITAEVENTCALIBRATOR_H
 #define ANITAEVENTCALIBRATOR_H
 
-//Includes
+// ROOT 
 #include <TObject.h>
 #include <TF1.h>
 #include <TH1.h>
+#include <TMath.h>
+#include <TGraph.h>
+
+#ifdef USE_FFT_TOOLS
+#include "FFTtools.h"
+#endif
+
+// std lib
+#include <fstream>
+#include <map>
+
+// Anita
 #include "AnitaConventions.h"
 #include "simpleStructs.h"
+#include "AnitaClock.h"
+#include "AnitaGeomTool.h"
+#include "RingBuffer.h"
 
 class TGraph;
 class UsefulAnitaEvent;
@@ -24,146 +39,124 @@ class UsefulAnitaEvent;
   Used to calibrate the raw ANITA data into voltage-time waveforms
   \ingroup rootclasses
 */
-class AnitaEventCalibrator : public TObject
+class AnitaEventCalibrator : public TObject 
 {
- public:
-   
+  public:
+
   AnitaEventCalibrator();
   ~AnitaEventCalibrator();
 
-  //Instance generator
-  static AnitaEventCalibrator*  Instance();
-  
-  
+  static AnitaEventCalibrator* Instance(); ///< Instance generator
+
   /*! \brief Calibration Routine
    *         The routine that is used to calibrate the voltage time waveforms in a UsefulAnitaEvent
    *
    *  The routines to calibrate a RawAnitaEvent into an UsefulAnitaEvent. The exact type of calibration applied depends on the WaveCalType::WaveCalType_t selected.
    */
-  int calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
-			   WaveCalType::WaveCalType_t calType);
+
+  
+  Int_t calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveCalType::WaveCalType_t calType);///< Workhorse
 
 
-  static int getChanIndex(int surf, int chan)
-     {return chan+(9*surf);}   ///<Generally useful function
+  void guessRco(UsefulAnitaEvent* eventPtr); ///< Guess RCO from clock
+  Double_t getTempFactor(); ///< Interface to RingBuffer of clock periods for temperature correction
+  void updateTemperatureCorrection(); ///< Update RingBuffer for this event
+  Int_t unwrapChannel(UsefulAnitaEvent* eventPtr, Int_t surf, Int_t chan, Int_t rco, 
+		      Bool_t fApplyTempCorrection, Double_t* voltsArray, 
+		      Double_t* timeArray, Int_t* scaArray);
+  void applyVoltageCalibration(UsefulAnitaEvent* eventPtr);
+  void keepOnlySomeTimeAfterClockUptick(TGraph* grClock, Double_t deltaClockKeepNs);
+
+  std::vector<Double_t> getClockAlignment(UsefulAnitaEvent* eventPtr,
+					  Int_t numPoints[NUM_SURF],
+					  Double_t volts[NUM_SURF][NUM_CHAN][NUM_SAMP],
+					  Double_t times[NUM_SURF][NUM_SAMP]);
+  std::vector<Double_t> getClockAlignment(UsefulAnitaEvent* eventPtr,
+					  Int_t numPoints[NUM_SURF],
+					  Double_t volts[NUM_SURF][NUM_CHAN][NUM_SAMP],
+					  Double_t times[NUM_SURF][NUM_SAMP],
+					  std::vector<Int_t> listOfClockNums);
+  void deleteClockAlignmentTGraphs();
+  void zeroMeanNonClockChannels();
+
+
+
+  Double_t getTimeOfZeroCrossing(Double_t x1, Double_t y1, Double_t x2, Double_t y2);
+  Int_t getTimeOfUpgoingZeroCrossings(Int_t numPoints, Double_t* times, Double_t* volts, 
+				      Double_t* timeZeroCrossings, Int_t* sampZeroCrossings);
+
+
+
+
+  // Calibration constants
+
+  
+
+  Double_t triggerJitterCorrection[NUM_SURF]; ///< Event-to-event calib: Since there is one clock per surf, only need NUM_SURF of these.
+  
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ///// Member variables
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  // Primary event data: voltage and time arrays
+  Double_t voltsArray[NUM_SURF][CHANNELS_PER_SURF][NUM_SAMP]; ///< Channel volts in mV
+  Double_t timeArray[NUM_SURF][NUM_SAMP]; ///< Channel times in ns 
+  Int_t numPointsArray[NUM_SURF]; ///< Number of samples in each channel
+  Int_t scaArray[NUM_SURF][NUM_SAMP]; ///< Capacitor numbers for each sample
+
+  // Secondary event data
+  RingBuffer* clockPeriodRingBuffer; ///< Holds rolling average of temperature correction
+  Double_t fTempFactorGuess; ///< Multiplicative factor for deltaTs & epsilons accounting for temperature
+  Int_t rcoArray[NUM_SURF]; ///< The output of AnitaEventCalibrator::guessRco() goes here.
+  Double_t measuredClockPeriods[NUM_SURF][NUM_RCO][AnitaClock::maxNumZcs]; ///< For guessRco and getTempFactor
+
+  // Constants for timing/voltage calibration
+  Double_t relativeChannelDelays[NUM_SURF][NUM_CHAN]; ///< Cable + other delays
+  Double_t deltaTs[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP]; ///< Calib constants: The time for the write pointer to travel between successove capacitors.
+  Double_t epsilons[NUM_SURF][NUM_CHIP][NUM_RCO]; ///< Calib constants: time (ns) for write pointer to go from sample 255 -> 0 (in ANITA-2 and ANITA-3 with the LAB-3 digitizers)
+  Double_t mvCalibVals[NUM_SURF][NUM_CHAN][NUM_CHIP]; ///< Calib constants: converts from ADC counts to millivolts
+
+  // Constants for calibration algorithms
+  Double_t clockKeepTime[NUM_SURF][NUM_CHIP]; ///< How much time after clock up-tick to keep, calib food
+  Int_t firstHitBusRcoLatchLimit;
+
+
+  std::vector<Int_t> defaultClocksToAlign; ///< List of SURFs for getClockAlignment() (for calibration progs)
+  std::vector<TGraph*> grClockInterps; ///< Interpolated clocks
+  std::map<Double_t, TGraph*> grClock0s; ///< Need to process clock 0 depending on needs of other SURF
+
+  std::vector<TGraph*> grCorClock;
+  std::vector<Double_t> clockAlignment;
+  Double_t dtInterp; ///< Interpolating clock for alignment step
+  Double_t nominalDeltaT; ///< If we don't want bin-to-bin deltaTs
+
+
+
 
   //Ben Rotter's rfPower calibration :)
   Double_t convertRfPowTodBm(int surf, int chan, int adc);
   Double_t convertRfPowToKelvin(int surf, int chan, int adc);
 
-
-  //Some flags that do things
-  Int_t fApplyClockFudge; //Should we use my silly clock fudge factor
-
-
-  // Variables for BS calib 
-  Int_t rcoLatchStart[NUM_SURF][NUM_CHIP];
-  Int_t rcoLatchEnd[NUM_SURF][NUM_CHIP];
-  Int_t fReadRcoFromFirmware;
-#define NUM_EVENTS_TO_AVERAGE_TEMP_OVER 1000
-  Double_t fAllSurfAverageClockDeltaTs[NUM_EVENTS_TO_AVERAGE_TEMP_OVER]; ///< For rolling average
-  Int_t fAllSurfAverageClockNumDeltaTs[NUM_EVENTS_TO_AVERAGE_TEMP_OVER]; ///< For rolling average
-  Int_t fTempEventInd; ///< Current index of rolling average arrays
-  UInt_t fLastEventNumber; ///< If doing a rolling average makes sense to check we are being sequential
-  Int_t fNumEventsAveraged;
-
-
-  //Variables for RG Calib
-  Double_t mvCalibVals[NUM_SURF][NUM_CHAN][NUM_CHIP];
-  Double_t timeBaseCalib[NUM_SURF][NUM_CHIP][NUM_RCO];
-  int rcoLatchCalib[NUM_SURF][NUM_CHIP];
-  Double_t epsilonCalib[NUM_SURF][NUM_CHIP][NUM_RCO]; //Note the rco is the end rco
-
-  
-  //Variables for clock-based trigger jitter correction
-  Double_t clockJitterOffset[NUM_SURF][NUM_CHIP];
-  Double_t fastClockPeakOffset[NUM_SURF][NUM_CHIP];
-  Double_t fancyClockJitterOffset[NUM_SURF][NUM_CHIP];
-
-  //Calibration constants for first pass bin-by-bin
-  Double_t justBinByBin[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP];
-  Double_t epsilonFromAbby[NUM_SURF][NUM_CHIP][NUM_RCO]; ///< Note the rco here is the rco which the event reports (ie. 1-->0 goes in [0] and 0-->1 goes in [1]
-  Double_t clockCrossCorr[NUM_SURF][NUM_CHIP];
-  Double_t chipByChipDeltats[NUM_SURF][NUM_CHAN][NUM_CHIP]; ///< Cable + chip-to-chip delays
-
-  //Cable Length Calib
-  //  Double_t groupDelayCalib[NUM_SURF][NUM_CHAN];
-  Double_t relativeChannelDelays[NUM_SURF][NUM_CHAN];
-
-  //Simon's deltat values
-  Double_t simonsDeltaT[NUM_SURF][NUM_CHAN];
-
-  //Ben's RF power calibration  
   Double_t RfPowYInt[NUM_SURF][NUM_CHAN];
   Double_t RfPowSlope[NUM_SURF][NUM_CHAN];
 
 
 
-  //Temporary variables that don't really need to be part of the class
-  int rawArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
-  int fLabChip[NUM_SURF][NUM_CHAN];
-  int rcobit[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
-  int scaArray[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
-  int unwrappedArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
-  Double_t surfTimeArray[NUM_SURF][NUM_SAMP];
-  Double_t mvArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
-  int numPointsArray[NUM_SURF][NUM_CHAN];
-
-  Double_t clockPhiArray[NUM_SURF];
-  Double_t timeArray[NUM_SURF][NUM_CHAN][NUM_SAMP]; 
 
 
 
-  TF1 *fSquareWave;
-  TF1 *fFakeTemp;
 
-  TGraph *grCorClock[NUM_SURF];
-
-  int justBinByBinTimebase(UsefulAnitaEvent *eventPtr);
-  void zeroMean(); ///< Worker function for zero meaning the waveform
-  void processClockJitter(UsefulAnitaEvent *eventPtr); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration
-  void processClockJitterFast(UsefulAnitaEvent *eventPtr); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- fast method
-  void processClockJitterCorrelation(UsefulAnitaEvent *eventPtr); ///< Worker function for applying the inter-SURF clock based trigger jitter calibration -- using cross-correlation
-  void applyClockPhiCorrection(UsefulAnitaEvent *eventPtr); ///< Worker fucntion if we are dealing with CalibratedAnitaEvent
-  //void processEventAG(UsefulAnitaEvent *eventPtr);
-  void processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGetTempFactorInProcessEventAG, Int_t fUseRolloingTempAverage, Int_t fReadRcoFromFirmware, Int_t fApplyRelativeChannelDelays);
-  void processEventBS(UsefulAnitaEvent* eventPtr, Int_t fApplyRelativeChannelDelays);
-
-  void updateRollingAverageClockDeltaT(UsefulAnitaEvent* eventPtr, Double_t allSurfMeanUpDt, Int_t allSurfNumUpDt);
-
-
-  void processEventUnwrapFast(UsefulAnitaEvent *eventPtr);
   
-
-  Int_t getClockUpSampleFactor() 
-  { return fClockUpSampleFactor;} ///< Returns the factor by which the clock is upsampled in the correlation calibration.
-  void setClockUpSampleFactor(Int_t factor)
-  { fClockUpSampleFactor=factor;} ///< Sets the factor by which the clock is upsampled in the correlation calibration.
-  
-  Double_t getEpsilonTempScale() 
-  { return fEpsilonTempScale;} ///< Returns the factor by which we multiply the temperature scale for the epsilon part
-  void setEpsilonTempScale(Double_t scale)
-  { fEpsilonTempScale=scale;} ///< Sets the factor by which we multiply the temperature scale for the epsilon part
-
-  std::vector<std::vector<Double_t> > getNeighbouringClockCorrelations(UsefulAnitaEvent* eventPtr, Double_t lowPassClockFilterFreq); ///< Used to assess calibration accuracy
 
 
  protected:
-   static AnitaEventCalibrator *fgInstance;  
-   // protect against multiple instances
+  static AnitaEventCalibrator *fgInstance; ///< Just one instance
 
  private:
-  void loadCalib();
-  Double_t Get_Interpolation_X(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Double_t y);
-  void correlateClocks(TGraph *grClock[NUM_SURF], Double_t deltaT);
-  void addPedestals();
-  Int_t fClockUpSampleFactor;
-  Double_t fEpsilonTempScale;
+  void loadCalib(); ///< Reads calibration constants from text files into arrays
 
-  PedestalStruct_t fPedStruct;
-
-
-  ClassDef(AnitaEventCalibrator,2);
+  ClassDef(AnitaEventCalibrator,0);
   
 };
 
