@@ -5,1170 +5,1171 @@
 /////     A simple class for calibrating UsefulAnitaEvents               /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
-#include <fstream>
-#include <iostream>
-#include <cstring>
-
-#include <TMath.h>
-#include <TGraph.h>
 
 #include "AnitaEventCalibrator.h"
-#include "AnitaGeomTool.h"
 #include "UsefulAnitaEvent.h"
-
-#ifdef USE_FFT_TOOLS
-#include "FFTtools.h"
-#endif
-
-//Clock Period Hard Coded
-Double_t clockPeriod=1000/33.;
-//Double_t clockPeriod=29.9964121338995078;
-
-//Fitting function
-Double_t funcSquareWave(Double_t *x, Double_t *par)
-{
-   Double_t phi=par[0];
-   Double_t a=par[1];
-   Double_t b=par[2];
-   Double_t dtLow=par[3];
-   Double_t dtHigh=par[4];
-   Double_t sllh=par[5];
-   Double_t slhl=par[6];
-
-
-   Double_t period=dtLow+dtHigh+sllh+slhl;
-
-   Double_t t=x[0]-phi;
-   
-   Double_t mlh=(a-b)/sllh;
-   Double_t mhl=(b-a)/slhl;
-
-   while(t<0) {
-      t+=period;
-   }
-   while(t>period) {
-      t-=period;
-   }
-   if(t<dtLow)
-      return b;
-   if(t<dtLow+sllh) {
-      Double_t t1=t-dtLow;
-      return (t1*mlh)+b;
-   }
-   if(t<dtLow+sllh+dtHigh)
-      return a;
-   if(t<dtLow+sllh+dtHigh+slhl) {
-      Double_t t2=t-(dtLow+sllh+dtHigh);
-      return (mhl*t2)+a;
-   }
-   
-      
-   return a;
-
-}
-
-
-Double_t newFuncSquareWave(Double_t *x, Double_t *par)
-{
-   Double_t phi=par[0];
-   Double_t a=par[1];
-   Double_t b=par[2];
-
-   Double_t sllh=par[4];
-   Double_t slhl=par[4];
-   
-   Double_t periodLeft=clockPeriod-2*par[4];   
-   Double_t dtLow=par[3]*periodLeft;
-   Double_t dtHigh=(1-par[3])*periodLeft;
-
-
-   Double_t t=x[0]-phi;
-   
-   Double_t mlh=(a-b)/sllh;
-   Double_t mhl=(b-a)/slhl;
-
-   while(t<0) {
-      t+=clockPeriod;
-   }
-   while(t>clockPeriod) {
-      t-=clockPeriod;
-   }
-   if(t<dtLow)
-      return b;
-   if(t<dtLow+sllh) {
-      Double_t t1=t-dtLow;
-      return (t1*mlh)+b;
-   }
-   if(t<dtLow+sllh+dtHigh)
-      return a;
-   if(t<dtLow+sllh+dtHigh+slhl) {
-      Double_t t2=t-(dtLow+sllh+dtHigh);
-      return (mhl*t2)+a;
-   }
-   
-      
-   return a;
-
-
-
-}
-
-
-
 
 ClassImp(AnitaEventCalibrator);
 
-AnitaEventCalibrator*  AnitaEventCalibrator::fgInstance = 0;
+AnitaEventCalibrator*  AnitaEventCalibrator::fgInstance = nullptr;
 
+AnitaEventCalibrator::AnitaEventCalibrator(){
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+  std::cout << "AnitaEventCalibrator::AnitaEventCalibrator()" << std::endl;
+  loadCalib();
 
-AnitaEventCalibrator::AnitaEventCalibrator()
-   : TObject()
-{
-   fSquareWave=0;
-   fFakeTemp=0;
-   fClockUpSampleFactor=16;
-   fEpsilonTempScale=1;
-   //Default constructor
-   std::cout << "AnitaEventCalibrator::AnitaEventCalibrator()" << std::endl;
-   loadCalib();
-   //   std::cout << "AnitaEventCalibrator::AnitaEventCalibrator() end" << std::endl;
-   // for(int surf=1;surf<NUM_SURF;surf++) {
-   for(int surf=0;surf<NUM_SURF;surf++) {
-     grCorClock[surf]=0;
-   }
-   fLastEventNumber = 0; /* Keep track of rolling events starting from first instance */
-   fTempEventInd = 0;
-   fNumEventsAveraged = 0;
+  const Int_t bufferSize = 3600; ///< An hour of averging at 1Hz, worked for calibration
+  clockPeriodRingBuffer = new RingBuffer(bufferSize); 
 
+  firstHitBusRcoLatchLimit = 40; ///< How closely to trust RCO.
+  // dtInterp = 0.001; ///< in nanoseconds, for clock alignment interpolation  
+  dtInterp = 0.01; ///< in nanoseconds, for clock alignment interpolation  
+  nominalDeltaT = 1./2.6; ///< in nanoseconds
+
+  // Set up empty vectors for clock alignment
+  for(Int_t surf=0; surf<NUM_SURF; surf++){
+    defaultClocksToAlign.push_back(surf);
+    clockAlignment.push_back(0);
+
+    grClockInterps.push_back(nullptr);
+    grCorClock.push_back(nullptr);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////
+  fTempFactorGuess = 1; ///< Very important this doesn't start at 0, things will break if it does!
+  ////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
-AnitaEventCalibrator::~AnitaEventCalibrator()
-{
-   //Default destructor
-}
-
+AnitaEventCalibrator::~AnitaEventCalibrator(){
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+  delete clockPeriodRingBuffer;
+  deleteClockAlignmentTGraphs();
+};
 
 
 //______________________________________________________________________________
-AnitaEventCalibrator*  AnitaEventCalibrator::Instance()
-{
-   //static function
-  if(fgInstance)
-    return fgInstance;
-
-  fgInstance = new AnitaEventCalibrator();
+AnitaEventCalibrator*  AnitaEventCalibrator::Instance(){
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+  if(fgInstance==nullptr){
+    fgInstance = new AnitaEventCalibrator();
+  }
 
   return fgInstance;
-  //   return (fgInstance) ? (AnitaEventCalibrator*) fgInstance : new AnitaEventCalibrator();
 }
 
 
 
-int AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveCalType::WaveCalType_t calType)
-{  
-  if(calType==WaveCalType::kJustTimeNoUnwrap)
-    return justBinByBinTimebase(eventPtr);
-  
-   fApplyClockFudge=0;
-   //   std::cout << "AnitaEventCalibrator::calibrateUsefulEvent():" << calType << std::endl;
-   if(calType==WaveCalType::kVoltageTime || calType==WaveCalType::kVTLabAG || calType==WaveCalType::kVTFast) {
-     processEventUnwrapFast(eventPtr);
-   }
-   else if( calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGFastClock || calType==WaveCalType::kVTFullAGCrossCorClock || calType==WaveCalType::kVTCalFilePlusSimon ) {
-     //processEventAG(eventPtr);
-     processEventAG(eventPtr, 1, 0, 0, 1); /* New args tweak timing calibration, 1,0,0,1 means same as before. */
-   }
-   else if(calType==WaveCalType::kVTBenS || calType==WaveCalType::kVTBenSNoClockJitterNoZeroMean || calType==WaveCalType::kVTBenSNoChannelToChannelDelays){
-     if(calType==WaveCalType::kVTBenSNoChannelToChannelDelays){
-       processEventBS(eventPtr, 0);
-     }
-     else{
-       processEventBS(eventPtr, 1);
-     }
-   }
-   else {
-     justBinByBinTimebase(eventPtr);
-   }
 
-   
-   if(calType>=WaveCalType::kVTInCalibratedFile && eventPtr->fFromCalibratedAnitaEvent==1) {
-     applyClockPhiCorrection(eventPtr);     
+
+Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, 
+						 WaveCalType::WaveCalType_t calType){  
+
+
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+  //! The plan for calibration happiness:
+  //! Step 1: figure out from WaveCalType_t calType exactly what we're going to do
+  //! Step 2: Figure out RCO phase from clock period (if bin-to-bin dts required)
+  //! Step 3: Update rolling temperature correction (copy to event)
+  //! Step 4: Unwrap all channels (if requested)
+  //! Step 5: Apply bin-to-bin timing (if requested)
+  //! Step 6: Apply voltage calib (if requested)
+  //! Step 7: Find trigger jitter correction
+  //! Step 8: Zero mean all non-clock channels
+  //! Step 9: Apply channel-to-channel cable delays
+  //! Step 10: Copy everything to UsefulAnitaEvent
+
+
+
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //! Step 1: figure out from WaveCalType_t calType exactly what we're going to do.
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  // Initial states for calibration flags, modified based on calType below
+  Bool_t fUnwrap = false;
+  Bool_t fBinToBinDts = false;
+  Bool_t fNominal = false;
+  Bool_t fApplyTempCorrection = true;
+  Bool_t fVoltage = false;
+  Bool_t fApplyTriggerJitterCorrection = false;
+  Bool_t fApplyCableDelays = false;
+  Bool_t fZeroMeanNonClockChannels = false;
+  Bool_t fFlipRcoPhase = false;
+  Bool_t fFirmwareRcoNoLatch = false;
+
+  switch(calType){
+
+  case WaveCalType::kNotACalib:
+    std::cerr << "Warning in " << __PRETTY_FUNCTION__ << ", calling kNotACalib will be treated as kNoCalib"
+	      << std::endl;
+
+  case WaveCalType::kNoCalib: 
+    fApplyTempCorrection = false;
+      break;
+
+  case WaveCalType::kNominal:
+    fBinToBinDts = true;
+    fApplyTempCorrection = true;
+    break;
+
+  case WaveCalType::kJustTimeNoUnwrap:
+    fBinToBinDts = true;
+    fApplyTempCorrection = true;
+    break;
+
+  case WaveCalType::kJustUnwrap:
+    fUnwrap = true;
+    break;
+
+  case WaveCalType::kNoTriggerJitterNoZeroMean:
+    fUnwrap = true;
+    fBinToBinDts = true;
+    fVoltage = true;
+    fApplyTempCorrection = true;
+    break;
+
+  case WaveCalType::kNoTriggerJitterNoZeroMeanFlipRco:
+    fUnwrap = true;
+    fBinToBinDts = true;
+    fVoltage = true;
+    fFlipRcoPhase = true;
+    break;
+
+  case WaveCalType::kNoTriggerJitterNoZeroMeanFirmwareRco:
+    fUnwrap = true;
+    fBinToBinDts = true;
+    fVoltage = true;
+    fApplyTempCorrection = true;
+    fFirmwareRcoNoLatch = true;
+    break;
+
+  case WaveCalType::kNoTriggerJitterNoZeroMeanFirmwareRcoFlipped:
+    fUnwrap = true;
+    fBinToBinDts = true;
+    fVoltage = true;
+    //    fApplyTempCorrection = false;
+    fFirmwareRcoNoLatch = true;
+    fFlipRcoPhase = true;
+    break;    
+
+  case WaveCalType::kNoChannelToChannelDelays:
+    fUnwrap = true;
+    fBinToBinDts = true;
+    fApplyTempCorrection = true;
+    fVoltage = true;
+    fApplyTriggerJitterCorrection = true;
+    fApplyCableDelays = false;
+    fZeroMeanNonClockChannels = true;
+    break;
+
+  case WaveCalType::kFull:
+    fUnwrap = true;
+    fBinToBinDts = true;
+    fApplyTempCorrection = true;
+    fVoltage = true;
+    fApplyTriggerJitterCorrection = true;
+    fApplyCableDelays = true;
+    fZeroMeanNonClockChannels = true;
+    break;
+
+  // case WaveCalType::kDefault:
+  //   std::cerr << "It seems like WaveCal::kDefault isn't handled by any of the options in " 
+  // 	      << __PRETTY_FUNCTION__ << std::endl;
+
   }
-   else { 
-     //Clock Jitter correction
-
-     if(calType==WaveCalType::kVTLabAGFastClock || calType==WaveCalType::kVTFullAGFastClock) {
-       processClockJitterFast(eventPtr);
-     }
-   
-     if( calType==WaveCalType::kVTLabAGCrossCorClock || calType==WaveCalType::kVTFullAGCrossCorClock 
-	 || calType==WaveCalType::kVTBenS || calType==WaveCalType::kVTBenSNoChannelToChannelDelays) {
-       processClockJitterCorrelation(eventPtr);
-     }
-   } 
-
-   //Zero Mean
-   if(
-      calType==WaveCalType::kVTLabAGCrossCorClock ||
-      calType==WaveCalType::kVTFullAGCrossCorClock ||
-      calType==WaveCalType::kVTBenS || calType==WaveCalType::kVTFast || 
-      calType==WaveCalType::kVTBenSNoChannelToChannelDelays) {
-
-      zeroMean();
-   }
-    
-
-   if(calType==WaveCalType::kAddPeds) {
-     addPedestals();
-   }
-
-   
-
-   //   std::cout << "Done processEvent" << std::endl;
-   return 0;
-}
-
-void AnitaEventCalibrator::processClockJitter(UsefulAnitaEvent *eventPtr) {
-   if(!fSquareWave) {
-      fSquareWave = new TF1("fSquareWave",newFuncSquareWave,5,90,5);
-      fSquareWave->SetParameters(25,1,-1,0.439,0.33);
-      fSquareWave->SetParLimits(0,0,35);
-      fSquareWave->SetParLimits(1,1,1);
-      fSquareWave->SetParLimits(2,-1,-1);
-      fSquareWave->SetParLimits(3,0.439,0.439);
-      fSquareWave->SetParLimits(4,0.33,0.33);
-      
-   }
-
-  Double_t fLowArray[NUM_SAMP];
-  Double_t fHighArray[NUM_SAMP];
-   Double_t phi0=0;
-   Double_t times[NUM_SAMP];
-   Double_t volts[NUM_SAMP];
 
 
-   for(int surf=0;surf<NUM_SURF;surf++) {
-      //First fill temp arrays
-      Int_t numPoints=numPointsArray[surf][8];
-      Int_t numHigh=0;
-      Int_t numLow=0;
-      for(int samp=0;samp<numPoints;samp++) {
-	 if(mvArray[surf][8][samp]>0) {
-	    fHighArray[numHigh]=mvArray[surf][8][samp];
-	    numHigh++;
-	 }
-	  else {
-	    fLowArray[numLow]=mvArray[surf][8][samp];
-	    numLow++;
-	  }
-      }
-      Double_t meanHigh=TMath::Mean(numHigh,fHighArray);
-      Double_t meanLow=TMath::Mean(numLow,fLowArray);
-       Double_t offset=(meanHigh+meanLow)/2;
-       Double_t maxVal=meanHigh-offset;
-       //       Double_t minVal=meanLow-offset;
-
-       Int_t gotPhiGuess=0;
-       Double_t phiGuess=0;
-       for(int i=0;i<numPoints;i++) {
-	  times[i]=surfTimeArray[surf][i];
-	 Double_t tempV=mvArray[surf][8][i]-offset;	
-// 	 if(tempV>maxVal*0.6)
-// 	   volts[i]=1;
-// 	 else if(tempV<minVal*0.6)
-// 	   volts[i]=-1;
-// 	 else {
-	 volts[i]=tempV/maxVal;
-	   //	 }
-	 
-	 if(!gotPhiGuess) {
-	    if(tempV>=0 && (mvArray[surf][8][i+1]-offset)<0) {
-	       if(i>3) {
-		  phiGuess=times[i];
-		  gotPhiGuess=1;
-	       }
-	    }
-	 }
-	 
-       }
-
-           
-      TGraph grTemp(numPoints,times,volts);
-      fSquareWave->SetParameter(0,phiGuess);
-      grTemp.Fit(fSquareWave,"QR","goff");
 
 
-      if(surf==0) 
-	 phi0=fSquareWave->GetParameter(0);
-      
-      
-      double phi=fSquareWave->GetParameter(0);
-      if((phi-phi0)>(clockPeriod/2))
-	 phi-=clockPeriod;
-      if((phi-phi0)<-1*(clockPeriod/2))
-	 phi+=clockPeriod;
-      
-      Double_t clockCor=phi-phi0;
-      clockPhiArray[surf]=(phi-phi0)-clockJitterOffset[surf][fLabChip[surf][8]];
-      eventPtr->fClockPhiArray[surf]=clockPhiArray[surf];
-      //      std::cout << phi << "\t"  << phi0 << "\t" << clockJitterOffset[surf][fLabChip[surf][8]]
-      //		<< std::endl;
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //! Step 2: Figure out RCO phase from clock period (if bin-to-bin dts required)
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-      //Now can actually shift times
-      // Normal channels are corrected by DeltaPhi - <DeltaPhi>
-      // Clock channels are corrected by DeltaPhi (just so the clocks line up)
-      for(int chan=0;chan<NUM_CHAN;chan++) {
-	 for(int samp=0;samp<numPoints;samp++) {
-	    if(chan<8) {
-	      //timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockPhiArray[surf];
-	      timeArray[surf][chan][samp]=timeArray[surf][chan][samp]-clockPhiArray[surf];
-	    }
-	    else{
-	      //timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockCor;
-	      timeArray[surf][chan][samp]=timeArray[surf][chan][samp]-clockCor;
-	    }
-	 }
-      }
-
-
-   }
-   
-}
-
-
-void AnitaEventCalibrator::addPedestals() {
-
-  //  int rawArray[NUM_SURF][NUM_CHAN][NUM_SAMP];
-  for(int surf=0;surf<NUM_SURF;surf++) {
-    for(int chan=0;chan<NUM_CHAN;chan++) {
-      int chip=fLabChip[surf][chan];
-      for(int samp=0;samp<NUM_SAMP;samp++) {
-	rawArray[surf][chan][samp]+=fPedStruct.thePeds[surf][chip][chan][samp];
+  if(fBinToBinDts==true){
+    // If we want deltaTs then we definitely need to know what RCO phase we are in
+    if(eventPtr->fFromCalibratedAnitaEvent==0){ // Figure out the RCO if we don't have calibrated input 
+      guessRco(eventPtr);
+    }
+    else{// If have calibrated anita event, then copy result and don't guess
+      for(Int_t surf=0; surf<NUM_SURF; surf++){
+	rcoArray[surf] = eventPtr->fRcoArray[surf];
       }
     }
-  }
-}
 
-
-void AnitaEventCalibrator::processClockJitterFast(UsefulAnitaEvent *eventPtr) {
- 
-  Double_t fLowArray[NUM_SAMP];
-  Double_t fHighArray[NUM_SAMP];
-
-  Double_t phi0=0;
-  Double_t times[NUM_SAMP];
-  Double_t volts[NUM_SAMP];
-  
-  for(int surf=0;surf<NUM_SURF;surf++) {
-    //First fill temp arrays
-    Int_t numPoints=numPointsArray[surf][8];
-    Int_t numHigh=0;
-    Int_t numLow=0;
-    for(int samp=0;samp<numPoints;samp++) {
-      if(mvArray[surf][8][samp]>0) {
-	    fHighArray[numHigh]=mvArray[surf][8][samp];
-	    numHigh++;
-      }
-      else {
-	fLowArray[numLow]=mvArray[surf][8][samp];
-	numLow++;
+    // For calibration purposes...
+    if(fFirmwareRcoNoLatch==true){
+      for(Int_t surf=0; surf<NUM_SURF; surf++){
+	rcoArray[surf] = eventPtr->getRcoCorrected(surf*NUM_CHAN + 8);
       }
     }
-    Double_t meanHigh=TMath::Mean(numHigh,fHighArray);
-    Double_t meanLow=TMath::Mean(numLow,fLowArray);
-    Double_t offset=(meanHigh+meanLow)/2;
-    Double_t maxVal=meanHigh-offset;
-    //       Double_t minVal=meanLow-offset;
-    //       cout << maxVal << "\t" << minVal << endl;
-    //       std::cout << offset << "\t" << maxVal << "\t" << minVal << std::endl;
-    
-    for(int i=0;i<numPoints;i++) {
-      times[i]=surfTimeArray[surf][i];
-      Double_t tempV=mvArray[surf][8][i]-offset;	
-      //	 if(tempV>maxVal*0.9)
-      //	   volts[i]=1;
-      //	 else if(tempV<minVal*0.9)
-      //	   volts[i]=-1;
-      //	 else {
-      volts[i]=tempV/maxVal;
-      //	 }
-      
+    // Sanity check for calibration purposes... don't ever use this.
+    if(fFlipRcoPhase==true){
+      for(Int_t surf=0; surf<NUM_SURF; surf++){
+	rcoArray[surf] = 1 - rcoArray[surf];
+      }
     }
-    
-    
-    Double_t phiGuess=0;
-    for(int i=0;i<numPoints-1;i++) {
-      if(volts[i]>=0 &&
-	 volts[i+1]<0) {
-	phiGuess=Get_Interpolation_X(times[i],volts[i],times[i+1],volts[i+1],0);
-	//	     	     std::cout << surf << "\t" << 8 << "\t" << times[i] << "\t" << times[i+1] 
-	//	     		       << "\t" << volts[i] << "\t" << volts[i+1] << "\t" << phiGuess << std::endl;
-	if(i>3)
-	  break;
-	  }
-       }
-       
-       if(surf==0) 
-	  phi0=phiGuess;
-       
-       double phi=phiGuess;
-       if((phi-phi0)>(clockPeriod/2))
-	 phi-=clockPeriod;
-       if((phi-phi0)<-1*(clockPeriod/2))
-	 phi+=clockPeriod;
-       
-       
-       Double_t clockCor=phi-phi0;
-       
-       while((clockCor-fastClockPeakOffset[surf][fLabChip[surf][8]])>(clockPeriod/2)) {
-	 clockCor-=clockPeriod;
-       }
-        while((clockCor-fastClockPeakOffset[surf][fLabChip[surf][8]])<(-1*clockPeriod/2)) {
-	 clockCor+=clockPeriod;
-       }
 
-       clockPhiArray[surf]=clockCor;
-       eventPtr->fClockPhiArray[surf]=clockPhiArray[surf];
-      
-
-
-       
-       //Now can actually shift times
-       // Normal channels are corrected by DeltaPhi - <DeltaPhi>
-       // Clock channels are corrected by DeltaPhi (just so the clocks line up)
-       //       std::cout << "clockCor:\t" << clockCor << "\t" << clockPhiArray[surf] << std::endl;
-       for(int chan=0;chan<NUM_CHAN;chan++) {
-	  for(int samp=0;samp<numPoints;samp++) {
-	     if(chan<8) {
-		timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockPhiArray[surf];
-	     }
-	     else
-		timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockCor;
-	  }
-       }
-       
-       
-   }
-}
-
-
-
-void AnitaEventCalibrator::processClockJitterCorrelation(UsefulAnitaEvent *eventPtr) {
-#ifdef USE_FFT_TOOLS
-   // This calibration works by first normalising the clock to be between -1 and 1
-   // then calculates the cross-correlation between SURF 0 and the other SURFs
-   // the peak of the cross-corrleation is taken as the time offset between
-   // the channels.
-
-   Double_t fLowArray[NUM_SAMP];
-   Double_t fHighArray[NUM_SAMP];
-   
-   Double_t times[NUM_SURF][NUM_SAMP];
-   Double_t volts[NUM_SURF][NUM_SAMP];
-   TGraph *grClock[NUM_SURF];
-   TGraph *grClockFiltered[NUM_SURF];
-   for(int surf=0;surf<NUM_SURF;surf++) {
-      //First up we normalise the signals
-
-      //By filling temp arrays
-      Int_t numPoints=numPointsArray[surf][8];
-      Int_t numHigh=0;
-      Int_t numLow=0;
-      for(int samp=0;samp<numPoints;samp++) {
-	 if(mvArray[surf][8][samp]>0) {
-	    fHighArray[numHigh]=mvArray[surf][8][samp];
-	    numHigh++;
-	 }
-	  else {
-	    fLowArray[numLow]=mvArray[surf][8][samp];
-	    numLow++;
-	  }
-      }
-      //Calculating the min, max and midpoints.
-      Double_t meanHigh=TMath::Mean(numHigh,fHighArray);
-      Double_t meanLow=TMath::Mean(numLow,fLowArray);
-      Double_t offset=(meanHigh+meanLow)/2;
-      Double_t maxVal=meanHigh-offset;
-      //      Double_t minVal=meanLow-offset;
-
-      //       cout << maxVal << "\t" << minVal << endl;
-      //       std::cout << offset << "\t" << maxVal << "\t" << minVal << std::endl;
-      
-      for(int i=0;i<numPoints;i++) {
-	 times[surf][i]=surfTimeArray[surf][i];
-	 Double_t tempV=mvArray[surf][8][i]-offset;	
-	 // This might be reinstated but I need to test to see if the correlation works better
-	 // with or without stamping on the overshoot
-// 	 if(tempV>maxVal*0.9)
-// 	    volts[surf][i]=1;
-// 	 else if(tempV<minVal*0.9)
-// 	    volts[surf][i]=-1;
-// 	 else {
-	 volts[surf][i]=tempV/maxVal;
-	    //	 }
-      }
-      grClock[surf] = new TGraph(numPoints,times[surf],volts[surf]);
-      if(numPoints>100) {
-	TGraph *grTemp = FFTtools::getInterpolatedGraph(grClock[surf],1./2.6);
-	//	grClockFiltered[surf]=FFTtools::simplePassBandFilter(grTemp,0,400);
-	grClockFiltered[surf]=FFTtools::simplePassBandFilter(grTemp,0,150);
-	delete grTemp;
-      }
-      else {
-	grClockFiltered[surf] = new TGraph(numPoints,times[surf],volts[surf]);
-      }
-   }
-
-   // At this point we have filled the normalised voltage arrays and created TGraphs
-   // we can now correlate  and extract the offsets
-   Double_t deltaT=1./(2.6*fClockUpSampleFactor);
-   correlateClocks(grClockFiltered,deltaT);
-
-
-   for(int surf=0;surf<NUM_SURF;surf++) {
-      Double_t clockCor=0;
-      if(surf>0) {
-	TGraph *grCor = grCorClock[surf-1];
-	if(grCor) {
-	  Int_t dtInt=FFTtools::getPeakBin(grCor);
-	  Double_t peakVal,phiDiff;
-	  grCor->GetPoint(dtInt,phiDiff,peakVal);
-	  clockCor=phiDiff;
-	  // std::cout << "clockJitters... surf " << surf << std::endl;
-	  // std::cout << "MaxInd = " << dtInt << ", clockCor = " << clockCor << ", n = " << grCor->GetN() << "\n";
-
-	  if(TMath::Abs(clockCor-clockCrossCorr[surf][fLabChip[surf][8]])>clockPeriod/2) {
-	    // std::cout << "But need to try again... Abs(" << clockCor << " - " << clockCrossCorr[surf][fLabChip[surf][8]] <<") > " << clockPeriod/2 << "\n";
-	    //Need to try again
-	    if(clockCor>clockCrossCorr[surf][fLabChip[surf][8]]) {
-	      std::cout << "clockCor > clockCrossCorr[surf][fLabChip[surf][8]]" << std::endl;
-	      if(dtInt>2*fClockUpSampleFactor) {
-		Int_t dt2ndInt=FFTtools::getPeakBin(grCor,0,dtInt-(2*fClockUpSampleFactor));
-	       grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
-	       clockCor=phiDiff;		 
-	      }
-	      else {
-		std::cerr << "What's going on here then??\n";
-	      }
-	    }
-	    else {
-	      if(dtInt<(grCor->GetN()-2*fClockUpSampleFactor)) {
-		Int_t dt2ndInt=FFTtools::getPeakBin(grCor,dtInt+(2*fClockUpSampleFactor),grCor->GetN());
-		grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
-		clockCor=phiDiff;
-	      }
-	      else {
-		std::cerr << "What's going on here then??\n";
-	      }
-	    }	     	       	   	    	   
-	  }
-	}
-	else {
-	  clockCor=0;
-	  std::cout << "Clock is broken for SURF " << surf+1 << "\tevent " 
-		    << eventPtr->eventNumber << "\n";
-	}
-	
-	 //	 delete grCor;
-      }
-	 
-      clockPhiArray[surf]=clockCor-fancyClockJitterOffset[surf][fLabChip[surf][8]];
-      eventPtr->fClockPhiArray[surf]=clockPhiArray[surf];
-
-      //Now can actually shift times
-      // Normal channels are corrected by DeltaPhi - <DeltaPhi>
-      // Clock channels are corrected by DeltaPhi (just so the clocks line up)
-      //       std::cout << "clockCor:\t" << clockCor << "\t" << clockPhiArray[surf] << std::endl;
-      Int_t numPoints=numPointsArray[surf][8];
-      for(int chan=0;chan<NUM_CHAN;chan++) {
-	 for(int samp=0;samp<numPoints;samp++) {
-	    if(chan<8) {
-	       timeArray[surf][chan][samp]=timeArray[surf][chan][samp]-clockPhiArray[surf];
-	       //timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockPhiArray[surf];
-	    }
-	    else{
-	       timeArray[surf][chan][samp]=timeArray[surf][chan][samp]-clockCor;	    
-	       //timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-clockCor;	    
-	       // if(samp==0){
-	       // 	 std::cout << "clockJitter... " << surf << " " << chan << " " << samp << " " 
-	       // 		   << timeArray[surf][chan][samp] << " " << clockCor << std::endl;
-	       // }
-	    }
-	 }
-      }
-   }
-
-   for(int surf=0;surf<NUM_SURF;surf++) {
-     if(grClock[surf]) delete grClock[surf];
-     if(grClockFiltered[surf]) delete grClockFiltered[surf];
-   }
-#else 
-   printf("FFTTools currently disabled\n");
-#endif
-}
-
-
-void AnitaEventCalibrator::applyClockPhiCorrection(UsefulAnitaEvent *eventPtr)
-{ 
-  for(int surf=0;surf<NUM_SURF;surf++) {
-    Int_t numPoints=numPointsArray[surf][8];
-    for(int chan=0;chan<NUM_CHAN;chan++) {
-      for(int samp=0;samp<numPoints;samp++) {
-	timeArray[surf][chan][samp]=surfTimeArray[surf][samp]-eventPtr->fClockPhiArray[surf];	
-      }
-    }   
+    // Copy to rco guessing array in UsefulAnitaEvent
+    for(Int_t surf=0; surf<NUM_SURF; surf++){
+      eventPtr->fRcoArray[surf] = rcoArray[surf];
+    }
   }
-}
-
-
-void AnitaEventCalibrator::zeroMean() {
-   //Won't do it for the clock channel due to the assymmetry of the clock signal
-   for(int surf=0;surf<NUM_SURF;surf++) {
-      for(int chan=0;chan<8;chan++) {
-	 Double_t mean=TMath::Mean(numPointsArray[surf][chan],mvArray[surf][chan]);
-	 for(int i=0;i<NUM_SAMP;i++) {
-	    mvArray[surf][chan][i]-=mean;
-	 }
-      }
-   }
-
-}
-
-void AnitaEventCalibrator::processEventUnwrapFast(UsefulAnitaEvent *eventPtr)
-{  
-
-  for(Int_t surf=0;surf<NUM_SURF;surf++) {
-      Int_t chanIndex=eventPtr->getChanIndex(surf,8);
-      Int_t labChip=eventPtr->getLabChip(chanIndex);
-      Int_t rco=eventPtr->getRCO(chanIndex);
-      Int_t earliestSample=eventPtr->getEarliestSample(chanIndex);
-      Int_t latestSample=eventPtr->getLatestSample(chanIndex);
-      Double_t tempFactor=1;
-      
-      if(earliestSample==0)
-	earliestSample++;
-      
-      if(latestSample==0)
-	latestSample=259;
-
-      for(Int_t chan=0;chan<NUM_CHAN;chan++) {
-	Int_t chanIndex=eventPtr->getChanIndex(surf,chan);
-	//Raw array
-	for(Int_t samp=0;samp<NUM_SAMP;samp++) {
-	  rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
-	}
-	
-	//Now do the unwrapping
-	Int_t index=0;
-	Double_t time=0;
-	if(latestSample<earliestSample) {
-	  //	std::cout << "Two RCO's\t" << surf << "\t" << chan << "\n";
-	  //We have two RCOs
-	  Int_t nextExtra=256;
-	  Double_t extraTime=0;	
-	  if(earliestSample<256) {
-	    //Lets do the first segment up	
-	    for(Int_t samp=earliestSample;samp<256;samp++) {
-	      int binRco=1-rco;
-	      scaArray[surf][chan][index]=samp;
-	      unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-	      mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
-	      timeArray[surf][chan][index]=time;
-	      if(samp==255) {
-		extraTime=time+(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-		
-	      }
-	      else {
-		time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-	     
-	      }
-	      index++;
-	    }
-	    time+=epsilonFromAbby[surf][labChip][rco]*tempFactor*fEpsilonTempScale; ///<This is the time of the first capacitor.
-	  }
-	  else {
-	    //Will just ignore the first couple of samples.
-	    nextExtra=260;
-	    extraTime=0;
-	  }
-	  
-	  
-	  if(latestSample>=1) {
-	    //We are going to ignore sample zero for now
-	    time+=(justBinByBin[surf][labChip][rco][0])*tempFactor;
-	    //	  time+=0.5*(justBinByBin[surf][labChip][rco][0]+justBinByBin[surf][labChip][rco][1])*tempFactor;
-	    for(Int_t samp=1;samp<=latestSample;samp++) {
-	      int binRco=rco;
-	      if(nextExtra<260 && samp==1) {
-		if(extraTime<time-0.22) { ///This is Andres's 220ps minimum sample separation
-		  //Then insert the next extra capacitor
-		  binRco=1-rco;
-		  scaArray[surf][chan][index]=nextExtra;
-		  unwrappedArray[surf][chan][index]=rawArray[surf][chan][nextExtra];
-		  mvArray[surf][chan][index]=double(rawArray[surf][chan][nextExtra])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
-		  timeArray[surf][chan][index]=extraTime;
-		  if(nextExtra<259) {
-		    extraTime+=(justBinByBin[surf][labChip][binRco][nextExtra])*tempFactor;
-		    //		extraTime+=0.5*(justBinByBin[surf][labChip][binRco][nextExtra]+justBinByBin[surf][labChip][binRco][nextExtra+1])*tempFactor;
-		  }
-		  nextExtra++;
-		  index++;	 
-		  samp--;
-		  continue;
-		}
-	      }
-	      scaArray[surf][chan][index]=samp;
-	      unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-	      mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
-	      timeArray[surf][chan][index]=time;
-	      if(samp<259) {
-		time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-		//	      time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
-	      }
-	      index++;
-	    }
-	  }
-	}
-	else {
-	  //	std::cout << "One RCO\t" << surf << "\t" << chan << "\n";
-	  //Only one rco
-	  time=0;
-	  for(Int_t samp=earliestSample;samp<=latestSample;samp++) {
-	    int binRco=rco;
-	    scaArray[surf][chan][index]=samp;
-	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
-	    timeArray[surf][chan][index]=time;
-	    if(samp<259) {
-	      time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-	      //	    time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
-	    }
-	    index++;
-	  }
-	}
-	numPointsArray[surf][chan]=index;
-      }
-  
-      //And fill in surfTimeArray if we need it for anything
-      for(int samp=0;samp<numPointsArray[surf][8];samp++) {
-	surfTimeArray[surf][samp]=timeArray[surf][8][samp];
-      }    
-  }    
-}
 
 
 
-void AnitaEventCalibrator::processEventBS(UsefulAnitaEvent* eventPtr, Int_t fApplyRelativeChannelDelays){
-  processEventAG(eventPtr, 0, 0, 1, fApplyRelativeChannelDelays);
-  eventPtr->analyseClocksForTempGuessBen();
-  //  std::cout << eventPtr->fRollingAverageTempFactor << std::endl;
 
-  /* Then apply bin-by-bin timing correction*/
-  for(int surfInd=0; surfInd<NUM_SURF; surfInd++){
-    for(int chanInd=0; chanInd<NUM_CHAN; chanInd++){
-      for(int samp=0; samp<numPointsArray[surfInd][chanInd]; samp++){
-	timeArray[surfInd][chanInd][samp]*=1; //eventPtr->fRollingAverageTempFactor;
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //! Step 3: Update rolling temperature correction (copy to usefulAnitaEvent)
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  if(eventPtr->fFromCalibratedAnitaEvent==0){
+    updateTemperatureCorrection(); ///< This is pretty important as RCO guess needs accurate clock 
+    fTempFactorGuess = getTempFactor();
+    eventPtr->fTempFactorGuess = fTempFactorGuess; 
+  }
+  else{
+    fTempFactorGuess = eventPtr->fTempFactorGuess;
+  }
+
+
+
+
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //! Steps 4: Unwrap all channels (if requested)
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  if(fUnwrap==true){
+    // Then we call the unwrapping function for every channel
+
+    for(Int_t surf = 0; surf < NUM_SURF; surf++){
+      for(Int_t chan = 0; chan < NUM_CHAN; chan++){
+	numPointsArray[surf] = unwrapChannel(eventPtr, surf, chan,
+					     rcoArray[surf], fApplyTempCorrection,
+					     voltsArray[surf][chan],
+					     timeArray[surf],
+					     scaArray[surf]);
       }
     }
   }
-}
+  else if(fUnwrap==false){// Then we fill in the volt/time arrays with linearly increasing data points 
 
+    Double_t tempFactor = fTempFactorGuess; //getTempFactor();
+    for(Int_t surf = 0; surf < NUM_SURF; surf++){
+      numPointsArray[surf] = NUM_SAMP;
+      Int_t clockIndex = surf*NUM_CHAN + 8;
+      Int_t labChip = eventPtr->getLabChip(clockIndex);
+      for(Int_t samp=0; samp < numPointsArray[surf]-1; samp++){
+	timeArray[surf][samp+1] = (timeArray[surf][samp] 
+				   + deltaTs[surf][labChip][rcoArray[surf]][samp]*tempFactor);
+      }
 
-  /* Don't want to copy and paste this code multiple times...*/
-void AnitaEventCalibrator::processEventAG(UsefulAnitaEvent *eventPtr, Int_t fGetTempFactorInProcessEventAG, Int_t fUseRollingTempAverage, Int_t fReadRcoFromFirmware, Int_t fApplyRelativeChannelDelays){
-  // std::cout << "processEventAG\n";
-
-  //C3PO num is no longer the clock in channel 9
-  //  if(eventPtr->fC3poNum) {
-  //    clockPeriod=1e9/eventPtr->fC3poNum;
-  //  }
-  Double_t tempFactor=1;
-
-  if(fGetTempFactorInProcessEventAG && !fUseRollingTempAverage){
-    tempFactor=eventPtr->getTempCorrectionFactor();
+      for(Int_t chan = 0; chan < NUM_CHAN; chan++){
+	Int_t chanIndex = surf*NUM_CHAN + chan;
+	for(Int_t samp=0; samp < numPointsArray[surf]; samp++){
+	  voltsArray[surf][chan][samp] = eventPtr->data[chanIndex][samp];
+	  scaArray[surf][samp] = samp;
+	}
+      }
+    }
   }
-  else if(fGetTempFactorInProcessEventAG && fUseRollingTempAverage){
-    tempFactor=eventPtr->fRollingAverageTempFactor;
+
+
+
+
+
+
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //! Step 5: Apply bin-to-bin timing (if requested)
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Actually all the bin-to-bin timings are put in the time array by default..
+  // so if they're not wanted we can take them out again.
+  if(fBinToBinDts==false){
+    if(fNominal==true){
+      for(Int_t surf = 0; surf < NUM_SURF; surf++){
+	for(Int_t samp=0; samp < numPointsArray[surf]; samp++){
+	  timeArray[surf][samp] = nominalDeltaT*samp;
+	}
+      }
+    }
+    else{ // just sample number
+      for(Int_t surf = 0; surf < NUM_SURF; surf++){
+	for(Int_t samp=0; samp < numPointsArray[surf]; samp++){
+	  timeArray[surf][samp] = samp;
+	}
+      }
+    }
   }
 
-  for(Int_t surf=0;surf<NUM_SURF;surf++) {
-    for(Int_t chan=0;chan<NUM_CHAN;chan++) {
-      int numExtras = 0;
 
-      Int_t chanIndex=eventPtr->getChanIndex(surf,chan);
-      Int_t labChip=eventPtr->getLabChip(chanIndex);
-      fLabChip[surf][chan]=labChip;
-      
-      Int_t rco = -1;
-      if(fReadRcoFromFirmware){
-	rco=eventPtr->getRcoCorrected(chanIndex);
-      }
-      else{
-	rco=eventPtr->guessRco(chanIndex);
-      }
 
-      Int_t earliestSample=eventPtr->getEarliestSample(chanIndex);
-      Int_t latestSample=eventPtr->getLatestSample(chanIndex);
 
-      if(earliestSample==0)
-	earliestSample++;
 
-      if(latestSample==0)
-	latestSample=259;
-      
-      //      if(surf==7) 
-      //	std::cout << chan << "\t" << earliestSample << "\t" << latestSample 
-      //		  << "\n";
 
-      //Raw array
-      for(Int_t samp=0;samp<NUM_SAMP;samp++) {
-	rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //! Step 6: Apply voltage calib (if requested)
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  if(fVoltage==true){
+    applyVoltageCalibration(eventPtr);
+  }
+
+
+
+
+
+
+
+
+
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //! Step 7: Find trigger jitter correction
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  if(fApplyTriggerJitterCorrection==true){
+    if(eventPtr->fFromCalibratedAnitaEvent==0){ 
+      // If we don't have the calibration then get correction
+      getClockAlignment(eventPtr, numPointsArray, voltsArray, timeArray);
+      // And copy to relevant array
+      for(Int_t surf=0; surf<NUM_SURF; surf++){
+	eventPtr->fClockPhiArray[surf] = clockAlignment.at(surf);
       }
-      
-      //Now do the unwrapping
-      Int_t index=0;
-      Double_t time=0;
-      if(chan!=8 && fApplyRelativeChannelDelays!=0){
-	time = relativeChannelDelays[surf][chan];
-      }
-      // std::cout << surf << ", " << chan << ", t0 = " << time 
-      // 		<< ", fApply = " << fApplyRelativeChannelDelays << std::endl;
-      if(latestSample<earliestSample) {
-	//	std::cout << "Two RCO's\t" << surf << "\t" << chan << "\n";
-	//We have two RCOs
-	Int_t nextExtra=256;
-	Double_t extraTime=0;	
-	if(earliestSample<256) {
-	  //Lets do the first segment up	
-	  for(Int_t samp=earliestSample;samp<256;samp++) {
-	    int binRco=1-rco;
-	    scaArray[surf][chan][index]=samp;
-	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
-	    timeArray[surf][chan][index]=time;
-	    if(samp==255) {
-	      extraTime=time+(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-	      //	      extraTime=time+0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
-	    }
-	    else {
-	      time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-	      //	      time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
-	    }
-	    index++;
-	  }
-	  time+=epsilonFromAbby[surf][labChip][rco]*tempFactor*fEpsilonTempScale; ///<This is the time of the first capacitor.
-	}
-	else {
-	  //Will just ignore the first couple of samples.
-	  nextExtra=260;
-	  extraTime=0;
-	}
-	
-	
-	if(latestSample>=1) {
-	  //We are going to ignore sample zero for now
-	  time+=(justBinByBin[surf][labChip][rco][0])*tempFactor;
-	  //	  time+=0.5*(justBinByBin[surf][labChip][rco][0]+justBinByBin[surf][labChip][rco][1])*tempFactor;
-	  for(Int_t samp=1;samp<=latestSample;samp++) {
-	    int binRco=rco;
-	    if(nextExtra<260 && samp==1) {
-	      if(extraTime<time-0.22) { ///This is Andres's 220ps minimum sample separation
-		//Then insert the next extra capacitor
-		binRco=1-rco;
-		scaArray[surf][chan][index]=nextExtra;
-		unwrappedArray[surf][chan][index]=rawArray[surf][chan][nextExtra];
-		mvArray[surf][chan][index]=double(rawArray[surf][chan][nextExtra])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
-		timeArray[surf][chan][index]=extraTime;
-		if(nextExtra<259) {
-		  extraTime+=(justBinByBin[surf][labChip][binRco][nextExtra])*tempFactor;
-		  //		extraTime+=0.5*(justBinByBin[surf][labChip][binRco][nextExtra]+justBinByBin[surf][labChip][binRco][nextExtra+1])*tempFactor;
-		}
-		nextExtra++;
-		numExtras++;
-		index++;	 
-		samp--;
-		continue;
-	      }
-	    }
-	    scaArray[surf][chan][index]=samp;
-	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
-	    timeArray[surf][chan][index]=time;
-	    if(samp<259) {
-	      time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-	      //	      time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
-	    }
-	    index++;
-	  }
-	}
-      }
-      else {
-	//	std::cout << "One RCO\t" << surf << "\t" << chan << "\n";
-	//Only one rco
-	time=0;
-	for(Int_t samp=earliestSample;samp<=latestSample;samp++) {
-	  int binRco=rco;
-	  scaArray[surf][chan][index]=samp;
-	  unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-	  mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
-	  timeArray[surf][chan][index]=time;
-	  if(samp<259) {
-	    time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-	    //	    time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
-	  }
-	  index++;
-	}
-      }
-      numPointsArray[surf][chan]=index;
-      // std::cout << "index = " << index << ", numExtras = " << numExtras << std::endl;
     }
-    //Okay now add Stephen's check to make sure that all the channels on the SURF have the same number of points.
-    for(int chan=0;chan<8;chan++) {
-	
-       
-      if(numPointsArray[surf][chan]<numPointsArray[surf][8]) {
-
-       
-	numPointsArray[surf][chan]=numPointsArray[surf][8];
-	for(int samp=0;samp<numPointsArray[surf][8];samp++) {
-	     
-	  timeArray[surf][chan][samp]=timeArray[surf][8][samp];
-	  // std::cout << "here 1 " << std::endl;
-	  //	     std::cout << "Fix: " << surf << "\t" << chan << "\t" << samp
-	  //		       << "\t" << timeArray[surf][chan][samp] << "\n";
-	}    
+    else{ // If we have the calibration then just copy the result
+      for(Int_t surf=0; surf<NUM_SURF; surf++){
+	clockAlignment.at(surf) = eventPtr->fClockPhiArray[surf];
       }
-
-      if(numPointsArray[surf][chan]>numPointsArray[surf][8]) {
-	numPointsArray[surf][chan]=numPointsArray[surf][8];
-	for(int samp=0;samp<numPointsArray[surf][8];samp++) {
-	  //	     std::cout << "Fix: " << surf << "\t" << chan << "\t" << samp
-	  //		       << "\t" << timeArray[surf][chan][samp] << "\n";
-	  // std::cout << "here 2 " << std::endl;
-	  timeArray[surf][chan][samp]=timeArray[surf][8][samp];
-	}    	
-      }
-              
     }
-    
-    //And fill in surfTimeArray if we need it for anything
-    for(int samp=0;samp<numPointsArray[surf][8];samp++) {
-      surfTimeArray[surf][samp]=timeArray[surf][8][samp];
-    }
-  }	  		  	  
-}
 
-
-//   Double_t tempFactor = 1;
-//   if(fGetTempFactorInProcessEventAG && !fUseRollingTempAverage){
-//     tempFactor=eventPtr->getTempCorrectionFactor();
-//   }
-//   else if(fGetTempFactorInProcessEventAG && fUseRollingTempAverage){
-//     tempFactor=eventPtr->fRollingAverageTempFactor;
-//   }
-
-//   for(Int_t surf=0;surf<NUM_SURF;surf++) {
-//     for(Int_t chan=0;chan<NUM_CHAN;chan++) {
-//       Int_t chanIndex=eventPtr->getChanIndex(surf,chan);
-//       Int_t labChip=eventPtr->getLabChip(chanIndex);
-//       fLabChip[surf][chan]=labChip;
-//       //      Int_t rco=eventPtr->guessRco(chanIndex);
-//       Int_t rco = -1;
-//       if(fReadRcoFromFirmware){
-// 	rco=eventPtr->getRcoCorrected(chanIndex);
-//       }
-//       else{
-// 	rco=eventPtr->guessRco(chanIndex);
-//       }
-
-      
-
-//       Int_t earliestSample=eventPtr->getEarliestSample(chanIndex);
-//       Int_t latestSample=eventPtr->getLatestSample(chanIndex);
-
-
-//       if(earliestSample==0)
-// 	earliestSample++;
-      
-//       if(latestSample==0)
-// 	latestSample=259;
-//       //      std::cerr << "processEventAG: " <<  chanIndex << "\t" << labChip << "\t" << rco 
-//       //      		<< "\t" << earliestSample << "\t" << latestSample << "\n";
-//       //Raw array
-//       for(Int_t samp=0;samp<NUM_SAMP;samp++) {
-// 	rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
-//       }
-      
-//       //Now do the unwrapping
-//       Int_t index=0;
-//       Double_t time=0;
-//       if(latestSample<earliestSample) {
-// 	//	std::cout << "Two RCO's\t" << surf << "\t" << chan << "\n";
-// 	//We have two RCOs
-// 	Int_t nextExtra=256;
-// 	Double_t extraTime=0;	
-// 	if(earliestSample<256) {
-// 	  //Lets do the first segment up	
-// 	  for(Int_t samp=earliestSample;samp<256;samp++) {
-// 	    int binRco=1-rco;
-// 	    scaArray[surf][chan][index]=samp;
-// 	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-// 	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
-// 	    timeArray[surf][chan][index]=time;
-// 	    if(samp==255) {
-// 	      extraTime=time+(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-	     
-// 	    }
-// 	    else {
-// 	      time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-	     
-// 	    }
-// 	    index++;
-// 	  }
-// 	  time+=epsilonFromAbby[surf][labChip][rco]*tempFactor*fEpsilonTempScale; ///<This is the time of the first capacitor.
-// 	}
-// 	else {
-// 	  //Will just ignore the first couple of samples.
-// 	  nextExtra=260;
-// 	  extraTime=0;
-// 	}
-	
-	
-// 	if(latestSample>=1) {
-// 	  //We are going to ignore sample zero for now
-// 	  time+=(justBinByBin[surf][labChip][rco][0])*tempFactor;
-// 	  //	  time+=0.5*(justBinByBin[surf][labChip][rco][0]+justBinByBin[surf][labChip][rco][1])*tempFactor;
-// 	  for(Int_t samp=1;samp<=latestSample;samp++) {
-// 	    int binRco=rco;
-// 	    if(nextExtra<260 && samp==1) {
-// 	      if(extraTime<time-0.22) { ///This is Andres's 220ps minimum sample separation
-// 		//Then insert the next extra capacitor
-// 	      binRco=1-rco;
-// 	      scaArray[surf][chan][index]=nextExtra;
-// 	      unwrappedArray[surf][chan][index]=rawArray[surf][chan][nextExtra];
-// 	      mvArray[surf][chan][index]=double(rawArray[surf][chan][nextExtra])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
-// 	      timeArray[surf][chan][index]=extraTime;
-// 	      if(nextExtra<259) {
-// 		extraTime+=(justBinByBin[surf][labChip][binRco][nextExtra])*tempFactor;
-// 		//		extraTime+=0.5*(justBinByBin[surf][labChip][binRco][nextExtra]+justBinByBin[surf][labChip][binRco][nextExtra+1])*tempFactor;
-// 	      }
-// 	      nextExtra++;
-// 	      index++;	 
-//    	      samp--;
-// 	      continue;
-// 	      }
-// 	    }
-// 	    scaArray[surf][chan][index]=samp;
-// 	    unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-// 	    mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
-// 	    timeArray[surf][chan][index]=time;
-// 	    if(samp<259) {
-// 	      time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-// 	      //	      time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
-// 	    }
-// 	    index++;
-// 	  }
-// 	}
-//       }
-//       else {
-// 	//	std::cout << "One RCO\t" << surf << "\t" << chan << "\n";
-// 	//Only one rco
-// 	time=0;
-// 	for(Int_t samp=earliestSample;samp<=latestSample;samp++) {
-// 	  int binRco=rco;
-// 	  scaArray[surf][chan][index]=samp;
-// 	  unwrappedArray[surf][chan][index]=rawArray[surf][chan][samp];
-// 	  mvArray[surf][chan][index]=double(rawArray[surf][chan][samp])* mvCalibVals[surf][chan][labChip]; //Need to add mv calibration at some point
-// 	  timeArray[surf][chan][index]=time;
-// 	  if(samp<259) {
-// 	    time+=(justBinByBin[surf][labChip][binRco][samp])*tempFactor;
-// 	    //	    time+=0.5*(justBinByBin[surf][labChip][binRco][samp]+justBinByBin[surf][labChip][binRco][samp+1])*tempFactor;
-// 	  }
-// 	  index++;
-// 	}
-//       }
-//       numPointsArray[surf][chan]=index;
-//     }
-//     //Okay now add Stephen's check to make sure that all the channels on the SURF have the same number of points.
-//     for(int chan=0;chan<8;chan++) {
-	
-       
-//        if(numPointsArray[surf][chan]<numPointsArray[surf][8]) {
-
-       
-// 	  numPointsArray[surf][chan]=numPointsArray[surf][8];
-// 	  for(int samp=0;samp<numPointsArray[surf][8];samp++) {
-	     
-// 	     timeArray[surf][chan][samp]=timeArray[surf][8][samp];
-// 	     //	     std::cout << "Fix: " << surf << "\t" << chan << "\t" << samp
-// 	     //		       << "\t" << timeArray[surf][chan][samp] << "\n";
-// 	  }    
-//        }
-
-//        if(numPointsArray[surf][chan]>numPointsArray[surf][8]) {
-// 	  numPointsArray[surf][chan]=numPointsArray[surf][8];
-// 	  for(int samp=0;samp<numPointsArray[surf][8];samp++) {
-// 	     //	     std::cout << "Fix: " << surf << "\t" << chan << "\t" << samp
-// 	     //		       << "\t" << timeArray[surf][chan][samp] << "\n";
-// 	     timeArray[surf][chan][samp]=timeArray[surf][8][samp];
-// 	  }    	
-//        }
-              
-//     }
-    
-//     //And fill in surfTimeArray if we need it for anything
-//     for(int samp=0;samp<numPointsArray[surf][8];samp++) {
-//       surfTimeArray[surf][samp]=timeArray[surf][8][samp];
-//     }    
-//   }	  		  	  
-// }
-
-Int_t AnitaEventCalibrator::justBinByBinTimebase(UsefulAnitaEvent *eventPtr)
-{
-//    Int_t refEvNum=31853801;
-//    if(!fFakeTemp) {
-//       fFakeTemp= new TF1("fFakeTemp","[0] + [1]*exp(-x*[2])",0,100000);
-//       fFakeTemp->SetParameters(8.07,0.13,1./30000);
-//    }
-  Double_t tempFactor=1;
-//    if(doFakeTemp) {
-//       tempFactor=fFakeTemp->Eval(100000)/fFakeTemp->Eval(eventPtr->eventNumber-refEvNum);
-//    }
-//  Double_t tempFactor=eventPtr->getTempCorrectionFactor();
-        
-
-   for(int surf=0;surf<NUM_SURF;surf++) {
-      for(int chan=0;chan<NUM_CHAN;chan++) {
-	 int chanIndex=getChanIndex(surf,chan);
-	 int labChip=eventPtr->getLabChip(chanIndex);
-	 int rco=1-eventPtr->getRCO(chanIndex); ///< Is this the right thing to do??
-	 //int rco=eventPtr->guessRco(chanIndex); ///< Is this the right thing to do??
-	 
-	 Int_t earliestSample=eventPtr->getEarliestSample(chanIndex);
-	 Int_t latestSample=eventPtr->getLatestSample(chanIndex);
-	 
-	 double time=0;
-	 for(int samp=0;samp<NUM_SAMP;samp++) {
-	   int binRco=rco;
-	   rawArray[surf][chan][samp]=eventPtr->data[chanIndex][samp];
-	   timeArray[surf][chan][samp]=time;
-	   if(latestSample<earliestSample) {
-	     //We have two rcos
-	     if(samp>=earliestSample)
-	       binRco=1-rco;
-	     else 
-	       binRco=rco;
-	   }
-	   time+=justBinByBin[surf][labChip][binRco][samp]*tempFactor;
-	 }
+    for(Int_t surf=0; surf<NUM_SURF; surf++){
+      for(Int_t samp=0; samp < numPointsArray[surf]; samp++){
+	// Update time base for each SURF with the trigger jitter
+	timeArray[surf][samp] -= clockAlignment.at(surf);
       }
-   }  
+    }
+  }
+
+
+
+
+
+
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //! Step 8: Zero mean all non-clock channels
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  if(fZeroMeanNonClockChannels==true){
+    zeroMeanNonClockChannels();
+  }
+
+
+
+
+
+
+
+
+
+  // Combine last two steps...
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //! Step 9: Apply channel-to-channel cable delays
+  //! Step 10: Copy voltage, time (with cable delays) & capacitor arrays to UsefulAnitaEvent
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  for(Int_t surf=0; surf<NUM_SURF; surf++){
+    eventPtr->fRcoArray[surf] = rcoArray[surf];
+    for(Int_t chan=0; chan<NUM_CHAN; chan++){
+      Int_t chanIndex = surf*CHANNELS_PER_SURF + chan;
+
+      eventPtr->fNumPoints[chanIndex] = numPointsArray[surf];
+
+      Double_t cableDelay = 0;
+      if(fApplyCableDelays==true){
+	cableDelay = relativeChannelDelays[surf][chan];
+      }
+
+      for(Int_t samp=0; samp<numPointsArray[surf]; samp++){
+	eventPtr->fTimes[chanIndex][samp] = timeArray[surf][samp] + cableDelay;
+	eventPtr->fVolts[chanIndex][samp] = voltsArray[surf][chan][samp];
+	eventPtr->fCapacitorNum[chanIndex][samp] = scaArray[surf][samp];
+      }
+    }
+  }
+
+  // Enjoy your calibrated event
+
+
   return 0;
 }
 
 
 
+
+void AnitaEventCalibrator::applyVoltageCalibration(UsefulAnitaEvent* eventPtr){
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+  for(Int_t surf=0; surf<NUM_SURF; surf++){
+    for(Int_t chan=0; chan<RFCHAN_PER_SURF; chan++){
+      Int_t chanIndex = surf*NUM_CHAN + chan;
+      Int_t labChip = eventPtr->getLabChip(chanIndex);
+      for(Int_t samp=0; samp<numPointsArray[surf]; samp++){
+	// std::cout << voltsArray[surf][chan][samp] << "\t";
+	voltsArray[surf][chan][samp]*=mvCalibVals[surf][chan][labChip];
+	// std::cout << voltsArray[surf][chan][samp] << "\tsurf=" << surf << "\tchan=" << chan 
+	// 	  << "\tchanIndex=" << chanIndex << "\tlabChip=" << labChip << "\tnumPoints=" 
+	// 	  << numPointsArray[surf] << "\tRFCHAN_PER_SURF=" << RFCHAN_PER_SURF
+	// 	  << "\tmvCalibVals[" << surf << "][" << chan << "]["<< labChip << "] = " 
+	// 	  << mvCalibVals[surf][chan][labChip] << std::endl;
+      }
+    }
+  }
+}
+
+
+
+void AnitaEventCalibrator::zeroMeanNonClockChannels(){
+  for(Int_t surf=0; surf<NUM_SURF; surf++){
+    for(Int_t chan=0; chan<RFCHAN_PER_SURF; chan++){
+      Double_t chanMean = TMath::Mean(numPointsArray[surf], voltsArray[surf][chan]);
+      for(Int_t samp=0; samp<numPointsArray[surf]; samp++){
+	voltsArray[surf][chan][samp] -= chanMean;
+      }
+    }    
+  }
+}
+
+
+std::vector<Double_t> AnitaEventCalibrator::getClockAlignment(UsefulAnitaEvent* eventPtr,
+							      Int_t numPoints[NUM_SURF],
+							      Double_t volts[NUM_SURF][NUM_CHAN][NUM_SAMP],
+							      Double_t times[NUM_SURF][NUM_SAMP]){
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+  return getClockAlignment(eventPtr, numPoints, volts, times, defaultClocksToAlign);
+}
+
+
+
+void AnitaEventCalibrator::deleteClockAlignmentTGraphs(){
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+  for(Int_t surf=0; surf<NUM_SURF; surf++){
+    // std::cout << surf << std::endl;
+    clockAlignment.at(surf) = 0;
+
+    if(grClockInterps.at(surf)) {
+      delete grClockInterps.at(surf);
+      grClockInterps.at(surf) = nullptr;
+    }
+    if(grCorClock.at(surf)){
+      delete grCorClock.at(surf);
+      grCorClock.at(surf) = nullptr; 
+    }
+  }
+
+  // std::cout << "deleting clock0s" << std::endl;
+  for(std::map<Double_t, TGraph*>::iterator itr = grClock0s.begin(); itr != grClock0s.end(); ++itr){
+    // std::cout << itr->first << ", " << itr->second << "\t" << itr->second->GetN() << std::endl;
+
+    delete itr->second; // delete object pointed to by current key
+    itr->second = nullptr;
+  }
+
+  // finally delete all key and pointer pairs from the map
+  grClock0s.erase(grClock0s.begin(), grClock0s.end());
+
+  // std::cout << "finished deleting..." << std::endl;
+}
+
+std::vector<Double_t> AnitaEventCalibrator::getClockAlignment(UsefulAnitaEvent* eventPtr,
+							      Int_t numPoints[NUM_SURF],
+							      Double_t volts[NUM_SURF][NUM_CHAN][NUM_SAMP],
+							      Double_t times[NUM_SURF][NUM_SAMP],
+							      std::vector<Int_t> listOfClockNums){
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+
+  // for(int surf=0; surf<NUM_SURF; surf++){
+  //   std::cout << surf << "\t" << numPoints[surf] << std::endl;
+  // }
+
+
+
+  // Want these to hang around in memory during calibration so I can examine them.
+  // Therefore delete previous clock alignment graphs only when this function is called.
+  deleteClockAlignmentTGraphs();
+
+
+
+
+  for(UInt_t surfInd=0; surfInd<listOfClockNums.size(); surfInd++){
+    Int_t surf = listOfClockNums.at(surfInd);
+    if(surf==0){
+      continue;
+    }
+
+    // Interpolate clock
+    TGraph* grTemp = new TGraph(numPoints[surf], times[surf], volts[surf][8]);
+    grClockInterps.at(surf) = FFTtools::getInterpolatedGraph(grTemp, dtInterp);
+
+    delete grTemp;
+
+    Int_t lab = eventPtr->getLabChip(surfInd*NUM_CHAN + 8);
+    Double_t deltaClockKeepNs = clockKeepTime[surf][lab];
+    
+    TGraph* grClock0 = nullptr;
+    if(grClock0s.find(deltaClockKeepNs)==grClock0s.end()){
+      // Not already made/played around with this amount of ringing
+      TGraph* grTemp0 = new TGraph(numPoints[0], times[0], volts[0][8]); // make clock
+      grClock0 = FFTtools::getInterpolatedGraph(grTemp0, dtInterp);
+      delete grTemp0;
+      grClock0s[deltaClockKeepNs] = grClock0; // add key and pointer into map
+      keepOnlySomeTimeAfterClockUptick(grClock0, deltaClockKeepNs); // process
+    }
+    else{
+      grClock0 = grClock0s.find(deltaClockKeepNs)->second;
+    }
+    keepOnlySomeTimeAfterClockUptick(grClockInterps.at(surf), deltaClockKeepNs);
+
+    // Correlate clocks once they've both been processed
+    grCorClock.at(surf) = FFTtools::getCorrelationGraph(grClockInterps.at(surf), 
+							grClock0);
+
+    Double_t maxVal = -1001;
+    Double_t clockAlignmentTemp = 0;
+    for(Int_t samp=0; samp<grCorClock.at(surf)->GetN(); samp++){
+      if(TMath::Abs(grCorClock.at(surf)->GetX()[samp]) <= AnitaClock::meanPeriodNs/2){
+	if(grCorClock.at(surf)->GetY()[samp] > maxVal){
+	  maxVal = grCorClock.at(surf)->GetY()[samp];
+	  clockAlignmentTemp = grCorClock.at(surf)->GetX()[samp];
+	}
+      }
+    }
+    clockAlignment.at(surf) = clockAlignmentTemp;
+
+    // not necessary but nice if printing graphs to be able to show alignment...
+    for(Int_t samp=0; samp < grClockInterps.at(surf)->GetN(); samp++){
+      grClockInterps.at(surf)->GetX()[samp] -= clockAlignment.at(surf);
+    }
+  }
+
+  return clockAlignment;
+
+}
+
+
+
+
+
+
+
+void AnitaEventCalibrator::keepOnlySomeTimeAfterClockUptick(TGraph* grClock, Double_t deltaClockKeepNs){
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+
+  if(deltaClockKeepNs > 0){ // Here 0 means don't actually do anything to the clock
+
+    // Try only keeping things near the upgoing clock
+    Double_t timeZeroCrossings[AnitaClock::maxNumZcs] = {0};
+    Int_t sampZeroCrossings[AnitaClock::maxNumZcs] = {0};
+
+    Int_t numZc = getTimeOfUpgoingZeroCrossings(grClock->GetN(),
+						grClock->GetX(),
+						grClock->GetY(),
+						timeZeroCrossings, 
+						sampZeroCrossings);
+    Int_t thisZc = 0;
+    for(Int_t samp=0; samp<grClock->GetN(); samp++){
+      
+      if(grClock->GetX()[samp] - timeZeroCrossings[thisZc] < deltaClockKeepNs &&
+	 grClock->GetX()[samp] - timeZeroCrossings[thisZc] >= 0){
+      }
+      else{
+	grClock->GetY()[samp] = 0;
+      }
+      
+      if(timeZeroCrossings[thisZc] < grClock->GetX()[samp] - deltaClockKeepNs){
+	if(thisZc < numZc-1){
+	  thisZc++;
+	}
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+Double_t AnitaEventCalibrator::getTempFactor(){
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+  Double_t oldMeanClockPeriod = clockPeriodRingBuffer->getMean();
+  Double_t tempFactor = 1;
+  if(oldMeanClockPeriod > 1){ // Check we actually have a mean value
+    tempFactor = AnitaClock::meanPeriodNs/oldMeanClockPeriod;
+  }
+  // std::cout << "output = " << oldMeanClockPeriod << "\t" << tempFactor << "\t" << std::endl;
+  // std::cout << tempFactor << std::endl;
+  // std::cout << clockPeriodRingBuffer->getSum() << std::endl;
+  return tempFactor;
+}
+
+
+
+
+
+
+
+
+void AnitaEventCalibrator::updateTemperatureCorrection(){
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+  //! N.B. This function relies on the results of the guessRCO() to have the measured clock periods
+  
+  // First need to remove effect of previous temp correction...
+  Double_t currentTempFactor = fTempFactorGuess; //getTempFactor();
+
+  Double_t meanClockDt = 0;
+  Int_t count = 0;
+  for(Int_t surf=0; surf<NUM_SURF; surf++){
+    for(Int_t zc=0; zc<AnitaClock::maxNumZcs; zc++){
+      // std::cout << surf << "\t" << rcoArray[surf] << "\t" << zc << "\t" 
+      // 		<< measuredClockPeriods[surf][rcoArray[surf]][zc] << std::endl;
+      if(measuredClockPeriods[surf][rcoArray[surf]][zc] > 0){
+	meanClockDt += measuredClockPeriods[surf][rcoArray[surf]][zc]/currentTempFactor;
+	count++;
+      }
+    }
+  }
+  
+  meanClockDt /= count;
+  // std::cout << meanClockDt << std::endl;
+  clockPeriodRingBuffer->insert(meanClockDt);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void AnitaEventCalibrator::guessRco(UsefulAnitaEvent* eventPtr){
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+  
+  /*
+    This function works by unwrapping the clock channels in both RCO phases
+    and compares the upgoing clock periods to the (two) clock period(s).
+  */
+
+  // Arrays to hold the unwrapped clock channels in both RCO phases
+  Double_t clockVolts[NUM_SURF][NUM_RCO][NUM_SAMP] = {{{0}}};
+  Double_t clockTimes[NUM_SURF][NUM_RCO][NUM_SAMP] = {{{0}}};
+  Int_t clockCapacitorNums[NUM_SURF][NUM_RCO][NUM_SAMP] = {{{0}}};
+  Int_t clockNumPoints[NUM_SURF][NUM_RCO] = {{0}};
+
+  // Here we do the unwrapping
+  for(Int_t surf=0; surf<NUM_SURF; surf++){
+    for(Int_t rco=0; rco<NUM_RCO; rco++){
+      clockNumPoints[surf][rco] = unwrapChannel(eventPtr, surf, 8, rco, true, 
+						clockVolts[surf][rco], clockTimes[surf][rco],
+						clockCapacitorNums[surf][rco]);
+      // std::cout << "surf = " << surf << "\trco = " << rco << "\tnumPoints = " 
+      // 		<< clockNumPoints[surf][rco] << ":" << std::endl;
+      // for(Int_t samp=0; samp<clockNumPoints[surf][rco]; samp++){
+      // 	std::cout << clockVolts[surf][rco][samp] << ", ";
+      // 	// std::cout << clockCapacitorNums[surf][rco][samp] << ", ";
+      // }
+      // std::cout << std::endl << std::endl;
+      // for(Int_t samp=0; samp<clockNumPoints[surf][rco]; samp++){
+      // 	std::cout << clockTimes[surf][rco][samp] << ", ";
+      // }
+      // std::cout << std::endl << std::endl;
+    }
+  }
+  
+  // Now we have the unwrapped clocks we need to examine their periods as measured by the SURFs. 
+  // (We will use the time of the zero crossings to match them up across the SURFs later so get that too.)
+
+  Double_t timeZeroCrossings[NUM_SURF][NUM_RCO][AnitaClock::maxNumZcs] = {{{0}}};
+  Int_t sampZeroCrossings[NUM_SURF][NUM_RCO][AnitaClock::maxNumZcs] = {{{0}}};
+  std::fill(&measuredClockPeriods[0][0][0],
+	    &measuredClockPeriods[0][0][0]+sizeof(measuredClockPeriods)/sizeof(Double_t), 0);
+  Int_t numZcs[NUM_SURF][NUM_RCO] = {{0}};
+
+  for(Int_t surf=0; surf<NUM_SURF; surf++){    
+    for(int rco=0; rco<NUM_RCO; rco++){
+      numZcs[surf][rco] = getTimeOfUpgoingZeroCrossings(clockNumPoints[surf][rco],
+							clockTimes[surf][rco],
+							clockVolts[surf][rco],
+							timeZeroCrossings[surf][rco],
+							sampZeroCrossings[surf][rco]);
+      for(Int_t zc=0; zc<numZcs[surf][rco]; zc++){	
+	if(zc > 0){
+	  measuredClockPeriods[surf][rco][zc-1] = timeZeroCrossings[surf][rco][zc] - timeZeroCrossings[surf][rco][zc-1]; 
+	}
+      }
+    }
+  }
+
+  // Now we have the time of (and times between) the clock upgoing zero crossings in both possible RCOs
+
+  // Now we compare the periods implied by both RCO phase possibilities to the true clock period(s)
+  // In ANITA-3 no-one turned off the spread spectrum modulation before flight, so we compare to
+  // AnitaClock::highPeriodNs and AnitaClock::lowPeriodNs
+  Double_t nearestClockPeriod[NUM_SURF][NUM_RCO][AnitaClock::maxNumZcs] = {{{0}}};
+  Double_t differenceFromClockPeriod[NUM_SURF][NUM_RCO] = {{0}};
+
+  const Int_t dangerZoneStart = 170;
+  const Int_t dangerZoneEnd = 220;
+
+  // First we use the clock period(s) to get a first pass at the RCO phase determination
+  for(Int_t surf=0; surf<NUM_SURF; surf++){
+    for(int rco=0; rco<NUM_RCO; rco++){
+      for(int zc=0; zc<numZcs[surf][rco]-1; zc++){
+
+	// Short variable name to make the next code snippet more readable
+	Double_t dt = measuredClockPeriods[surf][rco][zc];
+	if(dt <= 0){
+	  std::cerr << "Idiot " << __FILE__ << ": " << __LINE__ << std::endl;
+	}
+
+	Int_t capNum = clockCapacitorNums[surf][rco][sampZeroCrossings[surf][rco][zc]];
+	// In ANITA-3 no-one turned off the clock spread modulation... so compare to high and low periods
+	// (We will need the nearestClockPeriods later for a second, improved period matching.)
+	//	if(clockCapacitorNums[surf][rco]
+	if(capNum < dangerZoneStart || capNum > dangerZoneEnd){
+	  if(TMath::Abs(dt - AnitaClock::lowPeriodNs) < TMath::Abs(dt - AnitaClock::highPeriodNs)){
+	    differenceFromClockPeriod[surf][rco] += TMath::Abs(dt - AnitaClock::lowPeriodNs);
+	    nearestClockPeriod[surf][rco][zc] = AnitaClock::lowPeriodNs;
+	  }
+	  else{
+	    differenceFromClockPeriod[surf][rco] += TMath::Abs(dt - AnitaClock::highPeriodNs);
+	    nearestClockPeriod[surf][rco][zc] = AnitaClock::highPeriodNs;
+	  }
+	}
+      }
+
+      if(numZcs[surf][rco] > 0){
+	differenceFromClockPeriod[surf][rco]/=numZcs[surf][rco];
+      }
+      else{ // If we have no zero crossings we're probably missing a clock and this won't work
+	std::cerr << "Missing clock? SURF " << surf << ", RCO " << rco << ", guess 1" << std::endl;
+      }
+    }
+
+
+    // May as well use firmware RCO latched value in the safe area
+    // If the first hit bus is greater than the latch delay value defined here or the hit bus
+    Int_t chanIndex = surf*NUM_CHAN + 8;
+    Int_t firstHitBus = eventPtr->getFirstHitBus(chanIndex);
+    Int_t lastHitBus = eventPtr->getLastHitBus(chanIndex);
+    if(firstHitBus >= firstHitBusRcoLatchLimit || lastHitBus - firstHitBus > NUM_SAMP/2){
+      rcoArray[surf] = eventPtr->getRcoCorrected(chanIndex);
+    }
+    else{
+      // At this point we've compared the unwrapped clock periods to the closest of the 
+      // two spread modulated clock periods...
+      // Calibration work so far indicates this is a very good guess
+      if(differenceFromClockPeriod[surf][0] < differenceFromClockPeriod[surf][1]){
+	rcoArray[surf] = 0;
+      }
+      else{
+	rcoArray[surf] = 1;
+      }
+    }
+  }
+
+
+
+  // Now this is a pretty good guess, but we can do slightly better.
+  // The clock spread modulation means is the same across all SURFs... we can use that information.
+  // By using the time of the first upgoing zero crossings (and assuming any trigger jitter is 
+  // less than 15ns) we can match up the clock periods.
+
+  // We find the offset of the clock periods relative to SURF 0.
+
+  std::vector<Int_t> zeroCrossingMatchIndices;
+  zeroCrossingMatchIndices.clear();
+  zeroCrossingMatchIndices.assign(NUM_SURF, 0);
+
+  const Double_t halfClockPeriod = 0.5*AnitaClock::meanPeriodNs;
+  for(Int_t surf=0; surf<NUM_SURF; surf++){
+    Int_t rco = rcoArray[surf];
+
+    if(TMath::Abs(timeZeroCrossings[surf][rco][0] - timeZeroCrossings[0][rco][0]) < halfClockPeriod){
+      zeroCrossingMatchIndices.at(surf) = 0; // If within half a period, there's no offset
+    }
+
+    else if(timeZeroCrossings[surf][rco][0] - timeZeroCrossings[0][rco][0] >= halfClockPeriod){
+      // If first zero crossing in SURF[surf] is more than half a clock period later than current SURF[0]
+      // then the timeZeroCrossing[surf][rco][0] matches up with zeroCrossing[0][rco][1]
+      // and so the relative clock zero crossing index is -1
+      zeroCrossingMatchIndices.at(surf) = -1;
+    }
+    else if(timeZeroCrossings[surf][rco][0] - timeZeroCrossings[0][rco][0] <= halfClockPeriod){
+      // opposite of above.
+      zeroCrossingMatchIndices.at(surf) = 1;
+    }
+  }
+  
+
+
+
+  // Suppose the relative SURF clock period offsets are {0, -1, 1} in a simple situation with 3 SURFs.
+  // If we started at the sum at 0 then the third SURF would start at 1 and there would be a clock
+  // period which didn't contribute to anything.
+  // In that case we want the sum to start then at -1 so that the zero crossings compared will be {-1, -2, 0}
+  // on the first loop. (Obviously we should ignore the cases when the clock indices are less than 0.)
+  // Therefore, the start index is...
+  Int_t startIndex = -1*TMath::MaxElement(NUM_SURF, &zeroCrossingMatchIndices[0]);
+
+  
+  // Now we need to sum over the clock indices again but with the offsets.
+  // How many SURFs thought a period was high (Anita::highPeriodNs) or low (AnitaClock::lowPeriodNs)?
+
+  const Int_t maxNumOffsetZcs = AnitaClock::maxNumZcs - startIndex;
+  std::vector<Int_t> numHigh(maxNumOffsetZcs, 0);
+  std::vector<Int_t> numLow(maxNumOffsetZcs, 0);
+  std::vector<Int_t> meanClockPeriod(maxNumOffsetZcs, 0);
+  std::vector<Int_t> count(maxNumOffsetZcs, 0);
+    
+  Int_t alignedPeriodIndex = 0;
+  for(Int_t zcIndex=startIndex; zcIndex < AnitaClock::maxNumZcs; zcIndex++){
+    numHigh.at(alignedPeriodIndex)=0;
+    numLow.at(alignedPeriodIndex)=0;
+    for(Int_t surf=0; surf<NUM_SURF; surf++){
+      Int_t rco = rcoArray[surf];
+      Int_t zcThisSurf = zcIndex + zeroCrossingMatchIndices.at(surf);
+      if(zcThisSurf >=0 && zcThisSurf < AnitaClock::maxNumZcs && nearestClockPeriod[surf][rco][zcThisSurf] > 0){
+
+	meanClockPeriod.at(zcThisSurf) += measuredClockPeriods[surf][rco][zcThisSurf];
+	count.at(zcThisSurf)++;
+	// if(nearestClockPeriod[surf][rco][zcThisSurf]==AnitaClock::lowPeriodNs){
+	//   numLow.at(alignedPeriodIndex)++;
+	// }
+	// else if(nearestClockPeriod[surf][rco][zcThisSurf]==AnitaClock::highPeriodNs){
+	//   numHigh.at(alignedPeriodIndex)++;
+	// }
+	// else{
+	//   std::cerr << "How did I get here? " << __FILE__ << ": line " << __LINE__ << std::endl;
+	//   std::cerr << surf << "\t" << rco << "\t" << zcThisSurf << "\t" 
+	// 	    << nearestClockPeriod[surf][rco][zcThisSurf] << std::endl;
+	// }
+      }
+    }
+
+    alignedPeriodIndex++;
+  }
+
+  // Now we just pick the most common answer for the clock period and compare only to that
+  // (i.e. not to both possible (high/low) clock periods).
+
+  const Int_t numAlignedPeriodIndices = alignedPeriodIndex;
+  std::vector<Double_t> mostCommonClockPeriod;
+  mostCommonClockPeriod.clear();
+  mostCommonClockPeriod.assign(maxNumOffsetZcs, 0);
+  
+  for(Int_t alignedPeriodIndex=0; alignedPeriodIndex<numAlignedPeriodIndices; alignedPeriodIndex++){
+
+    if(count.at(alignedPeriodIndex)){
+      meanClockPeriod.at(alignedPeriodIndex)/=count.at(alignedPeriodIndex);
+      if(TMath::Abs(meanClockPeriod.at(alignedPeriodIndex) - AnitaClock::lowPeriodNs) < TMath::Abs(meanClockPeriod.at(alignedPeriodIndex) - AnitaClock::highPeriodNs)){
+	mostCommonClockPeriod.at(alignedPeriodIndex) = AnitaClock::lowPeriodNs;
+      }
+      else{
+	mostCommonClockPeriod.at(alignedPeriodIndex) = AnitaClock::highPeriodNs;
+      }
+    }
+    else{
+      mostCommonClockPeriod.at(alignedPeriodIndex) = -1000;
+    }
+    // if(numLow.at(alignedPeriodIndex) > numHigh.at(alignedPeriodIndex)){
+    //   mostCommonClockPeriod.at(alignedPeriodIndex) = AnitaClock::lowPeriodNs;
+    // }
+    // else if(numHigh.at(alignedPeriodIndex) > numLow.at(alignedPeriodIndex)){
+    //   mostCommonClockPeriod.at(alignedPeriodIndex) = AnitaClock::highPeriodNs;
+    // } 
+    // else{ // In the rare case that we're really not sure, let's use the mean clock period
+    //   mostCommonClockPeriod.at(alignedPeriodIndex) = AnitaClock::meanPeriodNs;
+    // }
+  }
+
+
+  // Now we have our best guess at what the clock periods across all SURFs really are...
+  // We can go through and see how far each pair of zero crossings are from the best guess across all SURFs.
+
+  for(Int_t surf=0; surf<NUM_SURF; surf++){
+    for(int rco=0; rco<NUM_RCO; rco++){
+      Int_t alignedPeriodIndex = 0;
+      for(int zcIndex=startIndex; zcIndex<startIndex; zcIndex++){
+	Int_t zc = zcIndex + zeroCrossingMatchIndices.at(surf);
+
+	if(zc >= 0 && zc < numZcs[surf][rco]-1 && mostCommonClockPeriod.at(alignedPeriodIndex)>0 ){
+	  // Short variable name to make the next code snippet more readable
+	  Double_t dt = measuredClockPeriods[surf][rco][zc];
+
+	  if(dt <= 0){
+	    std::cerr << "Idiot " << __FILE__ << ": " << __LINE__ << std::endl;
+	  }
+
+	  Int_t capNum = clockCapacitorNums[surf][rco][sampZeroCrossings[surf][rco][zc]];
+
+	  if(capNum < dangerZoneStart || capNum > dangerZoneEnd){
+	    differenceFromClockPeriod[surf][rco] += TMath::Abs(dt - mostCommonClockPeriod.at(alignedPeriodIndex));
+	  }
+	}
+      }
+      if(numZcs[surf][rco] > 0){
+	differenceFromClockPeriod[surf][rco]/=numZcs[surf][rco];
+      }
+      else{ // If we have no zero crossings we're probably missing a clock and this won't work
+	std::cerr << "Missing clock? SURF " << surf << ", RCO " << rco << ", guess 2" << std::endl;
+      }
+    }
+
+    // May as well use firmware RCO latched value in the safe area
+    // If the first hit bus is greater than the latch delay value defined here or the hit bus
+    Int_t chanIndex = surf*NUM_CHAN + 8;
+    Int_t firstHitBus = eventPtr->getFirstHitBus(chanIndex);
+    Int_t lastHitBus = eventPtr->getLastHitBus(chanIndex);
+    if(firstHitBus >= firstHitBusRcoLatchLimit || lastHitBus - firstHitBus > NUM_SAMP/2){
+      rcoArray[surf] = eventPtr->getRcoCorrected(chanIndex);
+    }
+    else{
+      // At this point we've compared the unwrapped clock periods to the closest of the 
+      // two spread modulated clock periods...
+      // Calibration work so far indicates this is a very good guess
+      if(differenceFromClockPeriod[surf][0] < differenceFromClockPeriod[surf][1]){
+	rcoArray[surf] = 0;
+      }
+      else{
+	rcoArray[surf] = 1;
+      }
+    }
+    // std::cout << "surf = " << surf << "\trcoArray = " << rcoArray[surf] << std::endl;
+  }
+}
+
+  
+
+
+
+
+Int_t AnitaEventCalibrator::getTimeOfUpgoingZeroCrossings(Int_t numPoints, Double_t* times, Double_t* volts, Double_t* timeZeroCrossings, Int_t* sampZeroCrossings){
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+  Int_t numZcs = 0;
+  for(Int_t samp=0; samp<numPoints-1; samp++){
+    Double_t y1 = volts[samp];
+    Double_t y2 = volts[samp+1];
+    Double_t t1 = times[samp];
+    Double_t t2 = times[samp+1];
+    if(y1 <= 0 && y2 > 0){
+      Double_t tzc = getTimeOfZeroCrossing(t1, y1, t2, y2);
+      if(TMath::IsNaN(tzc)){
+	std::cerr << "Error in " __FILE__ << ": line " << __LINE__ << std::endl;
+	std::cerr << samp << "\t" << numPoints << "\t" << t1 << "\t" 
+		  << y1 << "\t" << t2 << "\t" << y2 << std::endl;
+      }
+      timeZeroCrossings[numZcs] = tzc;
+      sampZeroCrossings[numZcs] = samp;
+      numZcs++;
+    }
+  }
+  return numZcs;
+}
+
+Double_t AnitaEventCalibrator::getTimeOfZeroCrossing(Double_t x1, Double_t y1, Double_t x2, Double_t y2){
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+  // Does a linear interpolation of zero crossing between (x1,y1) and (x2, y2)
+  Double_t m = (y1-y2)/(x1-x2);
+  Double_t c = y1 - m*x1;
+  return -c/m;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Int_t AnitaEventCalibrator::unwrapChannel(UsefulAnitaEvent* eventPtr, Int_t surf, Int_t chan, Int_t rco, 
+					  Bool_t fApplyTempCorrection, Double_t* mvArray, 
+					  Double_t* tArray, Int_t* cArray) {
+  // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+
+  /*
+    With 33 MHz clock will need to unwrap waveform to measure clock frequency and guess RCO phase.
+    For that reason, output array pointers are passed into function and the RCO phase to unwrap in.
+    The meat of this is inherited from ANITA-2 (ANITA-1) unwrapping function.
+  */
+
+  // std::cout << "AnitaEventCalibrator::unwrapChannel(" << eventPtr << ", " << surf << ", " << chan << " ," 
+  // 	    << rco << ", " << fApplyTempCorrection << ", " << mvArray << ", " << tArray << ", " 
+  // 	    << cArray << ")" << std::endl;
+
+
+  Int_t chanIndex = surf*CHANNELS_PER_SURF + chan;
+  
+  Int_t numExtras = 0; ///< Used to count how many extra capacitors to include after the wrap around 
+  Int_t labChip = eventPtr->getLabChip(chanIndex); ///< Each LAB has its own set of deltaTs and epsilons
+  Int_t earliestSample = eventPtr->getEarliestSample(chanIndex); ///< Given by firmware
+  Int_t latestSample = eventPtr->getLatestSample(chanIndex); ///< Given by firmware
+
+  Double_t tempFactor = 1;
+  if(fApplyTempCorrection==true){
+    tempFactor = fTempFactorGuess; //getTempFactor();
+  }
+
+  // Don't include first capacitor if it's the first sample
+  if(earliestSample==0){
+    earliestSample++;
+  }
+
+  // Don't include first capacitor if it's the last sample
+  if(latestSample==0){
+    latestSample=259;
+  }
+
+  Short_t* rawArray = eventPtr->data[chanIndex];
+      
+  //Now do the unwrapping
+  Int_t index=0;
+  Double_t time=0;
+
+
+
+  if(latestSample<earliestSample) {
+    // Then the waveform is wrapped around and we have two RCOs    
+
+    Int_t nextExtra=256; ///< nextExtra used for deciding whether or not to insert capacitors after 255
+    Double_t extraTime=0;///< sum of times of those extra capacitors
+
+    if(earliestSample<256) {
+      //Lets do the first segment up to the wrap around...
+      for(Int_t samp = earliestSample;samp<256;samp++) {
+	Int_t binRco = 1-rco;
+	cArray[index] = samp;
+	mvArray[index] = rawArray[samp];
+	tArray[index] = time;
+
+	// Need to store 255->256 differently to 255->0 in case we add data from extra capacitors
+	if(samp == 255) {
+	  extraTime = time+(deltaTs[surf][labChip][binRco][samp])*tempFactor;
+	}
+	else {
+	  time += (deltaTs[surf][labChip][binRco][samp])*tempFactor;
+	}
+	index++;
+      }
+
+      time += epsilons[surf][labChip][rco]*tempFactor; ///< This is the time of the first capacitor.
+
+      // Ignore sample zero: add time on, but don't include value in unwrapped waveform
+      // ***MOVED TO HERE*** (see big chunk of comments a few lines below for explanation)
+      time += (deltaTs[surf][labChip][rco][0])*tempFactor; ///< BenS - "I think moving to here is legit"
+    }
+    else {
+      // If first sample is inside the extra capacitors then just ignore the first couple of samples.
+      nextExtra=260;
+      extraTime=0;
+    }
+	
+
+    // Chuck of explanation:
+    // I have moved this to inside the (if earliestSample<256) statement as it led to 
+    // some waveforms starting with non-zero times when no inter-surf alignment was applied
+    // which makes no sense at all.
+    // Since all the deltaTs are identical across all channels (inc. the clock) in a SURF
+    // then the non-zero start time is accounted for in the clock correction.
+    // Moving it guarentees all channels start at t=0 (when no inter-SURF calibration is applied),
+    // which makes it less hard to mess up calibration
+
+    // Ignore sample zero: add time on, but don't include value in unwrapped waveform
+    // time += (deltaTs[surf][labChip][rco][0])*tempFactor; // ***MOVED FROM HERE*** (see above)
+
+    // Now unwrap from sample 1 to the end of the waveform
+    for(Int_t samp=1;samp<=latestSample;samp++) {
+      Int_t binRco = rco;
+
+      if(nextExtra<260 && samp==1) {
+
+	if(extraTime<time-0.22) { ///This is Andres's 220ps minimum sample separation
+
+	  // Then insert the next extra capacitor
+	  binRco=1-rco;
+	  cArray[index] = nextExtra;
+	  mvArray[index] = Double_t(rawArray[nextExtra]);
+	  tArray[index] = extraTime;
+	  if(nextExtra < 259) {
+	    extraTime += (deltaTs[surf][labChip][binRco][nextExtra])*tempFactor;
+	  }
+	  nextExtra++;
+	  numExtras++;
+	  index++;
+
+	  // continue in loop but undo the samp variable incrementation
+	  samp--;
+	  continue;
+	}
+      }
+
+      cArray[index] = samp;
+      mvArray[index] = Double_t(rawArray[samp]);
+      tArray[index] = time;
+
+      if(samp<259) {
+	time+=(deltaTs[surf][labChip][binRco][samp])*tempFactor;
+      }
+
+      index++;
+    }
+  }
+  else{ // Only one rco phase, entire waveform is in order in the capacitor array
+
+    time=0;
+    for(Int_t samp=earliestSample; samp<=latestSample; samp++){
+      Int_t binRco=rco;
+      cArray[index] = samp;
+      mvArray[index] = rawArray[samp];
+      tArray[index] = time;
+      if(samp<259) {
+	time += (deltaTs[surf][labChip][binRco][samp])*tempFactor;
+      }
+      index++;
+    }
+  }
+
+  // Here index == numPoints in unwrapped waveform
+  return index;
+
+}
 
 
 void AnitaEventCalibrator::loadCalib() {
@@ -1176,594 +1177,99 @@ void AnitaEventCalibrator::loadCalib() {
   char fileName[FILENAME_MAX];
   char *calibEnv=getenv("ANITA_CALIB_DIR");
   if(!calibEnv) {
-     char *utilEnv=getenv("ANITA_UTIL_INSTALL_DIR");
-     if(!utilEnv)
-	sprintf(calibDir,"calib");
-     else
-	sprintf(calibDir,"%s/share/anitaCalib",utilEnv);
+    char *utilEnv=getenv("ANITA_UTIL_INSTALL_DIR");
+    if(!utilEnv)
+      sprintf(calibDir,"calib");
+    else
+      sprintf(calibDir,"%s/share/anitaCalib",utilEnv);
   }
   else {
     strncpy(calibDir,calibEnv,FILENAME_MAX);
   }
 
-  for(int surf=0;surf<NUM_SURF;surf++) {
-     for(int chip=0;chip<NUM_CHIP;chip++) {
-	fancyClockJitterOffset[surf][chip]=0;
-	clockCrossCorr[surf][chip]=0;
-     }
+  //Set up some default numbers
+  for(Int_t surf=0;surf<NUM_SURF;surf++) {
+    for(Int_t chan=0;chan<NUM_CHAN;chan++) {
+      for(Int_t chip=0;chip<NUM_CHIP;chip++) {
+	mvCalibVals[surf][chan][chip]=1;
+      }
+    }
   }
-   //Set up some default numbers
-    for(int surf=0;surf<NUM_SURF;surf++) {
-	for(int chan=0;chan<NUM_CHAN;chan++) {
-	  simonsDeltaT[surf][chan]=0;
-	    for(int chip=0;chip<NUM_CHIP;chip++) {
-		mvCalibVals[surf][chan][chip]=1;
-		chipByChipDeltats[surf][chan][chip]=0;
-	    }
-	}
-    }
     
-    for(int surf=0;surf<NUM_SURF;surf++) {
-       for(int chip=0;chip<NUM_CHIP;chip++) {
-	  rcoLatchCalib[surf][chip]=36;
-	  for(int rco=0;rco<NUM_RCO;rco++) {
-	     timeBaseCalib[surf][chip][rco]=2.6;
-	     epsilonCalib[surf][chip][rco]=1.2;
-	     epsilonFromAbby[surf][chip][rco]=1.25*(rco+1);
-	     for(int samp=0;samp<NUM_SAMP;samp++)
-	       justBinByBin[surf][chip][rco][samp]=1./2.6;
-	  }
-       }
+  for(Int_t surf=0;surf<NUM_SURF;surf++) {
+    for(Int_t chip=0;chip<NUM_CHIP;chip++) {
+      for(Int_t rco=0;rco<NUM_RCO;rco++) {
+	epsilons[surf][chip][rco]=1.25*(rco+1);
+	for(Int_t samp=0;samp<NUM_SAMP;samp++)
+	  deltaTs[surf][chip][rco][samp]=1./2.6;
+      }
     }
+  }
     
-   
-    int surf,chan,chip,rco,samp;
-//    int ant;
-//    char pol;
-//    double mean,rms,calib;
-  double rms,calib;
-    int numEnts;
-    int icalib;
-    //    sprintf(fileName,"%s/rfcmCalibFile.txt",calibDir);
-//    sprintf(fileName,"%s/mattsFirstGainCalib.dat",calibDir);
+  Int_t surf,chan,chip,rco,samp;
+  Double_t calib;
   sprintf(fileName,"%s/simpleVoltageCalibrationHarm.txt",calibDir);
-    std::ifstream CalibFile(fileName);
-    char firstLine[180];
-    CalibFile.getline(firstLine,179);
+  std::ifstream CalibFile(fileName);
+  char firstLine[180];
+  CalibFile.getline(firstLine,179);
 
-    //OLD: while(CalibFile >> surf >> chan >> chip >> ant >> pol >> mean >> rms >> calib) {
   while(CalibFile >> surf >> chan >> chip >> calib) {
-    // Int_t realAnt;
-    // AnitaPol::AnitaPol_t realPol;
-    
-    // AnitaGeomTool::getAntPolFromSurfChan(surf,chan,realAnt,realPol);
-    // //OLD:    AnitaGeomTool::getAntPolFromSurfChan(surf-1,chan-1,realAnt,realPol);
-    // if(realPol==AnitaPol::kHorizontal)
-    //   calib*=-1;
-
-    // //The bastards switched the antenna orientation
-    // Int_t orient=AnitaGeomTool::getAntOrientation(realAnt);
-    // if(orient==-1)
-    //   calib*=-1;
-    // if(orient==-2 && realPol==AnitaPol::kHorizontal) //Even Orient have never scored -2 goals
-    //   calib*=-1;
       
-    //OLD: mvCalibVals[surf-1][chan-1][chip-1]= 2 * calib;
-    mvCalibVals[surf][chan][chip]= calib;
+    // std::cout << surf << "\t" << chan << "\t" << chip << "\t" << calib << std::endl;
+    mvCalibVals[surf][chan][chip]=calib;
     
     // accounts for factor of -1 in the top ring since the seaveys are flipped
-    int ant;
+    Int_t ant;
     AnitaPol::AnitaPol_t pol;
     AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant, pol);
-    // std::cout << ant << " " << AnitaGeomTool::getAntOrientation(ant) << std::endl; // ant-1 since surf->ant map goes 1->48 not 0->47
-    mvCalibVals[surf][chan][chip] *= AnitaGeomTool::getAntOrientation(ant); // ant-1 since surf->ant map goes 1->48 not 0->47
-
-                                           //	cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
-    }
-//    cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
-//    exit(0);
-
-
-
-    sprintf(fileName,"%s/firstPassDeltaT.dat",calibDir);
-    std::ifstream DeltaTCalibFile(fileName);
-    DeltaTCalibFile.getline(firstLine,179);
-    while(DeltaTCalibFile >> surf >> chan >> chip >> calib >> rms >> numEnts) {      
-      chipByChipDeltats[surf][chan][chip]=calib;
-      //      std::cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
-    }
-    
-    sprintf(fileName,"%s/timeBaseCalib.dat",calibDir);
-    std::ifstream TimeCalibFile(fileName);
-    TimeCalibFile.getline(firstLine,179);
-    while(TimeCalibFile >> surf >> chip >> rco >> calib) {
-	timeBaseCalib[surf][chip][rco]=calib;
-	//	std::cout << surf << " " << chip << " " << rco << " " << timeBaseCalib[surf][chip][rco] << std::endl;
-    }
+    mvCalibVals[surf][chan][chip] *= AnitaGeomTool::getAntOrientation(ant);
+  }
 
     
-    sprintf(fileName,"%s/justBinByBin.dat",calibDir);
-    std::ifstream BinByBinCalibFile(fileName);
-    BinByBinCalibFile.getline(firstLine,179);
-    while(BinByBinCalibFile >> surf >> chip >> rco >> samp >> calib) {
-	justBinByBin[surf][chip][rco][samp]=calib;
-	//	std::cout << surf << " " << chip << " " << rco << " " << samp << " " << justBinByBin[surf][chip][rco][samp] << std::endl;
-    }
+  sprintf(fileName,"%s/justBinByBin.dat",calibDir);
+  std::ifstream binByBinCalibFile(fileName);
+  binByBinCalibFile.getline(firstLine,179);
+  while(binByBinCalibFile >> surf >> chip >> rco >> samp >> calib) {
+    deltaTs[surf][chip][rco][samp]=calib;
+    // std::cout << "surf=" << surf << "\tchip=" << chip << "\trco=" << rco << "\tsamp=" << samp 
+    // 	      << "\tdt=" << deltaTs[surf][chip][rco][samp] << std::endl;
+  }
 
 
-    //sprintf(fileName,"%s/epsilonFromAbby.dat",calibDir);
-    sprintf(fileName,"%s/epsilonFromBenS.dat",calibDir);
-    std::ifstream EpsilonAbbyFile(fileName);
-    EpsilonAbbyFile.getline(firstLine,179);
-    while(EpsilonAbbyFile >> surf >> chip >> rco >> calib) {
-      epsilonFromAbby[surf][chip][rco]=calib; 
-	//	cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
-    }
+  sprintf(fileName,"%s/epsilonFromBenS.dat",calibDir);
+  std::ifstream epsilonFile(fileName);
+  epsilonFile.getline(firstLine,179);
+  while(epsilonFile >> surf >> chip >> rco >> calib) {
+    epsilons[surf][chip][rco]=calib; 
+  }
 
-    sprintf(fileName,"%s/rcoLatchCalibWidth.txt",calibDir);
-    std::ifstream RcoCalibFile(fileName);
-    RcoCalibFile.getline(firstLine,179);
-    while(RcoCalibFile >> surf >> chip >> icalib) {
-	rcoLatchCalib[surf][chip]=icalib;
-//	cout << surf << " " << chip << " " << icalib << std::endl;
-    }
-    RcoCalibFile.close();
+  sprintf(fileName,"%s/clockKeep.dat",calibDir);
+  std::ifstream clockKeep(fileName);
+  clockKeep.getline(firstLine,179);
+  while(clockKeep >> surf >> chip >> calib) {
+    clockKeepTime[surf][chip]=calib; 
+  }
     
-    sprintf(fileName,"%s/epsilonCalib.dat",calibDir);
-    std::ifstream EpsilonCalibFile(fileName);
-    EpsilonCalibFile.getline(firstLine,179);
-    while(EpsilonCalibFile >> surf >> chip >> rco >> calib) {
-	epsilonCalib[surf][chip][rco]=calib;
-//	cout << surf << " " << chan << " " << chip << " " << calib << std::endl;
-    }
-
-
-    // sprintf(fileName,"%s/groupDelayCalibFile.dat",calibDir);
-    // std::ifstream GroupDelayCalibFile(fileName);
-    // GroupDelayCalibFile.getline(firstLine,179);
-    // while(GroupDelayCalibFile >> surf >> chan >> calib) {
-    //    groupDelayCalib[surf][chan]=calib;
-    //    //       std::cout << surf <<  " " << chan << " " << calib << std::endl;
-    // }
-
-    sprintf(fileName,"%s/relativeCableDelays.dat",calibDir);
-    std::ifstream relativeChannelDelaysFile(fileName);
-    relativeChannelDelaysFile.getline(firstLine,179);
-    while(relativeChannelDelaysFile >> surf >> chan >> calib) {
-       relativeChannelDelays[surf][chan]=calib;
-       // std::cout << surf <<  " " << chan << " " << calib << std::endl;
-    }
-
-    sprintf(fileName,"%s/rcoLatchDelay.dat",calibDir);
-    std::ifstream rcoDelayFile(fileName);
-    rcoDelayFile.getline(firstLine,179);
-    int latchStart, latchEnd;
-    while(rcoDelayFile >> surf >> chip >> latchStart >> latchEnd) {
-      rcoLatchStart[surf][chip]=latchStart;
-      rcoLatchEnd[surf][chip]=latchEnd;
-      // std::cout << surf << " " << chip << " " << latchStart << " " << rcoLatchStart[surf][chip] << " " << latchEnd << " " << rcoLatchEnd[surf][chip] << std::endl;
-    }
-
-    sprintf(fileName,"%s/newSlowClockCalibNums.dat",calibDir);
-    std::ifstream ClockCalibFile(fileName);
-    ClockCalibFile.getline(firstLine,179);
-    while(ClockCalibFile >> surf >> chip >> calib) {
-      clockJitterOffset[surf][chip]=calib;
-      //      clockJitterOffset[surf][chip]=0;  //RJN hack for test
-      //      std::cout << "clockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
-    }
-
-    sprintf(fileName,"%s/fastClocksPeakPhi.dat",calibDir);
-    std::ifstream FastClockCalibFile(fileName);
-    FastClockCalibFile.getline(firstLine,179);
-    while(FastClockCalibFile >> surf >> chip >> calib) {
-      fastClockPeakOffset[surf][chip]=calib;
-    }
-
-    sprintf(fileName,"%s/newFancyClockCalibNums.dat",calibDir);
-    std::ifstream FancyClockCalibFile(fileName);
-    FancyClockCalibFile.getline(firstLine,179);
-    while(FancyClockCalibFile >> surf >> chip >> calib) {
-      //       fancyClockJitterOffset[surf][chip]=calib;
-       fancyClockJitterOffset[surf][chip]=0; //RJN hack for test
-       //       std::cout << "fancyClockJitterOffset:\t" << surf <<  " " << chip << " " << calib << std::endl;
-    }
-
-    sprintf(fileName,"%s/crossCorrClocksPeakPhi.dat",calibDir);
-    std::ifstream CrossCorrClockCalibFile(fileName);
-    CrossCorrClockCalibFile.getline(firstLine,179);
-    while(CrossCorrClockCalibFile >> surf >> chip >> calib) {
-      clockCrossCorr[surf][chip]=calib;
-    }
-
-    
-
-
-    sprintf(fileName,"%s/RFCalibration_BRotter.txt",calibDir);
-    std::ifstream BRotterRfPowPeds(fileName);
-    std::string chanName;
-    Double_t rfYInt,ampNoise,chanGain,rfSlope;
-    int surfi,chani;
-    BRotterRfPowPeds.getline(firstLine,179);
-    //    std::cout << firstLine << std::endl;
-    while(BRotterRfPowPeds >> chanName >> surfi >> chani >> rfSlope >> rfYInt >> ampNoise >> chanGain) {
-      RfPowYInt[surfi-1][chani-1]=rfYInt;
-      RfPowSlope[surfi-1][chani-1]=rfSlope;
-      //      std::cout << chanName << " "  << surfi << "\t" << chani << "\t" << rfSlope << "\t" << rfYInt << "\n";
-    }
-
-
-
-    
-    Int_t iant;
-
-    sprintf(fileName,"%s/simonsPositionAndTimingOffsets.dat",calibDir);
-    std::ifstream SimonsOffsets(fileName);
-    SimonsOffsets.getline(firstLine,179);
-    Double_t dt,dr,dphi,dz;
-    while(SimonsOffsets >> iant >> dt >> dr >> dphi >> dz) {
-      Int_t surf=AnitaGeomTool::getSurfFromAnt(iant);
-      Int_t chan=AnitaGeomTool::getChanFromAntPol(iant,AnitaPol::kVertical);
-      simonsDeltaT[surf][chan]=dt;     
-    }
-
-
-    sprintf(fileName,"%s/simonsHPolPositionAndTimingOffsets.dat",calibDir);
-    std::ifstream SimonsHPolOffsets(fileName);
-    SimonsHPolOffsets.getline(firstLine,179);
-    while(SimonsHPolOffsets >> iant >> dt >> dr >> dphi >> dz) {
-      Int_t surf=AnitaGeomTool::getSurfFromAnt(iant);
-      Int_t chan=AnitaGeomTool::getChanFromAntPol(iant,AnitaPol::kHorizontal);
-      simonsDeltaT[surf][chan]=dt;     
-    }
-
-
-
-    sprintf(fileName,"%s/peds.dat",calibDir);
-    std::ifstream PedestalFile(fileName,std::ios::in | std::ios::binary);
-    PedestalFile.read((char*)&fPedStruct,sizeof(PedestalStruct_t));
-    
-
+  sprintf(fileName,"%s/RFCalibration_BRotter.txt",calibDir);
+  std::ifstream BRotterRfPowPeds(fileName);
+  std::string chanName;
+  Double_t rfYInt,ampNoise,chanGain,rfSlope;
+  Int_t surfi,chani;
+  BRotterRfPowPeds.getline(firstLine,179);
+  while(BRotterRfPowPeds >> chanName >> surfi >> chani >> rfSlope >> rfYInt >> ampNoise >> chanGain) {
+    RfPowYInt[surfi-1][chani-1]=rfYInt;
+    RfPowSlope[surfi-1][chani-1]=rfSlope;
+  }
 }
 
 
-double AnitaEventCalibrator::Get_Interpolation_X(double x1, double y1, double x2, double y2, double y){
-  double x=(x2-x1)/(y2-y1)*(y-y1)+x1;
-  return x;
-}
-
-
-std::vector<std::vector<Double_t> > AnitaEventCalibrator::getNeighbouringClockCorrelations(UsefulAnitaEvent* eventPtr, Double_t lowPassClockFilterFreq){
-
-  /* 
-     Function to assess accuracy of clock cross correlation.
-     Correlates clock 0->NUM_SURF-1, 1->0, 2->1, 3->2 etc.
-     This set of circularOffsets should sum to zero.
-     Returns the relative offsets in an std::vector
-  */
-
-  // size is NUM_SURFS, default value is -1001
-  //vector<vector<int>> A(dimension, vector<int>(dimension));
-  std::vector<std::vector<Double_t> > circularOffsets(NUM_SURF, std::vector<Double_t>(NUM_SURF, -1001));
-
-  // This calibration works by first normalising the clock to be between -1 and 1
-  // then calculates the cross-correlation between SURF 0 and the other SURFs
-  // the peak of the cross-corrleation is taken as the time offset between
-  // the channels.
-
-  Double_t fLowArray[NUM_SAMP];
-  Double_t fHighArray[NUM_SAMP];
-
-  Double_t times[NUM_SURF][NUM_SAMP];
-  Double_t volts[NUM_SURF][NUM_SAMP];
-  TGraph *grClock[NUM_SURF];
-  TGraph *grClockFiltered[NUM_SURF];
-  for(int surf=0;surf<NUM_SURF;surf++) {
-    Int_t numPoints=numPointsArray[surf][8];
-    Int_t numHigh=0;
-    Int_t numLow=0;
-    for(int samp=0;samp<numPoints;samp++) {
-      if(mvArray[surf][8][samp]>0) {
-	fHighArray[numHigh]=mvArray[surf][8][samp];
-	numHigh++;
-      }
-      else {
-	fLowArray[numLow]=mvArray[surf][8][samp];
-	numLow++;
-      }
-    }
-    Double_t meanHigh=TMath::Mean(numHigh,fHighArray);
-    Double_t meanLow=TMath::Mean(numLow,fLowArray);
-    Double_t offset=(meanHigh+meanLow)/2;
-    Double_t maxVal=meanHigh-offset;
-
-    for(int i=0;i<numPoints;i++) {
-      times[surf][i]=surfTimeArray[surf][i];
-      Double_t tempV=mvArray[surf][8][i]-offset;	
-      volts[surf][i]=tempV/maxVal;
-    }
-
-    grClock[surf] = new TGraph(numPoints,times[surf],volts[surf]);
-    if(numPoints>100 && lowPassClockFilterFreq > 0) {
-      TGraph *grTemp = FFTtools::getInterpolatedGraph(grClock[surf],1./2.6);
-      grClockFiltered[surf]=FFTtools::simplePassBandFilter(grTemp,0,lowPassClockFilterFreq);
-      delete grTemp;
-    }
-    else {
-      grClockFiltered[surf] = new TGraph(numPoints,times[surf],volts[surf]);
-    }
-  }
-
-  // At this point we have filled the normalised voltage arrays and created TGraphs
-  // we can now correlate  and extract the offsets
-  Double_t deltaT=1./(2.6*fClockUpSampleFactor);
-  // std::cout << "deltaT things" << deltaT << " " << fClockUpSampleFactor << std::endl;
-
-#ifdef USE_FFT_TOOLS
-  for(int surf2=0;surf2<NUM_SURF;surf2++) {
-    for(int surf=0; surf<NUM_SURF; surf++){
-      if(grClockFiltered[surf]->GetN()>100) {
-	// Int_t surf2 = surf == 0 ? NUM_SURF - 1 : surf - 1;
-	grCorClock[surf]= FFTtools::getInterpolatedCorrelationGraph(grClockFiltered[surf],grClockFiltered[surf2],deltaT);
-      }
-      else {
-	std::cout << "Missing clock for SURF " << surf+1 << "\n";
-      }
-    }
-#endif
-
-    for(int surf=0; surf<NUM_SURF; surf++){
-      Double_t clockCor=0;
-      TGraph *grCor = grCorClock[surf];
-      if(grCor) {
-	Int_t dtInt=FFTtools::getPeakBin(grCor);
-	Double_t peakVal,phiDiff;
-	grCor->GetPoint(dtInt,phiDiff,peakVal);
-	clockCor=phiDiff;
-	if(TMath::Abs(clockCor-clockCrossCorr[surf][fLabChip[surf][8]])>clockPeriod/2) {
-	  //Need to try again
-	  if(clockCor>clockCrossCorr[surf][fLabChip[surf][8]]) {
-	    // std::cout << "clockCor > clockCrossCorr[surf][fLabChip[surf][8]]" << std::endl;
-	    if(dtInt>2*fClockUpSampleFactor) {
-	      Int_t dt2ndInt=FFTtools::getPeakBin(grCor,0,dtInt-(2*fClockUpSampleFactor));
-	      grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
-	      clockCor=phiDiff;		 
-	    }
-	    else {
-	      std::cerr << "What's going on here then??\n";
-	    }
-	  }
-	  else {
-	    if(dtInt<(grCor->GetN()-2*fClockUpSampleFactor)) {
-	      Int_t dt2ndInt=FFTtools::getPeakBin(grCor,dtInt+(2*fClockUpSampleFactor),grCor->GetN());
-	      grCor->GetPoint(dt2ndInt,phiDiff,peakVal);
-	      clockCor=phiDiff;
-	    }
-	    else {
-	      std::cerr << "What's going on here then??\n";
-	    }
-	  }	     	       	   	    	   
-	}
-      }
-      else {
-	clockCor=0;
-	std::cout << "Clock is broken for SURF " << surf+1 << "\tevent " 
-		  << eventPtr->eventNumber << "\n";
-      }	
-      circularOffsets.at(surf).at(surf2) = clockCor;
-    }
-    for(int surf=0;surf<NUM_SURF;surf++) {
-      if(grCorClock[surf])
-	delete grCorClock[surf];
-      grCorClock[surf]=NULL;
-    }
-  }
-
-  for(int surf=0;surf<NUM_SURF;surf++) {
-    if(grClock[surf]){
-      delete grClock[surf];
-      grClock[surf] = NULL;
-    }
-    if(grClockFiltered[surf]){
-      delete grClockFiltered[surf];
-      grClockFiltered[surf] = NULL;
-    }
-  }
-
-  return circularOffsets;
-
-}
-
-
-
-void AnitaEventCalibrator::correlateClocks(TGraph *grClock[NUM_SURF], Double_t deltaT)
-{
-#ifdef USE_FFT_TOOLS
-  for(int surf=1;surf<NUM_SURF;surf++) {
-    if(grCorClock[surf-1])
-      delete grCorClock[surf-1];
-    grCorClock[surf-1]=0;
-  }
-
-//   TGraph *grDeriv[NUM_SURF]={0};
-//   TGraph *grInt[NUM_SURF]={0};
-//   Int_t maxLength=0;
-//   Int_t lengths[10]={0};
-//   for(int surf=0;surf<NUM_SURF;surf++) {
-//     //    grDeriv[surf]=FFTtools::getDerviative(grClock[surf]);
-//         grInt[surf]=FFTtools::getInterpolatedGraph(grClock[surf],deltaT);
-//     //    grInt[surf]=FFTtools::getInterpolatedGraph(grDeriv[surf],deltaT);
-//     lengths[surf]=grInt[surf]->GetN();
-//     if(lengths[surf]>maxLength)
-//       maxLength=lengths[surf];
-
-//     //    delete grDeriv[surf];
-//   }
-  
-//   Int_t paddedLength=int(TMath::Power(2,int(TMath::Log2(maxLength))+2));
-//   FFTWComplex *theFFT[NUM_SURF]={0};
-//   Double_t *oldY[NUM_SURF] = {0};
-//   Double_t *corVals[NUM_SURF] = {0};
-
-//   Double_t *outputX[NUM_SURF] = {0};
-//   Double_t *outputY[NUM_SURF] = {0};
-
-//   Double_t firstX,firstY;
-//   Double_t secondX,secondY;
-//   grInt[0]->GetPoint(0,firstX,firstY);
-//   grInt[0]->GetPoint(1,secondX,secondY);
-//   Double_t actualDt=secondX-firstX;
-
-//   int tempLength=(paddedLength/2)+1;
-//   int firstRealSamp=(paddedLength-lengths[0])/2;
-//   for(int surf=0;surf<NUM_SURF;surf++) {
-//     Double_t thisX,thisY;
-//     grInt[surf]->GetPoint(0,thisX,thisY);
-//     Double_t waveOffset=firstX-thisX;
-
-//     oldY[surf]= new Double_t [paddedLength];
-
-//     for(int i=0;i<paddedLength;i++) {
-//       if(i<firstRealSamp || i>=firstRealSamp+lengths[surf])
-// 	thisY=0;
-//        else {
-// 	  grInt[surf]->GetPoint(i-firstRealSamp,thisX,thisY);
-//        }
-//        oldY[surf][i]=thisY;
-//     }
-//     theFFT[surf]=FFTtools::doFFT(paddedLength,oldY[surf]);    
-
-//     //Now do the correlation
-//     if(surf>0) {
-//       FFTWComplex *tempStep = new FFTWComplex [tempLength];
-//       Int_t no2=paddedLength>>1;
-//       for(int i=0;i<tempLength;i++) {
-// 	double reFFT1=theFFT[surf][i].re;
-// 	double imFFT1=theFFT[surf][i].im;
-// 	double reFFT2=theFFT[0][i].re;
-// 	double imFFT2=theFFT[0][i].im;
-// 	//Real part of output 
-// 	tempStep[i].re=(reFFT1*reFFT2+imFFT1*imFFT2)/double(no2);
-// 	//Imaginary part of output 
-// 	tempStep[i].im=(imFFT1*reFFT2-reFFT1*imFFT2)/double(no2);
-//       }
-//       corVals[surf] = FFTtools::doInvFFT(paddedLength,tempStep);
-//       delete [] tempStep;
-      
-//       outputX[surf] = new Double_t [paddedLength];
-//       outputY[surf] = new Double_t [paddedLength];
-//       for(int i=0;i<paddedLength;i++) {
-// 	if(i<paddedLength/2) {
-// 	  //Positive	  
-// 	  outputX[surf][i+(paddedLength/2)]=(i*actualDt)+waveOffset;
-// 	  outputY[surf][i+(paddedLength/2)]=corVals[surf][i];
-// 	}
-// 	else {
-// 	  //Negative
-// 	  outputX[surf][i-(paddedLength/2)]=((i-paddedLength)*actualDt)+waveOffset;
-// 	  outputY[surf][i-(paddedLength/2)]=corVals[surf][i];	
-// 	}  
-//       }
-      
-//       grCorClock[surf-1]= new TGraph(paddedLength,outputX[surf],outputY[surf]);
-//       delete [] outputX[surf];
-//       delete [] outputY[surf];
-//       delete [] corVals[surf];
-//     }
-//   }
-    
-//   for(int surf=0;surf<NUM_SURF;surf++) {
-//     delete [] oldY[surf];
-//     delete [] theFFT[surf];
-//     delete grInt[surf];
-//   }
-  
-
-  //Use the FFTtools package to interpolate and correlate the clock channels
-
-  //  TGraph *grDeriv[NUM_SURF];
-  //  TGraph *grInt[NUM_SURF];
-  //  for(int surf=0;surf<NUM_SURF;surf++) {
-  //    grInt[surf] = FFTtools::getInterpolatedGraph(grClock[surf],deltaT);
-  //    grDeriv[surf] = FFTtools::getDerviative(grInt[surf]);
-  //    if(surf>0) {
-  //      grCorClock[surf-1] = FFTtools::getCorrelationGraph(grDeriv[surf],grDeriv[0]);
-  //    }
-  //  }
-  //  for(int surf=0;surf<NUM_SURF;surf++) {
-  //    delete grDeriv[surf];
-  //    delete grInt[surf];
-  //  }
-  if(grClock[0]->GetN()>100) {
-    for(int surf=1;surf<NUM_SURF;surf++) {
-      if(grClock[surf]->GetN()>100) {
-	grCorClock[surf-1]= FFTtools::getInterpolatedCorrelationGraph(grClock[surf],grClock[0],deltaT);
-      }
-      else {
-	std::cout << "Missing clock for SURF " << surf+1 << "\n";
-      }
-    }
-  }
-  else {
-    std::cout << "Missing clock for SURF " << 1 << "\n";
-  } 
-#endif
-}
-
-
-void AnitaEventCalibrator::updateRollingAverageClockDeltaT(UsefulAnitaEvent* eventPtr, Double_t allSurfMeanUpDt, Int_t allSurfNumUpDt){
-
-  /* Probably sensible to check this really is a rolling average */
-  if(eventPtr->eventNumber - fLastEventNumber>NUM_EVENTS_TO_AVERAGE_TEMP_OVER && fLastEventNumber!=0){
-    std::cerr << "Careful! Processing non-sequential events may screw up rolling average temperature correction!";
-    std::cerr << " Last event " << fLastEventNumber << ", this event " << eventPtr->eventNumber << std::endl;
-  }
-  
-  fAllSurfAverageClockDeltaTs[fTempEventInd] = allSurfMeanUpDt;
-  fAllSurfAverageClockNumDeltaTs[fTempEventInd] = allSurfNumUpDt;
-
-  fTempEventInd++;
-  if(fTempEventInd==NUM_EVENTS_TO_AVERAGE_TEMP_OVER){
-    fTempEventInd=0;
-  }
-  if(fNumEventsAveraged<NUM_EVENTS_TO_AVERAGE_TEMP_OVER){
-    fNumEventsAveraged++;
-  }
-
-  // std::cout << fTempEventInd << " " << fNumEventsAveraged << " " << fLastEventNumber << std::endl;
-  /* Sum over events to get rolling average */
-  allSurfMeanUpDt /= allSurfNumUpDt;
-
-  Double_t allSurfNEventAverageUpDt = 0;
-  Int_t allSurfNEventAverageNumUpDt = 0;
-
-  for(int i=0; i<fNumEventsAveraged; i++){
-    allSurfNEventAverageUpDt += fAllSurfAverageClockDeltaTs[i];
-    allSurfNEventAverageNumUpDt += fAllSurfAverageClockNumDeltaTs[i];
-  }
-  allSurfNEventAverageUpDt/=allSurfNEventAverageNumUpDt;
-
-  /* Give the UsefulAnitaEvent it's temperature calibration numbers */
-  eventPtr->fTempFactorGuess = clockPeriod/allSurfMeanUpDt;
-  eventPtr->fRollingAverageTempFactor = clockPeriod/allSurfNEventAverageUpDt;
-  fLastEventNumber = eventPtr->eventNumber;
-}
-
-
-Double_t AnitaEventCalibrator::convertRfPowTodBm(int surf, int chan, int adc)
-{
-  //  std::cout << surf << "\t" << chan << "\t" << bensRfPowYInt[surf][chan]
-  //    << "\t" << bensRfPowSlope[surf][chan] << "\n";
+Double_t AnitaEventCalibrator::convertRfPowTodBm(int surf, int chan, int adc){
   return (double(adc)-RfPowYInt[surf][chan])/RfPowSlope[surf][chan];
 }
 
-Double_t AnitaEventCalibrator::convertRfPowToKelvin(int surf, int chan, int adc)
-{
-  double dBm = AnitaEventCalibrator::convertRfPowTodBm(surf, chan, adc);
-  
+Double_t AnitaEventCalibrator::convertRfPowToKelvin(int surf, int chan, int adc){
+  double dBm = AnitaEventCalibrator::convertRfPowTodBm(surf, chan, adc);  
   double mW = TMath::Power(10,dBm/10.);
-
   double K = (mW/(1000.*1.38e-23*1e9));
-
   return K;
 }

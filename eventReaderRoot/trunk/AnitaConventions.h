@@ -64,24 +64,21 @@
 */
 namespace WaveCalType {
   typedef enum EWaveCalType {
-    kNoCalib                        = 0x00, ///<The 260 samples straight from raw data
-    kJustUnwrap                     = 0x01, ///<The X good samples from raw data (260-hitbus)
-    kADC                            = 0x02, ///<Same as kNoCalib -- i.e. useless
-    kVoltageTime                    = 0x03, ///<Using 1 and 2.6
-    kJustTimeNoUnwrap               = 0x16, ///< Only applies the timebase calibrations, for use in calibration testing.
-    kVTLabAG                        = 0x17, ///< Applies the bin-by-bin and epsilon corrections
-    kVTLabAGFastClock               = 0x18, ///< Applies the bin-by-bin and epsilon corrections and tries to do a clock calibration
-    kVTLabAGCrossCorClock           = 0x19, ///< Applies the bin-by-bin and epsilon corrections and tries to do a clock calibration using corrections
-    kVTFullAGFastClock               = 0x1a, ///< Applies the bin-by-bin and epsilon corrections and tries to do a clock calibration + chip and cable delays
-    kVTFullAGCrossCorClock           = 0x1b, ///< Applies the bin-by-bin and epsilon corrections and tries to do a clock calibration using corrections + chip and cable delays
-    kVTInCalibratedFile              = 0x1b, ///< For use particularly with the new CalibratedAnitaEvent files
-    kVTCalFilePlusSimon              = 0x1c, ///< As above with Simon's deltaT's
-    kVTBenSNoClockJitterNoZeroMean   = 0x1d, ///< Ben's timing calibration, with no clock correction or zero-mean
-    kVTBenSNoChannelToChannelDelays  = 0x1e, ///< For calibration: turn off channel-to-channel delays with a flag, zero-mean + clock-jitter is on.
-    kVTBenS                          = 0x1f, ///< Ben's timing calibration.    
-    kDefault                         = 0x1f, ///< Is now the default calibration if you don't specify anything
-    kVTFast                          = 0x20, ///< Tries to get voltage and time fast for online processing
-    kAddPeds                         = 0x40, ///< New thing
+    
+    kNoCalib = 0x00, ///< The 260 samples straight from raw data
+    kJustUnwrap = 0x01, ///< The X good samples from raw data (260-hitbus)
+    kNominal = 0x02, ///< Using mV/ADC = 1 and all dts = 1./2.6 ns
+    kVoltageTime = 0x02, ///< Same as kNominal
+    kJustTimeNoUnwrap  = 0x03, ///< For calibration: sample-to-sample dts without unwrapping (or voltage calibs)
+    kNoTriggerJitterNoZeroMean = 0x05, ///< No inter-SURF timing (or zero meaning)
+    kNoChannelToChannelDelays  = 0x06, ///< Inter-SURF timing (trigger jitter) without cable delay 
+    kNoTriggerJitterNoZeroMeanFlipRco = 0x07, ///< For calib: opposite RCO from software algorithm
+    kNoTriggerJitterNoZeroMeanFirmwareRco = 0x08, ///< For calib: applies RCO from firmware (no latch delay)
+    kNoTriggerJitterNoZeroMeanFirmwareRcoFlipped = 0x09,///< For calib: 1-firmware RCO (no latch delay)
+    kFull = 0x0a, ///< deltaTs, voltage, unwrap, trigger jitter, cable delay. The full monty.
+    kDefault = 0x0a, ///< What you should call for analysis work
+    // kVTFast = 0x1b, ///< Faster, but no algorithm for it
+    // kAddPeds = 0x1c, ///< New thing
     kNotACalib ///< Useful for looping over all calibrations 
   } WaveCalType_t; ///< The calibration enumeration type
 

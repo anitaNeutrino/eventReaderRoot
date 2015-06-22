@@ -50,12 +50,17 @@ class UsefulAnitaEvent: public RawAnitaEvent
 		   AnitaPol::AnitaPol_t pol); ///< Returns a voltage-time waveform for given ring-phi-pol
   Int_t guessRco(int chanIndex); ///< Looks at clock channel to try and guess which RCO phase we are in.
   Int_t getRcoCorrected(int chanIndex); ///< Returns firmware RCO after correcting for latch delay (and factor of -1 for different definitions of which phase getRCO and guessRCO return)
-  Double_t getTempCorrectionFactor(); ///< Returns the temperature correction factor (or guesses at it using clock periods if necessary)
-  void analyseClocksForGuesses();
-  void analyseClocksForTempGuessBen();
+  // Double_t getTempCorrectionFactor(); ///< Returns the temperature correction factor (or guesses at it using clock periods if necessary)
+  // void analyseClocksForGuesses();
+  // void analyseClocksForTempGuessBen();
 
 
-  std::vector<std::vector<Double_t> > getNeighbouringClockCorrelations(Double_t lowPassClockFilterFreq);
+  // std::vector<std::vector<Double_t> > getNeighbouringClockCorrelations(Double_t lowPassClockFilterFreq, Int_t giveGraphsToInputArrays, TGraph* grInterpClocksArray[NUM_SURF], TGraph* grCorClocksArray[NUM_SURF][2]);
+  // std::vector<std::vector<Double_t> > getNeighbouringClockCorrelations2(bool writeGraphs);
+
+  std::vector<Double_t> getClockAlignment(std::vector<Int_t> listOfClockNums); ///< For calibration
+
+
 
 
   //The calibrated numbers
@@ -71,12 +76,11 @@ class UsefulAnitaEvent: public RawAnitaEvent
   UInt_t fLastEventGuessed; ///< Internal variable to see if we've already tried to guess the RCO and temp correction factors for this event
   Int_t fRcoArray[NUM_SURF];   ///< An array to store the guessed at RCO values;
   Double_t fTempFactorGuess;  ///< A holder variable to cling on to the temperature correction factor that we are guessing at.
-  Double_t fRollingAverageTempFactor; ///< Set by AnitaEventCalibrator, similar to fTempGuessFactor but averages unwrapped clock over a number of (hopefully) sequential events
   Double_t fClockPhiArray[NUM_SURF]; ///< An array to store the derived clock calibration numbers (from aligning the clocks)
 
   AnitaEventCalibrator *fCalibrator; ///< Pointer to the AnitaEventCalibrator
 
-  ClassDef(UsefulAnitaEvent,3);
+  ClassDef(UsefulAnitaEvent,4);
 };
 
 

@@ -8,19 +8,49 @@
 const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
 {
    switch(calType) {     
-   case kNoCalib: return "kNoCalib -- No Calibration"; break;
-   case kJustUnwrap: return "kJustUnwrap -- Unwrap Data, No Calibration"; break;
-   case kADC: return "kADC -- No Calibration"; break;       
-   case kVoltageTime: return "kVoltageTime -- Default 2GSa/s 1mv/ADC"; break;
-   case kJustTimeNoUnwrap: return "kJustTimeNoUnwrap -- Only applies the bin-by-bin time calibration" ; break;
-   case kVTLabAG: return "kVTLabAG --- Applies Abby's bin-by-bin and epsilon corrections"; break;
-   case kVTLabAGFastClock: return "kVTLabAGFastClock -- Applies Abby's bin-by-bin and epsilon corrections and tries to align the clocks"; break;
-   case kVTLabAGCrossCorClock: return "kVTLabAGCrossCorClock -- Applies Abby's bin-by-bin and epsilon corrections and tries to align the clocks using cross-correlations"; break;
-   case kVTFullAGFastClock: return "kVTFullAGFastClock -- Applies Abby's bin-by-bin and epsilon corrections and tries to align the clocks + delays"; break;
-   case kVTFullAGCrossCorClock: return "kVTFullAGCrossCorClock -- Applies Abby's bin-by-bin and epsilon corrections and tries to align the clocks using cross-correlations+ delays"; break;
+   case kNoCalib: 
+     return "The 260 samples straight from raw data";
+     break;
+   case kJustUnwrap:
+     return "The X good samples from raw data (260-hitbus)";
+     break;
+   case kNominal:
+     return "Using mV/ADC = 1 and all dts = 1./2.6 ns";
+     break;
+   case kJustTimeNoUnwrap :
+     return "For calibration: sample-to-sample dts without unwrapping (or voltage calibs)";
+     break;
+   case kCalibratedFile :
+     return "For use particularly with the new CalibratedAnitaEvent files";
+     break;
+   case kNoTriggerJitterNoZeroMean:
+     return "No inter-SURF timing (or zero meaning)";
+     break;
+   case kNoChannelToChannelDelays :
+     return "Inter-SURF timing (trigger jitter) without cable delay ";
+     break;
+   case kNoTriggerJitterNoZeroMeanFlipRco:
+     return "For calib: opposite RCO from software algorithm";
+     break;
+   case kNoTriggerJitterNoZeroMeanFirmwareRco:
+     return "For calib: applies RCO from firmware (no latch delay)";
+     break;
+   case kNoTriggerJitterNoZeroMeanFirmwareRcoFlipped:
+     return "For calib: 1-firmware RCO (no latch delay)";
+     break;
+   case kFull:
+     return "deltaTs; voltage; unwrap; trigger jitter; cable delay. The full monty.";
+     break;
+   case kDefault:
+     return "Default timing calibration: what you should call for analysis work";
+     break;
+   case kNotACalib: 
+     return "Useful for looping over all calibrations";
+     break;
+
    default:
-      return "Unknown Calibration Type";
-	 break;
+     return "Unknown Calibration Type";
+     break;
    }
    return "Unknown Calibration Type";
 }
