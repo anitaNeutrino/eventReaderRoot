@@ -39,9 +39,9 @@ class CalibratedAnitaEvent: public RawAnitaEvent
   Int_t fRcoArray[NUM_SURF];   ///< An array to store the guessed at RCO values;
   Double_t fTempFactorGuess;  ///< A holder variable to cling on to the temperature correction factor that we are guessing at.
   Double_t fClockPhiArray[NUM_SURF];   ///< An array to store the clock offsets
+  Int_t fClockProblem;
 
-
-  ClassDef(CalibratedAnitaEvent,3);
+  ClassDef(CalibratedAnitaEvent,4);
 };
 
 

@@ -20,9 +20,6 @@ const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
    case kJustTimeNoUnwrap :
      return "For calibration: sample-to-sample dts without unwrapping (or voltage calibs)";
      break;
-   case kCalibratedFile :
-     return "For use particularly with the new CalibratedAnitaEvent files";
-     break;
    case kNoTriggerJitterNoZeroMean:
      return "No inter-SURF timing (or zero meaning)";
      break;
@@ -41,9 +38,9 @@ const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
    case kFull:
      return "deltaTs; voltage; unwrap; trigger jitter; cable delay. The full monty.";
      break;
-   case kDefault:
-     return "Default timing calibration: what you should call for analysis work";
-     break;
+   // case kDefault:
+   //   return "Default timing calibration: what you should call for analysis work";
+   //   break;
    case kNotACalib: 
      return "Useful for looping over all calibrations";
      break;
