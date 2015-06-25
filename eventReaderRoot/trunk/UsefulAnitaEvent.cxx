@@ -43,6 +43,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr, WaveCalT
   fLastEventGuessed=calibratedPtr->eventNumber;
   gotCalibTemp=0;
   fTempFactorGuess=calibratedPtr->fTempFactorGuess;
+  fClockProblem = calibratedPtr->fClockProblem;
   for(int surf=0;surf<NUM_SURF;surf++) {
     fRcoArray[surf]=calibratedPtr->fRcoArray[surf];
     fClockPhiArray[surf]=calibratedPtr->fClockPhiArray[surf];    
@@ -74,6 +75,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   fC3poNum=theHd->c3poNum;
   fLastEventGuessed=0;
   gotCalibTemp=0;
+  fClockProblem = 0;
 
   if(theHd->eventNumber != eventPtr->eventNumber){
     std::cerr << "Warning! eventNumber mismatch in " << __FILE__ << " line " << __LINE__ << "." << std::endl;

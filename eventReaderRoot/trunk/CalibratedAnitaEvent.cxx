@@ -27,6 +27,7 @@ CalibratedAnitaEvent::CalibratedAnitaEvent()
   : RawAnitaEvent()
 {
   fTempFactorGuess=0;
+  fClockProblem=0;
   for(int surf=0;surf<NUM_SURF;surf++) {
     fRcoArray[surf]=0;
     fClockPhiArray[surf]=0;
@@ -40,6 +41,7 @@ CalibratedAnitaEvent::CalibratedAnitaEvent(UsefulAnitaEvent *usefulPtr)
 {
   fCalType=usefulPtr->fCalType;
   fTempFactorGuess=usefulPtr->fTempFactorGuess;
+  fClockProblem=usefulPtr->fClockProblem;
   for(int surf=0;surf<NUM_SURF;surf++) {
     // std::cout << usefulPtr->fRcoArray[surf] << std::endl;
     fRcoArray[surf]=usefulPtr->fRcoArray[surf];

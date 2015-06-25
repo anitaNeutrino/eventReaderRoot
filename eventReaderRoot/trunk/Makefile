@@ -87,7 +87,7 @@ exampleEventLoop : $(ROOT_LIBRARY) exampleEventLoop.$(SRCSUF)
 
 
 #The library
-$(ROOT_LIBRARY) : $(LIB_OBJS) 
+$(ROOT_LIBRARY) : $(LIB_OBJS)
 	@echo "Linking $@ ..."
 ifeq ($(PLATFORM),macosx)
 # We need to make both the .dylib and the .so
@@ -104,7 +104,7 @@ else
 	$(LD) $(SOFLAGS) $(LDFLAGS) $(LIBS) $(LIB_OBJS) -o $@
 endif
 
-%.$(OBJSUF) : %.$(SRCSUF)
+%.$(OBJSUF) : %.$(SRCSUF) %.h
 	@echo "<**Compiling**> "$<
 	$(CXX) $(CXXFLAGS) -c $< -o  $@
 

@@ -85,8 +85,9 @@ class AnitaEventCalibrator : public TObject
   Int_t getTimeOfUpgoingZeroCrossings(Int_t numPoints, Double_t* times, Double_t* volts, 
 				      Double_t* timeZeroCrossings, Int_t* sampZeroCrossings);
 
-
-
+  void findExtremaSamples(Int_t length, Double_t* volts, 
+			  std::vector<Int_t>& maximaSamps, 
+			  std::vector<Int_t>& minimaSamps);
 
   // Calibration constants
 
@@ -125,13 +126,18 @@ class AnitaEventCalibrator : public TObject
   std::vector<Int_t> defaultClocksToAlign; ///< List of SURFs for getClockAlignment() (for calibration progs)
   std::vector<TGraph*> grClockInterps; ///< Interpolated clocks
   std::map<Double_t, TGraph*> grClock0s; ///< Need to process clock 0 depending on needs of other SURF
-
   std::vector<TGraph*> grCorClock;
+  std::vector<TGraph*> grClocks;
+
+
   std::vector<Double_t> clockAlignment;
   Double_t dtInterp; ///< Interpolating clock for alignment step
   Double_t nominalDeltaT; ///< If we don't want bin-to-bin deltaTs
 
 
+  // If AnitaEventCalibrator can't disentangle surf clock zero crossings...
+  // Event will most likely be thrown away (e.g. SURF saturation)
+  Int_t fClockProblem; ///< Flag raised if more than 4 upgoing zero crossings in any SURF clock
 
 
   //Ben Rotter's rfPower calibration :)

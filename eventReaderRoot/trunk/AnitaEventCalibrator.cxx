@@ -31,13 +31,16 @@ AnitaEventCalibrator::AnitaEventCalibrator(){
     defaultClocksToAlign.push_back(surf);
     clockAlignment.push_back(0);
 
-    grClockInterps.push_back(nullptr);
-    grCorClock.push_back(nullptr);
+    grClocks.push_back(NULL);
+    grClockInterps.push_back(NULL);
+    grCorClock.push_back(NULL);
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
   fTempFactorGuess = 1; ///< Very important this doesn't start at 0, things will break if it does!
   ////////////////////////////////////////////////////////////////////////////////////////////////
+  fClockProblem = 0; ///< If we get more than reasonable zero crossings raise flag to skip updating temp correction
+
 }
 
 AnitaEventCalibrator::~AnitaEventCalibrator(){
@@ -185,7 +188,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   //! Step 2: Figure out RCO phase from clock period (if bin-to-bin dts required)
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+  fClockProblem = 0; ///< If we have an issue with the clock (more than 5 zero crossings!) then we raise this flag to not update rolling average temperature correction.
   if(fBinToBinDts==true){
     // If we want deltaTs then we definitely need to know what RCO phase we are in
     if(eventPtr->fFromCalibratedAnitaEvent==0){ // Figure out the RCO if we don't have calibrated input 
@@ -225,7 +228,13 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   //! Step 3: Update rolling temperature correction (copy to usefulAnitaEvent)
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   if(eventPtr->fFromCalibratedAnitaEvent==0){
-    updateTemperatureCorrection(); ///< This is pretty important as RCO guess needs accurate clock 
+    if(fClockProblem!=0){
+      std::cerr << "Clock problem found in eventNumber = " << eventPtr->eventNumber
+		<< ", skipped temperature correction" << std::endl;
+    }
+    else{
+      updateTemperatureCorrection(); ///< This is pretty important as RCO guess needs accurate clock 
+    }
     fTempFactorGuess = getTempFactor();
     eventPtr->fTempFactorGuess = fTempFactorGuess; 
   }
@@ -403,6 +412,9 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     }
   }
 
+  eventPtr->fCalType = calType;
+  eventPtr->fClockProblem = fClockProblem;
+
   // Enjoy your calibrated event
 
 
@@ -460,14 +472,17 @@ void AnitaEventCalibrator::deleteClockAlignmentTGraphs(){
   for(Int_t surf=0; surf<NUM_SURF; surf++){
     // std::cout << surf << std::endl;
     clockAlignment.at(surf) = 0;
-
+    if(grClocks.at(surf)) {
+      delete grClocks.at(surf);
+      grClocks.at(surf) = NULL;
+    }
     if(grClockInterps.at(surf)) {
       delete grClockInterps.at(surf);
-      grClockInterps.at(surf) = nullptr;
+      grClockInterps.at(surf) = NULL;
     }
     if(grCorClock.at(surf)){
       delete grCorClock.at(surf);
-      grCorClock.at(surf) = nullptr; 
+      grCorClock.at(surf) = NULL;
     }
   }
 
@@ -476,7 +491,7 @@ void AnitaEventCalibrator::deleteClockAlignmentTGraphs(){
     // std::cout << itr->first << ", " << itr->second << "\t" << itr->second->GetN() << std::endl;
 
     delete itr->second; // delete object pointed to by current key
-    itr->second = nullptr;
+    itr->second = NULL;
   }
 
   // finally delete all key and pointer pairs from the map
@@ -503,8 +518,6 @@ std::vector<Double_t> AnitaEventCalibrator::getClockAlignment(UsefulAnitaEvent* 
   deleteClockAlignmentTGraphs();
 
 
-
-
   for(UInt_t surfInd=0; surfInd<listOfClockNums.size(); surfInd++){
     Int_t surf = listOfClockNums.at(surfInd);
     if(surf==0){
@@ -512,10 +525,8 @@ std::vector<Double_t> AnitaEventCalibrator::getClockAlignment(UsefulAnitaEvent* 
     }
 
     // Interpolate clock
-    TGraph* grTemp = new TGraph(numPoints[surf], times[surf], volts[surf][8]);
-    grClockInterps.at(surf) = FFTtools::getInterpolatedGraph(grTemp, dtInterp);
-
-    delete grTemp;
+    grClocks.at(surf) = new TGraph(numPoints[surf], times[surf], volts[surf][8]);
+    grClockInterps.at(surf) = FFTtools::getInterpolatedGraph(grClocks.at(surf), dtInterp);
 
     Int_t lab = eventPtr->getLabChip(surfInd*NUM_CHAN + 8);
     Double_t deltaClockKeepNs = clockKeepTime[surf][lab];
@@ -527,13 +538,14 @@ std::vector<Double_t> AnitaEventCalibrator::getClockAlignment(UsefulAnitaEvent* 
       grClock0 = FFTtools::getInterpolatedGraph(grTemp0, dtInterp);
       delete grTemp0;
       grClock0s[deltaClockKeepNs] = grClock0; // add key and pointer into map
+
       keepOnlySomeTimeAfterClockUptick(grClock0, deltaClockKeepNs); // process
     }
     else{
       grClock0 = grClock0s.find(deltaClockKeepNs)->second;
     }
     keepOnlySomeTimeAfterClockUptick(grClockInterps.at(surf), deltaClockKeepNs);
-
+    
     // Correlate clocks once they've both been processed
     grCorClock.at(surf) = FFTtools::getCorrelationGraph(grClockInterps.at(surf), 
 							grClock0);
@@ -554,7 +566,25 @@ std::vector<Double_t> AnitaEventCalibrator::getClockAlignment(UsefulAnitaEvent* 
     for(Int_t samp=0; samp < grClockInterps.at(surf)->GetN(); samp++){
       grClockInterps.at(surf)->GetX()[samp] -= clockAlignment.at(surf);
     }
+    for(Int_t samp=0; samp < grClocks.at(surf)->GetN(); samp++){
+      grClocks.at(surf)->GetX()[samp] -= clockAlignment.at(surf);
+    }
   }
+
+  // if(fClockProblem!=0){
+  //   for(int surf=1; surf<NUM_SURF; surf++){
+  //     grClockInterps.at(surf)->SetName(TString::Format("grClockInterps_%d", surf));
+  //     grClockInterps.at(surf)->Write();
+
+  //     grClocks.at(surf)->SetName(TString::Format("grClocks_%d", surf));
+  //     grClocks.at(surf)->Write();
+
+  //   }
+  //   exit(-1);
+  // }
+
+
+
 
   return clockAlignment;
 
@@ -578,24 +608,27 @@ void AnitaEventCalibrator::keepOnlySomeTimeAfterClockUptick(TGraph* grClock, Dou
     Int_t numZc = getTimeOfUpgoingZeroCrossings(grClock->GetN(),
 						grClock->GetX(),
 						grClock->GetY(),
-						timeZeroCrossings, 
-						sampZeroCrossings);
-    Int_t thisZc = 0;
-    for(Int_t samp=0; samp<grClock->GetN(); samp++){
+						timeZeroCrossings,
+						sampZeroCrossings);    
+
+    if(fClockProblem==0){
+      Int_t thisZc = 0;
+      for(Int_t samp=0; samp<grClock->GetN(); samp++){
       
-      if(grClock->GetX()[samp] - timeZeroCrossings[thisZc] < deltaClockKeepNs &&
-	 grClock->GetX()[samp] - timeZeroCrossings[thisZc] >= 0){
-      }
-      else{
-	grClock->GetY()[samp] = 0;
-      }
+	if(grClock->GetX()[samp] - timeZeroCrossings[thisZc] < deltaClockKeepNs &&
+	   grClock->GetX()[samp] - timeZeroCrossings[thisZc] >= 0){
+	}
+	else{
+	  grClock->GetY()[samp] = 0;
+	}
       
-      if(timeZeroCrossings[thisZc] < grClock->GetX()[samp] - deltaClockKeepNs){
-	if(thisZc < numZc-1){
-	  thisZc++;
+	if(timeZeroCrossings[thisZc] < grClock->GetX()[samp] - deltaClockKeepNs){
+	  if(thisZc < numZc-1){
+	    thisZc++;
+	  }
 	}
       }
-    }
+    }    
   }
 }
 
@@ -630,25 +663,28 @@ void AnitaEventCalibrator::updateTemperatureCorrection(){
   //! N.B. This function relies on the results of the guessRCO() to have the measured clock periods
   
   // First need to remove effect of previous temp correction...
-  Double_t currentTempFactor = fTempFactorGuess; //getTempFactor();
 
-  Double_t meanClockDt = 0;
-  Int_t count = 0;
-  for(Int_t surf=0; surf<NUM_SURF; surf++){
-    for(Int_t zc=0; zc<AnitaClock::maxNumZcs; zc++){
-      // std::cout << surf << "\t" << rcoArray[surf] << "\t" << zc << "\t" 
-      // 		<< measuredClockPeriods[surf][rcoArray[surf]][zc] << std::endl;
-      if(measuredClockPeriods[surf][rcoArray[surf]][zc] > 0){
-	meanClockDt += measuredClockPeriods[surf][rcoArray[surf]][zc]/currentTempFactor;
-	count++;
+  if(fClockProblem==0){
+
+    Double_t currentTempFactor = fTempFactorGuess; //getTempFactor();
+
+    Double_t meanClockDt = 0;
+    Int_t count = 0;
+    for(Int_t surf=0; surf<NUM_SURF; surf++){
+      for(Int_t zc=0; zc<AnitaClock::maxNumZcs; zc++){
+	// std::cout << surf << "\t" << rcoArray[surf] << "\t" << zc << "\t" 
+	// 		<< measuredClockPeriods[surf][rcoArray[surf]][zc] << std::endl;
+	if(measuredClockPeriods[surf][rcoArray[surf]][zc] > 0){
+	  meanClockDt += measuredClockPeriods[surf][rcoArray[surf]][zc]/currentTempFactor;
+	  count++;
+	}
       }
     }
-  }
   
-  meanClockDt /= count;
-  // std::cout << meanClockDt << std::endl;
-  clockPeriodRingBuffer->insert(meanClockDt);
-
+    meanClockDt /= count;
+    // std::cout << meanClockDt << std::endl;
+    clockPeriodRingBuffer->insert(meanClockDt);
+  }
 }
 
 
@@ -715,11 +751,22 @@ void AnitaEventCalibrator::guessRco(UsefulAnitaEvent* eventPtr){
 							clockVolts[surf][rco],
 							timeZeroCrossings[surf][rco],
 							sampZeroCrossings[surf][rco]);
+      
       for(Int_t zc=0; zc<numZcs[surf][rco]; zc++){	
 	if(zc > 0){
 	  measuredClockPeriods[surf][rco][zc-1] = timeZeroCrossings[surf][rco][zc] - timeZeroCrossings[surf][rco][zc-1]; 
 	}
       }
+
+      // if(eventPtr->eventNumber==10512383){
+      // 	std::cout << "Summary at start of RCO guessing " << eventPtr->eventNumber << std::endl;
+      // 	std::cout << "numZcs[" << surf << "][" << rco << "] = " << numZcs[surf][rco] << std::endl;
+      // 	for(Int_t zc=0; zc<numZcs[surf][rco]; zc++){
+      // 	  std::cout << "zc = " << zc << ", timeZc = " << timeZeroCrossings[surf][rco][zc] << ", sampZc = " 
+      // 		    << sampZeroCrossings[surf][rco][zc] << "\t" << "AnitaClock::maxNumZcs = " 
+      // 		    << AnitaClock::maxNumZcs << std::endl;
+      // 	}
+      // }
     }
   }
 
@@ -745,18 +792,30 @@ void AnitaEventCalibrator::guessRco(UsefulAnitaEvent* eventPtr){
 	  std::cerr << "Idiot " << __FILE__ << ": " << __LINE__ << std::endl;
 	}
 
+	// std::cout << eventPtr->eventNumber << "\t" << surf << "\t" << rco << "\t" << zc << "\t"
+	// 	  << sampZeroCrossings[surf][rco][zc] << std::endl;
+
 	Int_t capNum = clockCapacitorNums[surf][rco][sampZeroCrossings[surf][rco][zc]];
 	// In ANITA-3 no-one turned off the clock spread modulation... so compare to high and low periods
 	// (We will need the nearestClockPeriods later for a second, improved period matching.)
 	//	if(clockCapacitorNums[surf][rco]
+	// std::cout << "capNum = " << capNum << std::endl;
+
+	// std::cout << eventPtr->eventNumber << "\t" << capNum << "\t" << surf << "\t" << rco 
+	// 	  << sampZeroCrossings[surf][rco][zc] << std::endl;
+
 	if(capNum < dangerZoneStart || capNum > dangerZoneEnd){
 	  if(TMath::Abs(dt - AnitaClock::lowPeriodNs) < TMath::Abs(dt - AnitaClock::highPeriodNs)){
 	    differenceFromClockPeriod[surf][rco] += TMath::Abs(dt - AnitaClock::lowPeriodNs);
 	    nearestClockPeriod[surf][rco][zc] = AnitaClock::lowPeriodNs;
+	    // std::cout << differenceFromClockPeriod[surf][rco] << "\t" << nearestClockPeriod[surf][rco][zc]
+	    // 	      << std::endl;
 	  }
 	  else{
 	    differenceFromClockPeriod[surf][rco] += TMath::Abs(dt - AnitaClock::highPeriodNs);
 	    nearestClockPeriod[surf][rco][zc] = AnitaClock::highPeriodNs;
+	    // std::cout << differenceFromClockPeriod[surf][rco] << "\t" << nearestClockPeriod[surf][rco][zc]
+	    // 	      << std::endl;
 	  }
 	}
       }
@@ -765,7 +824,7 @@ void AnitaEventCalibrator::guessRco(UsefulAnitaEvent* eventPtr){
 	differenceFromClockPeriod[surf][rco]/=numZcs[surf][rco];
       }
       else{ // If we have no zero crossings we're probably missing a clock and this won't work
-	std::cerr << "Missing clock? SURF " << surf << ", RCO " << rco << ", guess 1" << std::endl;
+	std::cerr << "eventNumber " << eventPtr->eventNumber << ": Missing clock? SURF " << surf << ", RCO " << rco << ", guess 1" << std::endl;
       }
     }
 
@@ -837,7 +896,7 @@ void AnitaEventCalibrator::guessRco(UsefulAnitaEvent* eventPtr){
 
   
   // Now we need to sum over the clock indices again but with the offsets.
-  // How many SURFs thought a period was high (Anita::highPeriodNs) or low (AnitaClock::lowPeriodNs)?
+  // How many SURFs thought a period was high (AnitaClock::highPeriodNs) or low (AnitaClock::lowPeriodNs)?
 
   const Int_t maxNumOffsetZcs = AnitaClock::maxNumZcs - startIndex;
   std::vector<Int_t> numHigh(maxNumOffsetZcs, 0);
@@ -935,7 +994,7 @@ void AnitaEventCalibrator::guessRco(UsefulAnitaEvent* eventPtr){
 	differenceFromClockPeriod[surf][rco]/=numZcs[surf][rco];
       }
       else{ // If we have no zero crossings we're probably missing a clock and this won't work
-	std::cerr << "Missing clock? SURF " << surf << ", RCO " << rco << ", guess 2" << std::endl;
+	std::cerr << "eventNumber " << eventPtr->eventNumber << ": Missing clock? SURF " << surf << ", RCO " << rco << ", guess 2" << std::endl;
       }
     }
 
@@ -966,9 +1025,19 @@ void AnitaEventCalibrator::guessRco(UsefulAnitaEvent* eventPtr){
 
 
 
-
 Int_t AnitaEventCalibrator::getTimeOfUpgoingZeroCrossings(Int_t numPoints, Double_t* times, Double_t* volts, Double_t* timeZeroCrossings, Int_t* sampZeroCrossings){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
+
+  std::vector<Double_t> tZcs;
+  std::vector<Int_t> sampZcs;
+  std::vector<Int_t> prevExtremas;
+  std::vector<Int_t> nextExtremas;
+
+  std::vector<Int_t> maximaSamps;
+  std::vector<Int_t> minimaSamps;
+
+  findExtremaSamples(numPoints, volts, maximaSamps, minimaSamps);
+
   Int_t numZcs = 0;
   for(Int_t samp=0; samp<numPoints-1; samp++){
     Double_t y1 = volts[samp];
@@ -976,19 +1045,130 @@ Int_t AnitaEventCalibrator::getTimeOfUpgoingZeroCrossings(Int_t numPoints, Doubl
     Double_t t1 = times[samp];
     Double_t t2 = times[samp+1];
     if(y1 <= 0 && y2 > 0){
+
       Double_t tzc = getTimeOfZeroCrossing(t1, y1, t2, y2);
       if(TMath::IsNaN(tzc)){
 	std::cerr << "Error in " __FILE__ << ": line " << __LINE__ << std::endl;
 	std::cerr << samp << "\t" << numPoints << "\t" << t1 << "\t" 
 		  << y1 << "\t" << t2 << "\t" << y2 << std::endl;
       }
-      timeZeroCrossings[numZcs] = tzc;
-      sampZeroCrossings[numZcs] = samp;
+
+      // Now have candidate upgoing zero crossing...
+      // For a real clock tick, the next extrema should be a maxima...
+      // and the previous one should be a minima
+
+      Int_t nextMaxima = 0;
+      Int_t prevMaxima = 0;
+      // std::cout << "maximaSamps.size() = " << maximaSamps.size() 
+      // 		<< " searching for samp = " << samp << std::endl;
+      for(UInt_t maxInd=0; maxInd < maximaSamps.size(); maxInd++){
+	// std::cout << maximaSamps.at(maxInd) << ", ";
+	if(maximaSamps.at(maxInd) > samp){
+	  nextMaxima = maximaSamps.at(maxInd);	  
+	  if(maxInd > 0){
+	    prevMaxima = maximaSamps.at(maxInd-1);
+	  }
+	  break;
+	}
+      }
+      // std::cout << std::endl;
+
+      Int_t nextMinima = numPoints-1;
+      Int_t prevMinima = numPoints-1;
+      // std::cout << "minimaSamps.size() = " << minimaSamps.size() 
+      // 		<< " searching for samp = " << samp << std::endl;
+      for(UInt_t minInd=minimaSamps.size()-1; minInd != 0; minInd--){
+	// std::cout << minimaSamps.at(minInd) << ", ";
+	if(minimaSamps.at(minInd) < samp){
+	  prevMinima = minimaSamps.at(minInd);
+	  if(minInd < minimaSamps.size()-1){
+	    nextMinima = minimaSamps.at(minInd+1);
+	  }
+	  break;
+	}
+      }
+      // std::cout << std::endl;
+
+      // std::cout << "samp = " << samp << ", prevMaxima = " << prevMaxima << ", nextMaxima = " << nextMaxima 
+      // 		<< ", prevMinima = " << prevMinima << ", nextMinima = " << nextMinima << std::endl;
+      // // std::cout << "time = " << times[samp] << ", prevMaxima = " << times[prevMaxima] 
+      // // 		<< ", nextMaxima = " << times[nextMaxima] << ", prevMinima = " 
+      // // 		<< times[prevMinima] << ", nextMinima = " << times[nextMinima] << std::endl;
+      // std::cout << "volt = " << volts[samp] << ", prevMaxima = " << volts[prevMaxima] 
+      // 		<< ", nextMaxima = " << volts[nextMaxima] << ", prevMinima = " 
+      // 		<< volts[prevMinima] << ", nextMinima = " << volts[nextMinima] << std::endl;
+
+      Int_t prevExtrema = prevMinima > prevMaxima ? prevMinima : prevMaxima;
+      Int_t nextExtrema = nextMinima < nextMaxima ? nextMinima : nextMaxima;
+      // std::cout << "nextExtrema = " << nextExtrema << " volts = " << volts[nextExtrema] << std::endl;
+      // std::cout << "prevExtrema = " << prevExtrema << " volts = " << volts[prevExtrema] << std::endl;
+
+      if(volts[nextExtrema] - volts[prevExtrema] > AnitaClock::upgoingThreshold){
+	prevExtremas.push_back(prevExtrema);
+	nextExtremas.push_back(nextExtrema);
+
+	tZcs.push_back(tzc);
+	sampZcs.push_back(samp);
+      }
+    }
+  }
+
+  if(tZcs.size() > (UInt_t)AnitaClock::maxNumZcs){
+    fClockProblem = 1;
+    // std::cerr << "!!!!!!!!!!!" << std::endl;
+    // for(UInt_t zc=0; zc<sampZcs.size(); zc++){
+    //   // std::cout << "(" << sampZcs.at(zc) << ", " << volts[sampZcs.at(zc)] << "), ";
+    //   std::cout << "(" << sampZcs.at(zc) << ", " << volts[sampZcs.at(zc)] << "), (" << prevExtremas.at(zc) << ", " << volts[prevExtremas.at(zc)] << "), (" << nextExtremas.at(zc) << ", " << volts[nextExtremas.at(zc)] << "), " << std::endl;
+    // }
+    // std::cout << std::endl;
+    // std::cout << fClockProblem << std::endl;
+    // std::cerr << "!!!!!!!!!!!" << std::endl;
+  }
+
+
+  // This guarentees we won't have any buffer overflow... 
+  // but may still have crappy zero crossings.
+  for(Int_t zc=0; zc<AnitaClock::maxNumZcs; zc++){
+    if(zc < (Int_t)tZcs.size()){
+      timeZeroCrossings[zc] = tZcs.at(zc);
+      sampZeroCrossings[zc] = sampZcs.at(zc);
       numZcs++;
     }
   }
+
+
   return numZcs;
 }
+
+
+void AnitaEventCalibrator::findExtremaSamples(Int_t length, Double_t* volts, 
+					      std::vector<Int_t>& maximaSamps, 
+					      std::vector<Int_t>& minimaSamps){
+  // empty vectors
+  maximaSamps.clear();
+  minimaSamps.clear();
+  
+  for(int samp=0; samp<length; samp++){
+    Double_t y0 = samp > 0 ? volts[samp-1] : 0;
+    Double_t y1 = volts[samp];
+
+    int posOffset = 1;
+    Double_t y2 = samp < length-1 ? volts[samp + posOffset] : 0;
+    while(y2==y1 && samp + posOffset < length){
+      y2 = samp < length-1 ? volts[samp + posOffset] : 0;
+      posOffset++;
+    }
+
+
+    if(y0 > y1 && y1 < y2){
+      minimaSamps.push_back(samp);
+    }
+    else if(y0 < y1 && y1 > y2){
+      maximaSamps.push_back(samp);
+    }
+  }
+}
+
 
 Double_t AnitaEventCalibrator::getTimeOfZeroCrossing(Double_t x1, Double_t y1, Double_t x2, Double_t y2){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
