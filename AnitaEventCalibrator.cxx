@@ -605,11 +605,12 @@ void AnitaEventCalibrator::keepOnlySomeTimeAfterClockUptick(TGraph* grClock, Dou
     Double_t timeZeroCrossings[AnitaClock::maxNumZcs] = {0};
     Int_t sampZeroCrossings[AnitaClock::maxNumZcs] = {0};
 
-    Int_t numZc = getTimeOfUpgoingZeroCrossings(grClock->GetN(),
-						grClock->GetX(),
-						grClock->GetY(),
-						timeZeroCrossings,
-						sampZeroCrossings);    
+    Int_t numZc = getTimeOfUpwardsClockTicksCrossingZero(grClock->GetN(),
+							 grClock->GetX(),
+							 grClock->GetY(),
+							 timeZeroCrossings,
+							 sampZeroCrossings,
+							 false);
 
     if(fClockProblem==0){
       Int_t thisZc = 0;
@@ -746,11 +747,12 @@ void AnitaEventCalibrator::guessRco(UsefulAnitaEvent* eventPtr){
 
   for(Int_t surf=0; surf<NUM_SURF; surf++){    
     for(int rco=0; rco<NUM_RCO; rco++){
-      numZcs[surf][rco] = getTimeOfUpgoingZeroCrossings(clockNumPoints[surf][rco],
-							clockTimes[surf][rco],
-							clockVolts[surf][rco],
-							timeZeroCrossings[surf][rco],
-							sampZeroCrossings[surf][rco]);
+      numZcs[surf][rco] = getTimeOfUpwardsClockTicksCrossingZero(clockNumPoints[surf][rco],
+								 clockTimes[surf][rco],
+								 clockVolts[surf][rco],
+								 timeZeroCrossings[surf][rco],
+								 sampZeroCrossings[surf][rco],
+								 true);
       
       for(Int_t zc=0; zc<numZcs[surf][rco]; zc++){	
 	if(zc > 0){
@@ -1025,7 +1027,7 @@ void AnitaEventCalibrator::guessRco(UsefulAnitaEvent* eventPtr){
 
 
 
-Int_t AnitaEventCalibrator::getTimeOfUpgoingZeroCrossings(Int_t numPoints, Double_t* times, Double_t* volts, Double_t* timeZeroCrossings, Int_t* sampZeroCrossings){
+Int_t AnitaEventCalibrator::getTimeOfUpwardsClockTicksCrossingZero(Int_t numPoints, Double_t* times, Double_t* volts, Double_t* timeZeroCrossings, Int_t* sampZeroCrossings, bool raiseFlagIfClocksAreWeird){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
 
   std::vector<Double_t> tZcs;
@@ -1036,6 +1038,7 @@ Int_t AnitaEventCalibrator::getTimeOfUpgoingZeroCrossings(Int_t numPoints, Doubl
   std::vector<Int_t> maximaSamps;
   std::vector<Int_t> minimaSamps;
 
+  // See explanation below for why I find the samples of the local maxima and minima
   findExtremaSamples(numPoints, volts, maximaSamps, minimaSamps);
 
   Int_t numZcs = 0;
@@ -1053,53 +1056,81 @@ Int_t AnitaEventCalibrator::getTimeOfUpgoingZeroCrossings(Int_t numPoints, Doubl
 		  << y1 << "\t" << t2 << "\t" << y2 << std::endl;
       }
 
-      // Now have candidate upgoing zero crossing...
-      // For a real clock tick, the next extrema should be a maxima...
-      // and the previous one should be a minima
 
-      Int_t nextMaxima = 0;
+      // OK here things get a little more complicated than I would like... here's why.
+      // There were some problems with the crosstalk from SURF saturation messing this function up
+      // Such a condition creates large +ve or -ve spikes in the clock channels which naively 
+      // look like the clock has crossed zero (it has but not because of the clock).
+      // So to combat that I've added some extra conditions a zero crossing has to fulfil to count as
+      // a tick of the clock.
+      // That condition is the nearest local maxmima or minima (which ever is closer but not equal) 
+      // before and after the zero crossing sample MUST have a voltage difference above some threshold.
+      // That threshold is defined in AnitaClock.h
+
+
+      // At the start of the function I found the local maxima and minima...
+      // Now I find the local maxima and minima immediately before and after the upgoing zero crossing.
+
+      // First do the maxima, since we are looking for an upwards "tick" of the clock between
+      // samp and samp+1, the current sample can't be a local maxima.
+      Int_t nextMaxima = numPoints-1;
       Int_t prevMaxima = 0;
-      // std::cout << "maximaSamps.size() = " << maximaSamps.size() 
-      // 		<< " searching for samp = " << samp << std::endl;
       for(UInt_t maxInd=0; maxInd < maximaSamps.size(); maxInd++){
-	// std::cout << maximaSamps.at(maxInd) << ", ";
 	if(maximaSamps.at(maxInd) > samp){
-	  nextMaxima = maximaSamps.at(maxInd);	  
+
+	  // So long as the next maxima isn't he sample immediately following the sample before the 
+	  // minima then select the next maxima. (It could be a surf saturation cross talk!)
+	  if(maximaSamps.at(maxInd) > samp+1){
+	    nextMaxima = maximaSamps.at(maxInd);
+	  }
+	  else if(maxInd < maximaSamps.size()-1){
+	    nextMaxima = maximaSamps.at(maxInd+1);
+	  }
+
 	  if(maxInd > 0){
+	    // If it's not the first maxima, then the previous value can be assigned
+	    // (otherwise it stays zero).
 	    prevMaxima = maximaSamps.at(maxInd-1);
 	  }
 	  break;
 	}
       }
-      // std::cout << std::endl;
 
+      // Now we do the minima, but need to take care that we don't accidentally select the current sample
+      // if it is indeed a minima (often the case for uninterpolated clocks)
       Int_t nextMinima = numPoints-1;
-      Int_t prevMinima = numPoints-1;
-      // std::cout << "minimaSamps.size() = " << minimaSamps.size() 
-      // 		<< " searching for samp = " << samp << std::endl;
-      for(UInt_t minInd=minimaSamps.size()-1; minInd != 0; minInd--){
-	// std::cout << minimaSamps.at(minInd) << ", ";
-	if(minimaSamps.at(minInd) < samp){
-	  prevMinima = minimaSamps.at(minInd);
-	  if(minInd < minimaSamps.size()-1){
-	    nextMinima = minimaSamps.at(minInd+1);
+      Int_t prevMinima = 0;
+      for(UInt_t minInd=0; minInd < minimaSamps.size(); minInd++){
+	if(minimaSamps.at(minInd) > samp){
+
+	  nextMinima = minimaSamps.at(minInd);
+ 
+	  // It is possible that the value of the current sample is a local minimum
+	  // But I don't want that (downward spike from cross talk fits that condition!)
+	  if(minInd > 0 && minimaSamps.at(minInd-1) < samp){// Require the previous minima be less than samp
+	    prevMinima = minimaSamps.at(minInd-1);
 	  }
+	  else if(minInd > 1 && minimaSamps.at(minInd-2) < samp){ //If not, then use the prior one.
+	    prevMinima = minimaSamps.at(minInd-2);
+	  }
+	  // If we are very close to the start of the array then the previous minima can be 0.
 	  break;
 	}
       }
+
+
+      // Here we select the closest maxima or minima to the upwards clock tick...
+      Int_t prevExtrema = prevMinima > prevMaxima ? prevMinima : prevMaxima;
+      Int_t nextExtrema = nextMinima < nextMaxima ? nextMinima : nextMaxima;
+
+
       // std::cout << std::endl;
 
       // std::cout << "samp = " << samp << ", prevMaxima = " << prevMaxima << ", nextMaxima = " << nextMaxima 
       // 		<< ", prevMinima = " << prevMinima << ", nextMinima = " << nextMinima << std::endl;
-      // // std::cout << "time = " << times[samp] << ", prevMaxima = " << times[prevMaxima] 
-      // // 		<< ", nextMaxima = " << times[nextMaxima] << ", prevMinima = " 
-      // // 		<< times[prevMinima] << ", nextMinima = " << times[nextMinima] << std::endl;
       // std::cout << "volt = " << volts[samp] << ", prevMaxima = " << volts[prevMaxima] 
       // 		<< ", nextMaxima = " << volts[nextMaxima] << ", prevMinima = " 
       // 		<< volts[prevMinima] << ", nextMinima = " << volts[nextMinima] << std::endl;
-
-      Int_t prevExtrema = prevMinima > prevMaxima ? prevMinima : prevMaxima;
-      Int_t nextExtrema = nextMinima < nextMaxima ? nextMinima : nextMaxima;
       // std::cout << "nextExtrema = " << nextExtrema << " volts = " << volts[nextExtrema] << std::endl;
       // std::cout << "prevExtrema = " << prevExtrema << " volts = " << volts[prevExtrema] << std::endl;
 
@@ -1109,22 +1140,23 @@ Int_t AnitaEventCalibrator::getTimeOfUpgoingZeroCrossings(Int_t numPoints, Doubl
 
 	tZcs.push_back(tzc);
 	sampZcs.push_back(samp);
+	// std::cout << "SELECTED!" << std::endl;
       }
+      // std::cout << std::endl;
     }
   }
 
-  if(tZcs.size() > (UInt_t)AnitaClock::maxNumZcs){
-    fClockProblem = 1;
-    // std::cerr << "!!!!!!!!!!!" << std::endl;
-    // for(UInt_t zc=0; zc<sampZcs.size(); zc++){
-    //   // std::cout << "(" << sampZcs.at(zc) << ", " << volts[sampZcs.at(zc)] << "), ";
-    //   std::cout << "(" << sampZcs.at(zc) << ", " << volts[sampZcs.at(zc)] << "), (" << prevExtremas.at(zc) << ", " << volts[prevExtremas.at(zc)] << "), (" << nextExtremas.at(zc) << ", " << volts[nextExtremas.at(zc)] << "), " << std::endl;
-    // }
-    // std::cout << std::endl;
-    // std::cout << fClockProblem << std::endl;
-    // std::cerr << "!!!!!!!!!!!" << std::endl;
+  if(raiseFlagIfClocksAreWeird==true){
+    if(tZcs.size() > (UInt_t)AnitaClock::maxNumZcs || tZcs.size() < (UInt_t)AnitaClock::minNumZcs){
+      fClockProblem = 1;
+      for(UInt_t zc=0; zc<sampZcs.size(); zc++){
+	std::cout << "(" << sampZcs.at(zc) << ", " << volts[sampZcs.at(zc)] << "), (" 
+		  << prevExtremas.at(zc) << ", " << volts[prevExtremas.at(zc)] << "), (" 
+		  << nextExtremas.at(zc) << ", " << volts[nextExtremas.at(zc)] << "), " << std::endl;
+      }
+      std::cout << "fClockProblem = " << fClockProblem << std::endl;      
+    }
   }
-
 
   // This guarentees we won't have any buffer overflow... 
   // but may still have crappy zero crossings.

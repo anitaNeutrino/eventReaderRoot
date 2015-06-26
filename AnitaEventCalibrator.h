@@ -79,11 +79,10 @@ class AnitaEventCalibrator : public TObject
   void deleteClockAlignmentTGraphs();
   void zeroMeanNonClockChannels();
 
-
-
   Double_t getTimeOfZeroCrossing(Double_t x1, Double_t y1, Double_t x2, Double_t y2);
-  Int_t getTimeOfUpgoingZeroCrossings(Int_t numPoints, Double_t* times, Double_t* volts, 
-				      Double_t* timeZeroCrossings, Int_t* sampZeroCrossings);
+  Int_t getTimeOfUpwardsClockTicksCrossingZero(Int_t numPoints, Double_t* times, Double_t* volts, 
+					       Double_t* timeZeroCrossings, Int_t* sampZeroCrossings, 
+					       bool raiseFlagIfClocksAreWeird);
 
   void findExtremaSamples(Int_t length, Double_t* volts, 
 			  std::vector<Int_t>& maximaSamps, 
