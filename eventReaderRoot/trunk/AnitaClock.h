@@ -21,12 +21,13 @@ namespace AnitaClock {
   // Variable for the maximum number of zero crossings per waveform.
   // 30 ns per period so this is more than sufficient for the 100 ns window.
   const Int_t maxNumZcs = 4;
+  const Int_t minNumZcs = 3;
 
 
   // ADC counts for the upgoing zero crossing of the clock next extrema - previous extrema...
   // i.e. should be > than the typical clock amplitude.
-  // This variable is supposed to limit the effect of surf saturation in clock
-  const Double_t upgoingThreshold = 75;
+  // This variable is supposed to limit the effect of cross talk from surf saturation in the clock
+  const Double_t upgoingThreshold = 50;
   
 }
 
