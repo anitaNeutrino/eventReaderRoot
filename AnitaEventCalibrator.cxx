@@ -1149,11 +1149,11 @@ Int_t AnitaEventCalibrator::getTimeOfUpwardsClockTicksCrossingZero(Int_t numPoin
   if(raiseFlagIfClocksAreWeird==true){
     if(tZcs.size() > (UInt_t)AnitaClock::maxNumZcs || tZcs.size() < (UInt_t)AnitaClock::minNumZcs){
       fClockProblem = 1;
-      for(UInt_t zc=0; zc<sampZcs.size(); zc++){
-	std::cout << "(" << sampZcs.at(zc) << ", " << volts[sampZcs.at(zc)] << "), (" 
-		  << prevExtremas.at(zc) << ", " << volts[prevExtremas.at(zc)] << "), (" 
-		  << nextExtremas.at(zc) << ", " << volts[nextExtremas.at(zc)] << "), " << std::endl;
-      }
+      // for(UInt_t zc=0; zc<sampZcs.size(); zc++){
+      // 	std::cout << "(" << sampZcs.at(zc) << ", " << volts[sampZcs.at(zc)] << "), (" 
+      // 		  << prevExtremas.at(zc) << ", " << volts[prevExtremas.at(zc)] << "), (" 
+      // 		  << nextExtremas.at(zc) << ", " << volts[nextExtremas.at(zc)] << "), " << std::endl;
+      // }
       std::cout << "fClockProblem = " << fClockProblem << std::endl;      
     }
   }
