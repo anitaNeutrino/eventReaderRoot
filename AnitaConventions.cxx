@@ -38,6 +38,10 @@ const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
    case kFull:
      return "deltaTs; voltage; unwrap; trigger jitter; cable delay. The full monty.";
      break;
+   case kAddPeds:
+     return "Same as full calibration but add pedestal voltages back into waveforms.";
+     break;
+
    // case kDefault:
    //   return "Default timing calibration: what you should call for analysis work";
    //   break;

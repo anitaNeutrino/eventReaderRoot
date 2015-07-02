@@ -62,8 +62,8 @@ class AnitaEventCalibrator : public TObject
   Double_t getTempFactor(); ///< Interface to RingBuffer of clock periods for temperature correction
   void updateTemperatureCorrection(); ///< Update RingBuffer for this event
   Int_t unwrapChannel(UsefulAnitaEvent* eventPtr, Int_t surf, Int_t chan, Int_t rco, 
-		      Bool_t fApplyTempCorrection, Double_t* voltsArray, 
-		      Double_t* timeArray, Int_t* scaArray);
+		      Bool_t fApplyTempCorrection, Bool_t fAddPedestal, 
+		      Double_t* voltsArray, Double_t* timeArray, Int_t* scaArray);
   void applyVoltageCalibration(UsefulAnitaEvent* eventPtr);
   void keepOnlySomeTimeAfterClockUptick(TGraph* grClock, Double_t deltaClockKeepNs);
 
@@ -80,21 +80,17 @@ class AnitaEventCalibrator : public TObject
   void zeroMeanNonClockChannels();
 
   Double_t getTimeOfZeroCrossing(Double_t x1, Double_t y1, Double_t x2, Double_t y2);
-  Int_t getTimeOfUpwardsClockTicksCrossingZero(Int_t numPoints, Double_t* times, Double_t* volts, 
-					       Double_t* timeZeroCrossings, Int_t* sampZeroCrossings, 
-					       bool raiseFlagIfClocksAreWeird);
+  Int_t getTimeOfUpwardsClockTicksCrossingZero(Int_t numPoints, Int_t surf, Double_t* times, 
+					       Double_t* volts, Double_t* timeZeroCrossings, 
+					       Int_t* sampZeroCrossings, bool raiseFlagIfClocksAreWeird);
 
-  void findExtremaSamples(Int_t length, Double_t* volts, 
+  void findExtremaSamples(Int_t length, Double_t* volts,
 			  std::vector<Int_t>& maximaSamps, 
 			  std::vector<Int_t>& minimaSamps);
 
-  // Calibration constants
 
+  void initializeVectors();
   
-
-  Double_t triggerJitterCorrection[NUM_SURF]; ///< Event-to-event calib: Since there is one clock per surf, only need NUM_SURF of these.
-  
-
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///// Member variables
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,8 +104,12 @@ class AnitaEventCalibrator : public TObject
   // Secondary event data
   RingBuffer* clockPeriodRingBuffer; ///< Holds rolling average of temperature correction
   Double_t fTempFactorGuess; ///< Multiplicative factor for deltaTs & epsilons accounting for temperature
-  Int_t rcoArray[NUM_SURF]; ///< The output of AnitaEventCalibrator::guessRco() goes here.
-  Double_t measuredClockPeriods[NUM_SURF][NUM_RCO][AnitaClock::maxNumZcs]; ///< For guessRco and getTempFactor
+
+
+  // Int_t rcoArray[NUM_SURF]; ///< The output of AnitaEventCalibrator::guessRco() goes here.
+  // Double_t measuredClockPeriods[NUM_SURF][NUM_RCO][AnitaClock::maxNumZcs]; ///< For guessRco and getTempFactor
+  std::vector<Int_t> rcoVector; ///< The output of AnitaEventCalibrator::guessRco() goes here.
+  std::vector<std::vector<std::vector<Double_t> > > measuredClockPeriods;
 
   // Constants for timing/voltage calibration
   Double_t relativeChannelDelays[NUM_SURF][NUM_CHAN]; ///< Cable + other delays
@@ -132,11 +132,7 @@ class AnitaEventCalibrator : public TObject
   std::vector<Double_t> clockAlignment;
   Double_t dtInterp; ///< Interpolating clock for alignment step
   Double_t nominalDeltaT; ///< If we don't want bin-to-bin deltaTs
-
-
-  // If AnitaEventCalibrator can't disentangle surf clock zero crossings...
-  // Event will most likely be thrown away (e.g. SURF saturation)
-  Int_t fClockProblem; ///< Flag raised if more than 4 upgoing zero crossings in any SURF clock
+  Int_t fClockProblem; ///< Flag raised if more than 4 or less than 2 upgoing zero crossings in a SURF clock
 
 
   //Ben Rotter's rfPower calibration :)
@@ -160,7 +156,7 @@ class AnitaEventCalibrator : public TObject
 
  private:
   void loadCalib(); ///< Reads calibration constants from text files into arrays
-
+  PedestalStruct_t fPedStruct; ///< For adding pedestals back onto voltage samples
   ClassDef(AnitaEventCalibrator,0);
   
 };
