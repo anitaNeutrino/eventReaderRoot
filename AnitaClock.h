@@ -27,7 +27,7 @@ namespace AnitaClock {
   // ADC counts for the upgoing zero crossing of the clock next extrema - previous extrema...
   // i.e. should be > than the typical clock amplitude.
   // This variable is supposed to limit the effect of cross talk from surf saturation in the clock
-  const Double_t upgoingThreshold = 40;
+  const Double_t upgoingThreshold = 30; // 40
   
 }
 

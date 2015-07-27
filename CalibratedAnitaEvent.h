@@ -37,11 +37,11 @@ class CalibratedAnitaEvent: public RawAnitaEvent
   // UInt_t fC3poNum; ///< Used to monitor the clock period... not read out in ANITA-3 :(
   WaveCalType::WaveCalType_t fCalType; ///< The calibration type used
   Int_t fRcoArray[NUM_SURF];   ///< An array to store the guessed at RCO values;
-  Double_t fTempFactorGuess;  ///< A holder variable to cling on to the temperature correction factor that we are guessing at.
+  Double_t fTempFactorGuesses[NUM_SURF];  ///< A holder variable to cling on to the temperature correction factor that we are guessing at.
   Double_t fClockPhiArray[NUM_SURF];   ///< An array to store the clock offsets
   Int_t fClockProblem;
 
-  ClassDef(CalibratedAnitaEvent,4);
+  ClassDef(CalibratedAnitaEvent,5);
 };
 
 
