@@ -23,6 +23,7 @@
 // std lib
 #include <fstream>
 #include <map>
+#include <bitset>
 
 // Anita
 #include "AnitaConventions.h"
@@ -30,6 +31,7 @@
 #include "AnitaClock.h"
 #include "AnitaGeomTool.h"
 #include "RingBuffer.h"
+#include "RawAnitaHeader.h"
 
 class TGraph;
 class UsefulAnitaEvent;
@@ -55,12 +57,12 @@ class AnitaEventCalibrator : public TObject
    */
 
   
-  Int_t calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, WaveCalType::WaveCalType_t calType);///< Workhorse
-
+  Int_t calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, 
+			     WaveCalType::WaveCalType_t calType);///< Workhorse
 
   void guessRco(UsefulAnitaEvent* eventPtr); ///< Guess RCO from clock
-  Double_t getTempFactor(); ///< Interface to RingBuffer of clock periods for temperature correction
-  void updateTemperatureCorrection(); ///< Update RingBuffer for this event
+  void getTempFactors(UsefulAnitaEvent* eventPtr); ///< Interface to RingBuffer of clock periods for temperature correction
+  void updateTemperatureCorrection(UsefulAnitaEvent* eventPtr); ///< Update RingBuffer for this event
   Int_t unwrapChannel(UsefulAnitaEvent* eventPtr, Int_t surf, Int_t chan, Int_t rco, 
 		      Bool_t fApplyTempCorrection, Bool_t fAddPedestal, 
 		      Double_t* voltsArray, Double_t* timeArray, Int_t* scaArray);
@@ -81,8 +83,10 @@ class AnitaEventCalibrator : public TObject
 
   Double_t getTimeOfZeroCrossing(Double_t x1, Double_t y1, Double_t x2, Double_t y2);
   Int_t getTimeOfUpwardsClockTicksCrossingZero(Int_t numPoints, Int_t surf, Double_t* times, 
-					       Double_t* volts, Double_t* timeZeroCrossings, 
-					       Int_t* sampZeroCrossings, bool raiseFlagIfClocksAreWeird);
+					       Double_t* volts, 
+					       std::vector<Double_t>& timeZeroCrossings, 
+					       std::vector<Int_t>& sampZeroCrossings, 
+					       bool raiseFlagIfClocksAreWeird);
 
   void findExtremaSamples(Int_t length, Double_t* volts,
 			  std::vector<Int_t>& maximaSamps, 
@@ -102,11 +106,12 @@ class AnitaEventCalibrator : public TObject
   Int_t scaArray[NUM_SURF][NUM_SAMP]; ///< Capacitor numbers for each sample
 
   // Secondary event data
-  RingBuffer* clockPeriodRingBuffer; ///< Holds rolling average of temperature correction
-  Double_t fTempFactorGuess; ///< Multiplicative factor for deltaTs & epsilons accounting for temperature
+  std::vector<std::vector<RingBuffer> > clockPeriodRingBuffers; ///< Holds rolling average of temperature correction
+  // RingBuffer* clockPeriodRingBuffer; ///< Holds rolling average of temperature correction
+  std::vector<Double_t> tempFactors; ///< Multiplicative factor for deltaTs & epsilons accounting for temperature
 
 
-  // Int_t rcoArray[NUM_SURF]; ///< The output of AnitaEventCalibrator::guessRco() goes here.
+  // Int_t rcoArray[NUM_SURF]; ///< The output of AnitaEvenCalibrator::guessRco() goes here.
   // Double_t measuredClockPeriods[NUM_SURF][NUM_RCO][AnitaClock::maxNumZcs]; ///< For guessRco and getTempFactor
   std::vector<Int_t> rcoVector; ///< The output of AnitaEventCalibrator::guessRco() goes here.
   std::vector<std::vector<std::vector<Double_t> > > measuredClockPeriods;

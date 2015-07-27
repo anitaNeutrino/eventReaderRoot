@@ -6,7 +6,7 @@
 include Makefile.arch
 
 #Site Specific  Flags
-SYSINCLUDES	= #-DANITA_2_DATA
+SYSINCLUDES	= -I/usr/local/include 
 SYSLIBS         = 
 DLLSUF = ${DllSuf}
 OBJSUF = ${ObjSuf}
