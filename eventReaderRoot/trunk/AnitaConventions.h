@@ -233,12 +233,13 @@ namespace AnitaBand {
    const char *bandAsString(AnitaBand::AnitaBand_t band); ///< Returns the band as a character string.
 }
 
-//!  AnitaLocations -- A selection of useful ANITA-I related locations
+//!  AnitaLocations -- A selection of useful ANITA-I related locations, now updated for ANITA-3.
 /*!
-  Things like the calibration antennas, etc.
+  Things like the calibration antennas and pulsers etc.
   \ingroup rootclasses
 */
 namespace AnitaLocations { 
+
   const double LONGITUDE_SURF_SEAVEY=167.0564667; ///< Longitude of surface seavey.
   const double LATITUDE_SURF_SEAVEY=-77.86185; ///< Latitude of surface seavey.
   const double ALTITUDE_SURF_SEAVEY=15.0; ///< Altitude of surface seavey.
@@ -254,6 +255,11 @@ namespace AnitaLocations {
   const double LATITUDE_TD=-77.8803;
   const double ALTITUDE_TD=2260-97.;
 
+  // WAIS divide position taken from Steph's e-log
+  // https://www.phys.hawaii.edu/elog/anita_notes/595
+  const Double_t LATITUDE_WAIS = - (79 + (27.93728/60)); ///< Latitude of WAIS divide pulser
+  const Double_t LONGITUDE_WAIS = -(112 + (6.74974/60)); ///< Longitude of WAIS divide pulser
+  const Double_t ALTITUDE_WAIS = 1813.42;///< Altitude of WAIS divide pulser
 
 };
 
