@@ -411,7 +411,8 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
       Double_t cableDelay = 0;
       if(fApplyCableDelays==true){
-	cableDelay = relativeChannelDelays[surf][chan];
+	Int_t labChip = eventPtr->getLabChip(chanIndex);
+	cableDelay = relativeCableDelays[surf][chan][labChip];
       }
 
       for(Int_t samp=0; samp<numPointsArray[surf]; samp++){
@@ -1474,6 +1475,15 @@ void AnitaEventCalibrator::loadCalib() {
   while(epsilonFile >> surf >> chip >> rco >> calib) {
     epsilons[surf][chip][rco]=calib; 
   }
+
+  sprintf(fileName,"%s/relativeCableDelays.dat",calibDir);
+  std::ifstream relativeCableDelayFile(fileName);
+  relativeCableDelayFile.getline(firstLine,179);
+  while(relativeCableDelayFile >> surf >> chan >> chip >> calib) {
+    relativeCableDelays[surf][chan][chip]=calib;
+    // std::cout << surf << "\t" << chan << "\t" << chip << "\t" << relativeCableDelays[surf][chan][chip] << std::endl;
+  }
+  
 
   sprintf(fileName,"%s/clockKeep.dat",calibDir);
   std::ifstream clockKeep(fileName);

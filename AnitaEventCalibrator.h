@@ -117,7 +117,7 @@ class AnitaEventCalibrator : public TObject
   std::vector<std::vector<std::vector<Double_t> > > measuredClockPeriods;
 
   // Constants for timing/voltage calibration
-  Double_t relativeChannelDelays[NUM_SURF][NUM_CHAN]; ///< Cable + other delays
+  Double_t relativeCableDelays[NUM_SURF][NUM_CHAN][NUM_CHIP]; ///< Cable + other delays
   Double_t deltaTs[NUM_SURF][NUM_CHIP][NUM_RCO][NUM_SAMP]; ///< Calib constants: The time for the write pointer to travel between successove capacitors.
   Double_t epsilons[NUM_SURF][NUM_CHIP][NUM_RCO]; ///< Calib constants: time (ns) for write pointer to go from sample 255 -> 0 (in ANITA-2 and ANITA-3 with the LAB-3 digitizers)
   Double_t mvCalibVals[NUM_SURF][NUM_CHAN][NUM_CHIP]; ///< Calib constants: converts from ADC counts to millivolts
