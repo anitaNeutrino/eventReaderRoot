@@ -260,7 +260,6 @@ namespace AnitaLocations {
   const Double_t LATITUDE_WAIS = - (79 + (27.93728/60)); ///< Latitude of WAIS divide pulser
   const Double_t LONGITUDE_WAIS = -(112 + (6.74974/60)); ///< Longitude of WAIS divide pulser
   const Double_t ALTITUDE_WAIS = 1813.42;///< Altitude of WAIS divide pulser
-
 };
 
 
