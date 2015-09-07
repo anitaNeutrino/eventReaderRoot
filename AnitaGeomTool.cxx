@@ -5,116 +5,172 @@
 /////     Class for accessing ANITA II Geometry Data                     /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
-#include <fstream>
-#include <iostream>
-#include <cstring>
-#include "AnitaGeomTool.h"
-#include "AnitaConventions.h"
 
-#include "TString.h"
-#include "TObjArray.h"
-#include "TObjString.h"
-#include "TVector3.h"
+#include "AnitaGeomTool.h"
 
 #define INCHTOMETER 0.0254
 
-double deltaRL = 0.0;
-double deltaUD = 0.0;
+Double_t deltaRL = 0.0;
+Double_t deltaUD = 0.0;
 
+
+
+
+//!  AnitaGeom -- Namespace used inside AnitaGeomTool
+/*!
+  \namespace AnitaGeom
+  Contains all the mappings between antennas/polarization/phi-sectors/trigger channels/digitizer channels
+*/
 namespace AnitaGeom {
    
-  //Positive is horizontal
-  //Negative is vetical
-  int antToSurfMap[NUM_SEAVEYS]={11,5,10,4,11,4,10,5,11,5,10,4,11,4,10,5,
+  ///< Map from antenna to SURF. Both polarizations from an antenna go to the same SURF.
+  Int_t antToSurfMap[NUM_SEAVEYS]={11,5,10,4,11,4,10,5,11,5,10,4,11,4,10,5,
 				  9,3,8,2,8,3,9,2,9,3,8,2,8,3,9,2,
 				  6,0,7,1,6,1,7,0,6,0,7,1,6,1,7,0};
 
+  ///< Map for VPOL channel of antenna to channel on SURF. (VPOL channels are 0-3)  
+  Int_t vAntToChan[NUM_SEAVEYS]={3,1,3,5,1,3,1,3,2,0,2,0,0,2,0,2,
+			       1,3,1,3,3,1,3,1,0,2,0,2,2,0,2,0,
+			       3,1,3,1,1,3,1,3,2,0,2,0,0,2,0,2};
 				  
-  int hAntToChan[NUM_SEAVEYS]={7,5,7,1,5,7,5,7,6,4,6,4,4,6,4,6,
+  ///< Map for HPOL channel of antenna to channel on SURF. (HPOL channels are 4-7)
+  Int_t hAntToChan[NUM_SEAVEYS]={7,5,7,1,5,7,5,7,6,4,6,4,4,6,4,6,
 			       5,7,5,7,7,5,7,5,4,6,4,6,6,4,6,4,
 			       7,5,7,5,5,7,5,7,6,4,6,4,4,6,4,6};
   
-  
-  int vAntToChan[NUM_SEAVEYS]={3,1,3,5,1,3,1,3,2,0,2,0,0,2,0,2,
-			       1,3,1,3,3,1,3,1,0,2,0,2,2,0,2,0,
-			       3,1,3,1,1,3,1,3,2,0,2,0,0,2,0,2};
    
-  ///< 1 is normal orientation, -1 is 180 degree flip, -2 is 90 degree flip (so only H-channels need flipping).
-  int antOrientationMap[NUM_SEAVEYS]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  //  int antOrientationMap[NUM_SEAVEYS]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  ///< 1 is Normal orientation, -1 is 180 degree flip. (Top ring needs to be inverted in software when signals come through seaveys.)
+  // Apparently -2 is a 90 degree flip.
+  Int_t antOrientationMap[NUM_SEAVEYS]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  //  Int_t antOrientationMap[NUM_SEAVEYS]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 				      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 				      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; 
 
 
-  // SEAVEYS that this array uses antenna number 1-48 as it needs
-  // the negative sign to indicate polarization
-   // Note that this array uses antenna number 1-48 as it needs
-   // the negative sign to indicate polarization (-ve is vertical)
-
-  int surfToAntMap[ACTIVE_SURFS][RFCHAN_PER_SURF]=
-    {{-42,-34,-48,-40,42,34,48,40},
-     {-44,-36,-46,-38,44,36,46,38},
-     {-32,-24,-28,-20,32,24,28,20},
-     {-30,-22,-26,-18,30,22,26,18},
-     {-12,4,-14,-6,12,-4,14,6},
-     {-10,-2,-16,-8,10,2,16,8},
-     {-45,-37,-41,-33,45,37,41,33},
-     {-47,-39,-43,-35,47,39,43,35},
-     {-27,-19,-29,-21,27,19,29,21},
-     {-25,-17,-31,-23,25,17,31,23},
-     {-15,-7,-11,-3,15,7,11,3},
-     {-13,-5,-9,-1,13,5,9,1}};
+  ///< Map from SURF to antenna+polarization.
+  ///< The numbers 1-48 indicate antenna as the negative sign is used to indicate polarization.
+  ///< The negative sign indicates polarization (-ve is VPOL, +ve is HPOL)
+  Int_t surfToAntMap[ACTIVE_SURFS][RFCHAN_PER_SURF]= {{-42,-34,-48,-40,42,34,48,40},
+						    {-44,-36,-46,-38,44,36,46,38},
+						    {-32,-24,-28,-20,32,24,28,20},
+						    {-30,-22,-26,-18,30,22,26,18},
+						    {-12,4,-14,-6,12,-4,14,6},
+						    {-10,-2,-16,-8,10,2,16,8},
+						    {-45,-37,-41,-33,45,37,41,33},
+						    {-47,-39,-43,-35,47,39,43,35},
+						    {-27,-19,-29,-21,27,19,29,21},
+						    {-25,-17,-31,-23,25,17,31,23},
+						    {-15,-7,-11,-3,15,7,11,3},
+						    {-13,-5,-9,-1,13,5,9,1}};
       
-  //Map from phi to antenna both start counting at zero
-  int topAntNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-  int middleAntNums[NUM_PHI]={16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
-  int bottomAntNums[NUM_PHI]={32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47};
+  ///< Map from phi-sector to antenna. Both start counting at zero.
+  Int_t topAntNums[NUM_PHI]    = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+  Int_t middleAntNums[NUM_PHI] = {16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+  Int_t bottomAntNums[NUM_PHI] = {32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47};
    
-  //and the inverse (using ANT-1 and ANT-17 and ANT-32 with the arrays)
-  int topPhiNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-  int middlePhiNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-  int bottomPhiNums[NUM_PHI]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-   
-  int surfToPhiTriggerMap[ACTIVE_SURFS][2]={{-1,-1},{-1,-1},{0,4},{2,6},
-					    {1,5},{3,7},{15,11},{13,9},
-					    {14,10},{12,8},{-1,-1},{-1,-1}};
-  AnitaRing::AnitaRing_t surfTriggerChanToRing[SCALERS_PER_SURF]={AnitaRing::kTopRing,AnitaRing::kMiddleRing,AnitaRing::kBottomRing,AnitaRing::kTopRing,AnitaRing::kMiddleRing,AnitaRing::kBottomRing,AnitaRing::kTopRing,AnitaRing::kMiddleRing,AnitaRing::kBottomRing,AnitaRing::kTopRing,AnitaRing::kMiddleRing,AnitaRing::kBottomRing};
-  AnitaPol::AnitaPol_t surfTriggerChanToPol[SCALERS_PER_SURF]={AnitaPol::kVertical,AnitaPol::kVertical,AnitaPol::kVertical,AnitaPol::kVertical,AnitaPol::kVertical,AnitaPol::kVertical,AnitaPol::kHorizontal,AnitaPol::kHorizontal,AnitaPol::kHorizontal,AnitaPol::kHorizontal,AnitaPol::kHorizontal,AnitaPol::kHorizontal};
+  ///< And the inverse, a map from antenna to phi-sector (using ANT-1 and ANT-17 and ANT-33 with the arrays).
+  Int_t topPhiNums[NUM_PHI]    = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+  Int_t middlePhiNums[NUM_PHI] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+  Int_t bottomPhiNums[NUM_PHI] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 
-  int phiToSurfTriggerMap[NUM_PHI]={2,4,3,5,2,4,3,5,9,7,8,6,9,7,8,6};
-  int phiToSurfHalf[NUM_PHI]={0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0};
-  //
 
+  ///< Map from SURF and polarization to phi-sector.
+  Int_t surfToPhiTriggerMap[ACTIVE_SURFS][2]={{-1,-1}, {-1,-1}, { 0, 4}, { 2, 6},
+					      { 1, 5}, { 3, 7}, {15,11}, {13, 9},
+					      {14,10}, {12, 8}, {-1,-1}, {-1,-1}};
+
+  
+  using AnitaRing::kTopRing;
+  using AnitaRing::kMiddleRing;
+  using AnitaRing::kBottomRing;
+
+  ///< Map from SURF trigger channel to ring  
+  AnitaRing::AnitaRing_t surfTriggerChanToRing[SCALERS_PER_SURF]={kTopRing, kMiddleRing, kBottomRing,
+								  kTopRing, kMiddleRing, kBottomRing,
+								  kTopRing, kMiddleRing, kBottomRing,
+								  kTopRing, kMiddleRing, kBottomRing};
+  
+
+  using AnitaPol::kVertical;
+  using AnitaPol::kHorizontal;
+  ///< Map from SURF trigger channel to polarization  
+  AnitaPol::AnitaPol_t surfTriggerChanToPol[SCALERS_PER_SURF]={kVertical,   kVertical,   kVertical,
+							       kVertical,   kVertical,   kVertical,
+							       kHorizontal, kHorizontal, kHorizontal,
+							       kHorizontal, kHorizontal, kHorizontal};
+
+  
+  Int_t phiToSurfTriggerMap[NUM_PHI] = {2,4,3,5,2,4,3,5,9,7,8,6,9,7,8,6};
+  Int_t phiToSurfHalf[NUM_PHI]       = {0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0};
 
 }
 
-AnitaGeomTool*  AnitaGeomTool::fgInstance = 0;
 
 
+
+
+
+AnitaGeomTool*  AnitaGeomTool::fgInstance = NULL; ///< Global pointer, init with AnitaGeomTool::Instance()
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Default constructor: defines antenna phase centre locations.
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+AnitaGeomTool::AnitaGeomTool()
+{
+  //Default constructor
+  ringPhaseCentreOffset[0]=0.2-0.042685;
+  ringPhaseCentreOffset[1]=0.2+0.00653;
+  ringPhaseCentreOffset[2]=0.2+0.1927;
+
+  //  readSimonsNumbers();
+  //  readPhotogrammetry();
+  //  readAnitaIIPhotogrammetry();
+
+  fUseKurtAnitaIINumbers=0;
+  fillAntPositionsFromPrioritizerdConfig();
+  fgInstance=this;
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Default destructor
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+AnitaGeomTool::~AnitaGeomTool()
+{
+  //Default destructor
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Use the geometrical information from he ANITA-3 Prioritizerd, from feed position numbers
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 void AnitaGeomTool::fillAntPositionsFromPrioritizerdConfig() {
-  Double_t phiArrayDeg[48]={0,22.5,45,67.5,90,112.5,135,157.5,180,
-			    202.5,225,247.5,270,292.5,315,337.5,
-			    0,22.5,45,67.5,90,112.5,135,157.5,180,
-			    202.5,225,247.5,270,292.5,315,337.5,
-			    0,22.5,45,67.5,90,112.5,135,157.5,180,
-			    202.5,225,247.5,270,292.5,315,337.5};
 
-  Double_t rArray[48]={0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,
-		       0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,
-		       2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,
-		       2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,
-		       2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,
-		       2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447};
-  Double_t zArray[48]={-1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,
-		       -1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,
-		       -5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,
-		       -5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,
-		       -6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,
-		       -6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951};
+  Double_t phiArrayDeg[NUM_SEAVEYS]={0,22.5,45,67.5,90,112.5,135,157.5,180,
+				     202.5,225,247.5,270,292.5,315,337.5,
+				     0,22.5,45,67.5,90,112.5,135,157.5,180,
+				     202.5,225,247.5,270,292.5,315,337.5,
+				     0,22.5,45,67.5,90,112.5,135,157.5,180,
+				     202.5,225,247.5,270,292.5,315,337.5};
+
+  Double_t rArray[NUM_SEAVEYS]={0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,
+				0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,0.9675,0.7402,
+				2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,
+				2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,
+				2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,
+				2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447,2.0447};
+  Double_t zArray[NUM_SEAVEYS]={-1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,
+				-1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,-1.4407,-2.4135,
+				-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,
+				-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,-5.1090,
+				-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,
+				-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951,-6.1951};
 
 
-  for(int ant=0;ant<48;ant++) {
-    for(int pol=0;pol<2;pol++) {
+  for(Int_t ant=0;ant<NUM_SEAVEYS;ant++) {
+    for(Int_t pol=0;pol<2;pol++) {
       zPhaseCentreFromVerticalHorn[ant][pol]=zArray[ant];
       rPhaseCentreFromVerticalHorn[ant][pol]=rArray[ant];
       azPhaseCentreFromVerticalHorn[ant][pol]=phiArrayDeg[ant]*TMath::DegToRad();
@@ -132,12 +188,17 @@ void AnitaGeomTool::fillAntPositionsFromPrioritizerdConfig() {
 }
 
 
-int AnitaGeomTool::getPhiRingPolFromSurfChanTrigger(int surf,int chan, int &phi, AnitaRing::AnitaRing_t &ring,AnitaPol::AnitaPol_t &pol)
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Converts the SURF and channel numbers to phi-sector, ring and polarization
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+Int_t AnitaGeomTool::getPhiRingPolFromSurfChanTrigger(Int_t surf,Int_t chan, Int_t &phi,
+						    AnitaRing::AnitaRing_t &ring,AnitaPol::AnitaPol_t &pol)
 {
   if(surf<0 || surf>=ACTIVE_SURFS) return -1;
   if(chan<0 || chan>=SCALERS_PER_SURF) return -1;
 
-  int surfHalf=0;				
+  Int_t surfHalf=0;				
   if((chan%6)>=3) surfHalf=1;
   phi=AnitaGeom::surfToPhiTriggerMap[surf][surfHalf];
   ring=AnitaGeom::surfTriggerChanToRing[chan];
@@ -149,20 +210,26 @@ int AnitaGeomTool::getPhiRingPolFromSurfChanTrigger(int surf,int chan, int &phi,
   return phi;
 }
 
-int AnitaGeomTool::getPhiPolFromSurfL1Chan(int surf, int l1Chan, int &phi, AnitaPol::AnitaPol_t &pol)
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Converts the SURF and L1 trigger channel to phi-sector and polarization.
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+Int_t AnitaGeomTool::getPhiPolFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &phi, AnitaPol::AnitaPol_t &pol)
 {
   if(phi<0 || phi>=NUM_PHI) return -1;
-  int surfHalf=l1Chan%2;   
+  Int_t surfHalf=l1Chan%2;   
   phi=AnitaGeom::surfToPhiTriggerMap[surf][surfHalf];
   pol=AnitaPol::kVertical;
   if(l1Chan>=2) pol=AnitaPol::kHorizontal;
   return phi;
 }
 
-int AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(int phi,AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol ,int &surf, int &chan) {
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Converts the SURF and L1 trigger channel to phi-sector and polarization.
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+Int_t AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(Int_t phi,AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol ,Int_t &surf, Int_t &chan) {
   if(phi<0 || phi>=NUM_PHI) return -1;
   surf=AnitaGeom::phiToSurfTriggerMap[phi];
-  int surfHalf=AnitaGeom::phiToSurfHalf[phi];
+  Int_t surfHalf=AnitaGeom::phiToSurfHalf[phi];
   chan = (6-6*pol)+ ring + 3*surfHalf; 
 
   if(phi==3 && ring==AnitaRing::kTopRing) {     
@@ -172,11 +239,15 @@ int AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(int phi,AnitaRing::AnitaRing
   return surf;
 }
 
-int AnitaGeomTool::getSurfL1TriggerChanFromPhiPol(int phi, AnitaPol::AnitaPol_t pol, int &surf, int &l1Chan) 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Convert phi-sector and polarization from phi-sector and polarization.
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+Int_t AnitaGeomTool::getSurfL1TriggerChanFromPhiPol(Int_t phi, AnitaPol::AnitaPol_t pol, Int_t &surf, Int_t &l1Chan) 
 {
   if(phi<0 || phi>=NUM_PHI) return -1;
   surf=AnitaGeom::phiToSurfTriggerMap[phi];
-  int surfHalf=AnitaGeom::phiToSurfHalf[phi];
+  Int_t surfHalf=AnitaGeom::phiToSurfHalf[phi];
   if(pol==AnitaPol::kVertical) {
     l1Chan=surfHalf;
   }
@@ -188,43 +259,22 @@ int AnitaGeomTool::getSurfL1TriggerChanFromPhiPol(int phi, AnitaPol::AnitaPol_t 
 
 
 
-AnitaGeomTool::AnitaGeomTool()
-{
-  //Default constructor
-  ringPhaseCentreOffset[0]=0.2-0.042685;
-  ringPhaseCentreOffset[1]=0.2+0.00653;
-  ringPhaseCentreOffset[2]=0.2+0.1927;
-//  ringPhaseCentreOffset[0]=0.2;
-//  ringPhaseCentreOffset[1]=0.2;
-//  ringPhaseCentreOffset[2]=0.2;
 
-//  readSimonsNumbers();
-  //  readPhotogrammetry();
-  //  readAnitaIIPhotogrammetry();
-  fUseKurtAnitaIINumbers=0;
-
-//   std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
-  //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
-
-  //std::cout << "AnitaGeomTool::AnitaGeomTool()" << std::endl;
-  //   std::cout << "AnitaGeomTool::AnitaGeomTool() end" << std::endl;
-  fillAntPositionsFromPrioritizerdConfig();
-  fgInstance=this;
-}
-
-AnitaGeomTool::~AnitaGeomTool()
-{
-  //Default destructor
-}
-
-
-
-//______________________________________________________________________________
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Generates an instance of AnitaGeomTool, required for non-static functions.
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 AnitaGeomTool*  AnitaGeomTool::Instance()
 {
   //static function
   return (fgInstance) ? (AnitaGeomTool*) fgInstance : new AnitaGeomTool();
 }
+
+
+Int_t AnitaGeomTool::getChanIndex(Int_t surf, Int_t chan){
+  return chan+(CHANNELS_PER_SURF*surf);
+}
+
+
 
 void AnitaGeomTool::getCartesianCoords(Double_t lat, Double_t lon, Double_t alt, Double_t p[3])
 {
@@ -233,8 +283,8 @@ void AnitaGeomTool::getCartesianCoords(Double_t lat, Double_t lon, Double_t alt,
    lat*=TMath::DegToRad();
    lon*=TMath::DegToRad();
    //calculate x,y,z coordinates
-   double C2=pow(cos(lat)*cos(lat)+(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR)*sin(lat)*sin(lat),-0.5);
-   double Q2=(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR)*C2;
+   Double_t C2=pow(cos(lat)*cos(lat)+(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR)*sin(lat)*sin(lat),-0.5);
+   Double_t Q2=(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR)*C2;
    p[1]=(R_EARTH*C2+alt)*TMath::Cos(lat)*TMath::Cos(lon);
    p[0]=(R_EARTH*C2+alt)*TMath::Cos(lat)*TMath::Sin(lon);
    p[2]=(R_EARTH*Q2+alt)*TMath::Sin(lat);
@@ -352,11 +402,11 @@ Double_t AnitaGeomTool::getPhiDiff(Double_t firstPhi, Double_t secondPhi)
 }
 
 
-int AnitaGeomTool::getChanIndexFromRingPhiPol(AnitaRing::AnitaRing_t ring,
-					      int phi,
+Int_t AnitaGeomTool::getChanIndexFromRingPhiPol(AnitaRing::AnitaRing_t ring,
+					      Int_t phi,
 					      AnitaPol::AnitaPol_t pol)
 {
-  int ant;
+  Int_t ant;
   if(phi<0 || phi>15) return -1;
   switch(ring) {
   case AnitaRing::kTopRing:
@@ -375,11 +425,11 @@ int AnitaGeomTool::getChanIndexFromRingPhiPol(AnitaRing::AnitaRing_t ring,
 }
 
 
-int AnitaGeomTool::getChanIndexFromAntPol(int ant,
+Int_t AnitaGeomTool::getChanIndexFromAntPol(Int_t ant,
 					  AnitaPol::AnitaPol_t pol)
 {
   if(ant<0 || ant>(NUM_SEAVEYS-1)) return -1;
-  int surf,chan;
+  Int_t surf,chan;
   surf=AnitaGeom::antToSurfMap[ant];
   if(pol==AnitaPol::kHorizontal) 
     chan=AnitaGeom::hAntToChan[ant];
@@ -391,13 +441,13 @@ int AnitaGeomTool::getChanIndexFromAntPol(int ant,
 }
 
 
-// int AnitaGeomTool::getRFCMFromAnt(int ant)
+// Int_t AnitaGeomTool::getRFCMFromAnt(Int_t ant)
 // {
 //   if(ant<0 || ant>(NUM_SEAVEYS-1)) return -1;
 //   return AnitaGeom::antToRFCM[ant];
 // }
 
-// int AnitaGeomTool::getRFCMChannelFromAntPol(int ant,AnitaPol::AnitaPol_t pol)
+// Int_t AnitaGeomTool::getRFCMChannelFromAntPol(Int_t ant,AnitaPol::AnitaPol_t pol)
 // {
 //   if(ant<0 || ant>(NUM_SEAVEYS-1)) return -1;
 //   if(pol==AnitaPol::kHorizontal)
@@ -409,18 +459,18 @@ int AnitaGeomTool::getChanIndexFromAntPol(int ant,
 // }
 
 
-int AnitaGeomTool::getSurfFromAnt(int ant)
+Int_t AnitaGeomTool::getSurfFromAnt(Int_t ant)
 {
   if(ant<0 || ant>(NUM_SEAVEYS-1)) return -1;
-  int surf;
+  Int_t surf;
   surf=AnitaGeom::antToSurfMap[ant];
   return surf;
 }
 
 
-int AnitaGeomTool::getChanFromAntPol(int ant,AnitaPol::AnitaPol_t pol)
+Int_t AnitaGeomTool::getChanFromAntPol(Int_t ant,AnitaPol::AnitaPol_t pol)
 {
-  int chan;
+  Int_t chan;
   if(pol==AnitaPol::kHorizontal) 
       chan=AnitaGeom::hAntToChan[ant];
    else if(pol==AnitaPol::kVertical)
@@ -431,7 +481,7 @@ int AnitaGeomTool::getChanFromAntPol(int ant,AnitaPol::AnitaPol_t pol)
 }
 
 
-int AnitaGeomTool::getAzimuthPartner(int rx)
+Int_t AnitaGeomTool::getAzimuthPartner(Int_t rx)
 {
   //Need to update for bottom ring
   
@@ -445,7 +495,7 @@ int AnitaGeomTool::getAzimuthPartner(int rx)
   return -1;
 }
 
-void AnitaGeomTool::getNeighbors(int rx,int& rxleft,int& rxright)
+void AnitaGeomTool::getNeighbors(Int_t rx,int& rxleft,int& rxright)
 {
   // input antenna number 0 to 31
   if (rx<0 || rx>(NUM_SEAVEYS-1))    
@@ -487,33 +537,33 @@ void AnitaGeomTool::getNeighbors(int rx,int& rxleft,int& rxright)
 
 }
 
-void AnitaGeomTool::getThetaPartners(int rx,int& rxleft,int& rxright)
+void AnitaGeomTool::getThetaPartners(Int_t rx,int& rxleft,int& rxright)
 {
   if (rx<0 || rx>(NUM_SEAVEYS-1))    
     std::cerr << "Antenna number out of range!\n";     
   if (rx<16) {
-    int phi=AnitaGeom::topPhiNums[rx];
-    int phiLeft=phi-1;
+    Int_t phi=AnitaGeom::topPhiNums[rx];
+    Int_t phiLeft=phi-1;
     if(phiLeft<0) phiLeft=15;
-    int phiRight=phi+1;
+    Int_t phiRight=phi+1;
     if(phiRight>15) phiRight=0;
     rxleft=AnitaGeom::topAntNums[phiLeft];
     rxright=AnitaGeom::topAntNums[phiRight];
   }
   else if (rx<32){
-    int phi=AnitaGeom::middlePhiNums[rx-16];
-    int phiLeft=phi-1;
+    Int_t phi=AnitaGeom::middlePhiNums[rx-16];
+    Int_t phiLeft=phi-1;
     if(phiLeft<0) phiLeft=15;
-    int phiRight=phi+1;
+    Int_t phiRight=phi+1;
     if(phiRight>15) phiRight=0;
     rxleft=AnitaGeom::middleAntNums[phiLeft];
     rxright=AnitaGeom::middleAntNums[phiRight];
   }
   else{
-    int phi=AnitaGeom::bottomPhiNums[rx-32];
-    int phiLeft=phi-1;
+    Int_t phi=AnitaGeom::bottomPhiNums[rx-32];
+    Int_t phiLeft=phi-1;
     if(phiLeft<0) phiLeft=15;
-    int phiRight=phi+1;
+    Int_t phiRight=phi+1;
     if(phiRight>15) phiRight=0;
     rxleft=AnitaGeom::bottomAntNums[phiLeft];
     rxright=AnitaGeom::bottomAntNums[phiRight];
@@ -521,7 +571,7 @@ void AnitaGeomTool::getThetaPartners(int rx,int& rxleft,int& rxright)
 
 }
 
-int AnitaGeomTool::getPhiSector(int rx)
+Int_t AnitaGeomTool::getPhiSector(Int_t rx)
 {
   if (rx<16)
     return AnitaGeom::topPhiNums[rx];
@@ -533,24 +583,32 @@ int AnitaGeomTool::getPhiSector(int rx)
 
   return 0;
 }
-float AnitaGeomTool::getDirectionwrtNorth(int phimax,float heading) {
 
-  if(phimax<0 || phimax>=16) return -1.;
+Double_t AnitaGeomTool::getDirectionWrtNorth(Int_t phiSector, Double_t heading) {
+
+  if(phiSector<0 || phiSector>=NUM_PHI) return -1.;
 
   //Copied this change from Amy don't (yet) know if it is correct
-  float direction=(1.*360./16)+heading-(phimax*360./16);
-  //    float direction=(2*360./16)+heading-(phimax*360./16);
-  //    float direction=heading+(phimax*360./16);
-  if(direction>360) direction-=360;
-  //std::cout << direction << endl;
+  // Float_t direction=(1.*360./NUM_PHI)+heading-(phiSector*360./NUM_PHI);
+
+  ///< Heading increases clockwise but phi-sector numbers increase anticlockwise, hence -ve sign.
+  Double_t direction = heading - aftForeOffsetAngleVertical*TMath::RadToDeg() - (phiSector*360./NUM_PHI);
+  
+  if(direction>=360){
+    direction -= 360;
+  }
+  else if(direction < 0){
+    direction += 360;
+  }
+
   return direction;
 
 }
 
 
 
-int AnitaGeomTool::getSurfChanFromChanIndex(int chanIndex, // input channel index
-					    int &surf,int &chan) // output surf and channel
+Int_t AnitaGeomTool::getSurfChanFromChanIndex(Int_t chanIndex, // input channel index
+					    Int_t &surf,Int_t &chan) // output surf and channel
 {
   if(chanIndex<0 || chanIndex>=NUM_DIGITZED_CHANNELS)
     return 0;
@@ -562,7 +620,7 @@ int AnitaGeomTool::getSurfChanFromChanIndex(int chanIndex, // input channel inde
   return 1;
 
 }
-int AnitaGeomTool::getAntPolFromSurfChan(int surf,int chan,int &ant, AnitaPol::AnitaPol_t &pol) 
+Int_t AnitaGeomTool::getAntPolFromSurfChan(Int_t surf,Int_t chan,Int_t &ant, AnitaPol::AnitaPol_t &pol) 
 {
 
   ant=AnitaGeom::surfToAntMap[surf][chan];
@@ -579,13 +637,13 @@ int AnitaGeomTool::getAntPolFromSurfChan(int surf,int chan,int &ant, AnitaPol::A
   return 1;
 }
 
-int AnitaGeomTool::getAntOrientation(int ant) {
+Int_t AnitaGeomTool::getAntOrientation(Int_t ant) {
   if(ant<0 || ant>=NUM_SEAVEYS)
     return 0;
   return AnitaGeom::antOrientationMap[ant];
 }
 
-int AnitaGeomTool::getLayer(int irx) 
+Int_t AnitaGeomTool::getLayer(Int_t irx) 
 {
   if (irx<8)
     return 0;
@@ -598,7 +656,7 @@ int AnitaGeomTool::getLayer(int irx)
 
 }
 
-AnitaRing::AnitaRing_t AnitaGeomTool::getRingFromAnt(int ant) {
+AnitaRing::AnitaRing_t AnitaGeomTool::getRingFromAnt(Int_t ant) {
   if (ant<8)
     return AnitaRing::kTopRing;
   else if (ant>=8 && ant<16)
@@ -611,11 +669,11 @@ AnitaRing::AnitaRing_t AnitaGeomTool::getRingFromAnt(int ant) {
 
 }
 
-void AnitaGeomTool::getRingAntPolPhiFromSurfChan(int surf, int chan,
+void AnitaGeomTool::getRingAntPolPhiFromSurfChan(Int_t surf, Int_t chan,
 						 AnitaRing::AnitaRing_t &ring,
-						 int &ant,
+						 Int_t &ant,
 						 AnitaPol::AnitaPol_t &pol,
-						 int &phi)
+						 Int_t &phi)
 {
   AnitaGeomTool::getAntPolFromSurfChan(surf,chan,ant,pol);
   ring=AnitaGeomTool::getRingFromAnt(ant);
@@ -623,11 +681,11 @@ void AnitaGeomTool::getRingAntPolPhiFromSurfChan(int surf, int chan,
 }
 
 void AnitaGeomTool::getSurfChanAntFromRingPhiPol(AnitaRing::AnitaRing_t ring,
-						 int phi,
+						 Int_t phi,
 						 AnitaPol::AnitaPol_t pol,
-						 int &surf, int &chan, int &ant)
+						 Int_t &surf, Int_t &chan, Int_t &ant)
 {
-  int chanIndex=AnitaGeomTool::getChanIndexFromRingPhiPol(ring,phi,pol);
+  Int_t chanIndex=AnitaGeomTool::getChanIndexFromRingPhiPol(ring,phi,pol);
   AnitaGeomTool::getSurfChanFromChanIndex(chanIndex,surf,chan);
   ant=AnitaGeomTool::getAntFromPhiRing(phi,ring);
 }
@@ -660,16 +718,16 @@ void AnitaGeomTool::readPhotogrammetry()
 
   //First up are the antenna positions
   TString line;
-  for(int i=0;i<4;i++) {
+  for(Int_t i=0;i<4;i++) {
     line.ReadLine(AntennaFile);
     //std::cout << line.Data() << "\n";
   }
   
-  for(int ant=0;ant<32;ant++) {
+  for(Int_t ant=0;ant<32;ant++) {
     line.ReadLine(AntennaFile);
     //std::cout << "Seavey:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<8;j++) {
+    for(Int_t j=0;j<8;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	std::cout << j << "\t" << subString.Data() << "\n";
@@ -712,7 +770,7 @@ void AnitaGeomTool::readPhotogrammetry()
 
 
   //Now we'll add a hack for the drop-down antennas
-  for(int ant=32;ant<48;ant++) {
+  for(Int_t ant=32;ant<48;ant++) {
     rAntFromDeckHorn[ant]=(101*INCHTOMETER)-0.38;
     zAntFromDeckHorn[ant]=(-21*INCHTOMETER)-1.8;
     azCentreFromDeckHorn[ant]=(-67.5 + 45*(ant-32))*TMath::DegToRad();
@@ -723,17 +781,17 @@ void AnitaGeomTool::readPhotogrammetry()
     //    std::cout << ant << "\t" << xAntFromDeckHorn[ant] << "\t" << yAntFromDeckHorn[ant]
     //	      << "\t" << zAntFromDeckHorn[ant] << "\t" << apertureAzFromDeckHorn[ant]*TMath::RadToDeg() << "\n";
   }
-  for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
-     for(int ant=0;ant<NUM_SEAVEYS;ant++) {
+  for(Int_t pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
+     for(Int_t ant=0;ant<NUM_SEAVEYS;ant++) {
 	Double_t phaseCentreToAntFront=ringPhaseCentreOffset[Int_t(this->getRingFromAnt(ant))];
 	
 	
-	double   deltaXRL = -deltaRL*TMath::Sin(apertureAzFromDeckHorn[ant]);
-	double   deltaYRL = deltaRL*TMath::Cos(apertureAzFromDeckHorn[ant]);
+	Double_t   deltaXRL = -deltaRL*TMath::Sin(apertureAzFromDeckHorn[ant]);
+	Double_t   deltaYRL = deltaRL*TMath::Cos(apertureAzFromDeckHorn[ant]);
 	
-	double  deltaZUD = deltaUD*TMath::Cos(apertureElFromDeckHorn[ant]);
-	double  deltaXUD = deltaUD*TMath::Sin(apertureElFromDeckHorn[ant])*TMath::Cos(apertureAzFromDeckHorn[ant]);
-	double  deltaYUD = deltaUD*TMath::Sin(apertureElFromDeckHorn[ant])*TMath::Sin(apertureAzFromDeckHorn[ant]);
+	Double_t  deltaZUD = deltaUD*TMath::Cos(apertureElFromDeckHorn[ant]);
+	Double_t  deltaXUD = deltaUD*TMath::Sin(apertureElFromDeckHorn[ant])*TMath::Cos(apertureAzFromDeckHorn[ant]);
+	Double_t  deltaYUD = deltaUD*TMath::Sin(apertureElFromDeckHorn[ant])*TMath::Sin(apertureAzFromDeckHorn[ant]);
 	
 	deltaXRL = 0;
 	deltaYRL = 0;
@@ -744,7 +802,7 @@ void AnitaGeomTool::readPhotogrammetry()
 	
 	// std::cout << deltaXRL << "  " << deltaXUD << "  "<< deltaYUD << "  "<< deltaYRL  <<  "  " <<  deltaZUD << std::endl;
 	
-	//     Now try to find the location of the antenna phaseCentre point     
+	//     Now try to find the location of the antenna phaseCentre poInt_t     
 	xPhaseCentreFromDeckHorn[ant][pol]=(xAntFromDeckHorn[ant] + deltaXRL + deltaXUD) -
 	   phaseCentreToAntFront*TMath::Cos( apertureAzFromDeckHorn[ant])*TMath::Cos(apertureElFromDeckHorn[ant]); //m
 	yPhaseCentreFromDeckHorn[ant][pol]=(yAntFromDeckHorn[ant] + deltaYRL + deltaYUD) -
@@ -777,17 +835,17 @@ void AnitaGeomTool::readPhotogrammetry()
   }
 
   //Now bicones and discones  
-  for(int i=0;i<2;i++) {
+  for(Int_t i=0;i<2;i++) {
     line.ReadLine(AntennaFile);
     //std::cout << line.Data() << "\n";
   }
 
 
-  for(int ant=0;ant<4;ant++) {
+  for(Int_t ant=0;ant<4;ant++) {
     line.ReadLine(AntennaFile);
     //std::cout << "Bicones:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	std::cout << j << "\t" << subString.Data() << "\n";
@@ -811,11 +869,11 @@ void AnitaGeomTool::readPhotogrammetry()
     tokens->Delete();
   }
 
-  for(int ant=0;ant<4;ant++) {
+  for(Int_t ant=0;ant<4;ant++) {
     line.ReadLine(AntennaFile);
     //std::cout << "Discones:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	std::cout << j << "\t" << subString.Data() << "\n";
@@ -839,15 +897,15 @@ void AnitaGeomTool::readPhotogrammetry()
   }
 
   //Now box enclosures and the like
-  for(int i=0;i<2;i++) {
+  for(Int_t i=0;i<2;i++) {
     line.ReadLine(AntennaFile);
     //std::cout << line.Data() << "\n";
   }
-  for(int corner=0;corner<4;corner++) {
+  for(Int_t corner=0;corner<4;corner++) {
     line.ReadLine(AntennaFile);
     //std::cout << "Anita Box:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	std::cout << j << "\t" << subString.Data() << "\n";
@@ -870,15 +928,15 @@ void AnitaGeomTool::readPhotogrammetry()
     }
     tokens->Delete();
   }
-  for(int i=0;i<2;i++) {
+  for(Int_t i=0;i<2;i++) {
     line.ReadLine(AntennaFile);
     //std::cout << line.Data() << "\n";
   }
-  for(int corner=0;corner<4;corner++) {
+  for(Int_t corner=0;corner<4;corner++) {
     line.ReadLine(AntennaFile);
     //std::cout << "Battery Box:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	std::cout << j << "\t" << subString.Data() << "\n";
@@ -901,15 +959,15 @@ void AnitaGeomTool::readPhotogrammetry()
     }
     tokens->Delete();
   }
-  for(int i=0;i<2;i++) {
+  for(Int_t i=0;i<2;i++) {
     line.ReadLine(AntennaFile);
     //std::cout << line.Data() << "\n";
   }
-  for(int corner=0;corner<4;corner++) {
+  for(Int_t corner=0;corner<4;corner++) {
     line.ReadLine(AntennaFile);
     //std::cout << "Sip Box:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	std::cout << j << "\t" << subString.Data() << "\n";
@@ -933,7 +991,7 @@ void AnitaGeomTool::readPhotogrammetry()
     tokens->Delete();
   }
   //Now gps stuff
-  for(int i=0;i<2;i++) {
+  for(Int_t i=0;i<2;i++) {
     line.ReadLine(AntennaFile);
     //std::cout << line.Data() << "\n";
   }
@@ -941,7 +999,7 @@ void AnitaGeomTool::readPhotogrammetry()
     line.ReadLine(AntennaFile);
     //std::cout << "GPS Plane:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	std::cout << j << "\t" << subString.Data() << "\n";
@@ -964,7 +1022,7 @@ void AnitaGeomTool::readPhotogrammetry()
     line.ReadLine(AntennaFile);
     //std::cout << "GPS Heading:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	std::cout << j << "\t" << subString.Data() << "\n";
@@ -988,16 +1046,16 @@ void AnitaGeomTool::readPhotogrammetry()
   
   //Now switch to the (more useful) vertical measurements
   //First up are the antenna positions
-  for(int i=0;i<5;i++) {
+  for(Int_t i=0;i<5;i++) {
     line.ReadLine(AntennaFile);
     //std::cout << line.Data() << "\n";
   }
   
-  for(int ant=0;ant<32;ant++) {
+  for(Int_t ant=0;ant<32;ant++) {
     line.ReadLine(AntennaFile);
     //std::cout << "Seavey:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<8;j++) {
+    for(Int_t j=0;j<8;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	//std::cout << j << "\t" << subString.Data() << "\n";
@@ -1037,28 +1095,28 @@ void AnitaGeomTool::readPhotogrammetry()
     }
     tokens->Delete();
   }
-  for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
-     for(int ant=0;ant<32;ant++) {
+  for(Int_t pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
+     for(Int_t ant=0;ant<32;ant++) {
 
     Double_t phaseCentreToAntFront=ringPhaseCentreOffset[Int_t(this->getRingFromAnt(ant))];
 
-    double   deltaXRL = -deltaRL*TMath::Sin(apertureAzFromVerticalHorn[ant]);
-    double   deltaYRL = deltaRL*TMath::Cos(apertureAzFromVerticalHorn[ant]);
+    Double_t   deltaXRL = -deltaRL*TMath::Sin(apertureAzFromVerticalHorn[ant]);
+    Double_t   deltaYRL = deltaRL*TMath::Cos(apertureAzFromVerticalHorn[ant]);
 
-    double  deltaZUD = deltaUD*TMath::Cos(apertureElFromVerticalHorn[ant]);
-    double  deltaXUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Cos(apertureAzFromVerticalHorn[ant]);
-    double  deltaYUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Sin(apertureAzFromVerticalHorn[ant]);
+    Double_t  deltaZUD = deltaUD*TMath::Cos(apertureElFromVerticalHorn[ant]);
+    Double_t  deltaXUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Cos(apertureAzFromVerticalHorn[ant]);
+    Double_t  deltaYUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Sin(apertureAzFromVerticalHorn[ant]);
 
     //std::cout << deltaXRL << "  " << deltaXUD << "  "<< deltaYUD << "  "<< deltaYRL  <<  "  " <<  deltaZUD << std::endl;
 
-    //Now try to find the location of the antenna phaseCentre point     
+    //Now try to find the location of the antenna phaseCentre poInt_t     
     xPhaseCentreFromVerticalHorn[ant][pol]=(xAntFromVerticalHorn[ant] + deltaXRL + deltaXUD) -
       phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
     yPhaseCentreFromVerticalHorn[ant][pol]=(yAntFromVerticalHorn[ant] + deltaYRL + deltaYUD) -
       phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
     zPhaseCentreFromVerticalHorn[ant][pol]=(zAntFromVerticalHorn[ant] + deltaZUD) -phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHorn[ant]); //m
 
-    //      //Now try to find the location of the antenna phaseCentre point     
+    //      //Now try to find the location of the antenna phaseCentre poInt_t     
     //      xPhaseCentreFromVerticalHorn[ant]=xAntFromVerticalHorn[ant]-
     //        phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
     //      yPhaseCentreFromVerticalHorn[ant]=yAntFromVerticalHorn[ant]-
@@ -1086,16 +1144,16 @@ void AnitaGeomTool::readPhotogrammetry()
 
 
   //Now we'll add a hack for the drop-down antennas
-  for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
-  for(int ant=32;ant<NUM_SEAVEYS;ant++) {
+  for(Int_t pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
+  for(Int_t ant=32;ant<NUM_SEAVEYS;ant++) {
     Double_t phaseCentreToAntFront=ringPhaseCentreOffset[Int_t(this->getRingFromAnt(ant))];
     //    std::cout << ant << "\t" << phaseCentreToAntFront << "\n";
-    double   deltaXRL = 0;
-    double   deltaYRL = 0;
+    Double_t   deltaXRL = 0;
+    Double_t   deltaYRL = 0;
 
-    double  deltaZUD = 0;
-    double  deltaXUD = 0;
-    double  deltaYUD = 0;
+    Double_t  deltaZUD = 0;
+    Double_t  deltaXUD = 0;
+    Double_t  deltaYUD = 0;
 
     // RJN changed the 0.38 number to 0.3 to match simons update function
     //Here's the little bastard that was causing all the problems
@@ -1116,7 +1174,7 @@ void AnitaGeomTool::readPhotogrammetry()
       phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
     zPhaseCentreFromVerticalHorn[ant][pol]=(zAntFromVerticalHorn[ant] + deltaZUD) -phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHorn[ant]); //m
 
-    //      //Now try to find the location of the antenna phaseCentre point     
+    //      //Now try to find the location of the antenna phaseCentre poInt_t     
     //      xPhaseCentreFromVerticalHorn[ant][pol]=xAntFromVerticalHorn[ant]-
     //        phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
     //      yPhaseCentreFromVerticalHorn[ant][pol]=yAntFromVerticalHorn[ant]-
@@ -1141,17 +1199,17 @@ void AnitaGeomTool::readPhotogrammetry()
 
 
   //Now bicones and discones  
-  for(int i=0;i<2;i++) {
+  for(Int_t i=0;i<2;i++) {
     line.ReadLine(AntennaFile);
     //std::cout << line.Data() << "\n";
   }
 
 
-  for(int ant=0;ant<4;ant++) {
+  for(Int_t ant=0;ant<4;ant++) {
     line.ReadLine(AntennaFile);
     //std::cout << "Bicones:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	//std::cout << j << "\t" << subString.Data() << "\n";
@@ -1175,11 +1233,11 @@ void AnitaGeomTool::readPhotogrammetry()
     tokens->Delete();
   }
 
-  for(int ant=0;ant<4;ant++) {
+  for(Int_t ant=0;ant<4;ant++) {
     line.ReadLine(AntennaFile);
     //std::cout << "Discones:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	//std::cout << j << "\t" << subString.Data() << "\n";
@@ -1204,15 +1262,15 @@ void AnitaGeomTool::readPhotogrammetry()
   }
 
   //Now box enclosures and the like
-  for(int i=0;i<2;i++) {
+  for(Int_t i=0;i<2;i++) {
     line.ReadLine(AntennaFile);
     //std::cout << line.Data() << "\n";
   }
-  for(int corner=0;corner<4;corner++) {
+  for(Int_t corner=0;corner<4;corner++) {
     line.ReadLine(AntennaFile);
     //std::cout << "Anita Box:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	//std::cout << j << "\t" << subString.Data() << "\n";
@@ -1235,15 +1293,15 @@ void AnitaGeomTool::readPhotogrammetry()
     }
     tokens->Delete();
   }
-  for(int i=0;i<2;i++) {
+  for(Int_t i=0;i<2;i++) {
     line.ReadLine(AntennaFile);
     //std::cout << line.Data() << "\n";
   }
-  for(int corner=0;corner<4;corner++) {
+  for(Int_t corner=0;corner<4;corner++) {
     line.ReadLine(AntennaFile);
     //std::cout << "Battery Box:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	//std::cout << j << "\t" << subString.Data() << "\n";
@@ -1266,15 +1324,15 @@ void AnitaGeomTool::readPhotogrammetry()
     }
     tokens->Delete();
   }
-  for(int i=0;i<2;i++) {
+  for(Int_t i=0;i<2;i++) {
     line.ReadLine(AntennaFile);
     //std::cout << line.Data() << "\n";
   }
-  for(int corner=0;corner<4;corner++) {
+  for(Int_t corner=0;corner<4;corner++) {
     line.ReadLine(AntennaFile);
     //std::cout << "Sip Box:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	//std::cout << j << "\t" << subString.Data() << "\n";
@@ -1298,7 +1356,7 @@ void AnitaGeomTool::readPhotogrammetry()
     tokens->Delete();
   }
   //Now gps stuff
-  for(int i=0;i<2;i++) {
+  for(Int_t i=0;i<2;i++) {
     line.ReadLine(AntennaFile);
     //std::cout << line.Data() << "\n";
   }
@@ -1306,7 +1364,7 @@ void AnitaGeomTool::readPhotogrammetry()
     line.ReadLine(AntennaFile);
     //std::cout << "GPS Plane:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	//std::cout << j << "\t" << subString.Data() << "\n";
@@ -1329,7 +1387,7 @@ void AnitaGeomTool::readPhotogrammetry()
     line.ReadLine(AntennaFile);
     //std::cout << "GPS Heading:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<4;j++) {
+    for(Int_t j=0;j<4;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	//std::cout << j << "\t" << subString.Data() << "\n";
@@ -1381,8 +1439,8 @@ void AnitaGeomTool::readPhotogrammetry()
 
 
   //Now add in Simon's corrections
-  for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
-     for(int ant=0;ant<NUM_SEAVEYS;ant++) {
+  for(Int_t pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
+     for(Int_t ant=0;ant<NUM_SEAVEYS;ant++) {
 	rPhaseCentreFromVerticalHorn[ant][pol]+=deltaRPhaseCentre[ant][pol];
 	//    std::cout << rPhaseCentreFromVerticalHorn[ant][pol] << "\t" << deltaRPhaseCentre[ant][pol] << "\n";
 	azPhaseCentreFromVerticalHorn[ant][pol]+=deltaPhiPhaseCentre[ant][pol];    
@@ -1405,7 +1463,7 @@ void AnitaGeomTool::readPhotogrammetry()
 
 
 //Non static thingies
-void AnitaGeomTool::getAntXYZ(int ant, Double_t &x, Double_t &y, Double_t &z,AnitaPol::AnitaPol_t pol)
+void AnitaGeomTool::getAntXYZ(Int_t ant, Double_t &x, Double_t &y, Double_t &z,AnitaPol::AnitaPol_t pol)
 {
   if(ant>=0 && ant<NUM_SEAVEYS) {
     x=xPhaseCentreFromVerticalHorn[ant][pol];
@@ -1415,7 +1473,7 @@ void AnitaGeomTool::getAntXYZ(int ant, Double_t &x, Double_t &y, Double_t &z,Ani
   }
 }
 
-Double_t AnitaGeomTool::getAntZ(int ant, AnitaPol::AnitaPol_t pol) {
+Double_t AnitaGeomTool::getAntZ(Int_t ant, AnitaPol::AnitaPol_t pol) {
   if(fUseKurtAnitaIINumbers==0) {
     if(ant>=0 && ant<NUM_SEAVEYS) {
       //      std::cout << "Using simon z\n";
@@ -1431,7 +1489,7 @@ Double_t AnitaGeomTool::getAntZ(int ant, AnitaPol::AnitaPol_t pol) {
   return 0;
 }
 
-Double_t AnitaGeomTool::getAntR(int ant, AnitaPol::AnitaPol_t pol) {
+Double_t AnitaGeomTool::getAntR(Int_t ant, AnitaPol::AnitaPol_t pol) {
   if(fUseKurtAnitaIINumbers==0) {
     //    std::cout << "Using simon R\n";
     if(ant>=0 && ant<NUM_SEAVEYS) {
@@ -1447,7 +1505,7 @@ Double_t AnitaGeomTool::getAntR(int ant, AnitaPol::AnitaPol_t pol) {
   return 0;
 }
 
-Double_t AnitaGeomTool::getAntPhiPosition(int ant, AnitaPol::AnitaPol_t pol) {
+Double_t AnitaGeomTool::getAntPhiPosition(Int_t ant, AnitaPol::AnitaPol_t pol) {
 
   if(fUseKurtAnitaIINumbers==0) {
     //    std::cout << "Using simon phi\n";
@@ -1464,7 +1522,7 @@ Double_t AnitaGeomTool::getAntPhiPosition(int ant, AnitaPol::AnitaPol_t pol) {
   return 0;
 }
 
-Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(int ant, AnitaPol::AnitaPol_t pol) {
+Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(Int_t ant, AnitaPol::AnitaPol_t pol) {
 
   if(fUseKurtAnitaIINumbers==0) {
     //    std::cout << "Using simon phi-rel\n";
@@ -1491,11 +1549,11 @@ Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(int ant, AnitaPol::AnitaPo
   return 0;
 }
 
-Double_t AnitaGeomTool::getMeanAntPairPhiRelToAftFore(int firstAnt, int secondAnt, AnitaPol::AnitaPol_t pol) {
+Double_t AnitaGeomTool::getMeanAntPairPhiRelToAftFore(Int_t firstAnt, Int_t secondAnt, AnitaPol::AnitaPol_t pol) {
 
    if(firstAnt>=0 && firstAnt<NUM_SEAVEYS && secondAnt>=0 && secondAnt<NUM_SEAVEYS) {
       //Calculating the phi of each antenna pair
-      double meanPhi=this->getAntPhiPositionRelToAftFore(firstAnt,pol); 
+      Double_t meanPhi=this->getAntPhiPositionRelToAftFore(firstAnt,pol); 
       if(TMath::Abs(meanPhi-this->getAntPhiPositionRelToAftFore(secondAnt,pol))<TMath::PiOver2()) {	 
 	 meanPhi+=this->getAntPhiPositionRelToAftFore(secondAnt,pol);	 
 	 meanPhi*=0.5;       
@@ -1520,7 +1578,7 @@ Int_t AnitaGeomTool::getTopAntNearestPhiWave(Double_t phiWave, AnitaPol::AnitaPo
   if(phiWave>TMath::TwoPi()) phiWave-=TMath::TwoPi();
   Double_t minDiff=TMath::TwoPi();
   Int_t minAnt=0;;
-  for(int ant=0;ant<16;ant++) {
+  for(Int_t ant=0;ant<16;ant++) {
     //      std::cout << ant << "\t" << azPhaseCentreFromVerticalHorn[ant][pol] << "\t" << phiPrime << "\t" << TMath::Abs(azPhaseCentreFromVerticalHorn[ant][pol]-phiPrime) << "\n";
     if(TMath::Abs(getAntPhiPositionRelToAftFore(ant,pol)-phiWave)<minDiff) {
       minDiff=TMath::Abs(getAntPhiPositionRelToAftFore(ant,pol)-phiWave);
@@ -1541,11 +1599,13 @@ Int_t AnitaGeomTool::getTopAntNearestPhiWave(Double_t phiWave, AnitaPol::AnitaPo
   return minAnt;
 }
 
-
+Int_t AnitaGeomTool::getUpperAntNearestPhiWave(Double_t phiWave, AnitaPol::AnitaPol_t pol) {
+  return getTopAntNearestPhiWave(phiWave,pol);
+}
 
 
 //Non static thingies
-void AnitaGeomTool::getAntFaceXYZ(int ant, Double_t &x, Double_t &y, Double_t &z)
+void AnitaGeomTool::getAntFaceXYZ(Int_t ant, Double_t &x, Double_t &y, Double_t &z)
 {
   if(ant>=0 && ant<NUM_SEAVEYS) {
     x=xAntFromVerticalHorn[ant];
@@ -1554,7 +1614,7 @@ void AnitaGeomTool::getAntFaceXYZ(int ant, Double_t &x, Double_t &y, Double_t &z
   }
 }
 
-Double_t AnitaGeomTool::getAntFaceZ(int ant) {
+Double_t AnitaGeomTool::getAntFaceZ(Int_t ant) {
   if(ant>=0 && ant<NUM_SEAVEYS) {
     return zAntFromVerticalHorn[ant];
     //      return zAntFaceFromDeckHorn[ant];
@@ -1562,7 +1622,7 @@ Double_t AnitaGeomTool::getAntFaceZ(int ant) {
   return 0;
 }
 
-Double_t AnitaGeomTool::getAntFaceR(int ant) {
+Double_t AnitaGeomTool::getAntFaceR(Int_t ant) {
   if(ant>=0 && ant<NUM_SEAVEYS) {
     return rAntFromVerticalHorn[ant];
     //return rAntFromDeckHorn[ant];
@@ -1570,14 +1630,14 @@ Double_t AnitaGeomTool::getAntFaceR(int ant) {
   return 0;
 }
 
-Double_t AnitaGeomTool::getAntFacePhiPosition(int ant) {
+Double_t AnitaGeomTool::getAntFacePhiPosition(Int_t ant) {
   if(ant>=0 && ant<NUM_SEAVEYS) {
     return azCentreFromVerticalHorn[ant];
   }
   return 0;
 }
 
-Double_t AnitaGeomTool::getAntFacePhiPositionRelToAftFore(int ant) {
+Double_t AnitaGeomTool::getAntFacePhiPositionRelToAftFore(Int_t ant) {
   if(ant>=0 && ant<NUM_SEAVEYS) {
     Double_t phi=azCentreFromVerticalHorn[ant]-aftForeOffsetAngleVertical;
     if(phi<0)
@@ -1593,7 +1653,7 @@ Int_t AnitaGeomTool::getTopAntFaceNearestPhiWave(Double_t phiWave) {
     phiPrime-=TMath::TwoPi();
   Double_t minDiff=TMath::TwoPi();
   Int_t minAnt=0;;
-  for(int ant=0;ant<16;ant++) {
+  for(Int_t ant=0;ant<16;ant++) {
     //      std::cout << ant << "\t" << azPhaseCentreFromVerticalHorn[ant][pol] << "\t" << phiPrime << "\t" << TMath::Abs(azPhaseCentreFromVerticalHorn[ant][pol]-phiPrime) << "\n";
     if(TMath::Abs(azCentreFromVerticalHorn[ant]-phiPrime)<minDiff) {
       minDiff=TMath::Abs(azCentreFromVerticalHorn[ant]-phiPrime);
@@ -1603,21 +1663,21 @@ Int_t AnitaGeomTool::getTopAntFaceNearestPhiWave(Double_t phiWave) {
   return minAnt;
 }
 
-void AnitaGeomTool::updateAnt(double deltaR,double deltaRL,double deltaUD){
+void AnitaGeomTool::updateAnt(Double_t deltaR,Double_t deltaRL,Double_t deltaUD){
   
    Double_t phaseCentreToAntFront=0.2+deltaR;
   
-   double   deltaXRL = 0;
-   double   deltaYRL = 0;
+   Double_t   deltaXRL = 0;
+   Double_t   deltaYRL = 0;
    
-   double  deltaZUD = 0;
-   double  deltaXUD = 0;
-   double  deltaYUD = 0;
+   Double_t  deltaZUD = 0;
+   Double_t  deltaXUD = 0;
+   Double_t  deltaYUD = 0;
    
    std::cout << deltaXRL << "  " << deltaXUD << "  "<< deltaYUD << "  "<< deltaYRL  <<  "  " <<  deltaZUD << " " << deltaRL << std::endl;
 
-  for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
-  for(int ant=0;ant<32;ant++) {
+  for(Int_t pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
+  for(Int_t ant=0;ant<32;ant++) {
     
     //deltaXRL = -deltaRL*TMath::Sin(apertureAzFromVerticalHorn[ant]);
 	    //       deltaYRL = deltaRL*TMath::Cos(apertureAzFromVerticalHorn[ant]);
@@ -1628,7 +1688,7 @@ void AnitaGeomTool::updateAnt(double deltaR,double deltaRL,double deltaUD){
     
     //std::cout << deltaXRL << "  " << deltaXUD << "  "<< deltaYUD << "  "<< deltaYRL  <<  "  " <<  deltaZUD << std::endl;
     
-    //Now try to find the location of the antenna phaseCentre point     
+    //Now try to find the location of the antenna phaseCentre poInt_t     
     xPhaseCentreFromVerticalHorn[ant][pol]=(xAntFromVerticalHorn[ant] + deltaXRL + deltaXUD) -
       phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
     yPhaseCentreFromVerticalHorn[ant][pol]=(yAntFromVerticalHorn[ant] + deltaYRL + deltaYUD) -
@@ -1648,15 +1708,15 @@ void AnitaGeomTool::updateAnt(double deltaR,double deltaRL,double deltaUD){
 }
 
 
-  for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
-     for(int ant=32;ant<48;ant++) {
+  for(Int_t pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
+     for(Int_t ant=32;ant<48;ant++) {
     
-    double   deltaXRL = 0;
-    double   deltaYRL = 0;
+    Double_t   deltaXRL = 0;
+    Double_t   deltaYRL = 0;
     
-    double  deltaZUD = 0;
-    double  deltaXUD = 0;
-    double  deltaYUD = 0;
+    Double_t  deltaZUD = 0;
+    Double_t  deltaXUD = 0;
+    Double_t  deltaYUD = 0;
     
     deltaZUD = deltaUD*TMath::Cos(apertureElFromVerticalHorn[ant]);
     deltaXUD = -deltaUD*TMath::Sin(apertureElFromVerticalHorn[ant])*TMath::Cos(apertureAzFromVerticalHorn[ant]);
@@ -1678,7 +1738,7 @@ void AnitaGeomTool::updateAnt(double deltaR,double deltaRL,double deltaUD){
       phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
     zPhaseCentreFromVerticalHorn[ant][pol]=(zAntFromVerticalHorn[ant] + deltaZUD) -phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHorn[ant]); //m
 
-    //      //Now try to find the location of the antenna phaseCentre point     
+    //      //Now try to find the location of the antenna phaseCentre poInt_t     
     //      xPhaseCentreFromVerticalHorn[ant]=xAntFromVerticalHorn[ant]-
     //        phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHorn[ant])*TMath::Cos(apertureElFromVerticalHorn[ant]); //m
     //      yPhaseCentreFromVerticalHorn[ant]=yAntFromVerticalHorn[ant]-
@@ -1707,8 +1767,8 @@ void AnitaGeomTool::updateAnt(double deltaR,double deltaRL,double deltaUD){
 
 void AnitaGeomTool::printAntPos(){
 
-   for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
-      for(int ant = 0; ant < 32; ant++){
+   for(Int_t pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
+      for(Int_t ant = 0; ant < 32; ant++){
 	 std::cout << rPhaseCentreFromVerticalHorn[ant][pol] << std::endl;
       }     
    }
@@ -1716,7 +1776,7 @@ void AnitaGeomTool::printAntPos(){
 
 
 
-int AnitaGeomTool::getPhiFromAnt(int ant)
+Int_t AnitaGeomTool::getPhiFromAnt(Int_t ant)
 {
   if(ant<16)
     return AnitaGeom::topPhiNums[ant];
@@ -1730,7 +1790,7 @@ int AnitaGeomTool::getPhiFromAnt(int ant)
 }
 
 
-int AnitaGeomTool::getAntFromPhiRing(int phi, AnitaRing::AnitaRing_t ring)
+Int_t AnitaGeomTool::getAntFromPhiRing(Int_t phi, AnitaRing::AnitaRing_t ring)
 {
   switch(ring) {
   case AnitaRing::kTopRing:
@@ -1832,16 +1892,16 @@ void AnitaGeomTool::readAnitaIIPhotogrammetry()
 
   //First up are the antenna positions
   TString line;
-  for(int i=0;i<2;i++) {
+  for(Int_t i=0;i<2;i++) {
     line.ReadLine(AnitaIIPhotoFile);
     //std::cout << line.Data() << "\n";
   }
   
-  for(int ant=0;ant<48;ant++) {
+  for(Int_t ant=0;ant<48;ant++) {
     line.ReadLine(AnitaIIPhotoFile);
     //std::cout << "Seavey:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
-    for(int j=0;j<8;j++) {
+    for(Int_t j=0;j<8;j++) {
       const TString subString = ((TObjString*)tokens->At(j))->GetString();
       //	TString *subString = (TString*) tokens->At(j);
       //	std::cout << j << "\t" << subString.Data() << "\n";
@@ -1882,14 +1942,14 @@ void AnitaGeomTool::readAnitaIIPhotogrammetry()
 
   }
 
-  for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
-     for(int ant=0;ant<NUM_SEAVEYS;ant++) {
+  for(Int_t pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
+     for(Int_t ant=0;ant<NUM_SEAVEYS;ant++) {
     Double_t phaseCentreToAntFront=ringPhaseCentreOffset[Int_t(this->getRingFromAnt(ant))];
     //Need to think about this at some point, but for now will just hard code in 20cm
     phaseCentreToAntFront=0.2;
  
 
-    //     Now try to find the location of the antenna phaseCentre point  
+    //     Now try to find the location of the antenna phaseCentre poInt_t  
     xPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]=xAntFromVerticalHornKurtAnitaII[ant] -
       phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHornKurtAnitaII[ant])*TMath::Cos(apertureElFromVerticalHornKurtAnitaII[ant]); //m
     yPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]=yAntFromVerticalHornKurtAnitaII[ant] -
@@ -1911,8 +1971,8 @@ void AnitaGeomTool::readAnitaIIPhotogrammetry()
   aftForeOffsetAngleVertical=aftForeOffsetAngleVerticalKurtAnitaII;
   //Will now make the default numbers the ones that start with Simon's and modify the positions
   //Now add in Simon's corrections
-  for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
-     for(int ant=0;ant<NUM_SEAVEYS;ant++) {
+  for(Int_t pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
+     for(Int_t ant=0;ant<NUM_SEAVEYS;ant++) {
 	rPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]+deltaRPhaseCentre[ant][pol];
 	azPhaseCentreFromVerticalHorn[ant][pol]=azPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]+deltaPhiPhaseCentre[ant][pol];    
 	if(azPhaseCentreFromVerticalHorn[ant][pol]<0)
