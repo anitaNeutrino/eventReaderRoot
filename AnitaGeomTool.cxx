@@ -127,10 +127,34 @@ AnitaGeomTool::AnitaGeomTool()
   //  readAnitaIIPhotogrammetry();
   //  fUseKurtAnitaIINumbers=0;
 
+  readAnita3PhaseCenterNumbers(); // This one has to come before reading ANITA-3 photogrammetry
   readAnitaIIIPhotogrammetry();
-  fUseKurtAnitaIIINumbers=1;
+  fUseKurtAnitaIIINumbers=0;
+
+
+  // Moved from fillAntPositionsFromPrioritizerdConfig
+  // Who knows where else these get set in this crazy place...
+  fHeadingRotationAxis.SetXYZ(0.,0.,1.);
+  fPitchRotationAxis.SetXYZ(0.,1.,0.);
+  fRollRotationAxis=fPitchRotationAxis.Cross(fHeadingRotationAxis);
+  aftForeOffsetAngleVertical=TMath::DegToRad()*45;  
   
-  fillAntPositionsFromPrioritizerdConfig();
+  // for(int ant=0; ant<NUM_SEAVEYS; ant++){
+  //   for(int pol=0; pol<2; pol++){
+  //     std::cout << ant << "\t" << pol<< "\t"
+  // 		<< rPhaseCentreFromVerticalHorn[ant][pol] << "\t"
+  // 		<< rPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol] << "\t"
+  // 		<< zPhaseCentreFromVerticalHorn[ant][pol] << "\t"
+  // 		<< zPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol] << "\t"
+  // 		<< azPhaseCentreFromVerticalHorn[ant][pol] << "\t"
+  // 		<< azPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol] << "\t"
+  // 		<< std::endl;
+  //   }
+  // }
+  
+  // fillAntPositionsFromPrioritizerdConfig();
+
+  
   fgInstance=this;
 }
 
@@ -1813,7 +1837,6 @@ Int_t AnitaGeomTool::getAntFromPhiRing(Int_t phi, AnitaRing::AnitaRing_t ring)
 
 void AnitaGeomTool::readSimonsNumbers() {
 
-
   char calibDir[FILENAME_MAX];
   char fileName[FILENAME_MAX];
   char *calibEnv=getenv("ANITA_CALIB_DIR");
@@ -1868,6 +1891,48 @@ void AnitaGeomTool::readSimonsNumbers() {
  
 
 }
+
+
+
+void AnitaGeomTool::readAnita3PhaseCenterNumbers() {
+
+  char calibDir[FILENAME_MAX];
+  char fileName[FILENAME_MAX];
+  char *calibEnv=getenv("ANITA_CALIB_DIR");
+  if(!calibEnv) {
+    char *utilEnv=getenv("ANITA_UTIL_INSTALL_DIR");
+    if(!utilEnv)
+      sprintf(calibDir,"calib");
+    else
+      sprintf(calibDir,"%s/share/anitaCalib",utilEnv);    
+  }
+  else {
+    strncpy(calibDir,calibEnv,FILENAME_MAX);
+  }
+
+  sprintf(fileName,"%s/phaseCenterPositionsRelativeToPhotogrammetryAnita3.dat",calibDir);
+  std::ifstream PhaseCenterFile(fileName);
+  if(!PhaseCenterFile) {
+    std::cerr << "Couldn't open:\t" << fileName << "\n";
+    return;
+  }
+  
+  Int_t antNum, pol;
+  Double_t deltaR,deltaPhi,deltaZ;
+  char firstLine[180];
+  
+  PhaseCenterFile.getline(firstLine,179);
+  while(PhaseCenterFile >> antNum >> pol >> deltaR >> deltaPhi >> deltaZ) {
+    deltaRPhaseCentre[antNum][pol]=deltaR;
+    deltaPhiPhaseCentre[antNum][pol]=deltaPhi*TMath::DegToRad();
+    deltaZPhaseCentre[antNum][pol]=deltaZ;
+    deltaRPhaseCentre[antNum][pol]=deltaR;
+    deltaPhiPhaseCentre[antNum][pol]=deltaPhi*TMath::DegToRad();
+    deltaZPhaseCentre[antNum][pol]=deltaZ;
+  } 
+
+}
+
 
 
 
@@ -2117,21 +2182,21 @@ void AnitaGeomTool::readAnitaIIIPhotogrammetry()
   }
 
 
-//   //Now add in Simon's corrections
-//   for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
-//      for(int ant=0;ant<NUM_SEAVEYS;ant++) {
-// 	rPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]+deltaRPhaseCentre[ant][pol];
-// 	azPhaseCentreFromVerticalHorn[ant][pol]=azPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]+deltaPhiPhaseCentre[ant][pol];    
-// 	if(azPhaseCentreFromVerticalHorn[ant][pol]<0)
-// 	   azPhaseCentreFromVerticalHorn[ant][pol]+=TMath::TwoPi();
-// 	if(azPhaseCentreFromVerticalHorn[ant][pol]>TMath::TwoPi())
-// 	   azPhaseCentreFromVerticalHorn[ant][pol]-=TMath::TwoPi();    
-// 	zPhaseCentreFromVerticalHorn[ant][pol]=zPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]+deltaZPhaseCentre[ant][pol];
-// 	xPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHorn[ant][pol]*TMath::Cos(azPhaseCentreFromVerticalHorn[ant][pol]);
-// 	yPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHorn[ant][pol]*TMath::Sin(azPhaseCentreFromVerticalHorn[ant][pol]);
-// 	//	std::cout << xPhaseCentreFromVerticalHorn[ant][pol] << std::endl;
+  // Now add in ANITA-3 phase centre corrections
+  for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
+    for(int ant=0;ant<NUM_SEAVEYS;ant++) {
+      rPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]+deltaRPhaseCentre[ant][pol];
+      azPhaseCentreFromVerticalHorn[ant][pol]=azPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]+deltaPhiPhaseCentre[ant][pol];    
+      if(azPhaseCentreFromVerticalHorn[ant][pol]<0)
+	azPhaseCentreFromVerticalHorn[ant][pol]+=TMath::TwoPi();
+      if(azPhaseCentreFromVerticalHorn[ant][pol]>TMath::TwoPi())
+	azPhaseCentreFromVerticalHorn[ant][pol]-=TMath::TwoPi();    
+      zPhaseCentreFromVerticalHorn[ant][pol]=zPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]+deltaZPhaseCentre[ant][pol];
+      xPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHorn[ant][pol]*TMath::Cos(azPhaseCentreFromVerticalHorn[ant][pol]);
+      yPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHorn[ant][pol]*TMath::Sin(azPhaseCentreFromVerticalHorn[ant][pol]);
+      //	std::cout << xPhaseCentreFromVerticalHorn[ant][pol] << std::endl;
 
-//      }
-//   }
+    }
+  }
 
 }

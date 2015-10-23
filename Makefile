@@ -54,7 +54,8 @@ GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 #Now the bits we're actually compiling
 ROOT_LIBRARY = libAnitaEvent.${DLLSUF}
-LIB_OBJS = RawAnitaEvent.o UsefulAnitaEvent.o  AnitaEventCalibrator.o AnitaGeomTool.o RawAnitaHeader.o PrettyAnitaHk.o Adu5Pat.o Adu5Vtg.o SurfHk.o TurfRate.o RawDataReader.o AnitaConventions.o TimedAnitaHeader.o SummedTurfRate.o AveragedSurfHk.o AcqdStart.o GpsdStart.o LogWatchdStart.o RunStart.o G12Pos.o GpsGga.o G12Sat.o Adu5Sat.o CommandEcho.o MonitorHk.o OtherMonitorHk.o RawHk.o CalibratedHk.o AnitaPacketUtil.o SlowRate.o CalibratedAnitaEvent.o RawSSHk.o CalibratedSSHk.o GpuPowerSpectra.o RingBuffer.o eventDict.o
+DICT = eventDict
+LIB_OBJS = RawAnitaEvent.o UsefulAnitaEvent.o  AnitaEventCalibrator.o AnitaGeomTool.o RawAnitaHeader.o PrettyAnitaHk.o Adu5Pat.o Adu5Vtg.o SurfHk.o TurfRate.o RawDataReader.o AnitaConventions.o TimedAnitaHeader.o SummedTurfRate.o AveragedSurfHk.o AcqdStart.o GpsdStart.o LogWatchdStart.o RunStart.o G12Pos.o GpsGga.o G12Sat.o Adu5Sat.o CommandEcho.o MonitorHk.o OtherMonitorHk.o RawHk.o CalibratedHk.o AnitaPacketUtil.o SlowRate.o CalibratedAnitaEvent.o RawSSHk.o CalibratedSSHk.o GpuPowerSpectra.o RingBuffer.o $(DICT).o
 CLASS_HEADERS = RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaHk.h Adu5Pat.h Adu5Vtg.h SurfHk.h TurfRate.h AnitaEventCalibrator.h AnitaConventions.h AnitaGeomTool.h TimedAnitaHeader.h SummedTurfRate.h AveragedSurfHk.h AcqdStart.h GpsdStart.h LogWatchdStart.h RunStart.h G12Pos.h GpsGga.h G12Sat.h Adu5Sat.h CommandEcho.h MonitorHk.h OtherMonitorHk.h RawHk.h CalibratedHk.h AnitaPacketUtil.h SlowRate.h CalibratedAnitaEvent.h RawSSHk.h CalibratedSSHk.h GpuPowerSpectra.h RingBuffer.h AnitaClock.h simpleStructs.h
 
 
@@ -113,7 +114,8 @@ endif
 	$(CXX) $(CXXFLAGS) $ -c $< -o  $@
 
 
-eventDict.C: $(CLASS_HEADERS)
+#eventDict.C: $(CLASS_HEADERS)
+$(DICT).C: $(CLASS_HEADERS)
 	@echo "Generating dictionary ..."
 	@ rm -f *Dict* 
 	rootcint $@ -c $(CLASS_HEADERS) LinkDef.h
@@ -127,6 +129,11 @@ else
 	install -c -m 755 $(ROOT_LIBRARY) $(ANITA_UTIL_LIB_DIR)
 endif
 	install -c -m 644  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
+
+	@if [ $(shell root-config --version | cut -c1) -ge 6 ]; then \
+	install -c -m 755 $(DICT)_rdict.pcm $(ANITA_UTIL_LIB_DIR) ;\
+	fi # Additional install command for ROOTv6
+
 	install -d $(ANITA_UTIL_CALIB_DIR)
 	for file in calib/*.dat calib/*.csv calib/*.txt; do install -c -m 644 "$${file}" $(ANITA_UTIL_CALIB_DIR); done
 	install -d $(ANITA_UTIL_CALIB_DIR)/jiwoo_timecode
