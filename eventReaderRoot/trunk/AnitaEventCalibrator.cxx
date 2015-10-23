@@ -15,7 +15,7 @@ AnitaEventCalibrator*  AnitaEventCalibrator::fgInstance = NULL;
 
 AnitaEventCalibrator::AnitaEventCalibrator(){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
-  std::cout << "AnitaEventCalibrator::AnitaEventCalibrator()" << std::endl;
+  // std::cerr << "AnitaEventCalibrator::AnitaEventCalibrator()" << std::endl;
   loadCalib();
 
   //  const Int_t bufferSize = 3600; ///< An hour of averging at 1Hz, worked for calibration
@@ -109,7 +109,8 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   Bool_t fFlipRcoPhase = false;
   Bool_t fFirmwareRcoNoLatch = false;
   Bool_t fAddPedestal = false;
-
+  Bool_t fApplyExtraDelayFromPhaseCenter = false;
+  
   switch(calType){
 
   case WaveCalType::kNotACalib:
@@ -187,6 +188,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     fApplyTriggerJitterCorrection = true;
     fApplyCableDelays = true;
     fZeroMeanNonClockChannels = true;
+    fApplyExtraDelayFromPhaseCenter = true;
     break;
 
   // case WaveCalType::kDefault:
@@ -393,9 +395,6 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
 
-
-
-
   // Combine last two steps...
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   //! Step 9: Apply channel-to-channel cable delays
@@ -413,6 +412,11 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
       if(fApplyCableDelays==true){
 	Int_t labChip = eventPtr->getLabChip(chanIndex);
 	cableDelay = relativeCableDelays[surf][chan][labChip];
+
+	if(fApplyExtraDelayFromPhaseCenter==true){
+	  // Defined this backwards in the phase center fitter so this gets subtracted.
+	  cableDelay -= relativePhaseCenterToAmpaDelays[surf][chan];
+	}
       }
 
       for(Int_t samp=0; samp<numPointsArray[surf]; samp++){
@@ -1425,7 +1429,9 @@ void AnitaEventCalibrator::loadCalib() {
     for(Int_t chan=0;chan<NUM_CHAN;chan++) {
       for(Int_t chip=0;chip<NUM_CHIP;chip++) {
 	mvCalibVals[surf][chan][chip]=1;
+	relativeCableDelays[surf][chan][chip] = 0;	
       }
+      relativePhaseCenterToAmpaDelays[surf][chan] = 0;      
     }
   }
     
@@ -1483,7 +1489,15 @@ void AnitaEventCalibrator::loadCalib() {
     relativeCableDelays[surf][chan][chip]=calib;
     // std::cout << surf << "\t" << chan << "\t" << chip << "\t" << relativeCableDelays[surf][chan][chip] << std::endl;
   }
-  
+
+
+  sprintf(fileName,"%s/relativePhaseCenterToAmpaDelays.dat",calibDir);
+  std::ifstream relativePhaseCenterToAmpaDelaysFile(fileName);
+  relativePhaseCenterToAmpaDelaysFile.getline(firstLine,179);
+  while(relativePhaseCenterToAmpaDelaysFile >> surf >> chan >> calib) {
+    relativePhaseCenterToAmpaDelays[surf][chan]=calib;
+    // std::cout << surf << "\t" << chan << "\t" << relativePhaseCenterToAmpaDelays[surf][chan] << std::endl;
+  }
 
   sprintf(fileName,"%s/clockKeep.dat",calibDir);
   std::ifstream clockKeep(fileName);

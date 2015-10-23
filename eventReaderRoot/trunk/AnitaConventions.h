@@ -243,7 +243,7 @@ namespace AnitaLocations {
   const double LONGITUDE_SURF_SEAVEY=167.0564667; ///< Longitude of surface seavey.
   const double LATITUDE_SURF_SEAVEY=-77.86185; ///< Latitude of surface seavey.
   const double ALTITUDE_SURF_SEAVEY=15.0; ///< Altitude of surface seavey.
-   
+
   const double LONGITUDE_BH=167.06679444; ///< Longitude of borehole antenna.
   const double LATITUDE_BH=-77.861936111; ///< Latitude if borehole antenna.
   const double ALTITUDE_BH=-33.67; ///< Altitude of borehole antenna.
@@ -263,8 +263,13 @@ namespace AnitaLocations {
 };
 
 
-#define STATIC_ADU5_PITCH -0.29
-#define STATIC_ADU5_ROLL 0.89
-#define OFFSET_ADU5_HEADING -0.32
+// Please note that in order to avoid unnecessarily dependencies during compiling
+// I have moved the static adu5 into UsefulAdu5Pat.h. Go look for them there.
+
+// // ANITA-2 values in degrees
+// #define STATIC_ADU5_PITCH -0.29
+// #define STATIC_ADU5_ROLL 0.89
+// #define OFFSET_ADU5_HEADING -0.32
+
 
 #endif //ANITACONVENTIONS_H

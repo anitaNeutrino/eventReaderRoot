@@ -352,18 +352,20 @@ class AnitaGeomTool
         lat=getLat(getTheta(thePos));
     } ///<Converts cartesian coordinates to latitude and longitude
 
-  
  protected:
    static AnitaGeomTool *fgInstance;  
    // protect against multiple instances
 
  private:
-   void readPhotogrammetry();
-   void readAnitaIIPhotogrammetry();
-   void readAnitaIIIPhotogrammetry();
-   void readSimonsNumbers();
-   Int_t fUseKurtAnitaIINumbers;
-   Int_t fUseKurtAnitaIIINumbers;
+  void readPhotogrammetry();
+  void readAnitaIIPhotogrammetry();
+  void readAnitaIIIPhotogrammetry();
+  void readSimonsNumbers();
+  void readAnita3PhaseCenterNumbers();
+  Int_t fUseKurtAnitaIINumbers;
+  Int_t fUseKurtAnitaIIINumbers;
+  
+
 
 };
 
