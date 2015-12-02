@@ -124,12 +124,10 @@ AnitaGeomTool::AnitaGeomTool()
 
   //  readSimonsNumbers();
   //  readPhotogrammetry();
-  //  readAnitaIIPhotogrammetry();
-  //  fUseKurtAnitaIINumbers=0;
 
   readAnita3PhaseCenterNumbers(); // This one has to come before reading ANITA-3 photogrammetry
-  readAnitaIIIPhotogrammetry();
-  fUseKurtAnitaIIINumbers=0;
+  readAnita3Photogrammetry();
+  fUseKurtAnita3Numbers=0;
 
 
   // Moved from fillAntPositionsFromPrioritizerdConfig
@@ -137,17 +135,16 @@ AnitaGeomTool::AnitaGeomTool()
   fHeadingRotationAxis.SetXYZ(0.,0.,1.);
   fPitchRotationAxis.SetXYZ(0.,1.,0.);
   fRollRotationAxis=fPitchRotationAxis.Cross(fHeadingRotationAxis);
-  aftForeOffsetAngleVertical=TMath::DegToRad()*45;  
-  
+  aftForeOffsetAngleVertical=TMath::DegToRad()*45;
   // for(int ant=0; ant<NUM_SEAVEYS; ant++){
   //   for(int pol=0; pol<2; pol++){
   //     std::cout << ant << "\t" << pol<< "\t"
   // 		<< rPhaseCentreFromVerticalHorn[ant][pol] << "\t"
-  // 		<< rPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol] << "\t"
+  // 		<< rPhaseCentreFromVerticalHornKurtAnita3[ant][pol] << "\t"
   // 		<< zPhaseCentreFromVerticalHorn[ant][pol] << "\t"
-  // 		<< zPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol] << "\t"
+  // 		<< zPhaseCentreFromVerticalHornKurtAnita3[ant][pol] << "\t"
   // 		<< azPhaseCentreFromVerticalHorn[ant][pol] << "\t"
-  // 		<< azPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol] << "\t"
+  // 		<< azPhaseCentreFromVerticalHornKurtAnita3[ant][pol] << "\t"
   // 		<< std::endl;
   //   }
   // }
@@ -1502,7 +1499,7 @@ void AnitaGeomTool::getAntXYZ(Int_t ant, Double_t &x, Double_t &y, Double_t &z,A
 }
 
 Double_t AnitaGeomTool::getAntZ(Int_t ant, AnitaPol::AnitaPol_t pol) {
-  if(fUseKurtAnitaIIINumbers==0) {
+  if(fUseKurtAnita3Numbers==0) {
     if(ant>=0 && ant<NUM_SEAVEYS) {
       //      std::cout << "Using simon z\n";
       return zPhaseCentreFromVerticalHorn[ant][pol];
@@ -1511,14 +1508,14 @@ Double_t AnitaGeomTool::getAntZ(Int_t ant, AnitaPol::AnitaPol_t pol) {
   else {
     if(ant>=0 && ant<NUM_SEAVEYS) {
       //      std::cout << "Using kurt z\n";
-      return zPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol];
+      return zPhaseCentreFromVerticalHornKurtAnita3[ant][pol];
     }      
   }
   return 0;
 }
 
 Double_t AnitaGeomTool::getAntR(Int_t ant, AnitaPol::AnitaPol_t pol) {
-  if(fUseKurtAnitaIIINumbers==0) {
+  if(fUseKurtAnita3Numbers==0) {
     //    std::cout << "Using simon R\n";
     if(ant>=0 && ant<NUM_SEAVEYS) {
       return rPhaseCentreFromVerticalHorn[ant][pol];
@@ -1527,7 +1524,7 @@ Double_t AnitaGeomTool::getAntR(Int_t ant, AnitaPol::AnitaPol_t pol) {
   else {
     //    std::cout << "Using kurt R\n";
     if(ant>=0 && ant<NUM_SEAVEYS) {
-      return rPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol];
+      return rPhaseCentreFromVerticalHornKurtAnita3[ant][pol];
     }
   }
   return 0;
@@ -1535,7 +1532,7 @@ Double_t AnitaGeomTool::getAntR(Int_t ant, AnitaPol::AnitaPol_t pol) {
 
 Double_t AnitaGeomTool::getAntPhiPosition(Int_t ant, AnitaPol::AnitaPol_t pol) {
 
-  if(fUseKurtAnitaIIINumbers==0) {
+  if(fUseKurtAnita3Numbers==0) {
     //    std::cout << "Using simon phi\n";
     if(ant>=0 && ant<NUM_SEAVEYS) {
       return azPhaseCentreFromVerticalHorn[ant][pol];
@@ -1544,7 +1541,7 @@ Double_t AnitaGeomTool::getAntPhiPosition(Int_t ant, AnitaPol::AnitaPol_t pol) {
   else {
     if(ant>=0 && ant<NUM_SEAVEYS) {
       //      std::cout << "Using kurt phi\n";
-      return azPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol];
+      return azPhaseCentreFromVerticalHornKurtAnita3[ant][pol];
     }
   }
   return 0;
@@ -1552,7 +1549,7 @@ Double_t AnitaGeomTool::getAntPhiPosition(Int_t ant, AnitaPol::AnitaPol_t pol) {
 
 Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(Int_t ant, AnitaPol::AnitaPol_t pol) {
 
-  if(fUseKurtAnitaIIINumbers==0) {
+  if(fUseKurtAnita3Numbers==0) {
     //    std::cout << "Using simon phi-rel\n";
     if(ant>=0 && ant<NUM_SEAVEYS) {
       Double_t phi=azPhaseCentreFromVerticalHorn[ant][pol]-aftForeOffsetAngleVertical;
@@ -1566,7 +1563,7 @@ Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(Int_t ant, AnitaPol::Anita
   else {
     if(ant>=0 && ant<NUM_SEAVEYS) {
       //      std::cout << "Using kurt phi-rel\n";
-      Double_t phi=azPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]-aftForeOffsetAngleVerticalKurtAnitaIII;
+      Double_t phi=azPhaseCentreFromVerticalHornKurtAnita3[ant][pol]-aftForeOffsetAngleVerticalKurtAnita3;
       //      std::cout << ant << " " << phi*TMath::RadToDeg() << std::endl;
 
       if(phi<0)
@@ -1936,129 +1933,9 @@ void AnitaGeomTool::readAnita3PhaseCenterNumbers() {
 
 
 
-void AnitaGeomTool::readAnitaIIPhotogrammetry()
-{
-  //  return; //Hack for now
-  char calibDir[FILENAME_MAX];
-  char fileName[FILENAME_MAX];
-  char *calibEnv=getenv("ANITA_CALIB_DIR");
-  if(!calibEnv) {
-    char *utilEnv=getenv("ANITA_UTIL_INSTALL_DIR");
-    if(!utilEnv)
-      sprintf(calibDir,"calib");
-    else
-      sprintf(calibDir,"%s/share/anitaCalib",utilEnv);    
-  }
-  else {
-    strncpy(calibDir,calibEnv,FILENAME_MAX);
-  }
-
-  sprintf(fileName,"%s/anitaIIPhotogrammetry.csv",calibDir);
-  std::ifstream AnitaIIPhotoFile(fileName);
-  if(!AnitaIIPhotoFile) {
-    std::cerr << "Couldn't open:\t" << fileName << "\n";
-    return;
-  }
 
 
-  //First up are the antenna positions
-  TString line;
-  for(Int_t i=0;i<2;i++) {
-    line.ReadLine(AnitaIIPhotoFile);
-    //std::cout << line.Data() << "\n";
-  }
-  
-  for(Int_t ant=0;ant<48;ant++) {
-    line.ReadLine(AnitaIIPhotoFile);
-    //std::cout << "Seavey:\t" << line.Data() << "\n";
-    TObjArray *tokens = line.Tokenize(",");
-    for(Int_t j=0;j<8;j++) {
-      const TString subString = ((TObjString*)tokens->At(j))->GetString();
-      //	TString *subString = (TString*) tokens->At(j);
-      //	std::cout << j << "\t" << subString.Data() << "\n";
-      switch(j) {
-      case 0:
-	if (ant+1 != subString.Atoi()) {
-	  std::cerr << "Antenna number mismatch\n";
-	}
-	break;
-      case 1:	   
-	xAntFromVerticalHornKurtAnitaII[ant]=subString.Atof()*INCHTOMETER; //m
-	break;
-      case 2:	   
-	yAntFromVerticalHornKurtAnitaII[ant]=subString.Atof()*INCHTOMETER; //m
-	break;
-      case 3:	   
-	zAntFromVerticalHornKurtAnitaII[ant]=subString.Atof()*INCHTOMETER; //m
-	break;
-      case 4:	   
-	rAntFromVerticalHornKurtAnitaII[ant]=subString.Atof()*INCHTOMETER; //m
-	//	   std::cout << ant << "\t" << rAntFromVerticalHornKurtAnitaII[ant] << "\n";
-	break;
-      case 5:	   
-	azCentreFromVerticalHornKurtAnitaII[ant]=subString.Atof()*TMath::DegToRad(); //radians
-	break;
-      case 6:	   
-	apertureAzFromVerticalHornKurtAnitaII[ant]=subString.Atof()*TMath::DegToRad(); //radians
-	break;
-      case 7:	   
-	apertureElFromVerticalHornKurtAnitaII[ant]=subString.Atof()*TMath::DegToRad(); //radians
-	break;
-      default:	   
-	break;
-      }
-   
-    }
-    tokens->Delete();
-
-  }
-
-  for(Int_t pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
-     for(Int_t ant=0;ant<NUM_SEAVEYS;ant++) {
-    Double_t phaseCentreToAntFront=ringPhaseCentreOffset[Int_t(this->getRingFromAnt(ant))];
-    //Need to think about this at some point, but for now will just hard code in 20cm
-    phaseCentreToAntFront=0.2;
- 
-
-    //     Now try to find the location of the antenna phaseCentre poInt_t  
-    xPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]=xAntFromVerticalHornKurtAnitaII[ant] -
-      phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHornKurtAnitaII[ant])*TMath::Cos(apertureElFromVerticalHornKurtAnitaII[ant]); //m
-    yPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]=yAntFromVerticalHornKurtAnitaII[ant] -
-      phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHornKurtAnitaII[ant])*TMath::Cos(apertureElFromVerticalHornKurtAnitaII[ant]); //m
-    zPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]=zAntFromVerticalHornKurtAnitaII[ant] - phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHornKurtAnitaII[ant]); //m
-    
-    rPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]=TMath::Sqrt(xPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]*xPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]+yPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]*yPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]);//m
-    azPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]=TMath::ATan(yPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]/xPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]); //radians
-    if(xPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]<0)
-      azPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]+=TMath::Pi();
-    if(azPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]<0)
-      azPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]+=TMath::TwoPi();
-
-        
-  }
-}
-
-  aftForeOffsetAngleVerticalKurtAnitaII=-45.12*TMath::DegToRad();
-  aftForeOffsetAngleVertical=aftForeOffsetAngleVerticalKurtAnitaII;
-  //Will now make the default numbers the ones that start with Simon's and modify the positions
-  //Now add in Simon's corrections
-  for(Int_t pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
-     for(Int_t ant=0;ant<NUM_SEAVEYS;ant++) {
-	rPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]+deltaRPhaseCentre[ant][pol];
-	azPhaseCentreFromVerticalHorn[ant][pol]=azPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]+deltaPhiPhaseCentre[ant][pol];    
-	if(azPhaseCentreFromVerticalHorn[ant][pol]<0)
-	   azPhaseCentreFromVerticalHorn[ant][pol]+=TMath::TwoPi();
-	if(azPhaseCentreFromVerticalHorn[ant][pol]>TMath::TwoPi())
-	   azPhaseCentreFromVerticalHorn[ant][pol]-=TMath::TwoPi();    
-	zPhaseCentreFromVerticalHorn[ant][pol]=zPhaseCentreFromVerticalHornKurtAnitaII[ant][pol]+deltaZPhaseCentre[ant][pol];
-	xPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHorn[ant][pol]*TMath::Cos(azPhaseCentreFromVerticalHorn[ant][pol]);
-	yPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHorn[ant][pol]*TMath::Sin(azPhaseCentreFromVerticalHorn[ant][pol]);
-     }
-  }
-}
-
-
-void AnitaGeomTool::readAnitaIIIPhotogrammetry()
+void AnitaGeomTool::readAnita3Photogrammetry()
 {
   //  return; //Hack for now
   char calibDir[FILENAME_MAX];
@@ -2075,9 +1952,9 @@ void AnitaGeomTool::readAnitaIIIPhotogrammetry()
     strncpy(calibDir,calibEnv,FILENAME_MAX);
   }
   
-  sprintf(fileName,"%s/anitaIIIPhotogrammetry.csv",calibDir);
-  std::ifstream AnitaIIIPhotoFile(fileName);
-  if(!AnitaIIIPhotoFile) {
+  sprintf(fileName,"%s/anita3Photogrammetry.csv",calibDir);
+  std::ifstream Anita3PhotoFile(fileName);
+  if(!Anita3PhotoFile) {
     std::cerr << "Couldn't open:\t" << fileName << "\n";
     return;
   }
@@ -2086,12 +1963,12 @@ void AnitaGeomTool::readAnitaIIIPhotogrammetry()
   //First up are the antenna positions
   TString line;
   for(int i=0;i<2;i++) {
-    line.ReadLine(AnitaIIIPhotoFile);
+    line.ReadLine(Anita3PhotoFile);
     //std::cout << line.Data() << "\n";
   }
   
   for(int ant=0;ant<48;ant++) {
-    line.ReadLine(AnitaIIIPhotoFile);
+    line.ReadLine(Anita3PhotoFile);
     //std::cout << "Seavey:\t" << line.Data() << "\n";
     TObjArray *tokens = line.Tokenize(",");
     for(int j=0;j<8;j++) {
@@ -2105,26 +1982,26 @@ void AnitaGeomTool::readAnitaIIIPhotogrammetry()
 	}
 	break;
       case 1:	   
-	xAntFromVerticalHornKurtAnitaIII[ant]=subString.Atof()*INCHTOMETER; //m
+	xAntFromVerticalHornKurtAnita3[ant]=subString.Atof()*INCHTOMETER; //m
 	break;
       case 2:	   
-	yAntFromVerticalHornKurtAnitaIII[ant]=subString.Atof()*INCHTOMETER; //m
+	yAntFromVerticalHornKurtAnita3[ant]=subString.Atof()*INCHTOMETER; //m
 	break;
       case 3:	   
-	zAntFromVerticalHornKurtAnitaIII[ant]=subString.Atof()*INCHTOMETER; //m
+	zAntFromVerticalHornKurtAnita3[ant]=subString.Atof()*INCHTOMETER; //m
 	break;
       case 4:	   
-	rAntFromVerticalHornKurtAnitaIII[ant]=subString.Atof()*INCHTOMETER; //m
+	rAntFromVerticalHornKurtAnita3[ant]=subString.Atof()*INCHTOMETER; //m
 	//	   std::cout << ant << "\t" << rAntFromVerticalHornKurtAnitaII[ant] << "\n";
 	break;
       case 5:	   
-	azCentreFromVerticalHornKurtAnitaIII[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	azCentreFromVerticalHornKurtAnita3[ant]=subString.Atof()*TMath::DegToRad(); //radians
 	break;
       case 6:	   
-	apertureAzFromVerticalHornKurtAnitaIII[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	apertureAzFromVerticalHornKurtAnita3[ant]=subString.Atof()*TMath::DegToRad(); //radians
 	break;
       case 7:	   
-	apertureElFromVerticalHornKurtAnitaIII[ant]=subString.Atof()*TMath::DegToRad(); //radians
+	apertureElFromVerticalHornKurtAnita3[ant]=subString.Atof()*TMath::DegToRad(); //radians
 	break;
       default:	   
 	break;
@@ -2143,37 +2020,37 @@ void AnitaGeomTool::readAnitaIIIPhotogrammetry()
     
     
     //     Now try to find the location of the antenna phaseCentre point  
-    xPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]=xAntFromVerticalHornKurtAnitaIII[ant] -
-      phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHornKurtAnitaIII[ant])*TMath::Cos(apertureElFromVerticalHornKurtAnitaIII[ant]); //m
-    yPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]=yAntFromVerticalHornKurtAnitaIII[ant] -
-      phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHornKurtAnitaIII[ant])*TMath::Cos(apertureElFromVerticalHornKurtAnitaIII[ant]); //m
-    zPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]=zAntFromVerticalHornKurtAnitaIII[ant] - phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHornKurtAnitaIII[ant]); //m
+    xPhaseCentreFromVerticalHornKurtAnita3[ant][pol]=xAntFromVerticalHornKurtAnita3[ant] -
+      phaseCentreToAntFront*TMath::Cos( apertureAzFromVerticalHornKurtAnita3[ant])*TMath::Cos(apertureElFromVerticalHornKurtAnita3[ant]); //m
+    yPhaseCentreFromVerticalHornKurtAnita3[ant][pol]=yAntFromVerticalHornKurtAnita3[ant] -
+      phaseCentreToAntFront*TMath::Sin( apertureAzFromVerticalHornKurtAnita3[ant])*TMath::Cos(apertureElFromVerticalHornKurtAnita3[ant]); //m
+    zPhaseCentreFromVerticalHornKurtAnita3[ant][pol]=zAntFromVerticalHornKurtAnita3[ant] - phaseCentreToAntFront*TMath::Sin(apertureElFromVerticalHornKurtAnita3[ant]); //m
     
-    rPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]=TMath::Sqrt(xPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]*xPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]+yPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]*yPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]);//m
-    azPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]=TMath::ATan(yPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]/xPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]); //radians
-    if(xPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]<0)
-      azPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]+=TMath::Pi();
-    if(azPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]<0)
-      azPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]+=TMath::TwoPi();
+    rPhaseCentreFromVerticalHornKurtAnita3[ant][pol]=TMath::Sqrt(xPhaseCentreFromVerticalHornKurtAnita3[ant][pol]*xPhaseCentreFromVerticalHornKurtAnita3[ant][pol]+yPhaseCentreFromVerticalHornKurtAnita3[ant][pol]*yPhaseCentreFromVerticalHornKurtAnita3[ant][pol]);//m
+    azPhaseCentreFromVerticalHornKurtAnita3[ant][pol]=TMath::ATan(yPhaseCentreFromVerticalHornKurtAnita3[ant][pol]/xPhaseCentreFromVerticalHornKurtAnita3[ant][pol]); //radians
+    if(xPhaseCentreFromVerticalHornKurtAnita3[ant][pol]<0)
+      azPhaseCentreFromVerticalHornKurtAnita3[ant][pol]+=TMath::Pi();
+    if(azPhaseCentreFromVerticalHornKurtAnita3[ant][pol]<0)
+      azPhaseCentreFromVerticalHornKurtAnita3[ant][pol]+=TMath::TwoPi();
     
     
      }
   }
   
-  aftForeOffsetAngleVerticalKurtAnitaIII= +45.12*TMath::DegToRad();
-  aftForeOffsetAngleVertical=aftForeOffsetAngleVerticalKurtAnitaIII;
+  aftForeOffsetAngleVerticalKurtAnita3= +45*TMath::DegToRad();
+  aftForeOffsetAngleVertical=aftForeOffsetAngleVerticalKurtAnita3;
   //Will now make the default numbers the ones that start with Simon's and modify the positions
 
   //Removed corrections for the moment
   for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
      for(int ant=0;ant<NUM_SEAVEYS;ant++) {
-	rPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol];
-	azPhaseCentreFromVerticalHorn[ant][pol]=azPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol];    
+	rPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHornKurtAnita3[ant][pol];
+	azPhaseCentreFromVerticalHorn[ant][pol]=azPhaseCentreFromVerticalHornKurtAnita3[ant][pol];    
 	if(azPhaseCentreFromVerticalHorn[ant][pol]<0)
 	   azPhaseCentreFromVerticalHorn[ant][pol]+=TMath::TwoPi();
 	if(azPhaseCentreFromVerticalHorn[ant][pol]>TMath::TwoPi())
 	   azPhaseCentreFromVerticalHorn[ant][pol]-=TMath::TwoPi();    
-	zPhaseCentreFromVerticalHorn[ant][pol]=zPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol];
+	zPhaseCentreFromVerticalHorn[ant][pol]=zPhaseCentreFromVerticalHornKurtAnita3[ant][pol];
 	xPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHorn[ant][pol]*TMath::Cos(azPhaseCentreFromVerticalHorn[ant][pol]);
 	yPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHorn[ant][pol]*TMath::Sin(azPhaseCentreFromVerticalHorn[ant][pol]);
 	//	std::cout << xPhaseCentreFromVerticalHorn[ant][pol] << std::endl;
@@ -2183,19 +2060,25 @@ void AnitaGeomTool::readAnitaIIIPhotogrammetry()
 
 
   // Now add in ANITA-3 phase centre corrections
+  // std::cerr << "Inside AnitaGeomTool we have..." << std::endl;
+  // std::cerr << "pol\tant\tr\tz\tphi" << std::endl;  
   for(int pol=AnitaPol::kHorizontal;pol<=AnitaPol::kVertical;pol++) {
     for(int ant=0;ant<NUM_SEAVEYS;ant++) {
-      rPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]+deltaRPhaseCentre[ant][pol];
-      azPhaseCentreFromVerticalHorn[ant][pol]=azPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]+deltaPhiPhaseCentre[ant][pol];    
+      rPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHornKurtAnita3[ant][pol]+deltaRPhaseCentre[ant][pol];
+      azPhaseCentreFromVerticalHorn[ant][pol]=azPhaseCentreFromVerticalHornKurtAnita3[ant][pol]+deltaPhiPhaseCentre[ant][pol];    
       if(azPhaseCentreFromVerticalHorn[ant][pol]<0)
 	azPhaseCentreFromVerticalHorn[ant][pol]+=TMath::TwoPi();
       if(azPhaseCentreFromVerticalHorn[ant][pol]>TMath::TwoPi())
 	azPhaseCentreFromVerticalHorn[ant][pol]-=TMath::TwoPi();    
-      zPhaseCentreFromVerticalHorn[ant][pol]=zPhaseCentreFromVerticalHornKurtAnitaIII[ant][pol]+deltaZPhaseCentre[ant][pol];
+      zPhaseCentreFromVerticalHorn[ant][pol]=zPhaseCentreFromVerticalHornKurtAnita3[ant][pol]+deltaZPhaseCentre[ant][pol];
       xPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHorn[ant][pol]*TMath::Cos(azPhaseCentreFromVerticalHorn[ant][pol]);
       yPhaseCentreFromVerticalHorn[ant][pol]=rPhaseCentreFromVerticalHorn[ant][pol]*TMath::Sin(azPhaseCentreFromVerticalHorn[ant][pol]);
       //	std::cout << xPhaseCentreFromVerticalHorn[ant][pol] << std::endl;
 
+
+      // std::cerr << pol << "\t" << ant << "\t" << rPhaseCentreFromVerticalHorn[ant][pol] << "\t" << zPhaseCentreFromVerticalHorn[ant][pol] << "\t" << getAntPhiPositionRelToAftFore(ant, (AnitaPol::AnitaPol_t)pol)*TMath::RadToDeg() << std::endl;
+      //      azPhaseCentreFromVerticalHorn[ant][pol]*TMath::RadToDeg() << std::endl;
+      
     }
   }
 

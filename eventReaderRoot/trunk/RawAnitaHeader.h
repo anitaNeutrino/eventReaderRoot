@@ -168,6 +168,7 @@ The second byte (reserved[1]) is currently reserved.
   const char *trigTypeAsString(); ///< Returns trigger type as string
   //  int isInL3Pattern(int phi); ///< Returns 1 if phi sector had l3 trigger
   //  int isInL2Pattern(int phi, AnitaRing::AnitaRing_t ring); ///< Returns 1 if given phi-ring had l2 trigger
+  UShort_t getL3TrigPattern(AnitaPol::AnitaPol_t pol);
   int isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
   int isInPhiMask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
   int isInL1Mask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger

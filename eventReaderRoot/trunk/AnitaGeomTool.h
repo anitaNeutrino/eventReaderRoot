@@ -218,46 +218,28 @@ class AnitaGeomTool
    TVector3 fPitchRotationAxis;
    TVector3 fRollRotationAxis;
 
-   //Kurt's ANITA-II numbers
-   Double_t xAntFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
-   Double_t yAntFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
-   Double_t zAntFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
-   Double_t rAntFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //m
-   Double_t azCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //radians
-   Double_t apertureAzFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //radians
-   Double_t apertureElFromVerticalHornKurtAnitaII[NUM_SEAVEYS]; //radians
-  
-   Double_t xPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t yPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t zPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t rPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t azPhaseCentreFromVerticalHornKurtAnitaII[NUM_SEAVEYS][NUM_POLS]; //radians
-   Double_t aftForeOffsetAngleVerticalKurtAnitaII; //radians
 
-   //Kurt's ANITA-III numbers
-   Double_t xAntFromVerticalHornKurtAnitaIII[NUM_SEAVEYS]; //m
-   Double_t yAntFromVerticalHornKurtAnitaIII[NUM_SEAVEYS]; //m
-   Double_t zAntFromVerticalHornKurtAnitaIII[NUM_SEAVEYS]; //m
-   Double_t rAntFromVerticalHornKurtAnitaIII[NUM_SEAVEYS]; //m
-   Double_t azCentreFromVerticalHornKurtAnitaIII[NUM_SEAVEYS]; //radians
-   Double_t apertureAzFromVerticalHornKurtAnitaIII[NUM_SEAVEYS]; //radians
-   Double_t apertureElFromVerticalHornKurtAnitaIII[NUM_SEAVEYS]; //radians
+   //Kurt's ANITA-3 numbers
+   Double_t xAntFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //m
+   Double_t yAntFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //m
+   Double_t zAntFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //m
+   Double_t rAntFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //m
+   Double_t azCentreFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //radians
+   Double_t apertureAzFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //radians
+   Double_t apertureElFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //radians
   
-   Double_t xPhaseCentreFromVerticalHornKurtAnitaIII[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t yPhaseCentreFromVerticalHornKurtAnitaIII[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t zPhaseCentreFromVerticalHornKurtAnitaIII[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t rPhaseCentreFromVerticalHornKurtAnitaIII[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t azPhaseCentreFromVerticalHornKurtAnitaIII[NUM_SEAVEYS][NUM_POLS]; //radians
-   Double_t aftForeOffsetAngleVerticalKurtAnitaIII; //radians
+   Double_t xPhaseCentreFromVerticalHornKurtAnita3[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t yPhaseCentreFromVerticalHornKurtAnita3[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t zPhaseCentreFromVerticalHornKurtAnita3[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t rPhaseCentreFromVerticalHornKurtAnita3[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t azPhaseCentreFromVerticalHornKurtAnita3[NUM_SEAVEYS][NUM_POLS]; //radians
+   Double_t aftForeOffsetAngleVerticalKurtAnita3; //radians
 
    void updateAnt(Double_t deltaR,Double_t deltaRL,Double_t deltaUD);
    void printAntPos();
-   void useKurtAnitaIINumbers(Int_t flag) {
-     fUseKurtAnitaIINumbers=flag;
-   }
 
-   void useKurtAnitaIIINumbers(Int_t flag) {
-     fUseKurtAnitaIIINumbers=flag;
+   void useKurtAnita3Numbers(Int_t flag) {
+     fUseKurtAnita3Numbers=flag;
    }
 
 
@@ -358,12 +340,10 @@ class AnitaGeomTool
 
  private:
   void readPhotogrammetry();
-  void readAnitaIIPhotogrammetry();
-  void readAnitaIIIPhotogrammetry();
+  void readAnita3Photogrammetry();
   void readSimonsNumbers();
   void readAnita3PhaseCenterNumbers();
-  Int_t fUseKurtAnitaIINumbers;
-  Int_t fUseKurtAnitaIIINumbers;
+  Int_t fUseKurtAnita3Numbers;
   
 
 
