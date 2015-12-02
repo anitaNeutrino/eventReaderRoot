@@ -378,7 +378,9 @@ const char *RawAnitaHeader::trigTypeAsString()
 }
 
 
- 
+UShort_t RawAnitaHeader::getL3TrigPattern(AnitaPol::AnitaPol_t pol){
+  return pol == AnitaPol::kHorizontal ? l3TrigPatternH : l3TrigPattern;
+}
 int RawAnitaHeader::isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol)
 { 
   if(phi<0 || phi>=PHI_SECTORS) return -1;
