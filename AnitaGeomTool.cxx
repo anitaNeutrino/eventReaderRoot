@@ -1952,7 +1952,7 @@ void AnitaGeomTool::readAnita3Photogrammetry()
     strncpy(calibDir,calibEnv,FILENAME_MAX);
   }
   
-  sprintf(fileName,"%s/anita3Photogrammetry.csv",calibDir);
+  sprintf(fileName,"%s/anitaIIIPhotogrammetry.csv",calibDir);
   std::ifstream Anita3PhotoFile(fileName);
   if(!Anita3PhotoFile) {
     std::cerr << "Couldn't open:\t" << fileName << "\n";
