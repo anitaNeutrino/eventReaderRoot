@@ -260,6 +260,13 @@ namespace AnitaLocations {
   const Double_t LATITUDE_WAIS = - (79 + (27.93728/60)); ///< Latitude of WAIS divide pulser
   const Double_t LONGITUDE_WAIS = -(112 + (6.74974/60)); ///< Longitude of WAIS divide pulser
   const Double_t ALTITUDE_WAIS = 1813.42;///< Altitude of WAIS divide pulser
+
+  // LDB position taken from Steph's e-log
+  // https://www.phys.hawaii.edu/elog/anita_notes/617
+  const Double_t LATITUDE_LDB  = - (77 + (51.23017/60)); ///< Latitude at LDB
+  const Double_t LONGITUDE_LDB = + (167 + (12.16908/60)); ///< Longitude at LDB
+  const Double_t ALTITUDE_LDB  = 0.; ///< Altitude at LDB
+
 };
 
 
