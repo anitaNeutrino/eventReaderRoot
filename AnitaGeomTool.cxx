@@ -617,7 +617,7 @@ Double_t AnitaGeomTool::getDirectionWrtNorth(Int_t phiSector, Double_t heading) 
   // Float_t direction=(1.*360./NUM_PHI)+heading-(phiSector*360./NUM_PHI);
 
   ///< Heading increases clockwise but phi-sector numbers increase anticlockwise, hence -ve sign.
-  Double_t direction = heading - aftForeOffsetAngleVertical*TMath::RadToDeg() - (phiSector*360./NUM_PHI);
+  Double_t direction = heading + aftForeOffsetAngleVertical*TMath::RadToDeg() - (phiSector*360./NUM_PHI);
   
   if(direction>=360){
     direction -= 360;
@@ -1920,9 +1920,6 @@ void AnitaGeomTool::readAnita3PhaseCenterNumbers() {
   
   PhaseCenterFile.getline(firstLine,179);
   while(PhaseCenterFile >> antNum >> pol >> deltaR >> deltaPhi >> deltaZ) {
-    deltaRPhaseCentre[antNum][pol]=deltaR;
-    deltaPhiPhaseCentre[antNum][pol]=deltaPhi*TMath::DegToRad();
-    deltaZPhaseCentre[antNum][pol]=deltaZ;
     deltaRPhaseCentre[antNum][pol]=deltaR;
     deltaPhiPhaseCentre[antNum][pol]=deltaPhi*TMath::DegToRad();
     deltaZPhaseCentre[antNum][pol]=deltaZ;
