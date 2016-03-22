@@ -60,7 +60,7 @@ class UsefulAnitaEvent: public RawAnitaEvent
   // std::vector<std::vector<Double_t> > getNeighbouringClockCorrelations2(bool writeGraphs);
 
   std::vector<Double_t> getClockAlignment(std::vector<Int_t> listOfClockNums); ///< For calibration
-
+  Int_t checkIfTreatingCalibratedEventAsRawEvent(RawAnitaEvent* rawEventPtr, const char* funcName); ///< Prints a verbose error message if you're calling the wrong constructor type
 
 
 

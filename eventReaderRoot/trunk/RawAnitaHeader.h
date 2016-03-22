@@ -190,7 +190,11 @@ The second byte (reserved[1]) is currently reserved.
   Float_t getImagePeak();
   Float_t getCoherentSumPeak();
   AnitaPol::AnitaPol_t getPeakPol();
-  
+
+  Int_t getTriggerBitRF() const;
+  Int_t getTriggerBitADU5() const;
+  Int_t getTriggerBitG12() const;
+  Int_t getTriggerBitSoftExt() const;
 
   ClassDef(RawAnitaHeader,35);
 };

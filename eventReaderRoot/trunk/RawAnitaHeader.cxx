@@ -531,3 +531,24 @@ Int_t RawAnitaHeader::getSaturationFlag()
 {
   return ((prioritizerStuff & 0x4000)>>14);
 }
+
+
+Int_t RawAnitaHeader::getTriggerBitRF() const{
+  ///< Bit 0 is RF, 1 is ADU5, 2 is G12, 3 is software/external
+  return (trigType & (1 << 0));
+}
+
+Int_t RawAnitaHeader::getTriggerBitADU5() const{
+  ///< Bit 0 is RF, 1 is ADU5, 2 is G12, 3 is software/external
+  return (trigType & (1 << 1));
+}
+
+Int_t RawAnitaHeader::getTriggerBitG12() const{
+  ///< Bit 0 is RF, 1 is ADU5, 2 is G12, 3 is software/external
+  return (trigType & (1 << 2));
+}
+
+Int_t RawAnitaHeader::getTriggerBitSoftExt() const{
+  ///< Bit 0 is RF, 1 is ADU5, 2 is G12, 3 is software/external
+  return (trigType & (1 << 3));
+}
