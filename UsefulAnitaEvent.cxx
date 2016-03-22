@@ -58,21 +58,29 @@ UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr, WaveCalT
 UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, PrettyAnitaHk *theHk) 
   : RawAnitaEvent(*eventPtr)
 {
+
+
+  checkIfTreatingCalibratedEventAsRawEvent(eventPtr, __PRETTY_FUNCTION__);
+
   fCalibrator=0;
   fLastEventGuessed=0;
   if(theHk) {
     gotCalibTemp=1;
     calibTemp=theHk->intTemps[2];
   }
-  else 
+  else{
     gotCalibTemp=0;
-   
+  }
+
   calibrateEvent(calType);
 }
 
 UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, RawAnitaHeader* theHd) 
   : RawAnitaEvent(*eventPtr)
 {
+
+  checkIfTreatingCalibratedEventAsRawEvent(eventPtr, __PRETTY_FUNCTION__);
+
   fCalibrator=0;
   fFromCalibratedAnitaEvent=0;
   fC3poNum=theHd->c3poNum;
@@ -93,6 +101,9 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
 UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, Double_t surfTemp) 
   : RawAnitaEvent(*eventPtr)
 {
+
+  checkIfTreatingCalibratedEventAsRawEvent(eventPtr, __PRETTY_FUNCTION__);
+
   fCalibrator=0;
   fFromCalibratedAnitaEvent=0;
   gotCalibTemp=1;
@@ -194,4 +205,38 @@ std::vector<Double_t> UsefulAnitaEvent::getClockAlignment(std::vector<Int_t> lis
 					fCalibrator->voltsArray,
 					fCalibrator->timeArray,
 					listOfClockNums);
+}
+
+
+Int_t UsefulAnitaEvent::checkIfTreatingCalibratedEventAsRawEvent(RawAnitaEvent* rawEventPtr, const char* funcName){
+  // This function is a check that you're not treating a CalibratedAnitaEvent as a RawAnitaEvent.
+  // If you are then it will print a warning.
+
+  // There is probably some alternative that could cause things to fail to compile... would that be better?
+  // Is a it better to turn a bug into a run-time warning or a compile time error?
+  // Anyway, enough philosophising...
+
+
+  // This line should return NULL if you can't dynamically cast the rawEventPtr as a pointer to a CalibratedAnitaEvent.
+  // i.e. if the pointer really is of type RawAnitaEvent this will return NULL.
+
+  CalibratedAnitaEvent* calEventPtr = dynamic_cast<CalibratedAnitaEvent*>(rawEventPtr);
+
+  // If you can cast it as a pointer to a CalibratedAnitaEvent...
+  if(calEventPtr){
+    // ... then this is a calibratedAnitaEvent getting treated like a RawAnitaEvent, i.e. being calibrated on the fly.
+    // At best this slow. At worst this will mess up things like the rolling temperature correction.
+    // Now I will fill your terminal with warnings so verbose you will hate me.
+
+    std::cerr << "WARNING in " << funcName << ":" << std::endl;
+    std::cerr << "\tCalling constructor that that takes a RawAnitaEvent* with a CalibratedAnitaEvent*. " << std::endl;
+    std::cerr << "\tThe CalibratedAnitaEvent numbers are not being applied but are being recalculated on the fly." << std::endl;
+    std::cerr << "\tAt best this is slow. At worst this could change rolling averages." << std::endl;
+    std::cerr << "\tPlease use the constructor that takes a CalibratedAnitaEvent* instead." << std::endl;
+    return 1;
+  }
+  else{
+    // If it really is a RawAnitaEvent, then that's fine.
+    return 0;
+  }
 }
