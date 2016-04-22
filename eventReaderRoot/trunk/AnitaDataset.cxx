@@ -92,7 +92,7 @@ Adu5Pat * AnitaDataset::gps(bool force_load)
       fGpsTree->GetEntry(gpsEntry); 
       while (fGps->attFlag == 1 && abs(offset) < 30)
       {
-        offset = - (offset +1); 
+        offset = offset >= 0 ? -(offset+1) : -offset; 
         if (gpsEntry + offset < 0) continue; 
         if (gpsEntry + offset >= fGpsTree->GetEntries()) continue; 
         fGpsTree->GetEntry(gpsEntry+offset); 
@@ -251,7 +251,10 @@ AnitaDataset::~AnitaDataset()
     delete fCalEvent; 
 
   if (fUseful) 
-    delete fUseful; 
+  {
+    fUseful->~UsefulAnitaEvent(); 
+    free(fUseful); 
+  }
 
   if (fRawEvent) 
     delete fRawEvent; 
@@ -300,7 +303,7 @@ bool  AnitaDataset::loadRun(int run, int version)
   fHeadTree->BuildIndex("eventNumber"); 
 
   //try to load gps event file  
-  fname = TString::Format("%s/run%d/gpsEventFile%d.root", data_dir, run, run); 
+  fname = TString::Format("%s/run%d/gpsEvent%d.root", data_dir, run, run); 
   if (checkIfFileExists(fname.Data()))
   {
      TFile * f = new TFile(fname.Data()); 
