@@ -64,6 +64,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
 
   fCalibrator=0;
   fLastEventGuessed=0;
+  fFromCalibratedAnitaEvent=0;  
   if(theHk) {
     gotCalibTemp=1;
     calibTemp=theHk->intTemps[2];
