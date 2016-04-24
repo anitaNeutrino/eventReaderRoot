@@ -534,14 +534,39 @@ std::vector<Double_t> AnitaEventCalibrator::getClockAlignment(UsefulAnitaEvent* 
   deleteClockAlignmentTGraphs();
 
 
+  
 #ifdef USE_FFT_TOOLS 
+
+  // is approximate and just to avoid an assertion error from inside ROOT's interpolation wrapper
+  const Int_t minNumPointsToTryInterpolation = 10; // should probs get moved to libRootFftwWrapper...
+  for(UInt_t surfInd=0; surfInd<listOfClockNums.size(); surfInd++){
+    // there is failure mode where there aren't enough points in the TGraph to interpolate
+    // here we do a very simple check for the number of points and don't even try if one clock is bad.
+
+    if(numPoints[surfInd] <= minNumPointsToTryInterpolation){
+      std::cerr << "Worryingly few points in clock for SURF " << surfInd << ", numPoints = "
+		<< numPoints[surfInd] << "." << std::endl;
+      std::cerr << "Clocks for this event will be misaligned! Setting fClockProblem to 2." << std::endl;
+      eventPtr->fClockProblem = 2;
+      std::vector<Double_t> zeroClockOffsets(NUM_SURF, 0);
+      return zeroClockOffsets;
+    }
+  }
+
+  
+
+  
+  
   for(UInt_t surfInd=0; surfInd<listOfClockNums.size(); surfInd++){
     Int_t surf = listOfClockNums.at(surfInd);
     if(surf==0){
       continue;
     }
-
+    
     // Interpolate clock
+    if(eventPtr->eventNumber == 31455791){
+      std::cerr << surf << "\t" << numPoints[surf] << std::endl;
+    }
     grClocks.at(surf) = new TGraph(numPoints[surf], times[surf], volts[surf][8]);
     grClockInterps.at(surf) = FFTtools::getInterpolatedGraph(grClocks.at(surf), dtInterp);
 
@@ -552,6 +577,10 @@ std::vector<Double_t> AnitaEventCalibrator::getClockAlignment(UsefulAnitaEvent* 
     if(grClock0s.find(deltaClockKeepNs)==grClock0s.end()){
       // Not already made/played around with this amount of ringing
       TGraph* grTemp0 = new TGraph(numPoints[0], times[0], volts[0][8]); // make clock
+      if(eventPtr->eventNumber == 31455791){
+	std::cerr << 0 << "\t" << numPoints[0] << std::endl;
+      }
+      
       grClock0 = FFTtools::getInterpolatedGraph(grTemp0, dtInterp);
       delete grTemp0;
       grClock0s[deltaClockKeepNs] = grClock0; // add key and pointer into map
