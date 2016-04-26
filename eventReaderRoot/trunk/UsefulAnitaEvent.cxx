@@ -29,6 +29,7 @@ UsefulAnitaEvent::UsefulAnitaEvent()
   fC3poNum=0;
   fFromCalibratedAnitaEvent=0;
   fCalibrator=0;
+  setAlfaFilterFlag(true);
 
   //Default Constructor
 }
@@ -52,6 +53,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr, WaveCalT
   }
   fCalType=calType;
   calibrateEvent(fCalType);
+  setAlfaFilterFlag(true);  
 }
 
 
@@ -72,6 +74,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   else{
     gotCalibTemp=0;
   }
+  setAlfaFilterFlag(true);  
 
   calibrateEvent(calType);
 }
@@ -88,7 +91,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   fLastEventGuessed=0;
   gotCalibTemp=0;
   fClockProblem = 0;
-
+  setAlfaFilterFlag(true);    
   if(theHd->eventNumber != eventPtr->eventNumber){
     std::cerr << "Warning! eventNumber mismatch in " << __FILE__ << " line " << __LINE__ << "." << std::endl;
     std::cerr << "RawAnitaHeader->eventNumber = " << theHd->eventNumber << " but "
@@ -109,6 +112,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   fFromCalibratedAnitaEvent=0;
   gotCalibTemp=1;
   calibTemp=surfTemp;
+  setAlfaFilterFlag(true);
      
   calibrateEvent(calType);
 }
@@ -137,12 +141,37 @@ TGraph *UsefulAnitaEvent::getGraph(int chanIndex)
   if(chanIndex<0 || chanIndex>=NUM_DIGITZED_CHANNELS)
     return NULL;
   //   std::cout << chanIndex << std::endl;
-   
+
   TGraph *grPtr=new TGraph(fNumPoints[chanIndex],
 			   fTimes[chanIndex],
 			   fVolts[chanIndex]);
+
+#ifdef USE_FFT_TOOLS 
+  // let's try the simplest thing first
+  const int alfaChannelIndex = 11*NUM_CHAN + 5;
+  if(fFilterAlfaChannel==true && chanIndex==alfaChannelIndex){    
+    const double lowPassFreq = 700; // MHz
+    TGraph* grFiltered = FFTtools::simplePassBandFilter(grPtr, 0, lowPassFreq);
+    delete grPtr;
+    grPtr = grFiltered;
+  }
+#endif
   return grPtr;
 }
+
+
+TGraph *UsefulAnitaEvent::getDeconvolvedALFA()
+{
+  // todo...
+
+  // You should put the code that uses FFTtools inside the include guard.
+#ifdef USE_FFT_TOOLS
+  // 
+#endif
+
+  return NULL;
+}
+
 
 TGraph *UsefulAnitaEvent::getGraph(int ant, AnitaPol::AnitaPol_t pol){
   //Antenna numbers count from 0
@@ -241,3 +270,22 @@ Int_t UsefulAnitaEvent::checkIfTreatingCalibratedEventAsRawEvent(RawAnitaEvent* 
     return 0;
   }
 }
+
+
+Bool_t UsefulAnitaEvent::getAlfaFilterFlag(){
+#ifdef USE_FFT_TOOLS
+  return fFilterAlfaChannel;
+#else
+  return false;
+#endif
+}
+
+Bool_t UsefulAnitaEvent::setAlfaFilterFlag(Bool_t newBoolianFlag){
+#ifdef USE_FFT_TOOLS
+  fFilterAlfaChannel = newBoolianFlag;
+#else
+  fFilterAlfaChannel = false;
+#endif
+  return fFilterAlfaChannel;
+}
+  
