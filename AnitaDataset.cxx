@@ -45,15 +45,15 @@ const char * AnitaDataset::getDataDir(int version)
 }
 
 
-AnitaDataset::AnitaDataset(int run, WaveCalType::WaveCalType_t cal, int version)
+AnitaDataset::AnitaDataset(int run, bool decimated, WaveCalType::WaveCalType_t cal, int version)
   : 
   fHeadTree(0), fHeader(0), 
   fEventTree(0), fCalEvent(0), fRawEvent(0), fUseful(0), 
   fGpsTree(0), fGps(0), 
-  fHkTree(0), fHk(0)
+  fHkTree(0), fHk(0) 
 {
   setCalType(cal); 
-  loadRun(run, version); 
+  loadRun(run, decimated, version); 
 }
 
 void  AnitaDataset::unloadRun() 
@@ -66,6 +66,7 @@ void  AnitaDataset::unloadRun()
   }
 
   fHeadTree = 0; 
+  fDecimatedHeadTree = 0; 
   fEventTree = 0; 
   fHkTree = 0; 
   fGpsTree = 0; 
@@ -151,10 +152,18 @@ PrettyAnitaHk * AnitaDataset::hk(bool force_load)
 
 RawAnitaHeader * AnitaDataset::header(bool force_load) 
 {
-  if (fHeadTree->GetReadEntry() != fWantedEntry || force_load) 
+  if (decimated)
+  {
+    if (force_load) 
+    {
+      fDecimatedHeadTree->GetEntry(fDecimatedEntry); 
+    }
+  }
+  else if ((fHeadTree->GetReadEntry() != fWantedEntry || force_load)) 
   {
     fHeadTree->GetEntry(fWantedEntry); 
   }
+
   return fHeader; 
 }
 
@@ -208,35 +217,47 @@ UsefulAnitaEvent * AnitaDataset::useful(bool force_load)
 
 int AnitaDataset::getEntry(int entryNumber)
 {
-  if (entryNumber < 0 || entryNumber >= fHeadTree->GetEntries())
+
+  if (entryNumber < 0 || entryNumber >= (decimated ? fDecimatedHeadTree : fHeadTree)->GetEntries())
   {
     fprintf(stderr,"Requested entry %d too big or small!\n", entryNumber); 
-    return fWantedEntry; 
   }
+  else
+  {
+    (decimated ? fDecimatedEntry : fWantedEntry) = entryNumber; 
+    if (decimated)
+    {
+      fDecimatedHeadTree->GetEntry(fDecimatedEntry); 
+      fWantedEntry = fHeadTree->GetEntryNumberWithIndex(fHeader->eventNumber); 
 
-  fWantedEntry = entryNumber; 
-  fUsefulDirty = true; 
-  fCalDirty = true; 
-  fGpsDirty = true; 
-  return fWantedEntry; 
+    }
+    fUsefulDirty = true; 
+    fCalDirty = true; 
+    fGpsDirty = true; 
+  }
+  return decimated ? fDecimatedEntry : fWantedEntry; 
 }
 
 
 int AnitaDataset::getEvent(int eventNumber)
 {
 
-  int entry  =  fHeadTree->GetEntryNumberWithIndex(eventNumber); 
+  int entry  =  (decimated ? fDecimatedHeadTree : fHeadTree)->GetEntryNumberWithIndex(eventNumber); 
   if (entry < 0) 
   {
     fprintf(stderr,"WARNING: event %d not found in header tree\n", fWantedEntry); 
+    if (decimated) 
+    {
+      fprintf(stderr,"\tWe are using decimated tree, so maybe that's why?\n"); 
+
+    }
   }
   else
   {
     getEntry(entry);
-
   }
 
-  return fWantedEntry; 
+  return decimated ? fDecimatedEntry : fWantedEntry; 
 }
   
 AnitaDataset::~AnitaDataset() 
@@ -266,16 +287,43 @@ AnitaDataset::~AnitaDataset()
     delete fHk; 
 }
 
-bool  AnitaDataset::loadRun(int run, int version) 
+bool  AnitaDataset::loadRun(int run, bool dec,  int version) 
 {
+
+  decimated = dec; 
 
   unloadRun(); 
   fWantedEntry = 0; 
 
   const char * data_dir = getDataDir(version); 
 
+  //if decimated, try to load decimated tree
 
+  if (decimated) 
+  {
+
+    fDecimatedEntry = 0; 
+    TString fname = TString::Format("%s/run%d/decimatedHeadFile%d.root", data_dir, run, run); 
+    if (checkIfFileExists(fname.Data()))
+    {
+      TFile * f = new TFile(fname.Data()); 
+      filesToClose.push_back(f); 
+      fDecimatedHeadTree = (TTree*) f->Get("headTree"); 
+      fDecimatedHeadTree->BuildIndex("eventNumber"); 
+      fDecimatedHeadTree->SetBranchAddress("header",&fHeader); 
+    }
+    else
+    {
+      fprintf(stderr," Could not find decimated head file for run %d, giving up!\n", run); 
+      return false; 
+    }
+  }
+  else
+  {
+    fDecimatedHeadTree = 0; 
+  }
   // try to load timed header file 
+  
   TString fname = TString::Format("%s/run%d/timedHeadFile%d.root", data_dir, run, run); 
   if (checkIfFileExists(fname.Data()))
   {
@@ -299,7 +347,7 @@ bool  AnitaDataset::loadRun(int run, int version)
     }
   }
 
-  fHeadTree->SetBranchAddress("header",&fHeader); 
+  if (!decimated) fHeadTree->SetBranchAddress("header",&fHeader); 
   fHeadTree->BuildIndex("eventNumber"); 
 
   //try to load gps event file  
@@ -385,5 +433,5 @@ bool  AnitaDataset::loadRun(int run, int version)
 
 int AnitaDataset::N() const
 {
-  return fHeadTree->GetEntries(); 
+  return (decimated ? fDecimatedHeadTree : fHeadTree)->GetEntries(); 
 }
