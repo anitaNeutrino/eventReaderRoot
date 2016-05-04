@@ -32,7 +32,7 @@ class AnitaDataset
     static const char * getDataDir(int anita_version = -1); 
 
     /** Constructor loading a run with calibration type and anita version. */
-    AnitaDataset (int run, WaveCalType::WaveCalType_t cal = WaveCalType::kDefault, int anita_version = -1 ); 
+    AnitaDataset (int run, bool decimated = false, WaveCalType::WaveCalType_t cal = WaveCalType::kDefault, int anita_version = -1 ); 
 
     /** Change the calibration type */ 
     void setCalType(WaveCalType::WaveCalType_t cal) { fCalType = cal; } 
@@ -41,7 +41,7 @@ class AnitaDataset
 
 
     /** Loads run */ 
-    bool loadRun(int run, int anita_version); 
+    bool loadRun(int run, bool decimated, int anita_version); 
 
     /** loads the desired eventNumber and returns the current entry**/ 
     int getEvent(int eventNumber); 
@@ -51,13 +51,15 @@ class AnitaDataset
 
 
     // returns the currently selected entry
-    int current() { return fWantedEntry; }
+    int current() { return decimated ? fDecimatedEntry : fWantedEntry; }
 
     /** gets the next entry and returns the current entry afterwards */
-    int next() { return getEntry(fWantedEntry+1); }
+    int next() { return getEntry(decimated ? fDecimatedEntry +1  : fWantedEntry+1); }
 
     /** gets the previous entry and returns the current entry afterwards */
-    int previous() { return getEntry(fWantedEntry-1); }
+    int previous() { return getEntry(decimated ? fDecimatedEntry - 1 : fWantedEntry-1); }
+
+    int first() { return getEntry(0); } 
 
     /** returns the number of entries */
     int N() const; 
@@ -91,6 +93,7 @@ class AnitaDataset
   private: 
     void unloadRun(); 
     TTree * fHeadTree; 
+    TTree * fDecimatedHeadTree; //only used when using decimated 
     RawAnitaHeader * fHeader;
     TTree *fEventTree; 
     CalibratedAnitaEvent * fCalEvent; 
@@ -105,11 +108,12 @@ class AnitaDataset
     PrettyAnitaHk * fHk; 
 
     int fWantedEntry; 
+    int fDecimatedEntry; 
     bool fHaveGpsEvent; 
     bool fHaveCalibFile; 
     WaveCalType::WaveCalType_t fCalType; 
     std::vector<TFile *> filesToClose;; 
-
+    bool decimated; 
 }; 
 
 #endif 
