@@ -7,44 +7,6 @@
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
 
-/*! \mainpage ANITA-II Event Reader
- *
- * \section intro_sec Introduction
- *
- * This is the somewhat sketchy documentation for the ANITA-II event reader.
- *
- * \section prereq_sec Prerequisites
- *
- *  -# <A HREF="http://root.cern.ch">ROOT</A>
- *  
- * \section optional_sec Optional Extras 
- * -# <A HREF="http://www.fftw.org/">FFTW 3 -- Fastest Fourier Transform in the West</a>
- * -# <A HREF="http://www.hep.ucl.ac.uk/uhen/anita/libRootFftwWrapper">libRootFftwWrapper -- a ROOT wrapper for FFTW 3</a>
- * 
- * \section install_sec Installation
- * -# Checkout the code from the SVN repository, eg.: <BR><PRE>svn co https://delos.mps.ohio-state.edu/anitaGround/eventReaderRoot/trunk myEventReaderDir</PRE>
- * -# Define the ANITA_UTIL_INSTALL_DIR to point to the location you want the library installed (the library files will end up in (ANITA_UTIL_INSTALL_DIR)/lib and the header files in (ANITA_UTIL_INSTALL_DIR)/include).
- * -# Do <PRE>make</PRE><PRE>make install</PRE>
- * \section manual_sec Manual
- * If you are averse to reading web pages (and who wouldn't be) you can download a <a href="manual/anitaEventReader.pdf">pdf copy of the reference material</a> but be warned it won't be a thrilling read as it was written by a computer program.
- * \section troubleshooting_sec Troubleshooting
- * There are a myriad of ways that one can run into problems with the event reader, the most common of which are listed here
- * - Path problems -- the bane of poorly organised code. By far the easiest way to use the ANITA offline code is to just set the ANITA_UTIL_INSTALL_DIR and have it point to the location you want to install all the packages. If things are set up correctly you will end up with a ANITA_UTIL_INSTALL_DIR/include and ANITA_UTIL_INSTALL_DIR/lib and ANITA_UTIL_INSTALL_DIR/share/anitaCalib all populated with essential headers, libraries and calibration constants. A quick round of <pre>make clean all install</pre> in libRootFftwWrapper and eventReader (and magicDisplay, etc.) can solve most such difficulties.
- * - Calibration data -- AnitaEventCalibrator looks for calibration data in the following order (make sure it finds some).
- * \section examples_sec Examples
- * The first example of the eventReaderRoot library in use is the exampleDumpHk program which  can be made by typing <PRE>make exampleDumpHk</PRE> in the main eventReaderRoot directory. This program shows the way to access hk data in the ROOT files, similar programs could be written for all the other data types. The main components of the program are:
- * - Opening a TFile of the .root file
- * - Getting the TTree from the TFile (in this case hkTree)
- * - Setting the tree branch address to be the address of a pointer to the class type (in this case CalibratedHk)
- * - A loop over all the "events" in the TTree
- * - The GetEntry function which effectively copies the data for this "event" from the TTree such that it can be accessed from the class pointer
- * - At this point all methods of the class (CalibratedHk) can be accessed.
- * 
- * There are a number of examples of eventReaderRoot in use in the macros directory. In general these are simply run at the command prompt by typing something like: <PRE>root macroName.C</PRE>
- * 
- * For further examples of using the waveform data in the event files, see the <a href="http://www.hep.ucl.ac.uk/uhen/anita/magicDisplay/">Magic Display</a> and <a href="http://www.hep.ucl.ac.uk/uhen/anita/eventCorrelator/">Event Correlator</a> libraries.
- *
- */
 
 #ifndef ANITACONVENTIONS_H
 #define ANITACONVENTIONS_H
