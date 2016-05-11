@@ -7,6 +7,7 @@
 #include "TFile.h" 
 #include "TTree.h" 
 #include <stdlib.h>
+#include <unistd.h>
 
 static bool checkIfFileExists(const char * file)
 {
