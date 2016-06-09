@@ -102,7 +102,7 @@ else
 endif
 endif
 else
-	$(LD) $(SOFLAGS) $(LDFLAGS) $(LIBS) $(LIB_OBJS) -o $@
+	$(LD) $(SOFLAGS) $(LDFLAGS) $(LIB_OBJS) -o $@  $(LIBS)
 endif
 
 %.$(OBJSUF) : %.$(SRCSUF) %.h
