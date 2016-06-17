@@ -64,7 +64,7 @@ GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 ROOT_LIBRARY = $(LIBDIR)/libAnitaEvent.${DLLSUF}
 DICT = eventDict
 LIB_OBJS = $(addprefix $(BUILDDIR)/, RawAnitaEvent.o UsefulAnitaEvent.o  AnitaEventCalibrator.o AnitaGeomTool.o RawAnitaHeader.o PrettyAnitaHk.o Adu5Pat.o Adu5Vtg.o SurfHk.o TurfRate.o RawDataReader.o AnitaConventions.o TimedAnitaHeader.o SummedTurfRate.o AveragedSurfHk.o AcqdStart.o GpsdStart.o LogWatchdStart.o RunStart.o G12Pos.o GpsGga.o G12Sat.o Adu5Sat.o CommandEcho.o MonitorHk.o OtherMonitorHk.o RawHk.o CalibratedHk.o AnitaPacketUtil.o SlowRate.o CalibratedAnitaEvent.o RawSSHk.o CalibratedSSHk.o GpuPowerSpectra.o RingBuffer.o AnitaDataset.o $(DICT).o )
-CLASS_HEADERS =  $(addprefix $(INCLUDEDIR)/,RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaHk.h Adu5Pat.h Adu5Vtg.h SurfHk.h TurfRate.h AnitaEventCalibrator.h AnitaConventions.h AnitaGeomTool.h TimedAnitaHeader.h SummedTurfRate.h AveragedSurfHk.h AcqdStart.h GpsdStart.h LogWatchdStart.h RunStart.h G12Pos.h GpsGga.h G12Sat.h Adu5Sat.h CommandEcho.h MonitorHk.h OtherMonitorHk.h RawHk.h CalibratedHk.h AnitaPacketUtil.h SlowRate.h CalibratedAnitaEvent.h RawSSHk.h CalibratedSSHk.h GpuPowerSpectra.h RingBuffer.h AnitaClock.h simpleStructs.h AnitaDataset.h )
+CLASS_HEADERS =  $(addprefix $(INCLUDEDIR)/, RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaHk.h Adu5Pat.h Adu5Vtg.h SurfHk.h TurfRate.h AnitaEventCalibrator.h AnitaConventions.h AnitaGeomTool.h TimedAnitaHeader.h SummedTurfRate.h AveragedSurfHk.h AcqdStart.h GpsdStart.h LogWatchdStart.h RunStart.h G12Pos.h GpsGga.h G12Sat.h Adu5Sat.h CommandEcho.h MonitorHk.h OtherMonitorHk.h RawHk.h CalibratedHk.h AnitaPacketUtil.h SlowRate.h CalibratedAnitaEvent.h RawSSHk.h CalibratedSSHk.h GpuPowerSpectra.h RingBuffer.h AnitaClock.h simpleStructs.h AnitaDataset.h )
 
 
 all : $(ROOT_LIBRARY)
@@ -103,7 +103,6 @@ $(BINDIR):
 
 $(BUILDDIR): 
 	mkdir -p $(BUILDDIR)
-
 
 $(LIBDIR): 
 	mkdir -p $(LIBDIR)
