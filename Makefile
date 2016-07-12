@@ -118,7 +118,7 @@ endif
 $(DICT).C: $(CLASS_HEADERS)
 	@echo "Generating dictionary ..."
 	@ rm -f *Dict* 
-	rootcint $@ -c $(CLASS_HEADERS) LinkDef.h
+	rootcint -f $@ -c -p -I$(shell $(RC) --incdir) $(SYSINCLUDES) $(CINTFLAGS) $(CLASS_HEADERS) LinkDef.h
 
 install: $(ROOT_LIBRARY)
 	install -d $(ANITA_UTIL_LIB_DIR)

@@ -1,8 +1,28 @@
-#ifdef __CINT__
+#ifdef __ROOTCLING__
 
 #pragma link off all globals;
 #pragma link off all classes;
-#pragma link off all functions;
+
+
+#pragma link C++ namespace     WaveCalType;
+#pragma link C++ enum          WaveCalType::EWaveCalType;
+#pragma link C++ nestedtypedef WaveCalType::WaveCalType_t;
+
+#pragma link C++ namespace     AnitaRing;
+#pragma link C++ enum          AnitaRing::EAnitaRing;
+#pragma link C++ nestedtypedef AnitaRing::AnitaRing_t;
+
+#pragma link C++ namespace     AnitaBand;
+#pragma link C++ enum          AnitaBand::EAnitaBand;
+#pragma link C++ nestedtypedef AnitaBand::AnitaBand_t;
+
+#pragma link C++ namespace     AnitaPol;
+#pragma link C++ enum          AnitaPol::EAnitaPol;
+#pragma link C++ nestedtypedef AnitaPol::AnitaPol_t;
+
+#pragma link C++ namespace     AnitaLocations;
+#pragma link C++ namespace     AnitaCompress;
+
 
 #pragma link C++ class AnitaGeomTool+;
 #pragma link C++ class RawAnitaEvent+;
@@ -37,24 +57,7 @@
 #pragma link C++ class GpuPowerSpectra+;
 #pragma link C++ class AnitaDataset+;
 
-#pragma link C++ namespace     WaveCalType;
-#pragma link C++ enum          WaveCalType::EWaveCalType;
-#pragma link C++ nestedtypedef WaveCalType::WaveCalType_t;
-
-#pragma link C++ namespace     AnitaRing;
-#pragma link C++ enum          AnitaRing::EAnitaRing;
-#pragma link C++ nestedtypedef AnitaRing::AnitaRing_t;
-
-#pragma link C++ namespace     AnitaBand;
-#pragma link C++ enum          AnitaBand::EAnitaBand;
-#pragma link C++ nestedtypedef AnitaBand::AnitaBand_t;
-
-#pragma link C++ namespace     AnitaPol;
-#pragma link C++ enum          AnitaPol::EAnitaPol;
-#pragma link C++ nestedtypedef AnitaPol::AnitaPol_t;
-
-#pragma link C++ namespace     AnitaLocations;
-#pragma link C++ namespace     AnitaCompress;
-
+#else
+#error "for compilation"
 #endif
 
