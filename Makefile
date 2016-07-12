@@ -5,6 +5,14 @@
 ##############################################################################
 include Makefile.arch
 
+
+### Package subdirectories
+LIBDIR=lib
+BUILDDIR=build
+INCLUDEDIR=include
+BINDIR=bin
+
+
 #Site Specific  Flags
 SYSINCLUDES	= -I/usr/local/include 
 SYSLIBS         = 
@@ -53,10 +61,10 @@ LIBS          = $(ROOTLIBS) $(FFTLIBS) -lMathMore -lMinuit $(SYSLIBS) $(LD_ANITA
 GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 #Now the bits we're actually compiling
-ROOT_LIBRARY = libAnitaEvent.${DLLSUF}
+ROOT_LIBRARY = $(LIBDIR)/libAnitaEvent.${DLLSUF}
 DICT = eventDict
-LIB_OBJS = RawAnitaEvent.o UsefulAnitaEvent.o  AnitaEventCalibrator.o AnitaGeomTool.o RawAnitaHeader.o PrettyAnitaHk.o Adu5Pat.o Adu5Vtg.o SurfHk.o TurfRate.o RawDataReader.o AnitaConventions.o TimedAnitaHeader.o SummedTurfRate.o AveragedSurfHk.o AcqdStart.o GpsdStart.o LogWatchdStart.o RunStart.o G12Pos.o GpsGga.o G12Sat.o Adu5Sat.o CommandEcho.o MonitorHk.o OtherMonitorHk.o RawHk.o CalibratedHk.o AnitaPacketUtil.o SlowRate.o CalibratedAnitaEvent.o RawSSHk.o CalibratedSSHk.o GpuPowerSpectra.o RingBuffer.o AnitaDataset.o $(DICT).o
-CLASS_HEADERS = RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaHk.h Adu5Pat.h Adu5Vtg.h SurfHk.h TurfRate.h AnitaEventCalibrator.h AnitaConventions.h AnitaGeomTool.h TimedAnitaHeader.h SummedTurfRate.h AveragedSurfHk.h AcqdStart.h GpsdStart.h LogWatchdStart.h RunStart.h G12Pos.h GpsGga.h G12Sat.h Adu5Sat.h CommandEcho.h MonitorHk.h OtherMonitorHk.h RawHk.h CalibratedHk.h AnitaPacketUtil.h SlowRate.h CalibratedAnitaEvent.h RawSSHk.h CalibratedSSHk.h GpuPowerSpectra.h RingBuffer.h AnitaClock.h simpleStructs.h AnitaDataset.h
+LIB_OBJS = $(addprefix $(BUILDDIR)/, RawAnitaEvent.o UsefulAnitaEvent.o  AnitaEventCalibrator.o AnitaGeomTool.o RawAnitaHeader.o PrettyAnitaHk.o Adu5Pat.o Adu5Vtg.o SurfHk.o TurfRate.o RawDataReader.o AnitaConventions.o TimedAnitaHeader.o SummedTurfRate.o AveragedSurfHk.o AcqdStart.o GpsdStart.o LogWatchdStart.o RunStart.o G12Pos.o GpsGga.o G12Sat.o Adu5Sat.o CommandEcho.o MonitorHk.o OtherMonitorHk.o RawHk.o CalibratedHk.o AnitaPacketUtil.o SlowRate.o CalibratedAnitaEvent.o RawSSHk.o CalibratedSSHk.o GpuPowerSpectra.o RingBuffer.o AnitaDataset.o $(DICT).o )
+CLASS_HEADERS =  $(addprefix $(INCLUDEDIR)/, RawAnitaEvent.h UsefulAnitaEvent.h RawAnitaHeader.h PrettyAnitaHk.h Adu5Pat.h Adu5Vtg.h SurfHk.h TurfRate.h AnitaEventCalibrator.h AnitaConventions.h AnitaGeomTool.h TimedAnitaHeader.h SummedTurfRate.h AveragedSurfHk.h AcqdStart.h GpsdStart.h LogWatchdStart.h RunStart.h G12Pos.h GpsGga.h G12Sat.h Adu5Sat.h CommandEcho.h MonitorHk.h OtherMonitorHk.h RawHk.h CalibratedHk.h AnitaPacketUtil.h SlowRate.h CalibratedAnitaEvent.h RawSSHk.h CalibratedSSHk.h GpuPowerSpectra.h RingBuffer.h AnitaClock.h simpleStructs.h AnitaDataset.h )
 
 
 all : $(ROOT_LIBRARY)
@@ -87,8 +95,20 @@ exampleEventLoop : $(ROOT_LIBRARY) exampleEventLoop.$(SRCSUF)
 	$(LD)  $(CXXFLAGS) $(LDFLAGS) exampleEventLoop.$(SRCSUF) $(ROOT_LIBRARY) $(LIBS) -o $@
 
 
+
+$(LIB_OBJS): | $(BUILDDIR) 
+
+$(BINDIR): 
+	mkdir -p $(BINDIR)
+
+$(BUILDDIR): 
+	mkdir -p $(BUILDDIR)
+
+$(LIBDIR): 
+	mkdir -p $(LIBDIR)
+
 #The library
-$(ROOT_LIBRARY) : $(LIB_OBJS)
+$(ROOT_LIBRARY) : $(LIB_OBJS)  | $(LIBDIR)
 	@echo "Linking $@ ..."
 ifeq ($(PLATFORM),macosx)
 # We need to make both the .dylib and the .so
@@ -104,18 +124,24 @@ endif
 else
 	$(LD) $(SOFLAGS) $(LDFLAGS) $(LIB_OBJS) -o $@  $(LIBS)
 endif
+	@if [ $(shell root-config --version | cut -c1) -ge 6 ]; then \
+	cp $(BUILDDIR)/*.pcm $(LIBDIR); \
+	fi; # Additional install command for ROOTv6
 
-%.$(OBJSUF) : %.$(SRCSUF) %.h
-	@echo "<**Compiling**> "$<
-	$(CXX) $(CXXFLAGS) -c $< -o  $@
 
-%.$(OBJSUF) : %.C
+
+
+$(BUILDDIR)/%.$(OBJSUF) : src/%.$(SRCSUF) $(CLASS_HEADERS) Makefile | $(BUILDDIR) 
 	@echo "<**Compiling**> "$<
-	$(CXX) $(CXXFLAGS) $ -c $< -o  $@
+	$(CXX) -I$(INCLUDEDIR) $(CXXFLAGS)  -c $< -o  $@
+
+$(BUILDDIR)/%.$(OBJSUF) : $(BUILDDIR)/%.C
+	@echo "<**Compiling**> "$<
+	$(CXX) -I$(INCLUDEDIR) -I./ $(CXXFLAGS) -c $< -o  $@
 
 
 #eventDict.C: $(CLASS_HEADERS)
-$(DICT).C: $(CLASS_HEADERS)
+$(BUILDDIR)/$(DICT).C: $(CLASS_HEADERS)
 	@echo "Generating dictionary ..."
 	@ rm -f *Dict* 
 	rootcint -f $@ -c -p -I$(shell $(RC) --incdir) $(SYSINCLUDES) $(CINTFLAGS) $(CLASS_HEADERS) LinkDef.h
@@ -131,7 +157,7 @@ endif
 	install -c -m 644  $(CLASS_HEADERS) $(ANITA_UTIL_INC_DIR)
 
 	@if [ $(shell root-config --version | cut -c1) -ge 6 ]; then \
-	install -c -m 755 $(DICT)_rdict.pcm $(ANITA_UTIL_LIB_DIR) ;\
+	install -c -m 755 $(BUILDDIR)/$(DICT)_rdict.pcm $(ANITA_UTIL_LIB_DIR) ;\
 	fi # Additional install command for ROOTv6
 
 	install -d $(ANITA_UTIL_CALIB_DIR)
@@ -140,11 +166,11 @@ endif
 	for file in calib/jiwoo_timecode/*.txt; do install -c -m 644 "$${file}" $(ANITA_UTIL_CALIB_DIR)/jiwoo_timecode ; done
 
 clean:
-	@rm -f *Dict*
-	@rm -f *.${OBJSUF}
-	@rm -f $(LIBRARY)
-	@rm -f $(ROOT_LIBRARY)
-	@rm -f $(subst .$(DLLSUF),.so,$(ROOT_LIBRARY))	
+	rm -rf $(BUILDDIR) 
+	rm -rf $(BINDIR) 
+	rm -rf $(LIBDIR) 
+	rm -rf doc/html
+	rm -rf doc/latex
 	@rm -f $(TEST)
 #############################################################################
 
