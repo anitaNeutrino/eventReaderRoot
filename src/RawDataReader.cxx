@@ -14,14 +14,17 @@
 #include <fstream>
 #include <cstring>
 #include <cstdlib>
+#include <zlib.h>
 #include "TTreeIndex.h"
 
+gzFile eventFile; ///< File ptr
+gzFile headFile; ///< File ptr
 
 RawDataReader::RawDataReader() 
-  :eventFile(0)
+
 {
    //Default Constructor
-
+  eventFile=0;
    
 }
 
