@@ -98,17 +98,17 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   // Initial states for calibration flags, modified based on calType below
-  Bool_t fUnwrap = false;
-  Bool_t fBinToBinDts = false;
-  Bool_t fNominal = false;
-  Bool_t fApplyTempCorrection = true; // The only thing "on" by default
-  Bool_t fVoltage = false;
-  Bool_t fApplyTriggerJitterCorrection = false;
-  Bool_t fApplyCableDelays = false;
-  Bool_t fZeroMeanNonClockChannels = false;
-  Bool_t fFlipRcoPhase = false;
-  Bool_t fFirmwareRcoNoLatch = false;
-  Bool_t fAddPedestal = false;
+  Bool_t fUnwrap                         = false;
+  Bool_t fBinToBinDts                    = false;
+  Bool_t fNominal                        = false;
+  Bool_t fApplyTempCorrection            = true; // The only thing "on" by default
+  Bool_t fVoltage                        = false;
+  Bool_t fApplyTriggerJitterCorrection   = false;
+  Bool_t fApplyCableDelays               = false;
+  Bool_t fZeroMeanNonClockChannels       = false;
+  Bool_t fFlipRcoPhase                   = false;
+  Bool_t fFirmwareRcoNoLatch             = false;
+  Bool_t fAddPedestal                    = false;
   Bool_t fApplyExtraDelayFromPhaseCenter = false;
   
   switch(calType){
@@ -176,7 +176,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     break;
 
   case WaveCalType::kAddPeds:
-    fAddPedestal = true; 
+    fAddPedestal = true;
     // Don't break just do full calibration but add pedestal...
     // Not sure if this is the same as the previous implementation of this flag.
 
@@ -290,9 +290,20 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
       if(rco < 0 || rco > 1){
 	std::cerr << "Error in rco array!" << __FILE__ << ": " << __LINE__ << std::endl;
       }
+      // Int_t firstHitBus = eventPtr->getFirstHitBus(clockIndex);
 
+      Int_t earliestSample = eventPtr->getEarliestSample(clockIndex);
+      Int_t latestSample = eventPtr->getLatestSample(clockIndex);
+
+      // i.e. is the waveform wrapped around the SCA?
+      Int_t needToFlipRco = latestSample<earliestSample ? 1 : 0;
+
+      timeArray[surf][0] = 0;
       for(Int_t samp=0; samp < numPointsArray[surf]-1; samp++){
-	timeArray[surf][samp+1] = (timeArray[surf][samp] + deltaTs[surf][labChip][rco][samp]*tempFactor);
+	if(samp==earliestSample && needToFlipRco){
+	  rco = 1 - rco;
+	}
+	timeArray[surf][samp+1] = timeArray[surf][samp] + deltaTs[surf][labChip][rco][samp]*tempFactor;
       }
 
       for(Int_t chan = 0; chan < NUM_CHAN; chan++){
@@ -307,7 +318,6 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
       }
     }
   }
-
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   //! Step 5: Apply bin-to-bin timing (if requested)
@@ -701,7 +711,6 @@ void AnitaEventCalibrator::getTempFactors(UsefulAnitaEvent* eventPtr){
       tempFactor = AnitaClock::meanPeriodNs/oldMeanClockPeriod;
     }
     tempFactors.at(surf) = tempFactor;
-
   }
 }
 
