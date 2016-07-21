@@ -13,11 +13,11 @@
 
 ///First up we'll add some definitions of the raw data
 #include "AnitaConventions.h"
-
 /** @defgroup rawdata The Raw Data Structs 
  * These are the raw data structures from the fligth software
  * @{
  */
+
 
 #ifdef SLAC_DATA06
 //SLAC data definitions
@@ -107,7 +107,7 @@
 #define VER_SUM_TURF_RATE 16
 #define VER_ACQD_START 11
 #define VER_TURF_REG 10
-#else // ANITA_3_DATA
+#elif ANITA_3_DATA
 #define VER_EVENT_BODY 30
 #define VER_PEDSUBBED_EVENT_BODY 30
 #define VER_EVENT_HEADER 33
@@ -145,6 +145,44 @@
 #define VER_TURF_REG 30
 #define VER_TURF_EVENT_DATA 30
 #define VER_GPU_POW_SPEC 30
+#else //ANITA_4_DATA
+#define VER_EVENT_BODY 40
+#define VER_PEDSUBBED_EVENT_BODY 40
+#define VER_EVENT_HEADER 40
+#define SLAC_VER_EVENT_HEADER 40
+#define VER_WAVE_PACKET 40
+#define VER_SURF_PACKET 40
+#define VER_ENC_WAVE_PACKET 40
+#define VER_ENC_SURF_PACKET 40
+#define VER_SURF_HK 40
+#define VER_GPS_GGA 40
+#define VER_ADU5_PAT 40
+#define VER_ADU5_SAT 40
+#define VER_ADU5_VTG 40
+#define VER_G12_POS 40
+#define VER_G12_SAT 40
+#define VER_HK_FULL 40
+#define VER_HK_SS 40
+#define VER_CMD_ECHO 40
+#define VER_MONITOR 40
+#define VER_TURF_RATE 40
+#define VER_LAB_PED 40
+#define VER_FULL_PED 40
+#define VER_SLOW_1 40
+#define VER_SLOW_2 40
+#define VER_SLOW_FULL 40
+#define VER_ZIPPED_FILE 40
+#define VER_ZIPPED_PACKET 40
+#define VER_RUN_START 40
+#define VER_OTHER_MON 40
+#define VER_GPSD_START 40
+#define VER_LOGWATCHD_START 40
+#define VER_AVG_SURF_HK 40
+#define VER_SUM_TURF_RATE 40
+#define VER_ACQD_START 40
+#define VER_TURF_REG 40
+#define VER_TURF_EVENT_DATA 40
+#define VER_GPU_POW_SPEC 40
 #endif
 
 
@@ -200,7 +238,9 @@ typedef enum {
     PACKET_GPSD_START = 0xc00, ///< GpsdStartStruct_t -- Yes
     PACKET_LOGWATCHD_START = 0xc01, ///< LogWatchdStart_t -- Yes
     PACKET_ACQD_START = 0xc02, ///<AcqdStartStruct_t -- Yes
-    PACKET_GPU_AVE_POW_SPEC = 0xd ///<GpuPhiSectorPowerSpectrumStruct_t -- Yes
+    PACKET_GPU_AVE_POW_SPEC = 0xd, ///<GpuPhiSectorPowerSpectrum_t -- Yes
+    PACKET_RTLSDR_POW_SPEC = 0xe , 
+    PACKET_TUFF_STATUS =0xf 
     
 } PacketCode_t;
 
@@ -1281,6 +1321,170 @@ typedef struct {
 } GpsSubTime_t;
 
 
+///////////////////////////////////////////////////////////////////////
+//Raw Gps Structs
+//////////////////////////////////////////////////////////////////////
+
+//! This is the MBEN struct described on page 121 of the ADU5 manual
+/*!
+  All of the comments come directly from the ADU5 manual
+*/
+typedef struct __attribute__((packed)) RawAdu5MBNStruct {
+  char header[11]; ///< $PASHR,MCA,
+  unsigned short sequence_tag;  ///< Sequence ID number in units of 50ms, modulo 30 minutes
+  unsigned char mben_eft; ///< Number of remaining MBEN structures to be sent for current epoch.
+  unsigned char svpm; ///< Satellite PRN number.
+  unsigned char el; ///< Satellite elevation angle (degrees).
+  unsigned char az; ///< Satellite azimuth angle (degrees).
+  unsigned char chnind; ///< Channel ID (1 to 12).
+  unsigned char warn; ///< Warning flag
+  unsigned char good_bad; ///< I3ndicates quality of the position measurement.
+  unsigned char polarity_know; ///< Indicates synchronization of receiver with NAV message
+  unsigned char ireg; ///< Signal-to-noise ratio of satellite observation
+  unsigned char qa_phase; ///< Phase quality indicator: 0 - 5 and 95 -100 are normal
+  double full_phase; ///< Full carrier phase measurements in cycles
+  double raw_range; ///< Raw range to SV (in seconds), that is, receive_time - raw_range = transmit time
+  int doppler; ///< Doppler (10-4 Hz)
+  int smoothing; ///< Doppler (10-4 Hz)  
+  unsigned char checkSum; ///< Checksum, a bytewise exclusive OR (XOR) on all bytes from sequence_tag (just after header) to the byte before checksum. 
+  char carriageReturn;
+  char lineFeed;
+} RawAdu5MBNStruct_t;
+
+
+//! This is the SNAV struct described on page 131 of the ADU5 manual
+/*!
+  The SNAV epheremis raw data. All of the comments come directly from the ADU5 manual
+*/
+typedef struct __attribute__((packed)) RawAdu5SNVStruct {
+  char snvHeader[11]; ///< $PASHR,SNV
+  short weekNumber; ///< GPS week number.
+  int secondsInWeek; ///< Seconds of GPS week.
+  float groupDelay; ///< Group delay (sec).
+  int aodc; ///< Clock data issue.
+  int toc; ///< (sec).
+  float af2; ///< Clock: (sec/sec2)
+  float af1; ///< Clock (sec/sec)
+  float af0; ///< Clock (sec)
+  int aode; ///< Orbit data issue.
+  float deltaN; ///< Mean anomaly correction (semi-circle/sec).
+  double m0; ///< Mean anomaly at reference time (semi-circle).
+  double eccentricity; ///< Eccentricity.
+  double roota; ///< Square root of semi-major axis (meters p)
+  int toe; ///< Reference time for orbit (sec).
+  float cic; ///< Harmonic correction term (radians).
+  float crc; ///< Harmonic correction term (meters).
+  float cis; ///< Harmonic correction term (radians).
+  float crs; ///< Harmonic correction term (meters).
+  float cuc; ///< Harmonic correction term (radians).
+  float cus; ///< Harmonic correction term (radians).
+  double omega0; ///< Lon of Asc. node (semi-circles).
+  double omega; ///< Arg. of Perigee (semi-circles).
+  double i0; ///< Inclination angle at reference time (semi-circles).
+  float omegadot; ///< Rate of right Asc. (semi-circles per sec).
+  float idot; ///< Rate of inclination (semi-circles per sec).
+  short accuracy; ///< (coded).
+  short health; ///< (coded).
+  short fit; ///< Curve fit interval (coded).
+  char prnnum; ///< (SV PRN number -1)
+  char res; ///< Reserved byte.
+  unsigned short checkSum; ///< Checksum (sum of words from weekNumber to res)
+  char carriageReturn;
+  char lineFeed;
+} RawAdu5SNVStruct_t;
+
+//////////////////////////////////////////////////////////////////
+
+//! This is the PBEN struct described on page 128 of the ADU5 manual
+/*!
+  All of the comments come directly from the ADU5 manual
+*/
+typedef struct __attribute__((packed)) RawAdu5PBNStruct {
+  char pbenHeader[11]; ///< $PASHR,PBN
+  int pben_time;  ///< GPS time in 10-3 seconds of the week when data was received.
+  char sitename[4]; ///< 4-character site name (operator entered)
+  double navx; ///< Station position: ECEF-X
+  double navy; ///< Station position: ECEF-Y
+  double navz; ///< Station position: ECEF-Z
+  float navt; ///< Clock offset (meters).
+  float navxdot; ///< Velocity in ECEF-X (m/sec)
+  float navydot; ///< Velocity in ECEF-Y (m/sec)
+  float navzdot; ///< Velocity in ECEF-Z (m/sec)
+  float navtdot; ///< Clock drift.
+  unsigned short pdop; ///< Position Dilution of Precision
+  unsigned short checkSum; ///< Checksum (sum of words from pben_time to pdop)
+  char carriageReturn;
+  char lineFeed;
+} RawAdu5PBNStruct_t;
+
+//! This is the ATT struct described on page 114 of the ADU5 manual
+/*!
+  All of the comments come directly from the ADU5 manual
+*/
+typedef struct __attribute__((packed)) RawAdu5ATTStruct {
+  char attHeader[11]; ///< $PASHR,ATT
+  double head; ///< Heading in degrees
+  double pitch; ///< Pitch in degrees 
+  double roll; ///< Roll in degrees
+  double brms; ///< BRMS in meters
+  double mrms; ///< MRMS in meters
+  int timeOfWeek; ///< Seconds-of-Week in milliseconds
+  char reset; ///< Attitude reset flag
+  char spare; ///< Spare byte which is not used
+  unsigned short checkSum; ///< Checksum (sum of words from head to spare)
+  char carriageReturn;
+  char lineFeed;
+} RawAdu5ATTStruct_t;
+
+
+struct __attribute__((packed)) RawAdu5BFileHeader {
+    char version[10];
+    unsigned char raw_version;
+    char rcvr_type[10];
+    char chan_ver[10];
+    char nav_ver[10];
+    short capability;
+    int wb_start;
+    char num_obs_type;
+    char spare[42];
+}  RawAdu5BFileHeader_t;
+
+struct __attribute__((packed)) RawAdu5BFileRawNav {
+    char sitename[4];
+    double rcv_time;
+    double navx;
+    double navy;
+    double navz;
+    float navxdot;
+    float navydot;
+    float navzdot;
+    double navt;
+    double navtdot;
+    unsigned short pdop;
+    char num_sats;     
+}  RawAdu5BFileRawNav_t; 
+
+struct __attribute__((packed)) RawAdu5BFileChanObs {
+  double raw_range;
+  float smth_corr;
+  unsigned short smth_count;
+  char polarity_known;
+  unsigned char warning;
+  unsigned char goodbad;
+  unsigned char ireg;
+  unsigned char qa_phase;
+  int doppler;
+  double carphase;		    
+}  RawAdu5BFileChanObs_t;
+
+
+struct __attribute__((packed)) RawAdu5BFileSatelliteHeader {
+  unsigned char svprn;
+  unsigned char elevation;
+  unsigned char azimuth;
+  unsigned char chnind;
+}  RawAdu5BFileSatelliteHeader_t;
+
 
 ///////////////////////////////////////////////////////////////////////
 //Utility Structures
@@ -1449,89 +1653,6 @@ typedef struct {
 } PedestalStruct_t;
 
 
-/////////////////////////////////////////////////////////////////////////////
-///// Slow Rate Stuff                                                   /////
-/////////////////////////////////////////////////////////////////////////////
-
-
-/// Everything below here is for legacy support
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-
-//!  The TURF I/O struct
-/*!
-  Is part of the AnitaEventHeader_t and contains all sorts of useful info
-  about trigger patterns, deadTime, trigger time and trigger type.
-*/
-typedef struct {
-  //!  The trigger type
-  /*!
-    0=RF, 1=PPS1, 2=PPS2, 3=Soft/Ext, 4=L3Type1, 5,6 buffer depth at trig
-  */
-  unsigned char trigType; ///<Trig type bit masks
-  unsigned char l3Type1Count; ///<L3 counter
-  unsigned short trigNum; ///<turf trigger counter
-  unsigned int trigTime;
-  unsigned short ppsNum;     ///< 1PPS
-  unsigned short deadTime; ///< fraction = deadTime/64400
-  unsigned int c3poNum;     ///< 1 number of trigger time ticks per PPS
-  unsigned short upperL1TrigPattern;
-  unsigned short lowerL1TrigPattern;
-  unsigned short upperL2TrigPattern;
-  unsigned short lowerL2TrigPattern;
-  unsigned short l3TrigPattern;
-  unsigned short otherTrigPattern[3];
-  unsigned char nadirL1TrigPattern;
-  unsigned char nadirL2TrigPattern; ///<Might just be the same thing
-  unsigned char bufferDepth; ///<bits 0,1 trigTime depth 2,3 current depth
-  unsigned char reserved;
-} TurfioStructVer30_t;
-
-
-//!  ANITA Event Header -- Telemetered
-/*!
-  ANITA Event Header, contains all kinds of fun information about the event
-  including times, trigger patterns, event numbers and error words
-*/
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime;       ///< unix UTC sec
-  unsigned int unixTimeUs;     ///< unix UTC microsec 
-
-  //!  GPS timestamp
-  /*!
-     the GPS fraction of second (in ns) 
-     (for the X events per second that get 
-     tagged with it, note it now includes
-     second offset from unixTime)
-  */
-  int gpsSubTime;    
-  unsigned int turfEventId; ///<Turf event id that doesn't roll
-  unsigned int eventNumber;    ///< Global event number 
-  unsigned short calibStatus;   ///< Were we flashing the pulser? 
-  unsigned char priority; ///< priority and other
-  unsigned char turfUpperWord; ///< The upper 8 bits from the TURF
-  unsigned char otherFlag; ///< Currently the first two surf evNums 
-  //!  Error Flag
-  /*!
-    Bit 1 means sync slip between TURF and software
-    Bit 2 is sync slip between SURF 1 and software
-    Bit 3 is sync slip between SURF 10 and SURF 1
-    Bit 4 is non matching TURF test pattern
-    Bit 5 is startBitGood (1 is good, 0 is bad);
-    Bit 6 is stopBitGood (1 is good, 0 is bad);
-    Bit 7-8 TURFIO photo shutter output
-  */
-  unsigned char errorFlag; 
-  unsigned char surfSlipFlag; ///< Sync Slip between SURF 2-9 and SURF 1
-  unsigned char nadirAntTrigMask; ///< 8-bit nadir phi mask (from TURF)
-  unsigned int antTrigMask; ///< 2x 16-bit phi ant mask (from TURF)
-  unsigned short phiTrigMask; ///< 16-bit phi mask (from TURF)
-  unsigned char reserved[2]; ///< reserved[0] is 
-  TurfioStructVer30_t turfio; ///<The X byte TURFIO data
-} AnitaEventHeaderVer30_t;
-
-
 typedef struct {
   short bins[99];
 } GpuAnitaBandPowerSpectrumStruct_t;
@@ -1549,531 +1670,41 @@ typedef struct {
 
 
 
-//Old FullSurfHkStruct_t
-typedef struct { 
-    GenericHeader_t gHdr;
-    unsigned int unixTime;
-    unsigned int unixTimeUs;
-    unsigned short globalThreshold; //set to zero if there isn't one
-    unsigned short errorFlag; //Will define at some point    
-    unsigned short scalerGoal; //What are we aiming for with the scaler rate
-    unsigned short upperWords[ACTIVE_SURFS];
-    unsigned short scaler[ACTIVE_SURFS][SCALERS_PER_SURF];
-    unsigned short threshold[ACTIVE_SURFS][SCALERS_PER_SURF];
-    unsigned short setThreshold[ACTIVE_SURFS][SCALERS_PER_SURF];
-    unsigned short rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-    unsigned short surfTrigBandMask[ACTIVE_SURFS];
-} FullSurfHkStructVer12_t;
 
-typedef struct { 
-    GenericHeader_t gHdr;
-    unsigned int unixTime;
-    unsigned int unixTimeUs;
-    unsigned short globalThreshold; //set to zero if there isn't one
-    unsigned short errorFlag; //Will define at some point    
-    unsigned short scalerGoals[BANDS_PER_ANT]; //What are we aiming for with the scaler rate
-    unsigned short upperWords[ACTIVE_SURFS];
-    unsigned short scaler[ACTIVE_SURFS][SCALERS_PER_SURF];
-    unsigned short threshold[ACTIVE_SURFS][SCALERS_PER_SURF];
-    unsigned short setThreshold[ACTIVE_SURFS][SCALERS_PER_SURF];
-    unsigned short rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-    unsigned short surfTrigBandMask[ACTIVE_SURFS];
-} FullSurfHkStructVer13_t;
-
-typedef struct { 
-    GenericHeader_t gHdr;
-    unsigned int unixTime;
-    unsigned int unixTimeUs;
-    unsigned short globalThreshold; ///<set to zero if there isn't one
-    unsigned short errorFlag; ///<Will define at some point    
-    unsigned short scalerGoals[BANDS_PER_ANT]; ///<What are we aiming for with the scaler rate
-    unsigned short scalerGoalsNadir[BANDS_PER_ANT]; ///<What are we aiming for with the scaler rate
-    unsigned short upperWords[ACTIVE_SURFS];
-    unsigned short scaler[ACTIVE_SURFS][SCALERS_PER_SURF];
-    unsigned short threshold[ACTIVE_SURFS][SCALERS_PER_SURF];
-    unsigned short setThreshold[ACTIVE_SURFS][SCALERS_PER_SURF];
-    unsigned short rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-    unsigned short surfTrigBandMask[ACTIVE_SURFS];
-} FullSurfHkStructVer14_t;
-
-//! SURF Hk -- Telemetered
-/*!
-  SURF Hk, contains thresholds, band rates (scalers) and rf power
-*/
-typedef struct { 
-    GenericHeader_t gHdr;
-    unsigned int unixTime;
-    unsigned int unixTimeUs;
-    unsigned short globalThreshold; ///<set to zero if there isn't one
-    unsigned short errorFlag; ///<Will define at some point    
-    unsigned short scalerGoals[BANDS_PER_ANT]; ///<What are we aiming for with the scaler rate
-    unsigned short scalerGoalsNadir[BANDS_PER_ANT]; ///<What are we aiming for with the scaler rate
-    unsigned short upperWords[ACTIVE_SURFS];
-    unsigned short scaler[ACTIVE_SURFS][SCALERS_PER_SURF_V30];
-    unsigned short threshold[ACTIVE_SURFS][SCALERS_PER_SURF_V30];
-    unsigned short setThreshold[ACTIVE_SURFS][SCALERS_PER_SURF_V30];
-    unsigned short rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-    unsigned short surfTrigBandMask[ACTIVE_SURFS];
-} FullSurfHkStructVer30_t;
+/*! Struct to store RTL data 
+ *
+ *
+ *  Short is overkill for the dynamic range, and probably makes the packet too big... so maybe this will change to a char soon. 
+ *  Only first nFreq of a spectrum non-zero. 
+ */ 
+typedef struct 
+{
+  GenericHeader_t gHdr; 
+  unsigned int nFreq;  //< number of frequency bins actually stored
+  unsigned int startFreq;  //< start frequency of output, in Hz
+  unsigned int freqStep;  //< frequency step of output, in Hz 
+  unsigned int unixTimeStart;  //< time when scan was started (unix time) 
+  unsigned short scanTime;  //<  approximate time it scan to finish finished (in decisecs). 
+  unsigned short gain;  //< LNA gain, in cBm (i.e. 10 * dBm) 
+  short spectrum [RTLSDR_MAX_SPECTRUM_BINS]; //< power spectra, in cBm
+  unsigned char rtlNum ; //<which RTL is this? This is the SERIAL NUMBER (RTL%d), not the device enumeration order ( 4 bits is sufficient for < 15 devices) 
+} RtlSdrPowerSpectraStruct_t; 
 
 
-//Old AveragedSurfHkStruct_t
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime; ///<Time of first hk
-  unsigned short numHks; ///<Number of hks in average
-  unsigned short deltaT; ///<Difference in time between first and last 
-  unsigned int hadError; ///<Bit mask to be defined
-  unsigned short globalThreshold;
-  unsigned short reserved; 
-  unsigned short scalerGoals[BANDS_PER_ANT];
-  unsigned short scalerGoalsNadir[BANDS_PER_ANT]; ///<What are we aiming for with the scaler rate
-  unsigned short avgScaler[ACTIVE_SURFS][SCALERS_PER_SURF_V30];
-  unsigned short rmsScaler[ACTIVE_SURFS][SCALERS_PER_SURF_V30];
-  unsigned short avgThresh[ACTIVE_SURFS][SCALERS_PER_SURF_V30];
-  unsigned short rmsThresh[ACTIVE_SURFS][SCALERS_PER_SURF_V30];
-  unsigned short avgRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-  unsigned short rmsRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-  unsigned short surfTrigBandMask[ACTIVE_SURFS];
-} AveragedSurfHkStructVer30_t;
-
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime; ///<Time of first hk
-  unsigned short numHks; ///<Number of hks in average
-  unsigned short deltaT; ///<Difference in time between first and last 
-  unsigned int hadError; ///<Bit mask to be defined
-  unsigned short globalThreshold;
-  unsigned short reserved; 
-    unsigned short scalerGoals[BANDS_PER_ANT];
-    unsigned short scalerGoalsNadir[BANDS_PER_ANT]; ///<What are we aiming for with the scaler rate
-  unsigned short avgScaler[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short rmsScaler[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short avgThresh[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short rmsThresh[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short avgRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-  unsigned short rmsRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-  unsigned short surfTrigBandMask[ACTIVE_SURFS];
-} AveragedSurfHkStructVer14_t;
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime; //Time of first hk
-  unsigned short numHks; //Number of hks in average
-  unsigned short deltaT; //Difference in time between first and last 
-  unsigned int hadError; //Bit mask to be defined
-  unsigned short globalThreshold;
-  unsigned short scalerGoals[BANDS_PER_ANT];
-  unsigned short avgScaler[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short rmsScaler[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short avgThresh[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short rmsThresh[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short avgRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-  unsigned short rmsRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-  unsigned short surfTrigBandMask[ACTIVE_SURFS];
-} AveragedSurfHkStructVer13_t;
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime; //Time of first hk
-  unsigned short numHks; //Number of hks in average
-  unsigned short deltaT; //Difference in time between first and last 
-  unsigned int hadError; //Bit mask to be defined
-  unsigned short globalThreshold;
-  unsigned short scalerGoal;
-  unsigned short avgScaler[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short rmsScaler[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short avgThresh[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short rmsThresh[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short avgRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-  unsigned short rmsRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-  unsigned short surfTrigBandMask[ACTIVE_SURFS];
-} AveragedSurfHkStructVer12_t;
-
-//Old TurfRateStruct_t
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime;
-  unsigned short ppsNum; ///<It's only updated every second so no need for sub-second timing
-  unsigned short deadTime; ///<How much were we dead??
-  unsigned char l3Rates[PHI_SECTORS][2]; /// to get Hz
-  unsigned short l1TrigMask; ///< As read from TURF (16-bit upper phi, lower phi)
-  unsigned short l1TrigMaskH; ///< As read from TURF (16-bit upper phi, lower phi)
-  unsigned short phiTrigMask; ///< 16 bit phi-sector mask
-  unsigned short phiTrigMaskH; ///< 16 bit phi-sector mask
-  unsigned char errorFlag;///<Bit 1-4 bufferdepth, Bits 5,6,7 are for upper,lower,nadir trig mask match
-  unsigned char reserved[3];
-  unsigned int c3poNum;
-} TurfRateStructVer34_t;
-
-
-typedef struct {
-   GenericHeader_t gHdr;
-   unsigned int unixTime;
-   unsigned short ppsNum; ///<It's only updated every second so no need for sub-second timing
-   unsigned short deadTime; ///<How much were we dead??
-   unsigned short l1Rates[PHI_SECTORS][2]; ///<x16 to get Hz
-   unsigned char upperL2Rates[PHI_SECTORS]; ///<x64 to get Hz
-   unsigned char lowerL2Rates[PHI_SECTORS]; ///<x64 to get Hz
-   unsigned char l3Rates[PHI_SECTORS]; ///<Hz
-   unsigned short nadirL1Rates[NADIR_ANTS]; ///<x16 to get Hz
-   unsigned char nadirL2Rates[NADIR_ANTS]; ///<x64 to get Hz
-   unsigned int antTrigMask; ///< As read from TURF (16-bit upper phi, lower phi)
-   unsigned short phiTrigMask; ///< 16 bit phi-sector mask
-   unsigned char nadirAntTrigMask; ///< 8-bit nadir phi mask
-   unsigned char errorFlag;///<Bit 1-4 bufferdepth, Bits 5,6,7 are for upper,lower,nadir trig mask match
-} TurfRateStructVer16_t;
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime;
-  unsigned int ppsNum; ///<It's only updated every second so no need for sub-second timing
-  unsigned short l1Rates[PHI_SECTORS][2]; ///<x16 to get Hz
-  unsigned char upperL2Rates[PHI_SECTORS]; ///<x64 to get Hz
-  unsigned char lowerL2Rates[PHI_SECTORS]; ///<x64 to get Hz
-  unsigned char l3Rates[PHI_SECTORS]; ///<Hz
-  unsigned short nadirL1Rates[NADIR_ANTS]; ///<x16 to get Hz
-  unsigned char nadirL2Rates[NADIR_ANTS]; ///<x64 to get Hz
-  unsigned int antTrigMask; ///< As read from TURF (16-bit upper phi, lower phi)
-  unsigned short phiTrigMask; ///< 16 bit phi-sector mask
-  unsigned char nadirAntTrigMask; ///< 8-bit nadir phi mask
-  unsigned char errorFlag;///<Bit 1,2,3 are for upper,lower,nadir trig mask match
-} TurfRateStructVer15_t;
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime;
-  unsigned int ppsNum; //It's only updated every second so no need for sub-second timing
-  unsigned short l1Rates[PHI_SECTORS][2]; //x16 to get Hz
-  unsigned char upperL2Rates[PHI_SECTORS]; //x64 to get Hz
-  unsigned char lowerL2Rates[PHI_SECTORS]; //x64 to get Hz
-  unsigned char l3Rates[PHI_SECTORS]; //Hz
-  unsigned char nadirL1Rates[PHI_SECTORS]; //?? to get Hz
-  unsigned char nadirL2Rates[PHI_SECTORS]; //?? to get Hz
-  unsigned int antTrigMask;
-  unsigned char nadirAntTrigMask;
-  unsigned char reserved[3];
-} TurfRateStructVer14_t;
-
-
-typedef struct {
-   GenericHeader_t gHdr;
-   unsigned int unixTime;
-   unsigned int ppsNum; //It's only updated every second so no need for sub-second timing
-   unsigned short l1Rates[PHI_SECTORS][2]; // up and down counts
-   unsigned char upperL2Rates[PHI_SECTORS];
-   unsigned char lowerL2Rates[PHI_SECTORS];
-   unsigned char l3Rates[PHI_SECTORS];
-   unsigned int antTrigMask;
-   unsigned char nadirAntTrigMask; //Will need to do pad three bytes
-} TurfRateStructVer13_t;
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime;
-  unsigned int ppsNum; //It's only updated every second so no need for sub-second timing
-  unsigned short l1Rates[PHI_SECTORS][2]; // up and down counts
-  unsigned char upperL2Rates[PHI_SECTORS];
-  unsigned char lowerL2Rates[PHI_SECTORS];
-  unsigned char l3Rates[PHI_SECTORS];
-} TurfRateStructVer12_t;
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime;
-  unsigned int ppsNum; //It's only updated every second so no need for sub-second timing
-  unsigned short l1Rates[TRIGGER_SURFS][ANTS_PER_SURF]; // 3 of 8 counters
-  unsigned char upperL2Rates[PHI_SECTORS];
-  unsigned char lowerL2Rates[PHI_SECTORS];
-  unsigned char l3Rates[PHI_SECTORS];
-} TurfRateStructVer11_t;
-
-
-//Old SummedTurfRateStruct_t
-typedef struct {
-    GenericHeader_t gHdr;
-    unsigned int unixTime; ///<Time of first hk
-    unsigned short numRates; ///<Number of rates in average
-    unsigned short deltaT; ///<Difference in time between first and last 
-    unsigned int deadTime; ///<Summed dead time between first and last
-    unsigned char bufferCount[4]; ///<Counting filled buffers
-    unsigned int l1Rates[PHI_SECTORS][2]; ///<x16/numRates to get Hz 
-    unsigned short upperL2Rates[PHI_SECTORS]; ///<x64/numRates to get Hz
-    unsigned short lowerL2Rates[PHI_SECTORS]; ///<x64/numRates to get Hz
-    unsigned short l3Rates[PHI_SECTORS]; ///< /numRates to get Hz
-    unsigned int nadirL1Rates[NADIR_ANTS]; ///<x16/numRates to get Hz
-    unsigned short nadirL2Rates[NADIR_ANTS]; ///<x64/numRates to get Hz  
-    unsigned int antTrigMask; ///<As read from TURF (16-bit upper phi, lower phi)
-    unsigned short phiTrigMask; ///<16-bit phi-sector mask
-    unsigned char nadirAntTrigMask; ///< 8-bit nadir phi mask
-    unsigned char errorFlag;///<Bit 1-4 bufferdepth, Bits 5,6,7 are for upper,lower,nadir trig mask match
-} SummedTurfRateStructVer16_t;
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime; ///<Time of first hk
-  unsigned short numRates; ///<Number of rates in average
-  unsigned short deltaT; ///<Difference in time between first and last 
-  unsigned int l1Rates[PHI_SECTORS][2]; ///<x16 to get Hz 
-  unsigned short upperL2Rates[PHI_SECTORS]; ///<x64 to get Hz
-  unsigned short lowerL2Rates[PHI_SECTORS]; ///<x64 to get Hz
-  unsigned short l3Rates[PHI_SECTORS]; ///<Hz
-  unsigned short nadirL1Rates[NADIR_ANTS]; ///<x16 to get Hz
-  unsigned char nadirL2Rates[NADIR_ANTS]; ///<x64 to get Hz  
-  unsigned int antTrigMask; ///<As read from TURF (16-bit upper phi, lower phi)
-  unsigned short phiTrigMask; ///<16-bit phi-sector mask
-  unsigned char nadirAntTrigMask; ///< 8-bit nadir phi mask
-  unsigned char errorFlag;///<Bit 1,2,3 are for upper,lower,nadir trig mask match
-} SummedTurfRateStructVer15_t;
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime; //Time of first hk
-  unsigned short numRates; //Number of rates in average
-  unsigned short deltaT; //Difference in time between first and last 
-  unsigned int l1Rates[PHI_SECTORS][2]; //x16 to get Hz 
-  unsigned short upperL2Rates[PHI_SECTORS]; //x64 to get Hz
-  unsigned short lowerL2Rates[PHI_SECTORS]; //x64 to get Hz
-  unsigned short l3Rates[PHI_SECTORS]; //Hz
-  unsigned int antTrigMask;
-  unsigned char nadirAntTrigMask; //Maybe need to pad three bytes
-  unsigned char reserved[3];
-} SummedTurfRateStructVer14_t;
+/*! 
+ * Struct to store TUFF start and end phi sectors 
+ *
+ **/ 
+typedef struct
+{
+  GenericHeader_t gHdr; 
+  unsigned int unixTime; 
+  unsigned char startSectors[NUM_TUFF_NOTCHES]; 
+  unsigned char endSectors[NUM_TUFF_NOTCHES]; 
+} TuffNotchStatus_t;
 
 
 
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime; //Time of first hk
-  unsigned short numRates; //Number of rates in average
-  unsigned short deltaT; //Difference in time between first and last 
-  unsigned int l1Rates[PHI_SECTORS][2]; //upper and lower rings only
-  unsigned short upperL2Rates[PHI_SECTORS];
-  unsigned short lowerL2Rates[PHI_SECTORS];
-  unsigned short l3Rates[PHI_SECTORS];
-  unsigned int antTrigMask;
-  unsigned char nadirAntTrigMask; //Maybe need to pad three bytes
-} SummedTurfRateStructVer11_t;
-
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime; //Time of first hk
-  unsigned short numRates; //Number of rates in average
-  unsigned short deltaT; //Difference in time between first and last 
-  unsigned int l1Rates[TRIGGER_SURFS][ANTS_PER_SURF]; // 3 of 8 counters
-  unsigned short upperL2Rates[PHI_SECTORS];
-  unsigned short lowerL2Rates[PHI_SECTORS];
-  unsigned short l3Rates[PHI_SECTORS];
-} SummedTurfRateStructVer10_t;
-
-
-//Old Headers
-typedef struct {
-  //!  The trigger type
-  /*!
-    0=RF, 1=PPS1, 2=PPS2, 3=Soft/Ext, 4=L3Type1, 5,6 buffer depth at trig
-  */
-  unsigned char trigType; ///<Trig type bit masks
-  unsigned char l3Type1Count; ///<L3 counter
-  unsigned short trigNum; ///<turf trigger counter
-  unsigned int trigTime;
-  unsigned short ppsNum;     ///< 1PPS
-  unsigned short deadTime; ///< fraction = deadTime/64400
-  unsigned int c3poNum;     ///< 1 number of trigger time ticks per PPS
-  unsigned short upperL1TrigPattern;
-  unsigned short lowerL1TrigPattern;
-  unsigned short upperL2TrigPattern;
-  unsigned short lowerL2TrigPattern;
-  unsigned short l3TrigPattern;
-  unsigned short otherTrigPattern[3];
-  unsigned char nadirL1TrigPattern;
-  unsigned char nadirL2TrigPattern; ///<Might just be the same thing
-  unsigned char bufferDepth; ///<bits 0,1 trigTime depth 2,3 current depth
-  unsigned char reserved;
-} TurfioStructVer13_t;
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime;       ///< unix UTC sec
-  unsigned int unixTimeUs;     ///< unix UTC microsec 
-
-  //!  GPS timestamp
-  /*!
-     the GPS fraction of second (in ns) 
-     (for the X events per second that get 
-     tagged with it, note it now includes
-     second offset from unixTime)
-  */
-  int gpsSubTime;    
-  unsigned int turfEventId; ///<Turf event id that doesn't roll
-  unsigned int eventNumber;    ///< Global event number 
-  unsigned short calibStatus;   ///< Were we flashing the pulser? 
-  unsigned char priority; ///< priority and other
-  unsigned char turfUpperWord; ///< The upper 8 bits from the TURF
-  unsigned char otherFlag; ///< Currently the first two surf evNums 
-  //!  Error Flag
-  /*!
-    Bit 1 means sync slip between TURF and software
-    Bit 2 is sync slip between SURF 1 and software
-    Bit 3 is sync slip between SURF 10 and SURF 1
-    Bit 4 is non matching TURF test pattern
-  */
-  unsigned char errorFlag; 
-  unsigned char surfSlipFlag; ///< Sync Slip between SURF 2-9 and SURF 1
-  unsigned char nadirAntTrigMask; ///< 8-bit nadir phi mask (from TURF)
-  unsigned int antTrigMask; ///< 2x 16-bit phi ant mask (from TURF)
-  unsigned short phiTrigMask; ///< 16-bit phi mask (from TURF)
-  unsigned char reserved[2];
-  TurfioStructVer13_t turfio; ///<The X byte TURFIO data
-} AnitaEventHeaderVer13_t;
-
-typedef struct {
-  unsigned char trigType; //Trig type bit masks
-  // 0=RF, 1=PPS1, 2=PPS2, 3=Soft/Ext, 4=L3Type1, 5,6 buffer depth at trig
-  unsigned char l3Type1Count; //L3 counter
-  unsigned short trigNum; //turf trigger counter
-  unsigned int trigTime;
-  unsigned short ppsNum;     // 1PPS
-  unsigned short deadTime; // fraction = deadTime/64400
-  unsigned int c3poNum;     // 1 number of trigger time ticks per PPS
-  unsigned short upperL1TrigPattern;
-  unsigned short lowerL1TrigPattern;
-  unsigned short upperL2TrigPattern;
-  unsigned short lowerL2TrigPattern;
-  unsigned short l3TrigPattern;
-  unsigned short otherTrigPattern[3];
-  unsigned char nadirL1TrigPattern;
-  unsigned char nadirL2TrigPattern; //Might just be the same thing
-  unsigned char bufferDepth; //bits 0,1 trigTime depth 2,3 current depth
-  unsigned char reserved;
-} TurfioStructVer12_t;
-
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime;       /* unix UTC sec*/
-  unsigned int unixTimeUs;     /* unix UTC microsec */
-  int gpsSubTime;     /* the GPS fraction of second (in ns) 
-                         (for the X events per second that get 
-                           tagged with it, note it now includes
-                           second offset from unixTime)*/
-  unsigned int turfEventId; //Turf event id that doesn't roll
-  unsigned int eventNumber;    /* Global event number */
-  unsigned short calibStatus;   /* Were we flashing the pulser? */
-  unsigned char priority; // priority and other
-  unsigned char turfUpperWord; // The upper 8 bits from the TURF
-  unsigned char otherFlag; // Currently the first two surf evNums 
-  unsigned char errorFlag; /*Bit 1 means sync slip between TURF and software
-                             Bit 2 is sync slip between SURF 1 and software
-                             Bit 3 is sync slip between SURF 10 and SURF 1
-                             Bit 4 is non matching TURF test pattern*/
-  unsigned char surfSlipFlag; /* Sync Slip between SURF 2-9 and SURF 1*/
-  unsigned char nadirAntTrigMask; //
-  unsigned int antTrigMask; // What was the ant trigger mask
-  TurfioStructVer12_t turfio; /*The X byte TURFIO data*/
-} AnitaEventHeaderVer12_t;
-
-typedef struct {
-    unsigned char trigType; //Trig type bit masks
-    // 0=RF, 1=PPS1, 2=PPS2, 3=Soft/Ext, 4=L3Type1, 5,6 buffer depth at trig
-    unsigned char l3Type1Count; //L3 counter
-    unsigned short trigNum; //turf trigger counter
-    unsigned int trigTime;
-    unsigned short ppsNum;     // 1PPS
-    unsigned short deadTime; // fraction = deadTime/64400
-    unsigned int c3poNum;     // 1 number of trigger time ticks per PPS
-    unsigned short upperL1TrigPattern;
-    unsigned short lowerL1TrigPattern;
-    unsigned short upperL2TrigPattern;
-    unsigned short lowerL2TrigPattern;
-    unsigned short l3TrigPattern;
-    unsigned char bufferDepth; //bits 0,1 trigTime depth 2,3 current depth
-    unsigned char reserved;
-} TurfioStructVer11_t;
-
-
-
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int unixTime;       /* unix UTC sec*/
-  unsigned int unixTimeUs;     /* unix UTC microsec */
-  int gpsSubTime;     /* the GPS fraction of second (in ns) 
-                         (for the X events per second that get 
-                           tagged with it, note it now includes
-                           second offset from unixTime)*/
-  unsigned int eventNumber;    /* Global event number */
-  unsigned short calibStatus;   /* Were we flashing the pulser? */
-  unsigned char priority; // priority and other
-  unsigned char turfUpperWord; // The upper 8 bits from the TURF
-  unsigned char otherFlag; //Currently unused 
-  unsigned char errorFlag; //Bit 1 means sync slip
-  unsigned char otherFlag3;
-  unsigned char nadirAntTrigMask; //
-  unsigned int antTrigMask; // What was the ant trigger mask
-  TurfioStructVer11_t turfio; /*The X byte TURFIO data*/
-} AnitaEventHeaderVer11_t;
-
-typedef struct {
-    unsigned char trigType; //Trig type bit masks
-    // 0=RF, 1=PPS1, 2=PPS2, 3=Soft/Ext, 4=L3Type1, 5,6 buffer depth at trig
-    unsigned char l3Type1Count; //L3 counter
-    unsigned short trigNum; //turf trigger counter
-    unsigned int trigTime;
-    unsigned short ppsNum;     // 1PPS
-    unsigned short deadTime; // fraction = deadTime/64400
-    unsigned int c3poNum;     // 1 number of trigger time ticks per PPS
-    unsigned short upperL1TrigPattern;
-    unsigned short lowerL1TrigPattern;
-    unsigned short upperL2TrigPattern;
-    unsigned short lowerL2TrigPattern;
-    unsigned short l3TrigPattern;
-    unsigned char bufferDepth; //bits 0,1 trigTime depth 2,3 current depth
-    unsigned char reserved;
-} TurfioStructVer10_t;
-
-typedef struct {
-    GenericHeader_t gHdr;
-    unsigned int unixTime;       /* unix UTC sec*/
-    unsigned int unixTimeUs;     /* unix UTC microsec */
-    int gpsSubTime;     /* the GPS fraction of second (in ns) 
-                           (for the X events per second that get 
-                           tagged with it, note it now includes
-                           second offset from unixTime)*/
-    unsigned int eventNumber;    /* Global event number */
-    unsigned short surfMask;
-    unsigned short calibStatus;   /* Were we flashing the pulser? */
-    unsigned char priority; // priority and other
-    unsigned char turfUpperWord; // The upper 8 bits from the TURF
-    unsigned char otherFlag; //Currently unused 
-    unsigned char otherFlag2; //Currently unused 
-    unsigned int antTrigMask; // What was the ant trigger mask
-    TurfioStructVer10_t turfio; /*The X byte TURFIO data*/
-} AnitaEventHeaderVer10_t;
-
-
-//Old Event Structures
-typedef struct {
-  GenericHeader_t gHdr;
-  unsigned int eventNumber;    /* Global event number */
-  unsigned int surfEventId[ACTIVE_SURFS];
-  unsigned int whichPeds; ///<whichPedestals did we subtract
-  SurfChannelPedSubbed_t channel[NUM_DIGITZED_CHANNELS];
-} PedSubbedEventBodyVer11_t;
-
-typedef struct {
-    GenericHeader_t gHdr;
-    unsigned int eventNumber;    /* Global event number */
-    unsigned int whichPeds; //whichPedestals did we subtract
-    SurfChannelPedSubbed_t channel[NUM_DIGITZED_CHANNELS];
-} PedSubbedEventBodyVer10_t;
-
-
-#endif
-/*\@}*/
-
+#include "oldStructs.h"
 
 #endif //SIMPLESTRUCTS_H
