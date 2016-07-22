@@ -144,6 +144,16 @@ namespace WaveCalType {
 #define ALL_ID_MASK 0xffff ///< Catch all Id Mask
 
 
+//RTLd stuff   
+#define NUM_RTLSDR 6  /// The number of devices 
+#define RTLSDR_MAX_SPECTRUM_BINS 4096  // The maximum number of bins we can save in a packet.
+
+
+// TUFF stuff
+#define NUM_TUFF_NOTCHES 3
+
+
+
 //Now some geometry and polarisation considerations
 
 //!  AnitaRing -- Enumeration for the three rings
@@ -239,6 +249,8 @@ namespace AnitaLocations {
 // #define STATIC_ADU5_PITCH -0.29
 // #define STATIC_ADU5_ROLL 0.89
 // #define OFFSET_ADU5_HEADING -0.32
+
+
 
 
 #endif //ANITACONVENTIONS_H

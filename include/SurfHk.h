@@ -13,6 +13,7 @@
 #include <TObject.h>
 #include "AnitaConventions.h"
 #include "simpleStructs.h"
+#include "oldStructs.h"
 
 
 //!  SurfHk -- The raw SURF scaler+threshold data

@@ -66,6 +66,8 @@ class CalibratedHk: public TObject
 
    CalibratedHk(RawHk *hkPtr, RawHk *avzPtr, RawHk *calPtr); ///< Assignment constructor... takes the RawHk data along with the zero (avzPtr) and +5V (calPtr) calibration points
 
+   GenericHeader_t gHdr;
+   
    Int_t           run; ///< Assigned offline
    UInt_t          realTime; ///< Time in unixTime
    UInt_t          payloadTime; ///< Time in unixTime

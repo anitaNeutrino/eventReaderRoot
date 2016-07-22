@@ -37,6 +37,7 @@ RawHk::RawHk(Int_t trun, Int_t trealTime, HkDataStruct_t *hkPtr)
 	      << "\nsize:\t" << hkPtr->gHdr.numBytes << "\t"
 	      << sizeof(HkDataStruct_t) << std::endl;
   }
+ memcpy(&(this->gHdr),&(hkPtr->gHdr),sizeof(GenericHeader_t));
   run=trun;
   realTime=trealTime;
   payloadTime=hkPtr->unixTime;

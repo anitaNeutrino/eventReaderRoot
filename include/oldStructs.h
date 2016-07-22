@@ -85,6 +85,22 @@ typedef struct {
   TurfioStructVer30_t turfio; ///<The X byte TURFIO data
 } AnitaEventHeaderVer30_t;
 
+//Old FullSurfHkStruct_t
+typedef struct { 
+    GenericHeader_t gHdr;
+    unsigned int unixTime;
+    unsigned int unixTimeUs;
+    unsigned short globalThreshold; //set to zero if there isn't one
+    unsigned short errorFlag; //Will define at some point    
+    unsigned short scalerGoal; //What are we aiming for with the scaler rate
+    unsigned short upperWords[ACTIVE_SURFS];
+    unsigned short scaler[ACTIVE_SURFS][SCALERS_PER_SURF];
+    unsigned short threshold[ACTIVE_SURFS][SCALERS_PER_SURF];
+    unsigned short setThreshold[ACTIVE_SURFS][SCALERS_PER_SURF];
+    unsigned short rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
+    unsigned short surfTrigBandMask[ACTIVE_SURFS];
+} FullSurfHkStructVer12_t;
+
 
 
 typedef struct { 

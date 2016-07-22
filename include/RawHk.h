@@ -13,6 +13,7 @@
 #include <TObject.h>
 #include "AnitaConventions.h"
 #include "simpleStructs.h"
+#include "oldStructs.h"
 
 
 //!  RawHk -- The Raw ANITA Housekeeping
@@ -28,6 +29,8 @@ class RawHk: public TObject
 
    RawHk(Int_t trun, Int_t trealTime, HkDataStruct_t *hkPtr); ///< Assignment constructor
 
+   GenericHeader_t gHdr;
+   
    Int_t           run; ///< Run number, assigned offline
    UInt_t          realTime; ///< Time in unixTime
    UInt_t          payloadTime;  ///< Time in unixTime
@@ -41,7 +44,7 @@ class RawHk: public TObject
    Short_t         sbsTemp[3]; ///<SBS temperatures multiplied by 10
    Short_t         ntuTemp[3]; ///<NTU temperatures in some crazy scheme
    
-  ClassDef(RawHk,11);
+  ClassDef(RawHk,12);
 };
 
 
