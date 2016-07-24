@@ -14,10 +14,11 @@
 #include "simpleStructs.h"
 #include "AnitaConventions.h"
 #include "UsefulAnitaEvent.h"
-#include <zlib.h>
+//#include <zlib.h>
 #include "TFile.h"
 #include "TTree.h"
 
+//#class gzFile;
 
 //!  RawDataReader -- Raw data reader
 /*!
@@ -39,8 +40,7 @@ class RawDataReader
   //Data Reading Thingies 
    PedSubbedEventBody_t psBody; ///< Raw data
    AnitaEventHeader_t theHeader; ///< The header
-   gzFile eventFile; ///< File ptr
-   gzFile headFile; ///< File ptr
+
    //   TFile *fpSurf; ///< Who knows
    //   TTree *surfTempTree; ///< Who knows
    //   Float_t surfTemp; ///< Who knows
