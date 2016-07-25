@@ -29,7 +29,8 @@ class RawHk: public TObject
 
    RawHk(Int_t trun, Int_t trealTime, HkDataStruct_t *hkPtr); ///< Assignment constructor
 
-   GenericHeader_t gHdr;
+   unsigned char gHdr_verId; // verId from GenericHeader_t
+
    
    Int_t           run; ///< Run number, assigned offline
    UInt_t          realTime; ///< Time in unixTime

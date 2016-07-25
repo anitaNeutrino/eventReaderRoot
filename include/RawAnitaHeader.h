@@ -25,6 +25,8 @@ class RawAnitaHeader: public TObject
    RawAnitaHeader(); ///< Default constructor
    RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t run, UInt_t realTime,
 		  UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Assignment constructor
+  RawAnitaHeader(AnitaEventHeaderVer33_t *hdPtr, Int_t run, UInt_t realTime,
+  		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 33 constructor
   RawAnitaHeader(AnitaEventHeaderVer30_t *hdPtr, Int_t run, UInt_t realTime,
   		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 30 constructor
   RawAnitaHeader(AnitaEventHeaderVer13_t *hdPtr, Int_t run, UInt_t realTime,

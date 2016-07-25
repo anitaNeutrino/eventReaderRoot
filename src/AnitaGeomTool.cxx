@@ -41,8 +41,8 @@ namespace AnitaGeom {
    
   ///< 1 is Normal orientation, -1 is 180 degree flip. (Top ring needs to be inverted in software when signals come through seaveys.)
   // Apparently -2 is a 90 degree flip.
-  Int_t antOrientationMap[NUM_SEAVEYS]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  //  Int_t antOrientationMap[NUM_SEAVEYS]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+//  Int_t antOrientationMap[NUM_SEAVEYS]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    Int_t antOrientationMap[NUM_SEAVEYS]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 				      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 				      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; 
 
@@ -107,6 +107,61 @@ namespace AnitaGeom {
 
 
 
+static void readAntennaOrientations()
+{
+
+  char calibDir[FILENAME_MAX];
+  char fileName[FILENAME_MAX];
+  char *calibEnv=getenv("ANITA_CALIB_DIR");
+  if(!calibEnv) {
+    char *utilEnv=getenv("ANITA_UTIL_INSTALL_DIR");
+    if(!utilEnv)
+      sprintf(calibDir,"calib");
+    else
+      sprintf(calibDir,"%s/share/anitaCalib",utilEnv);    
+  }
+  else {
+    strncpy(calibDir,calibEnv,FILENAME_MAX);
+  }
+
+  sprintf(fileName,"%s/antenna_orientations.csv",calibDir);
+
+  FILE * oriFile = fopen(fileName, "r"); 
+
+  if (!oriFile)
+  {
+    fprintf(stderr, "Could not read %s. Defaulting to A3 layout\n",fileName); 
+  }
+
+  char line[1024]; 
+
+  
+
+  int index =0; 
+  while(fgets(line, sizeof(line), oriFile)) 
+  {
+    if (char * comment = strchr(line,'#')) 
+    {
+      *comment = 0; 
+    }
+
+    if (int val = atoi(line))
+    {
+      if (index >= NUM_SEAVEYS)
+      {
+        fprintf(stderr,"WARNING! More orientations than SEAVEYS in %s!\n", fileName); 
+        break; 
+      }
+      AnitaGeom::antOrientationMap[index++] =  val; 
+    }
+   }
+
+  if (index < NUM_SEAVEYS)
+  {
+    fprintf(stderr,"WARNING! Not as many orientations as SEAVEYS in %s\n",fileName); 
+  }
+}
+
 
 
 
@@ -129,6 +184,7 @@ AnitaGeomTool::AnitaGeomTool()
   readAnita3Photogrammetry();
   fUseKurtAnita3Numbers=0;
 
+  //readAntennaOrientations(); 
 
   // Moved from fillAntPositionsFromPrioritizerdConfig
   // Who knows where else these get set in this crazy place...
@@ -1926,6 +1982,8 @@ void AnitaGeomTool::readAnita3PhaseCenterNumbers() {
   } 
 
 }
+
+
 
 
 

@@ -24,6 +24,7 @@
 #pragma link C++ namespace     AnitaCompress;
 
 
+#pragma link C++ class GenericHeader_t+;
 #pragma link C++ class AnitaGeomTool+;
 #pragma link C++ class RawAnitaEvent+;
 #pragma link C++ class RawAnitaHeader+;

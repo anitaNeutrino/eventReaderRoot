@@ -29,9 +29,66 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
 			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
 {
  if(hdPtr->gHdr.code!=PACKET_HD ||
-     hdPtr->gHdr.verId!=VER_EVENT_HEADER ||
-     hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeader_t)) {
-    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
+    hdPtr->gHdr.verId!=VER_EVENT_HEADER ||
+    hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeader_t)) {
+    std::cerr << "Mismatched packet :\t" << packetCodeAsString(PACKET_HD) << " (default)\n" 
+	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
+	      << "\nversion:\t" << (int)hdPtr->gHdr.verId 
+	      << "\t" << (int)VER_EVENT_HEADER 
+	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
+	      << sizeof(AnitaEventHeader_t) << std::endl;
+  }
+
+   payloadTime=hdPtr->unixTime;
+   payloadTimeUs=hdPtr->unixTimeUs;
+   gpsSubTime=hdPtr->gpsSubTime;
+   turfEventId=hdPtr->turfEventId;
+   eventNumber=hdPtr->eventNumber;
+   calibStatus=hdPtr->calibStatus;
+   priority=hdPtr->priority;
+   turfUpperWord=hdPtr->turfUpperWord;
+   otherFlag=hdPtr->otherFlag;
+   errorFlag=hdPtr->errorFlag;
+   surfSlipFlag=hdPtr->surfSlipFlag;
+   //   nadirAntTrigMask=hdPtr->nadirAntTrigMask;
+   l1TrigMask=hdPtr->l1TrigMask;
+   l1TrigMaskH=hdPtr->l1TrigMaskH;
+   phiTrigMask=hdPtr->phiTrigMask;
+   phiTrigMaskH=hdPtr->phiTrigMaskH;
+   trigType=hdPtr->turfio.trigType;
+   l3Type1Count=hdPtr->turfio.l3Type1Count;
+   trigNum=hdPtr->turfio.trigNum;
+   trigTime=hdPtr->turfio.trigTime;
+   c3poNum=hdPtr->turfio.c3poNum;
+   ppsNum=hdPtr->turfio.ppsNum;
+   deadTime=hdPtr->turfio.deadTime;
+   bufferDepth=hdPtr->turfio.bufferDepth;
+   turfioReserved=hdPtr->turfio.reserved[0];
+   l3TrigPattern=hdPtr->turfio.l3TrigPattern;
+   l3TrigPatternH=hdPtr->turfio.l3TrigPatternH;
+   //   memcpy(reserved,hdPtr->reserved,2*sizeof(UChar_t));
+   run=trun;
+   realTime=trealTime;
+   triggerTime=ttriggerTime;
+   triggerTimeNs=ttriggerTimeNs;
+   goodTimeFlag=tgoodTimeFlag;
+
+
+  //Prioritizer stuff
+  peakThetaBin=hdPtr->peakThetaBin;
+  imagePeak=hdPtr->imagePeak;
+  coherentSumPeak=hdPtr->coherentSumPeak;
+  prioritizerStuff=hdPtr->prioritizerStuff;
+}
+
+
+RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer33_t *hdPtr, Int_t trun, UInt_t trealTime,
+			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
+{
+ if(hdPtr->gHdr.code!=PACKET_HD ||
+     hdPtr->gHdr.verId!=33 ||
+     hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeaderVer33_t)) {
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << " (Ver33)\n" 
 	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
 	      << "\nversion:\t" << (int)hdPtr->gHdr.verId 
 	      << "\t" << (int)VER_EVENT_HEADER 
@@ -87,8 +144,8 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer30_t *hdPtr, Int_t trun, UInt_
 			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
 {
  if(hdPtr->gHdr.code!=PACKET_HD ||
-     hdPtr->gHdr.verId!=VER_EVENT_HEADER ||
-     hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeader_t)) {
+     hdPtr->gHdr.verId!=30 ||
+     hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeaderVer30_t)) {
     std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
 	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
 	      << "\nversion:\t" << (int)hdPtr->gHdr.verId 

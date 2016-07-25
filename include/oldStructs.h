@@ -42,6 +42,29 @@ typedef struct {
 } TurfioStructVer30_t;
 
 
+//!  The TURF I/O struct
+/*!
+  Is part of the AnitaEventHeader_t and contains all sorts of useful info
+  about trigger patterns, deadTime, trigger time and trigger type.
+*/
+typedef struct {
+  //!  The trigger type
+  /*!
+    0=RF, 1=PPS1, 2=PPS2, 3=Soft/Ext, 4=L3Type1, 5,6 buffer depth at trig
+  */
+  unsigned char trigType; ///<Trig type bit masks
+  unsigned char l3Type1Count; ///<L3 counter
+  unsigned short trigNum; ///<turf trigger counter
+  unsigned int trigTime;
+  unsigned short ppsNum;     ///< 1PPS
+  unsigned short deadTime; ///< fraction = deadTime/64400
+  unsigned int c3poNum;     ///< 1 number of trigger time ticks per PPS
+  unsigned short l3TrigPattern;
+  unsigned short l3TrigPatternH;
+  unsigned char bufferDepth; ///<bits 0,1 trigTime depth 2,3 current depth
+  unsigned char reserved[3];
+} TurfioStructVer33_t;
+
 //!  ANITA Event Header -- Telemetered
 /*!
   ANITA Event Header, contains all kinds of fun information about the event
@@ -84,6 +107,55 @@ typedef struct {
   unsigned char reserved[2]; ///< reserved[0] is 
   TurfioStructVer30_t turfio; ///<The X byte TURFIO data
 } AnitaEventHeaderVer30_t;
+
+
+
+//!  ANITA Event Header -- Telemetered
+/*!
+  ANITA Event Header, contains all kinds of fun information about the event
+  including times, trigger patterns, event numbers and error words
+*/
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime;       ///< unix UTC sec
+  unsigned int unixTimeUs;     ///< unix UTC microsec 
+
+  //!  GPS timestamp
+  /*!
+     the GPS fraction of second (in ns) 
+     (for the X events per second that get 
+     tagged with it, note it now includes
+     second offset from unixTime)
+  */
+  int gpsSubTime;    
+  unsigned int turfEventId; ///<Turf event id that doesn't roll
+  unsigned int eventNumber;    ///< Global event number 
+  unsigned short calibStatus;   ///< Were we flashing the pulser? 
+  unsigned char priority; ///< priority and other
+  unsigned char turfUpperWord; ///< The upper 8 bits from the TURF
+  unsigned char otherFlag; ///< Currently the first two surf evNums 
+  //!  Error Flag
+  /*!
+    Bit 1 means sync slip between TURF and software
+    Bit 2 is sync slip between SURF 1 and software
+    Bit 3 is sync slip between SURF 10 and SURF 1
+    Bit 4 is non matching TURF test pattern
+    Bit 5 is startBitGood (1 is good, 0 is bad);
+    Bit 6 is stopBitGood (1 is good, 0 is bad);
+    Bit 7-8 TURFIO photo shutter output
+  */
+  unsigned char errorFlag; 
+  unsigned char surfSlipFlag; ///< Sync Slip between SURF 2-9 and SURF 1
+  unsigned char peakThetaBin; ///< 8-bit peak theta bin from Prioritizer
+  unsigned short l1TrigMask; ///< 16-bit phi ant mask (from TURF)
+  unsigned short l1TrigMaskH; ///< 16-bit phi ant mask (from TURF)
+  unsigned short phiTrigMask; ///< 16-bit phi mask (from TURF)
+  unsigned short phiTrigMaskH; ///< 16-bit phi mask (from TURF)
+  unsigned short imagePeak; ///< 16-bit image peak from Prioritizer
+  unsigned short coherentSumPeak; ///< 16-bit coherent sum peak from Prioritizer
+  unsigned short prioritizerStuff; ///< TBD
+  TurfioStruct_t turfio; ///<The X byte TURFIO data
+} AnitaEventHeaderVer33_t;
 
 //Old FullSurfHkStruct_t
 typedef struct { 

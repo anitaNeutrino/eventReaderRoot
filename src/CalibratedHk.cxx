@@ -67,9 +67,9 @@ int calSchemeAnita4[3][40]=
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
 
-int **calScheme=NULL;
-float **calIntercept=NULL;
-float **calSlope=NULL;
+static int calScheme[3][40]={{0}};
+static float calIntercept[3][40]={{0}};
+static float calSlope[3][40]={{0}};
 
 
 //Sunsensor Stuff
@@ -96,10 +96,10 @@ const float globalGamma=67;
 
 CalibratedHk::CalibratedHk() 
 {
-   //Default Constructor
-  calScheme=(int**)&calSchemeAnita4[0][0];
-  calIntercept=(float**)&calInterceptAnita4[0][0];
-  calSlope=(float**)&calSlopeAnita4[0][0];
+  //Default Constructor
+  memcpy(calScheme,calSchemeAnita4,3*40*sizeof(int));
+  memcpy(calIntercept,calInterceptAnita4,3*40*sizeof(float));
+  memcpy(calScheme,calInterceptAnita4,3*40*sizeof(float));
   
 }
 
@@ -111,17 +111,17 @@ CalibratedHk::~CalibratedHk() {
 CalibratedHk::CalibratedHk(RawHk *hkPtr, RawHk *avzPtr, RawHk *calPtr)
 {
   //Assignment consturctor
-  memcpy(&(this->gHdr),&(hkPtr->gHdr),sizeof(GenericHeader_t));
+  this->gHdr_verId=hkPtr->gHdr_verId;
 
-  if(gHdr.verId>=40) {
-    calScheme=(int**)&calSchemeAnita4[0][0];
-    calIntercept=(float**)&calInterceptAnita4[0][0];
-    calSlope=(float**)&calSlopeAnita4[0][0];
+  if(gHdr_verId>=40) {
+    memcpy(calScheme,calSchemeAnita4,3*40*sizeof(int));
+    memcpy(calIntercept,calInterceptAnita4,3*40*sizeof(float));
+    memcpy(calScheme,calInterceptAnita4,3*40*sizeof(float));
   }
   else {
-    calScheme=(int**)&calSchemeAnita3[0][0];
-    calIntercept=(float**)&calInterceptAnita3[0][0];
-    calSlope=(float**)&calSlopeAnita3[0][0];
+    memcpy(calScheme,calSchemeAnita3,3*40*sizeof(int));
+    memcpy(calIntercept,calInterceptAnita3,3*40*sizeof(float));
+    memcpy(calScheme,calInterceptAnita3,3*40*sizeof(float));
   }
     
   
