@@ -28,6 +28,7 @@ class SurfHk: public TObject
    ~SurfHk(); ///< Destructor
 
    SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr); ///< Assignment constructor
+   SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer40_t *surfPtr); ///< Version 40 constructor
    SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer30_t *surfPtr); ///< Version 30 constructor
    SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer14_t *surfPtr); ///< Version 14 constructor
    SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer13_t *surfPtr); ///< Version 13 constructor 
@@ -55,11 +56,12 @@ class SurfHk: public TObject
   UInt_t          payloadTimeUs; ///< Subsecond time of readout in us
   UShort_t        globalThreshold; ///< Global threshold if set
   UShort_t        errorFlag; ///< Error flag
-  UShort_t        scalerGoals[BANDS_PER_ANT]; ///< Scaler goal for each band
-  UShort_t        scalerGoalsNadir[BANDS_PER_ANT]; ///< Scaler goal for each band of the nadir antennas
+  UShort_t        scalerGoals[4]; ///< Scaler goal for each ring, only use 3 
+  UShort_t        scalerGoalsNadir[BANDS_PER_ANT]; ///< Deprecated
   UShort_t        upperWords[ACTIVE_SURFS]; ///< Upper words of each SURF... for debugging
   UShort_t        scaler[ACTIVE_SURFS][SCALERS_PER_SURF_V30]; ///< Scaler values, multiple by 1000 to get Hz.
   UShort_t        l1Scaler[ACTIVE_SURFS][L1S_PER_SURF]; ///< L1 Scaler values.
+  UShort_t        l2Scaler[ACTIVE_SURFS][L2S_PER_SURF]; ///< L2 Scaler values
   UShort_t        threshold[ACTIVE_SURFS][SCALERS_PER_SURF_V30]; ///< Threshold values in DAC counts
   UShort_t        setThreshold[ACTIVE_SURFS][SCALERS_PER_SURF_V30]; ///< Threshold values intedned, should match threshold array exactly
   UShort_t        rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF]; ///< RF power per input channel in ADC counts
