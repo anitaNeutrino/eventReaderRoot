@@ -30,8 +30,70 @@ SurfHk::~SurfHk() {
    //Default Destructor
 }
 
-
 SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr)
+{
+  if(surfPtr->gHdr.code!=PACKET_SURF_HK ||
+     surfPtr->gHdr.verId!=VER_SURF_HK ||
+     surfPtr->gHdr.numBytes!=sizeof(FullSurfHkStruct_t)) {
+     std::cerr << "Mismatched packet\t" << packetCodeAsString(PACKET_SURF_HK)
+	 
+	       << "\ncode:\t" << (int)surfPtr->gHdr.code << "\t" << PACKET_SURF_HK 
+	       << "\nversion:\t" << (int)surfPtr->gHdr.verId 
+	       << "\t" << VER_SURF_HK 
+	       << "\nsize:\t" << surfPtr->gHdr.numBytes << "\t"
+	       << sizeof(FullSurfHkStruct_t) << std::endl;
+  }
+     
+
+  run=trun;
+  realTime=trealTime;
+  payloadTime=surfPtr->unixTime;
+  payloadTimeUs=surfPtr->unixTimeUs;
+  globalThreshold=surfPtr->globalThreshold;
+  errorFlag=surfPtr->errorFlag;
+  memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*NUM_ANTENNA_RINGS);
+  memcpy(upperWords,surfPtr->upperWords,sizeof(UShort_t)*ACTIVE_SURFS);
+
+  //At some point will fix this to do it properly
+  int rawSurfToTrigSurf[ACTIVE_SURFS]={-1,-1,0,1,2,3,4,5,6,7,-1,-1};
+  
+  
+  for(int surf=0;surf<ACTIVE_SURFS;surf++) {
+    if(rawSurfToTrigSurf[surf]>=0) {
+      for(int l1=0;l1<L1S_PER_SURF;l1++) {
+	l1Scaler[surf][l1]=surfPtr->l1Scaler[rawSurfToTrigSurf[surf]][l1];
+      }
+      for(int l2=0;l2<L2S_PER_SURF;l2++) {
+	l2Scaler[surf][l2]=surfPtr->l2Scaler[rawSurfToTrigSurf[surf]][l2];
+      }
+      for(int i=0;i<12;i++) {
+	scaler[surf][i]=surfPtr->scaler[rawSurfToTrigSurf[surf]][i];
+	threshold[surf][i]=surfPtr->threshold[rawSurfToTrigSurf[surf]][i];
+	setThreshold[surf][i]=surfPtr->setThreshold[rawSurfToTrigSurf[surf]][i];
+      }
+    }
+    else {
+      for(int l1=0;l1<L1S_PER_SURF;l1++) {
+	l1Scaler[surf][l1]=0;
+      }
+      for(int l2=0;l2<L2S_PER_SURF;l2++) {
+	l2Scaler[surf][l2]=0;
+      }
+      for(int i=0;i<12;i++) {
+	scaler[surf][i]=0;
+	threshold[surf][i]=0;
+	setThreshold[surf][i]=0;
+      }
+    }          
+  }
+  memcpy(rfPower,surfPtr->rfPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
+  memcpy(surfTrigBandMask,surfPtr->surfTrigBandMask,sizeof(UShort_t)*TRIGGER_SURFS);
+  intFlag=0;
+}
+
+
+
+SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStructVer40_t *surfPtr)
 {
   if(surfPtr->gHdr.code!=PACKET_SURF_HK ||
      surfPtr->gHdr.verId!=VER_SURF_HK ||
