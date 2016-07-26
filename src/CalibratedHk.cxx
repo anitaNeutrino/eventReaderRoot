@@ -140,10 +140,10 @@ CalibratedHk::CalibratedHk(RawHk *hkPtr, RawHk *avzPtr, RawHk *calPtr)
     for(int chan=0;chan<40;chan++) {
       float avz= 2048;
       float cal = 4055;   
-      if(avzPtr)
-	avz = float((avzPtr->acromagData[board][chan])>>4);	    
-      if(calPtr)
-	cal = float((calPtr->acromagData[board][chan])>>4);      
+      // if(avzPtr)
+      // 	avz = float((avzPtr->acromagData[board][chan])>>4);	    
+      // if(calPtr)
+      // 	cal = float((calPtr->acromagData[board][chan])>>4);      
       float slope=4.9/(cal-avz);
       float intercept=-1*slope*avz;
       voltage[board][chan]=slope*float((hkPtr->acromagData[board][chan])>>4)+intercept;      

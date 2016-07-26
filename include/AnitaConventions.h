@@ -63,7 +63,9 @@ namespace WaveCalType {
 
 #define SCALERS_PER_SURF 12 ///< The number of active trigger channels per SURF.
 #define SCALERS_PER_SURF_V30 16 ///< The number of active trigger channels per SURF.
-#define L1S_PER_SURF 4
+#define L1S_PER_SURF_ANITA3 4
+#define L1S_PER_SURF 6
+
 #define RFCHAN_PER_SURF 8 ///< The number of RF input channels per SURF.
 #define CHANNELS_PER_SURF 9 ///< The total number of channels per SURF (including the clock).
 #define LABRADORS_PER_SURF 4 ///< The number of LABRADOR chips per SURF.
