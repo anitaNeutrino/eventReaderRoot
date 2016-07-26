@@ -43,33 +43,33 @@ int calSchemeAnita3[3][40]=
 };
 
 
-float calSlopeAnita4[3][40]=
+float calSlope[3][40]=
 {
     {1,1,100,1,1,1,1,1,1,1,1,100,1,1,1,100,100,100,100,100,1,1,1,1,100,1,1,1,100,1,1,1,1,1,1,100,100,100,100,100},
     {2,1,2,-3.0075,4.02,2,2,1,1,1,   //40-49
      1,1,1,8,8,30,30,20,1,1,    //50-59
      0.8,8,-2,0.8,60,20,0.8,1,1,1, //60-69
-     1,1,1,4.02,2,2,10.1,19.25,100,400}, //70-79
+     1,1,1,2,3,2,10.1,19.25,100,400}, //70-79
     {100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100}
 };
 
-float calInterceptAnita4[3][40]=
+float calIntercept[3][40]=
 {
     {0,0,-273.15,0,0,0,0,0,0,0,0,-273.15,0,0,0,-273.15,-273.15,-273.15,-273.15,-273.15,0,0,0,0,-273.15,0,0,0,-273.15,0,0,0,0,0,0,-273.15,-273.15,-273.15,-273.15,-273.15},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-273.15,0},
     {-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15,-273.15}
 };
 
-int calSchemeAnita4[3][40]=
+int calScheme[3][40]=
 {
     {0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,1,1,1,1},
     {1,1,1,1,1,1,1,2,3,2,4,5,0,1,1,1,1,1,0,0,1,1,1,1,1,1,1,6,7,8,9,10,0,1,1,0,1,1,1,1},
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
 
-static int calScheme[3][40]={{0}};
-static float calIntercept[3][40]={{0}};
-static float calSlope[3][40]={{0}};
+//static int calScheme[3][40]={{0}};
+//static float calIntercept[3][40]={{0}};
+//static float calSlope[3][40]={{0}};
 
 
 //Sunsensor Stuff
@@ -97,9 +97,9 @@ const float globalGamma=67;
 CalibratedHk::CalibratedHk() 
 {
   //Default Constructor
-  memcpy(calScheme,calSchemeAnita4,3*40*sizeof(int));
-  memcpy(calIntercept,calInterceptAnita4,3*40*sizeof(float));
-  memcpy(calScheme,calInterceptAnita4,3*40*sizeof(float));
+  //  memcpy(calScheme,calSchemeAnita4,3*40*sizeof(int));
+  //  memcpy(calIntercept,calInterceptAnita4,3*40*sizeof(float));
+  //  memcpy(calScheme,calInterceptAnita4,3*40*sizeof(float));
   
 }
 
@@ -113,16 +113,16 @@ CalibratedHk::CalibratedHk(RawHk *hkPtr, RawHk *avzPtr, RawHk *calPtr)
   //Assignment consturctor
   this->gHdr_verId=hkPtr->gHdr_verId;
 
-  if(gHdr_verId>=40) {
-    memcpy(calScheme,calSchemeAnita4,3*40*sizeof(int));
-    memcpy(calIntercept,calInterceptAnita4,3*40*sizeof(float));
-    memcpy(calScheme,calInterceptAnita4,3*40*sizeof(float));
-  }
-  else {
-    memcpy(calScheme,calSchemeAnita3,3*40*sizeof(int));
-    memcpy(calIntercept,calInterceptAnita3,3*40*sizeof(float));
-    memcpy(calScheme,calInterceptAnita3,3*40*sizeof(float));
-  }
+  //  if(gHdr_verId>=40) {
+  //    memcpy(calScheme,calSchemeAnita4,3*40*sizeof(int));
+  //    memcpy(calIntercept,calInterceptAnita4,3*40*sizeof(float));
+  //    memcpy(calScheme,calInterceptAnita4,3*40*sizeof(float));
+  //  }
+  //  else {
+  //    memcpy(calScheme,calSchemeAnita3,3*40*sizeof(int));
+  //    memcpy(calIntercept,calInterceptAnita3,3*40*sizeof(float));
+  //    memcpy(calScheme,calInterceptAnita3,3*40*sizeof(float));
+  //  }
     
   
   run=hkPtr->run;
@@ -261,7 +261,7 @@ Float_t   CalibratedHk::getNTUTemp(int index)
 
 const char *CalibratedHk::getVoltageName(int index)
 {
-  const char *voltageNames[NUM_VOLTAGES]={"5.6V NTU","12V IP","+12_PCI","+24","PV","+5_PCI","+5M","+3.3_PCI","+1.5","-12_PCI","-5"};
+  const char *voltageNames[NUM_VOLTAGES]={"12V GPS","5.3V IP","+12_PCI","+24","PV","+5_PCI","+5M","+3.3_PCI","+1.5","-12_PCI","-5"};
  if(index>=0 && index<NUM_VOLTAGES) 
     return voltageNames[index];
   return "None";
