@@ -140,10 +140,10 @@ CalibratedHk::CalibratedHk(RawHk *hkPtr, RawHk *avzPtr, RawHk *calPtr)
     for(int chan=0;chan<40;chan++) {
       float avz= 2048;
       float cal = 4055;   
-      if(avzPtr)
-	avz = float((avzPtr->acromagData[board][chan])>>4);	    
-      if(calPtr)
-	cal = float((calPtr->acromagData[board][chan])>>4);      
+      // if(avzPtr)
+      // 	avz = float((avzPtr->acromagData[board][chan])>>4);	    
+      // if(calPtr)
+      // 	cal = float((calPtr->acromagData[board][chan])>>4);      
       float slope=4.9/(cal-avz);
       float intercept=-1*slope*avz;
       voltage[board][chan]=slope*float((hkPtr->acromagData[board][chan])>>4)+intercept;      
@@ -362,8 +362,11 @@ Float_t CalibratedHk::getAttitude(int index) {
   //ANITA2
   //const char *intTempNames[NUM_INT_TEMPS]={"SURF 10","SURF 8","SURF 3","Top of CPU fcaeplate","Bottom of CPU faceplate","MTRON Box","125MHz Clock","Radiator Plate (near SURF 7)","Radiator Plate (near SURF 2)","SHORT 02","SHORT 24","SHORT 28","SHORT 31","IP Box","DC-DC Box"};
   //ANITA3
-  const char *intTempNames[NUM_INT_TEMPS]={"SHORT - Phi 16","Radiator above DC-DC box","IRFCM A","Bottom of CPCI crate","NTU SSD box","DC-DC box","IP Box","SHORT - Phi 9","Top of CPCI, CPU side","SURF 8","IRFCM D","TURFIO faceplate","Housekeeping Box","He Drive 1 Enclosure","Bottom of Radiator Plate, beneath DC-DC Box"};
- if(index>=0 && index<NUM_INT_TEMPS) 
+  //  const char *intTempNames[NUM_INT_TEMPS]={"SHORT - Phi 16","Radiator above DC-DC box","IRFCM A","Bottom of CPCI crate","NTU SSD box","DC-DC box","IP Box","SHORT - Phi 9","Top of CPCI, CPU side","SURF 8","IRFCM D","TURFIO faceplate","Housekeeping Box","He Drive 1 Enclosure","Bottom of Radiator Plate, beneath DC-DC Box"};
+  //ANITA4
+  const char *intTempNames[NUM_INT_TEMPS]={"Lid near SHORT 20 PHI 09", "Radiator plate above DC-DC Box", "IRFCM 0", "Bottom side of CPU crate", "NTU SSD array Box top", "DC-DC Box middle", "Top of IP Box", "Lid near SHORT 01 PHI 16", "Top of CPCI crate CPU side", "Top Front edge of CPCI crate near SURF8", "IRFCM 3", "Cover plate near TURFIO", "Back of He Drive mounting plate (Drive 2)", "Back of He Drive mounting plate (Drive 1)", "Radiator plate below DC-DC Box"};
+
+  if(index>=0 && index<NUM_INT_TEMPS) 
     return intTempNames[index];
  return "None";
 }

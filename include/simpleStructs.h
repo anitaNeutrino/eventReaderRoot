@@ -154,7 +154,7 @@
 #define VER_SURF_PACKET 40
 #define VER_ENC_WAVE_PACKET 40
 #define VER_ENC_SURF_PACKET 40
-#define VER_SURF_HK 40
+#define VER_SURF_HK 41
 #define VER_GPS_GGA 40
 #define VER_ADU5_PAT 40
 #define VER_ADU5_SAT 40
@@ -164,7 +164,7 @@
 #define VER_HK_FULL 40
 #define VER_HK_SS 40
 #define VER_CMD_ECHO 40
-#define VER_MONITOR 40
+#define VER_MONITOR 41
 #define VER_TURF_RATE 40
 #define VER_LAB_PED 40
 #define VER_FULL_PED 40
@@ -177,12 +177,15 @@
 #define VER_OTHER_MON 41
 #define VER_GPSD_START 40
 #define VER_LOGWATCHD_START 40
-#define VER_AVG_SURF_HK 40
+#define VER_AVG_SURF_HK 41
 #define VER_SUM_TURF_RATE 40
-#define VER_ACQD_START 40
+#define VER_ACQD_START 41
 #define VER_TURF_REG 40
 #define VER_TURF_EVENT_DATA 40
 #define VER_GPU_POW_SPEC 40
+#define VER_RTLSDR_POW_SPEC 40 
+#define VER_TUFF_STATUS 40 
+#define VER_TUFF_RAW_CMD 40 
 #endif
 
 
@@ -239,8 +242,9 @@ typedef enum {
     PACKET_LOGWATCHD_START = 0xc01, ///< LogWatchdStart_t -- Yes
     PACKET_ACQD_START = 0xc02, ///<AcqdStartStruct_t -- Yes
     PACKET_GPU_AVE_POW_SPEC = 0xd, ///<GpuPhiSectorPowerSpectrum_t -- Yes
-    PACKET_RTLSDR_POW_SPEC = 0xe , 
-    PACKET_TUFF_STATUS =0xf 
+    PACKET_RTLSDR_POW_SPEC = 0xe00 , 
+    PACKET_TUFF_STATUS =0xf00, 
+    PACKET_TUFF_RAW_CMD =0xf01
     
 } PacketCode_t;
 
@@ -1095,7 +1099,7 @@ typedef struct {
   float chanMean[ACTIVE_SURFS][CHANNELS_PER_SURF]; ///<Ped subtracted
   float chanRMS[ACTIVE_SURFS][CHANNELS_PER_SURF]; ///<Ped subtracted
   unsigned short threshVals[10];
-  unsigned short scalerVals[ACTIVE_SURFS][SCALERS_PER_SURF][10];
+  unsigned short scalerVals[TRIGGER_SURFS][SCALERS_PER_SURF][10];
 } AcqdStartStruct_t;
   
 //! Hk Data Struct -- Telemetered
@@ -1136,12 +1140,14 @@ typedef struct {
   unsigned short scalerGoals[NUM_ANTENNA_RINGS]; ///<What are we aiming for with the scaler rate
   unsigned short reserved;  
   unsigned short upperWords[ACTIVE_SURFS];
-  unsigned short scaler[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short l1Scaler[ACTIVE_SURFS][L1S_PER_SURF];
-  unsigned short threshold[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short setThreshold[ACTIVE_SURFS][SCALERS_PER_SURF];
+  unsigned short scaler[TRIGGER_SURFS][SCALERS_PER_SURF];
+  unsigned short l1Scaler[TRIGGER_SURFS][L1S_PER_SURF];
+  unsigned short l2Scaler[TRIGGER_SURFS][L2S_PER_SURF];
+  unsigned short threshold[TRIGGER_SURFS][SCALERS_PER_SURF];
+  unsigned short setThreshold[TRIGGER_SURFS][SCALERS_PER_SURF];
   unsigned short rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-  unsigned short surfTrigBandMask[ACTIVE_SURFS];
+  unsigned short surfTrigBandMask[TRIGGER_SURFS];
+  unsigned char surfTrigIndex[TRIGGER_SURFS]; ///< Which SURFs are in the trigger
 } FullSurfHkStruct_t;
 
 //! Average Surf Hk -- Telemetered
@@ -1156,15 +1162,15 @@ typedef struct {
   unsigned int hadError; ///<Bit mask to be defined
   unsigned short globalThreshold;
   unsigned short scalerGoals[NUM_ANTENNA_RINGS];
-  unsigned short avgScaler[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short rmsScaler[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short avgL1[ACTIVE_SURFS][L1S_PER_SURF];
-  unsigned short rmsL1[ACTIVE_SURFS][L1S_PER_SURF];
-  unsigned short avgThresh[ACTIVE_SURFS][SCALERS_PER_SURF];
-  unsigned short rmsThresh[ACTIVE_SURFS][SCALERS_PER_SURF];
+  unsigned short avgScaler[TRIGGER_SURFS][SCALERS_PER_SURF];
+  unsigned short rmsScaler[TRIGGER_SURFS][SCALERS_PER_SURF];
+  unsigned short avgL1[TRIGGER_SURFS][L1S_PER_SURF];
+  unsigned short rmsL1[TRIGGER_SURFS][L1S_PER_SURF];
+  unsigned short avgThresh[TRIGGER_SURFS][SCALERS_PER_SURF];
+  unsigned short rmsThresh[TRIGGER_SURFS][SCALERS_PER_SURF];
   unsigned short avgRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
   unsigned short rmsRFPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
-  unsigned short surfTrigBandMask[ACTIVE_SURFS];
+  unsigned short surfTrigBandMask[TRIGGER_SURFS];
 } AveragedSurfHkStruct_t;
 
 //! Command Echo -- Telemetered
@@ -1196,7 +1202,7 @@ typedef struct {
 /*!
   Monitor inodes, inter-process communication lists and processes
 */
-typedef struct __attribute__((packed)){
+typedef struct __attribute__((packed)) {
     GenericHeader_t gHdr;
     unsigned int unixTime;
     unsigned int ramDiskInodes;
@@ -1686,22 +1692,34 @@ typedef struct
   unsigned int unixTimeStart;  //< time when scan was started (unix time) 
   unsigned short scanTime;  //<  approximate time it scan to finish finished (in decisecs). 
   unsigned short gain;  //< LNA gain, in cBm (i.e. 10 * dBm) 
-  short spectrum [RTLSDR_MAX_SPECTRUM_BINS]; //< power spectra, in cBm
+  unsigned char spectrum [RTLSDR_MAX_SPECTRUM_BINS]; //< power spectra... see anitaFlight.h for units
   unsigned char rtlNum ; //<which RTL is this? This is the SERIAL NUMBER (RTL%d), not the device enumeration order ( 4 bits is sufficient for < 15 devices) 
 } RtlSdrPowerSpectraStruct_t; 
 
 
 /*! 
  * Struct to store TUFF start and end phi sectors 
- *
  **/ 
-typedef struct
+typedef struct __attribute__((packed)) 
 {
   GenericHeader_t gHdr; 
-  unsigned int unixTime; 
-  unsigned char startSectors[NUM_TUFF_NOTCHES]; 
-  unsigned char endSectors[NUM_TUFF_NOTCHES]; 
-} TuffNotchStatus_t;
+  unsigned int notchSetTime;  // The last time the notches were set
+  unsigned int unixTime;  // The approximate time that this was written. If temperatures are read, the temperatures are read around this time
+  unsigned char startSectors[NUM_TUFF_NOTCHES]; //start sectors... 0 to 15 for real sectors, start and stop on 16 means nothing is enabled
+  unsigned char endSectors[NUM_TUFF_NOTCHES]; //stop sectors... 0 to 15 for real sectors, start and stop on 16 means nothing is enabled
+  char temperatures[NUM_RFCM];  //-128 if temperatures are not being read 
+} TuffNotchStatus_t; 
+
+typedef struct __attribute__((packed))
+{
+  GenericHeader_t gHdr; 
+  unsigned int requestedTime; 
+  unsigned int enactedTime; 
+  unsigned short cmd; 
+  unsigned char irfcm;    //these could be packed more strongly 
+  unsigned char tuffStack;  //these could be packed more strongly 
+} TuffRawCmd_t; 
+
 
 
 

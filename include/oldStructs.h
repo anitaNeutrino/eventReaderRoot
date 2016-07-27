@@ -159,6 +159,24 @@ typedef struct {
 
 //Old FullSurfHkStruct_t
 typedef struct { 
+  GenericHeader_t gHdr;
+  unsigned int unixTime;
+  unsigned int unixTimeUs;
+  unsigned short globalThreshold; ///<set to zero if there isn't one
+  unsigned short errorFlag; ///<Will define at some point    
+  unsigned short scalerGoals[NUM_ANTENNA_RINGS]; ///<What are we aiming for with the scaler rate
+  unsigned short reserved;  
+  unsigned short upperWords[ACTIVE_SURFS];
+  unsigned short scaler[ACTIVE_SURFS][SCALERS_PER_SURF];
+  unsigned short l1Scaler[ACTIVE_SURFS][L1S_PER_SURF];
+  unsigned short threshold[ACTIVE_SURFS][SCALERS_PER_SURF];
+  unsigned short setThreshold[ACTIVE_SURFS][SCALERS_PER_SURF];
+  unsigned short rfPower[ACTIVE_SURFS][RFCHAN_PER_SURF];
+  unsigned short surfTrigBandMask[ACTIVE_SURFS];
+} FullSurfHkStructVer40_t;
+
+
+typedef struct { 
     GenericHeader_t gHdr;
     unsigned int unixTime;
     unsigned int unixTimeUs;
