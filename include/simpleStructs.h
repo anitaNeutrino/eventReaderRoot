@@ -174,7 +174,7 @@
 #define VER_ZIPPED_FILE 40
 #define VER_ZIPPED_PACKET 40
 #define VER_RUN_START 40
-#define VER_OTHER_MON 40
+#define VER_OTHER_MON 41
 #define VER_GPSD_START 40
 #define VER_LOGWATCHD_START 40
 #define VER_AVG_SURF_HK 40
@@ -1196,7 +1196,7 @@ typedef struct {
 /*!
   Monitor inodes, inter-process communication lists and processes
 */
-typedef struct {
+typedef struct __attribute__((packed)){
     GenericHeader_t gHdr;
     unsigned int unixTime;
     unsigned int ramDiskInodes;
@@ -1205,7 +1205,7 @@ typedef struct {
     unsigned int runNumber; ///<Run number
     unsigned short dirFiles[3]; ///< /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
     unsigned short dirLinks[3]; ///< /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
-    unsigned short processBitMask;
+    unsigned int processBitMask;
   unsigned short reserved;
 } OtherMonitorStruct_t;
 
