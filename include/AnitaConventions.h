@@ -113,7 +113,8 @@ namespace WaveCalType {
 
 
 //Process Stuff
-#define NUM_PROCESSES 16 ///< The number of processes, actually this a couple more than we need
+#define NUM_PROCESSES 20 ///< The number of processes, actually this a couple more than we need
+#define NUM_PROCESSES_V40 20 ///< The number of processes, actually this a couple more than we need
 
 //GPS stuff
 #define MAX_SATS 12 ///< The maximum number of channels our GPS units have

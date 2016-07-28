@@ -88,7 +88,7 @@ class SurfHk: public TObject
    UInt_t getRFPowerPayloadTime(UInt_t surf, UInt_t chan); //returns the corrected payloadTime of the measured power monitor sample
    UInt_t getRFPowerPayloadTimeUs(UInt_t surf, UInt_t chan); //returns the corrected payloadTimeUs of the measured power monitor sample
 
-  ClassDef(SurfHk,31);
+   ClassDef(SurfHk,VER_SURF_HK);
 };
 
 
