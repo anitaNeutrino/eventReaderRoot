@@ -191,6 +191,16 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     fApplyExtraDelayFromPhaseCenter = true;
     break;
 
+  case WaveCalType::kVTFast:
+    fUnwrap = true;
+    fBinToBinDts = true;
+    fApplyTempCorrection = false;
+    fVoltage=true;
+    fApplyTriggerJitterCorrection=false;
+    fApplyCableDelays=true;
+    fZeroMeanNonClockChannels=true;
+    fApplyExtraDelayFromPhaseCenter=true;
+
   // case WaveCalType::kDefault:
   //   std::cerr << "It seems like WaveCal::kDefault isn't handled by any of the options in " 
   // 	      << __PRETTY_FUNCTION__ << std::endl;

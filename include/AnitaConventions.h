@@ -39,7 +39,7 @@ namespace WaveCalType {
     kNoTriggerJitterNoZeroMeanFirmwareRcoFlipped = 0x09,///< For calib: 1-firmware RCO (no latch delay)
     kFull = 0x0a, ///< deltaTs, voltage, unwrap, trigger jitter, cable delay. The full monty.
     kDefault = 0x0a, ///< What you should call for analysis work
-    // kVTFast = 0x1b, ///< Faster, but no algorithm for it
+    kVTFast = 0x1b, ///< Faster, but no algorithm for it
     kAddPeds = 0x1c, ///< New thing
     kNotACalib ///< Useful for looping over all calibrations 
   } WaveCalType_t; ///< The calibration enumeration type
