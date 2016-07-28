@@ -25,24 +25,15 @@ SummedTurfRate::~SummedTurfRate() {
 
 SummedTurfRate::SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStruct_t *turfPtr)
 {
-
- if(turfPtr->gHdr.code!=PACKET_SUM_TURF_RATE ||
-     turfPtr->gHdr.verId!=VER_SUM_TURF_RATE ||
-     turfPtr->gHdr.numBytes!=sizeof(SummedTurfRateStruct_t)) {
-    std::cerr << "Mismatched packet\n" 
-	      << "code:\t" << turfPtr->gHdr.code << "\t" << PACKET_SUM_TURF_RATE 
-	      << "\nversion:\t" << turfPtr->gHdr.verId 
-	      << "\t" << VER_SUM_TURF_RATE 
-	      << "\nsize:\t" << turfPtr->gHdr.numBytes << "\t"
-	      << sizeof(SummedTurfRateStruct_t) << std::endl;
-  }
-   run=trun;
-   realTime=trealTime;
-   payloadTime=turfPtr->unixTime;
-   numRates=turfPtr->numRates;
-   deltaT=turfPtr->deltaT;
-   deadTime=turfPtr->deadTime;
-   memcpy(bufferCount,turfPtr->bufferCount,sizeof(UChar_t)*4);
+  simplePacketCheck(&(turfPtr->gHdr),PACKET_SUM_TURF_RATE);
+  //All the above does is print a warning message
+  run=trun;
+  realTime=trealTime;
+  payloadTime=turfPtr->unixTime;
+  numRates=turfPtr->numRates;
+  deltaT=turfPtr->deltaT;
+  deadTime=turfPtr->deadTime;
+  memcpy(bufferCount,turfPtr->bufferCount,sizeof(UChar_t)*4);
    for(int phi=0;phi<PHI_SECTORS;phi++) {
      l3Rates[phi]=turfPtr->l3Rates[phi][0];
      l3RatesH[phi]=turfPtr->l3Rates[phi][1];

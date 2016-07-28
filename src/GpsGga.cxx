@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "GpsGga.h"
+#include "AnitaPacketUtil.h"
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -26,17 +27,7 @@ GpsGga::GpsGga(Int_t           trun,
 	 UInt_t          trealTime,
 	 GpsGgaStruct_t *gpsStruct)
 {
-
-  if((gpsStruct->gHdr.code&BASE_PACKET_MASK)!=PACKET_GPS_GGA ||
-     gpsStruct->gHdr.verId!=VER_GPS_GGA ||
-     gpsStruct->gHdr.numBytes!=sizeof(GpsGgaStruct_t)) {
-    std::cerr << "Mismatched packet\n" 
-	      << "code:\t" << gpsStruct->gHdr.code << "\t" << PACKET_GPS_GGA 
-	      << "\nversion:\t" << gpsStruct->gHdr.verId 
-	      << "\t" << VER_GPS_GGA 
-	      << "\nsize:\t" << gpsStruct->gHdr.numBytes << "\t"
-	      << sizeof(GpsGgaStruct_t) << std::endl;
-  }
+  simplePacketCheck(&(gpsStruct->gHdr),PACKET_GPS_GGA);
    run=trun;
    realTime=trealTime;
    intFlag=0;

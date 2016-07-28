@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "G12Pos.h"
+#include "AnitaPacketUtil.h"
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -26,17 +27,7 @@ G12Pos::G12Pos(Int_t           trun,
 	 UInt_t          trealTime,
 	 GpsG12PosStruct_t *gpsStruct)
 {
-
- if(gpsStruct->gHdr.code!=PACKET_GPS_G12_POS ||
-     gpsStruct->gHdr.verId!=VER_G12_POS ||
-     gpsStruct->gHdr.numBytes!=sizeof(GpsG12PosStruct_t)) {
-    std::cerr << "Mismatched packet\n" 
-	      << "code:\t" << gpsStruct->gHdr.code << "\t" << PACKET_GPS_G12_POS 
-	      << "\nversion:\t" << gpsStruct->gHdr.verId 
-	      << "\t" << VER_G12_POS 
-	      << "\nsize:\t" << gpsStruct->gHdr.numBytes << "\t"
-	      << sizeof(GpsG12PosStruct_t) << std::endl;
-  }
+  simplePacketCheck(&(gpsStruct->gHdr),PACKET_GPS_G12_POS);
    run=trun;
    realTime=trealTime;
    intFlag=0;

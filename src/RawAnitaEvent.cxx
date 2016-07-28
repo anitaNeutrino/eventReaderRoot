@@ -8,6 +8,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "RawAnitaEvent.h"
+#include "AnitaPacketUtil.h"
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -26,17 +27,7 @@ RawAnitaEvent::~RawAnitaEvent() {
 
 RawAnitaEvent::RawAnitaEvent(PedSubbedEventBody_t *bdPtr) 
 {
-  if(bdPtr->gHdr.code!=PACKET_PED_SUBBED_EVENT ||
-     bdPtr->gHdr.verId!=VER_PEDSUBBED_EVENT_BODY ||
-     bdPtr->gHdr.numBytes!=sizeof(PedSubbedEventBody_t)) {
-    std::cerr << "Mismatched packet\n" 
-	      << "code:\t" << bdPtr->gHdr.code << "\t" << PACKET_PED_SUBBED_EVENT 
-	      << "\nversion:\t" << bdPtr->gHdr.verId 
-	      << "\t" << VER_PEDSUBBED_EVENT_BODY 
-	      << "\nsize:\t" << bdPtr->gHdr.numBytes << "\t"
-	      << sizeof(PedSubbedEventBody_t) << std::endl;
-  }
-
+  simplePacketCheck(&(bdPtr->gHdr),PACKET_PED_SUBBED_EVENT);
    //Filling Constructor
    whichPeds=bdPtr->whichPeds;
    eventNumber=bdPtr->eventNumber;

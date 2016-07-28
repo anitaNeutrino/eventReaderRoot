@@ -37,6 +37,35 @@ void fillGenericHeader(void *thePtr, PacketCode_t code, unsigned short numBytes)
   \ingroup packetutil
 */
 int checkPacket(void *thePtr);
+
+
+
+//!  simplePacketCheck -- utility function
+/*!
+  Utility function that looks at a packet and prints a warning message
+  \ingroup packetutil
+*/
+int simplePacketCheck(GenericHeader_t *gHdr, PacketCode_t code);
+
+
+
+//!  getVersionId -- utility function
+/*!
+  Utility function that returns a version id
+  \ingroup packetutil
+*/
+unsigned char getVersionId(PacketCode_t code);
+
+
+//!  getPacketSize -- utility function
+/*!
+  Utility function that returns the size of a packet in bytes
+  \ingroup packetutil
+*/
+int getPacketSize(PacketCode_t code);
+
+
+
 //!  simpleIntCrc -- utility function
 /*!
   Utility function useful when looking at telemetry data
