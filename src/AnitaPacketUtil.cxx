@@ -14,7 +14,7 @@ int simplePacketCheck(GenericHeader_t *gHdr, PacketCode_t code) {
   int packetSize=getPacketSize(code);
   unsigned char expVerId=getVersionId(code);
   
-  if(gHdr->code!=code ||
+  if((gHdr->code&BASE_PACKET_MASK)!=code ||
      gHdr->verId!=expVerId ||
      gHdr->numBytes!=packetSize) {
     std::cerr << "Mismatched packet\t" << packetCodeAsString(code) <<  "\n" 
