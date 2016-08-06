@@ -28,17 +28,7 @@ SlowRate::~SlowRate() {
 
 SlowRate::SlowRate(Int_t trun, UInt_t trealTime, SlowRateFull_t *slowPtr)
 {
-
- if(slowPtr->gHdr.code!=PACKET_SLOW_FULL ||
-     slowPtr->gHdr.verId!=VER_SLOW_FULL ||
-     slowPtr->gHdr.numBytes!=sizeof(SlowRateFull_t)) {
-   std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_SLOW_FULL) << "\n" 
-	     << "code:\t" << (int)slowPtr->gHdr.code << "\t" << PACKET_SLOW_FULL 
-	     << "\nversion:\t" << (int)slowPtr->gHdr.verId 
-	     << "\t" << VER_SLOW_FULL 
-	     << "\nsize:\t" << slowPtr->gHdr.numBytes << "\t"
-	     << sizeof(SlowRateFull_t) << std::endl;
-  }
+  simplePacketCheck(&(slowPtr->gHdr),PACKET_SLOW_FULL);
 
    run=trun;
    realTime=trealTime;

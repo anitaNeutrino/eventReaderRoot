@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "CommandEcho.h"
+#include "AnitaPacketUtil.h"
 #include "anitaCommand.h"
 #include <iostream>
 #include <fstream>
@@ -26,17 +27,7 @@ CommandEcho::~CommandEcho() {
 
 CommandEcho::CommandEcho(Int_t trun, Int_t trealTime, CommandEcho_t *echoPtr)
 {
-
-  if((echoPtr->gHdr.code&BASE_PACKET_MASK)!=PACKET_CMD_ECHO ||
-     echoPtr->gHdr.verId!=VER_CMD_ECHO ||
-     echoPtr->gHdr.numBytes!=sizeof(CommandEcho_t)) {
-    std::cerr << "Mismatched packet\n" 
-	      << "code:\t" << echoPtr->gHdr.code << "\t" << PACKET_CMD_ECHO 
-	      << "\nversion:\t" << echoPtr->gHdr.verId 
-	      << "\t" << VER_CMD_ECHO 
-	      << "\nsize:\t" << echoPtr->gHdr.numBytes << "\t"
-	      << sizeof(CommandEcho_t) << std::endl;
-  }
+  simplePacketCheck(&(echoPtr->gHdr),PACKET_CMD_ECHO);
   run=trun;
   realTime=trealTime;
   payloadTime=echoPtr->unixTime;

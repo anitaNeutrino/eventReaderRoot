@@ -28,17 +28,8 @@ AveragedSurfHk::~AveragedSurfHk() {
 
 AveragedSurfHk::AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct_t *surfPtr)
 {
- if(surfPtr->gHdr.code!=PACKET_AVG_SURF_HK ||
-     surfPtr->gHdr.verId!=VER_AVG_SURF_HK ||
-     surfPtr->gHdr.numBytes!=sizeof(AveragedSurfHkStruct_t)) {
-    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_AVG_SURF_HK) <<"\n" 
-	      << "code:\t" << surfPtr->gHdr.code << "\t" << PACKET_AVG_SURF_HK 
-	      << "\nversion:\t" << surfPtr->gHdr.verId 
-	      << "\t" << VER_AVG_SURF_HK 
-	      << "\nsize:\t" << surfPtr->gHdr.numBytes << "\t"
-	      << sizeof(AveragedSurfHkStruct_t) << std::endl;
-  }
-
+  simplePacketCheck(&(surfPtr->gHdr),PACKET_AVG_SURF_HK);
+  
   run=trun;
   realTime=trealTime;
   payloadTime=surfPtr->unixTime;

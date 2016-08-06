@@ -32,17 +32,7 @@ SurfHk::~SurfHk() {
 
 SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr)
 {
-  if(surfPtr->gHdr.code!=PACKET_SURF_HK ||
-     surfPtr->gHdr.verId!=VER_SURF_HK ||
-     surfPtr->gHdr.numBytes!=sizeof(FullSurfHkStruct_t)) {
-     std::cerr << "Mismatched packet\t" << packetCodeAsString(PACKET_SURF_HK)
-	 
-	       << "\ncode:\t" << (int)surfPtr->gHdr.code << "\t" << PACKET_SURF_HK 
-	       << "\nversion:\t" << (int)surfPtr->gHdr.verId 
-	       << "\t" << VER_SURF_HK 
-	       << "\nsize:\t" << surfPtr->gHdr.numBytes << "\t"
-	       << sizeof(FullSurfHkStruct_t) << std::endl;
-  }
+  simplePacketCheck(&(surfPtr->gHdr),PACKET_SURF_HK);
      
 
   run=trun;

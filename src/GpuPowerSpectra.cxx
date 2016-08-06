@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "GpuPowerSpectra.h"
+#include "AnitaPacketUtil.h"
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -41,18 +42,8 @@ GpuPowerSpectra::~GpuPowerSpectra() {
 
 GpuPowerSpectra::GpuPowerSpectra(Int_t trun, Int_t trealTime, GpuPhiSectorPowerSpectrumStruct_t *gpuPtr)
 {
+  simplePacketCheck(&(gpuPtr->gHdr),PACKET_GPU_AVE_POW_SPEC);
 
-
- if(gpuPtr->gHdr.code!=PACKET_GPU_AVE_POW_SPEC ||
-     gpuPtr->gHdr.verId!=VER_GPU_POW_SPEC  ||
-     gpuPtr->gHdr.numBytes!=sizeof(GpuPhiSectorPowerSpectrumStruct_t)) {
-    std::cerr << "Mismatched packet\n" 
-	      << "code:\t" << gpuPtr->gHdr.code << "\t" << PACKET_GPU_AVE_POW_SPEC
-	      << "\nversion:\t" << (int)gpuPtr->gHdr.verId 
-	      << "\t" << (int)VER_GPU_POW_SPEC
-	      << "\nsize:\t" << (int)gpuPtr->gHdr.numBytes << "\t"
-	      << (int)sizeof(GpuPhiSectorPowerSpectrumStruct_t) << std::endl;
-  }
   run=trun;
   realTime=trealTime;
   for(int ring=0;ring<NUM_ANTENNA_RINGS;ring++) {

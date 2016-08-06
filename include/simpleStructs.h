@@ -1212,7 +1212,7 @@ typedef struct __attribute__((packed)) {
     unsigned short dirFiles[3]; ///< /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
     unsigned short dirLinks[3]; ///< /tmp/anita/acqd /tmp/anita/eventd /tmp/anita/prioritizerd
     unsigned int processBitMask;
-  unsigned short reserved;
+    unsigned short reserved;
 } OtherMonitorStruct_t;
 
 //! Pedestal Block -- Telemetered

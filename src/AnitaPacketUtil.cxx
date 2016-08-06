@@ -10,6 +10,82 @@
 #include <cstring>
 
 
+int simplePacketCheck(GenericHeader_t *gHdr, PacketCode_t code) {
+  int packetSize=getPacketSize(code);
+  unsigned char expVerId=getVersionId(code);
+  
+  if((gHdr->code&BASE_PACKET_MASK)!=code ||
+     gHdr->verId!=expVerId ||
+     gHdr->numBytes!=packetSize) {
+    std::cerr << "Mismatched packet\t" << packetCodeAsString(code) <<  "\n" 
+	      << "code:\t" << (int)gHdr->code << "\t" << (int)code 
+	      << "\nversion:\t" << (int)gHdr->verId 
+	      << "\t" << (int)expVerId 
+	      << "\nsize:\t" << gHdr->numBytes << "\t"
+	      << packetSize << std::endl;
+    return -1;
+  }
+  return 0;
+}
+
+
+int getPacketSize(PacketCode_t code) {
+  switch(code&BASE_PACKET_MASK) {
+  case PACKET_BD: return sizeof(AnitaEventBody_t); break;	    
+  case PACKET_HD: return sizeof(AnitaEventHeader_t); break;	    
+  case PACKET_WV: return sizeof(RawWaveformPacket_t); break;
+  case PACKET_PEDSUB_WV: return sizeof(PedSubbedWaveformPacket_t); break;
+  case PACKET_PEDSUB_SURF: return sizeof(PedSubbedSurfPacket_t); break;
+  case PACKET_SURF: return sizeof(RawSurfPacket_t); break;
+  case PACKET_SURF_HK: return sizeof(FullSurfHkStruct_t); break;
+  case PACKET_TURF_RATE: return sizeof(TurfRateStruct_t); break;
+  case PACKET_TURF_REGISTER: return sizeof(TurfRegisterContents_t); break;
+  case PACKET_AVG_SURF_HK: return sizeof(AveragedSurfHkStruct_t); break;
+  case PACKET_SUM_TURF_RATE: return sizeof(SummedTurfRateStruct_t); break;
+  case PACKET_ENC_WV_PEDSUB: break;
+  case PACKET_ENC_SURF: break;
+  case PACKET_ENC_SURF_PEDSUB: break;
+  case PACKET_PED_SUBBED_EVENT: return sizeof(PedSubbedEventBody_t); break;
+  case PACKET_LAB_PED: return sizeof(FullLabChipPedStruct_t); break;
+  case PACKET_FULL_PED: return sizeof(FullPedStruct_t); break;
+  case PACKET_GPS_ADU5_PAT: return sizeof(GpsAdu5PatStruct_t); break;
+  case PACKET_GPS_ADU5_SAT: return sizeof(GpsAdu5SatStruct_t); break;
+  case PACKET_GPS_ADU5_VTG: return sizeof(GpsAdu5VtgStruct_t); break;
+  case PACKET_GPS_G12_POS: return sizeof(GpsG12PosStruct_t); break;
+  case PACKET_GPS_G12_SAT: return sizeof(GpsG12SatStruct_t); break;
+  case PACKET_GPS_GGA: return sizeof(GpsGgaStruct_t); break;
+  case PACKET_HKD: return sizeof(HkDataStruct_t); break;    
+  case PACKET_HKD_SS: return sizeof(SSHkDataStruct_t); break;    
+  case PACKET_CMD_ECHO: return sizeof(CommandEcho_t); break;
+  case PACKET_MONITOR: return sizeof(MonitorStruct_t); break;
+  case PACKET_WAKEUP_LOS: return WAKEUP_LOS_BUFFER_SIZE; break;
+  case PACKET_WAKEUP_HIGHRATE: return WAKEUP_TDRSS_BUFFER_SIZE; 
+    break;
+  case PACKET_WAKEUP_COMM1: return WAKEUP_LOW_RATE_BUFFER_SIZE; 
+    break;
+  case PACKET_WAKEUP_COMM2: return WAKEUP_LOW_RATE_BUFFER_SIZE; 
+    break;
+  case PACKET_SLOW1: return sizeof(SlowRateType1_t); 
+    break;
+  case PACKET_SLOW2: return sizeof(SlowRateType1_t); 
+    break;
+  case PACKET_SLOW_FULL: return sizeof(SlowRateFull_t); 
+    break;
+  case PACKET_RUN_START: return sizeof(RunStart_t); 
+    break;
+  case PACKET_OTHER_MONITOR: return sizeof(OtherMonitorStruct_t); 
+    break;
+  case PACKET_ZIPPED_PACKET: break;
+  case PACKET_ZIPPED_FILE: break;
+  case PACKET_GPSD_START: return sizeof(GpsdStartStruct_t); break;
+  case PACKET_LOGWATCHD_START: return sizeof(LogWatchdStart_t); break;
+  case PACKET_ACQD_START: return sizeof(AcqdStartStruct_t); break;
+    //  default: 
+    //    retVal+=PKT_E_CODE; break;
+  }
+  return 0;
+  
+}
 
 
 
@@ -25,7 +101,51 @@ unsigned int simpleIntCrc(unsigned int *p, unsigned int n)
   return ((0xffffffff - sum) + 1);
 }
 
+unsigned char getVersionId(PacketCode_t code) {
 
+  switch(code&BASE_PACKET_MASK) {
+  case PACKET_BD: return VER_EVENT_BODY; break;
+  case PACKET_HD: return VER_EVENT_HEADER; break;
+  case PACKET_HD_SLAC: return SLAC_VER_EVENT_HEADER; break;
+  case PACKET_WV: return VER_WAVE_PACKET; break;
+  case PACKET_SURF: return VER_SURF_PACKET; break;
+  case PACKET_SURF_HK: return VER_SURF_HK; break;
+  case PACKET_TURF_RATE: return VER_TURF_RATE; break;
+  case PACKET_AVG_SURF_HK: return VER_AVG_SURF_HK; break;
+  case PACKET_SUM_TURF_RATE: return VER_SUM_TURF_RATE; break;
+  case PACKET_TURF_REGISTER: return VER_TURF_REG; break;
+  case PACKET_LAB_PED: return VER_LAB_PED; break;
+  case PACKET_FULL_PED: return VER_FULL_PED; break;
+  case PACKET_ENC_WV_PEDSUB: return VER_ENC_WAVE_PACKET; break;
+  case PACKET_ENC_SURF: return VER_ENC_SURF_PACKET; break;
+  case PACKET_PED_SUBBED_EVENT: return VER_PEDSUBBED_EVENT_BODY; break;
+  case PACKET_GPS_ADU5_PAT: return VER_ADU5_PAT; break;
+  case PACKET_GPS_ADU5_SAT: return VER_ADU5_SAT; break;
+  case PACKET_GPS_ADU5_VTG: return VER_ADU5_VTG; break;
+  case PACKET_GPS_G12_POS: return VER_G12_POS; break;
+  case PACKET_GPS_G12_SAT: return VER_G12_SAT; break;
+  case PACKET_GPS_GGA: return VER_GPS_GGA; break;
+  case PACKET_HKD: return VER_HK_FULL; break;  
+#ifndef ANITA_2_DATA
+  case PACKET_HKD_SS: return VER_HK_SS; break;
+#endif
+  case PACKET_CMD_ECHO: return VER_CMD_ECHO; break;
+  case PACKET_MONITOR: return VER_MONITOR; break;
+  case PACKET_SLOW1: return VER_SLOW_1; break;
+  case PACKET_SLOW2: return VER_SLOW_2; break;
+  case PACKET_SLOW_FULL: return VER_SLOW_FULL; break;
+  case PACKET_ZIPPED_FILE: return VER_ZIPPED_FILE; break;
+  case PACKET_ZIPPED_PACKET: return VER_ZIPPED_PACKET; break;
+  case PACKET_RUN_START: return VER_RUN_START; break;
+  case PACKET_OTHER_MONITOR: return VER_OTHER_MON; break;
+  case PACKET_GPSD_START: return VER_GPSD_START; break;
+  case PACKET_LOGWATCHD_START: return VER_LOGWATCHD_START; break;
+  case PACKET_ACQD_START: return VER_ACQD_START; break;
+  default: 
+    return 0; break;
+  }
+  return 0;
+}
 
 
 void fillGenericHeader(void *thePtr, PacketCode_t code, unsigned short numBytes) {
@@ -42,47 +162,7 @@ void fillGenericHeader(void *thePtr, PacketCode_t code, unsigned short numBytes)
   gHdr->code=code;
   gHdr->numBytes=numBytes;
   gHdr->feByte=0xfe;
-  switch(code&BASE_PACKET_MASK) {
-  case PACKET_BD: gHdr->verId=VER_EVENT_BODY; break;
-  case PACKET_HD: gHdr->verId=VER_EVENT_HEADER; break;
-  case PACKET_HD_SLAC: gHdr->verId=SLAC_VER_EVENT_HEADER; break;
-  case PACKET_WV: gHdr->verId=VER_WAVE_PACKET; break;
-  case PACKET_SURF: gHdr->verId=VER_SURF_PACKET; break;
-  case PACKET_SURF_HK: gHdr->verId=VER_SURF_HK; break;
-  case PACKET_TURF_RATE: gHdr->verId=VER_TURF_RATE; break;
-  case PACKET_AVG_SURF_HK: gHdr->verId=VER_AVG_SURF_HK; break;
-  case PACKET_SUM_TURF_RATE: gHdr->verId=VER_SUM_TURF_RATE; break;
-  case PACKET_TURF_REGISTER: gHdr->verId=VER_TURF_REG; break;
-  case PACKET_LAB_PED: gHdr->verId=VER_LAB_PED; break;
-  case PACKET_FULL_PED: gHdr->verId=VER_FULL_PED; break;
-  case PACKET_ENC_WV_PEDSUB: gHdr->verId=VER_ENC_WAVE_PACKET; break;
-  case PACKET_ENC_SURF: gHdr->verId=VER_ENC_SURF_PACKET; break;
-  case PACKET_PED_SUBBED_EVENT: gHdr->verId=VER_PEDSUBBED_EVENT_BODY; break;
-  case PACKET_GPS_ADU5_PAT: gHdr->verId=VER_ADU5_PAT; break;
-  case PACKET_GPS_ADU5_SAT: gHdr->verId=VER_ADU5_SAT; break;
-  case PACKET_GPS_ADU5_VTG: gHdr->verId=VER_ADU5_VTG; break;
-  case PACKET_GPS_G12_POS: gHdr->verId=VER_G12_POS; break;
-  case PACKET_GPS_G12_SAT: gHdr->verId=VER_G12_SAT; break;
-  case PACKET_GPS_GGA: gHdr->verId=VER_GPS_GGA; break;
-  case PACKET_HKD: gHdr->verId=VER_HK_FULL; break;  
-#ifndef ANITA_2_DATA
-  case PACKET_HKD_SS: gHdr->verId=VER_HK_SS; break;
-#endif
-  case PACKET_CMD_ECHO: gHdr->verId=VER_CMD_ECHO; break;
-  case PACKET_MONITOR: gHdr->verId=VER_MONITOR; break;
-  case PACKET_SLOW1: gHdr->verId=VER_SLOW_1; break;
-  case PACKET_SLOW2: gHdr->verId=VER_SLOW_2; break;
-  case PACKET_SLOW_FULL: gHdr->verId=VER_SLOW_FULL; break;
-  case PACKET_ZIPPED_FILE: gHdr->verId=VER_ZIPPED_FILE; break;
-  case PACKET_ZIPPED_PACKET: gHdr->verId=VER_ZIPPED_PACKET; break;
-  case PACKET_RUN_START: gHdr->verId=VER_RUN_START; break;
-  case PACKET_OTHER_MONITOR: gHdr->verId=VER_OTHER_MON; break;
-  case PACKET_GPSD_START: gHdr->verId=VER_GPSD_START; break;
-  case PACKET_LOGWATCHD_START: gHdr->verId=VER_LOGWATCHD_START; break;
-  case PACKET_ACQD_START: gHdr->verId=VER_ACQD_START; break;
-  default: 
-    gHdr->verId=0; break;
-  }
+  gHdr->verId=getVersionId(code);
   gHdr->checksum=simpleIntCrc(dataPtr,intBytes);
   //  printf("Int bytes %u\t checksum %u\n",intBytes,gHdr->checksum);
 }
@@ -117,105 +197,14 @@ int checkPacket(void *thePtr)
     //	   packetCodeAsString(code),code,numInts,gHdr->numBytes,checksum,gHdr->checksum);	
     retVal+=PKT_E_CHECKSUM;
   }
-  switch(code&BASE_PACKET_MASK) {
-  case PACKET_BD: packetSize=sizeof(AnitaEventBody_t); break;	    
-  case PACKET_HD: packetSize=sizeof(AnitaEventHeader_t); break;	    
-  case PACKET_WV: packetSize=sizeof(RawWaveformPacket_t); break;
-  case PACKET_PEDSUB_WV: packetSize=sizeof(PedSubbedWaveformPacket_t); break;
-  case PACKET_PEDSUB_SURF: packetSize=sizeof(PedSubbedSurfPacket_t); break;
-  case PACKET_SURF: packetSize=sizeof(RawSurfPacket_t); break;
-  case PACKET_SURF_HK: packetSize=sizeof(FullSurfHkStruct_t); break;
-  case PACKET_TURF_RATE: packetSize=sizeof(TurfRateStruct_t); break;
-  case PACKET_TURF_REGISTER: packetSize=sizeof(TurfRegisterContents_t); break;
-  case PACKET_AVG_SURF_HK: packetSize=sizeof(AveragedSurfHkStruct_t); break;
-  case PACKET_SUM_TURF_RATE: packetSize=sizeof(SummedTurfRateStruct_t); break;
-  case PACKET_ENC_WV_PEDSUB: break;
-  case PACKET_ENC_SURF: break;
-  case PACKET_ENC_SURF_PEDSUB: break;
-  case PACKET_PED_SUBBED_EVENT: packetSize=sizeof(PedSubbedEventBody_t); break;
-  case PACKET_LAB_PED: packetSize=sizeof(FullLabChipPedStruct_t); break;
-  case PACKET_FULL_PED: packetSize=sizeof(FullPedStruct_t); break;
-  case PACKET_GPS_ADU5_PAT: packetSize=sizeof(GpsAdu5PatStruct_t); break;
-  case PACKET_GPS_ADU5_SAT: packetSize=sizeof(GpsAdu5SatStruct_t); break;
-  case PACKET_GPS_ADU5_VTG: packetSize=sizeof(GpsAdu5VtgStruct_t); break;
-  case PACKET_GPS_G12_POS: packetSize=sizeof(GpsG12PosStruct_t); break;
-  case PACKET_GPS_G12_SAT: packetSize=sizeof(GpsG12SatStruct_t); break;
-  case PACKET_GPS_GGA: packetSize=sizeof(GpsGgaStruct_t); break;
-  case PACKET_HKD: packetSize=sizeof(HkDataStruct_t); break;    
-  case PACKET_HKD_SS: packetSize=sizeof(SSHkDataStruct_t); break;    
-  case PACKET_CMD_ECHO: packetSize=sizeof(CommandEcho_t); break;
-  case PACKET_MONITOR: packetSize=sizeof(MonitorStruct_t); break;
-  case PACKET_WAKEUP_LOS: packetSize=WAKEUP_LOS_BUFFER_SIZE; break;
-  case PACKET_WAKEUP_HIGHRATE: packetSize=WAKEUP_TDRSS_BUFFER_SIZE; 
-    break;
-  case PACKET_WAKEUP_COMM1: packetSize=WAKEUP_LOW_RATE_BUFFER_SIZE; 
-    break;
-  case PACKET_WAKEUP_COMM2: packetSize=WAKEUP_LOW_RATE_BUFFER_SIZE; 
-    break;
-  case PACKET_SLOW1: packetSize=sizeof(SlowRateType1_t); 
-    break;
-  case PACKET_SLOW2: packetSize=sizeof(SlowRateType1_t); 
-    break;
-  case PACKET_SLOW_FULL: packetSize=sizeof(SlowRateFull_t); 
-    break;
-  case PACKET_RUN_START: packetSize=sizeof(RunStart_t); 
-    break;
-  case PACKET_OTHER_MONITOR: packetSize=sizeof(OtherMonitorStruct_t); 
-    break;
-  case PACKET_ZIPPED_PACKET: break;
-  case PACKET_ZIPPED_FILE: break;
-  case PACKET_GPSD_START: packetSize=sizeof(GpsdStartStruct_t); break;
-  case PACKET_LOGWATCHD_START: packetSize=sizeof(LogWatchdStart_t); break;
-  case PACKET_ACQD_START: packetSize=sizeof(AcqdStartStruct_t); break;
-    //  default: 
-    //    retVal+=PKT_E_CODE; break;
-  }
+
+  //Now check packet size
+  packetSize=getPacketSize(code);
   if(packetSize && (packetSize!=gHdr->numBytes))  
     retVal+=PKT_E_SIZE;
 
-  unsigned char expVerId;
-
-  switch(code&BASE_PACKET_MASK) {
-  case PACKET_BD: expVerId=VER_EVENT_BODY; break;
-  case PACKET_HD: expVerId=VER_EVENT_HEADER; break;
-  case PACKET_HD_SLAC: expVerId=SLAC_VER_EVENT_HEADER; break;
-  case PACKET_WV: expVerId=VER_WAVE_PACKET; break;
-  case PACKET_SURF: expVerId=VER_SURF_PACKET; break;
-  case PACKET_SURF_HK: expVerId=VER_SURF_HK; break;
-  case PACKET_TURF_RATE: expVerId=VER_TURF_RATE; break;
-  case PACKET_AVG_SURF_HK: expVerId=VER_AVG_SURF_HK; break;
-  case PACKET_SUM_TURF_RATE: expVerId=VER_SUM_TURF_RATE; break;
-  case PACKET_TURF_REGISTER: expVerId=VER_TURF_REG; break;
-  case PACKET_LAB_PED: expVerId=VER_LAB_PED; break;
-  case PACKET_FULL_PED: expVerId=VER_FULL_PED; break;
-  case PACKET_ENC_WV_PEDSUB: expVerId=VER_ENC_WAVE_PACKET; break;
-  case PACKET_ENC_SURF: expVerId=VER_ENC_SURF_PACKET; break;
-  case PACKET_PED_SUBBED_EVENT: expVerId=VER_PEDSUBBED_EVENT_BODY; break;
-  case PACKET_GPS_ADU5_PAT: expVerId=VER_ADU5_PAT; break;
-  case PACKET_GPS_ADU5_SAT: expVerId=VER_ADU5_SAT; break;
-  case PACKET_GPS_ADU5_VTG: expVerId=VER_ADU5_VTG; break;
-  case PACKET_GPS_G12_POS: expVerId=VER_G12_POS; break;
-  case PACKET_GPS_G12_SAT: expVerId=VER_G12_SAT; break;
-  case PACKET_GPS_GGA: expVerId=VER_GPS_GGA; break;
-  case PACKET_HKD: expVerId=VER_HK_FULL; break;  
-#ifndef ANITA_2_DATA
-  case PACKET_HKD_SS: expVerId=VER_HK_SS; break;
-#endif
-  case PACKET_CMD_ECHO: expVerId=VER_CMD_ECHO; break;
-  case PACKET_MONITOR: expVerId=VER_MONITOR; break;
-  case PACKET_SLOW1: expVerId=VER_SLOW_1; break;
-  case PACKET_SLOW2: expVerId=VER_SLOW_2; break;
-  case PACKET_SLOW_FULL: expVerId=VER_SLOW_FULL; break;
-  case PACKET_ZIPPED_FILE: expVerId=VER_ZIPPED_FILE; break;
-  case PACKET_ZIPPED_PACKET: expVerId=VER_ZIPPED_PACKET; break;
-  case PACKET_RUN_START: expVerId=VER_RUN_START; break;
-  case PACKET_OTHER_MONITOR: expVerId=VER_OTHER_MON; break;
-  case PACKET_GPSD_START: expVerId=VER_GPSD_START; break;
-  case PACKET_LOGWATCHD_START: expVerId=VER_LOGWATCHD_START; break;
-  case PACKET_ACQD_START: expVerId=VER_ACQD_START; break;
-  default: 
-    expVerId=0; break;
-  }
+  unsigned char expVerId=getVersionId(code);
+  
   if(gHdr->verId!=expVerId) {
     std::cout << "Version mis-match: " << (int) gHdr->verId << "\t" << (int)expVerId << "\n";
   }
@@ -2323,6 +2312,8 @@ int AnitaCompress::codeunpack(int m, unsigned char *in, unsigned int *out)
      }
      return outword;
 }
+
+
 
 
      

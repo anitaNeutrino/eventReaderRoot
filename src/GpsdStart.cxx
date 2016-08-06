@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "GpsdStart.h"
+#include "AnitaPacketUtil.h"
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -25,17 +26,7 @@ GpsdStart::~GpsdStart() {
 
 GpsdStart::GpsdStart(Int_t trun, Int_t trealTime, GpsdStartStruct_t *startPtr)
 {
-
- if(startPtr->gHdr.code!=PACKET_GPSD_START ||
-     startPtr->gHdr.verId!=VER_GPSD_START ||
-     startPtr->gHdr.numBytes!=sizeof(GpsdStartStruct_t)) {
-    std::cerr << "Mismatched packet\n" 
-	      << "code:\t" << startPtr->gHdr.code << "\t" << PACKET_GPSD_START 
-	      << "\nversion:\t" << startPtr->gHdr.verId 
-	      << "\t" << VER_GPSD_START 
-	      << "\nsize:\t" << startPtr->gHdr.numBytes << "\t"
-	      << sizeof(GpsdStartStruct_t) << std::endl;
-  }
+  simplePacketCheck(&(startPtr->gHdr),PACKET_GPSD_START);
   run=trun;
   realTime=trealTime;
   payloadTime=startPtr->unixTime;

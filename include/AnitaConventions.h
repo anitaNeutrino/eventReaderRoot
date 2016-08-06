@@ -39,7 +39,7 @@ namespace WaveCalType {
     kNoTriggerJitterNoZeroMeanFirmwareRcoFlipped = 0x09,///< For calib: 1-firmware RCO (no latch delay)
     kFull = 0x0a, ///< deltaTs, voltage, unwrap, trigger jitter, cable delay. The full monty.
     kDefault = 0x0a, ///< What you should call for analysis work
-    // kVTFast = 0x1b, ///< Faster, but no algorithm for it
+    kVTFast = 0x1b, ///< Faster, but no algorithm for it
     kAddPeds = 0x1c, ///< New thing
     kNotACalib ///< Useful for looping over all calibrations 
   } WaveCalType_t; ///< The calibration enumeration type
@@ -113,7 +113,8 @@ namespace WaveCalType {
 
 
 //Process Stuff
-#define NUM_PROCESSES 16 ///< The number of processes, actually this a couple more than we need
+#define NUM_PROCESSES 20 ///< The number of processes, actually this a couple more than we need
+#define NUM_PROCESSES_V40 20 ///< The number of processes, actually this a couple more than we need
 
 //GPS stuff
 #define MAX_SATS 12 ///< The maximum number of channels our GPS units have

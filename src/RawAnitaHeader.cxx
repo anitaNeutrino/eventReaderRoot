@@ -28,16 +28,7 @@ RawAnitaHeader::~RawAnitaHeader() {
 RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t trealTime,
 			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
 {
- if(hdPtr->gHdr.code!=PACKET_HD ||
-    hdPtr->gHdr.verId!=VER_EVENT_HEADER ||
-    hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeader_t)) {
-    std::cerr << "Mismatched packet :\t" << packetCodeAsString(PACKET_HD) << " (default)\n" 
-	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
-	      << "\nversion:\t" << (int)hdPtr->gHdr.verId 
-	      << "\t" << (int)VER_EVENT_HEADER 
-	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
-	      << sizeof(AnitaEventHeader_t) << std::endl;
-  }
+  simplePacketCheck(&(hdPtr->gHdr),PACKET_HD);
 
    payloadTime=hdPtr->unixTime;
    payloadTimeUs=hdPtr->unixTimeUs;

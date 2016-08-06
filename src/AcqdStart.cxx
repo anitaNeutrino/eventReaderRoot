@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "AcqdStart.h"
+#include "AnitaPacketUtil.h"
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -25,16 +26,7 @@ AcqdStart::~AcqdStart() {
 
 AcqdStart::AcqdStart(Int_t trun, Int_t trealTime, AcqdStartStruct_t *startPtr)
 {
-  if(startPtr->gHdr.code!=PACKET_ACQD_START ||
-     startPtr->gHdr.verId!=VER_ACQD_START ||
-     startPtr->gHdr.numBytes!=sizeof(AcqdStartStruct_t)) {
-    std::cerr << "Mismatched packet\n" 
-	      << "code:\t" << startPtr->gHdr.code << "\t" << PACKET_ACQD_START 
-	      << "\nversion:\t" << startPtr->gHdr.verId 
-	      << "\t" << VER_ACQD_START 
-	      << "\nsize:\t" << startPtr->gHdr.numBytes << "\t"
-	      << sizeof(AcqdStartStruct_t) << std::endl;
-  }
+  simplePacketCheck(&(startPtr->gHdr),PACKET_ACQD_START);
   run=trun;
   realTime=trealTime;
   payloadTime=startPtr->unixTime;
