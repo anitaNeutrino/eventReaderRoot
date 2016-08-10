@@ -1,4 +1,10 @@
 #ifdef __ROOTCLING__
+#define ROOT_PARSER
+#elif __CINT__
+#define ROOT_PARSER
+#endif
+
+#ifdef ROOT_PARSER
 
 #pragma link off all globals;
 #pragma link off all classes;
