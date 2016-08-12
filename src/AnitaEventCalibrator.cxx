@@ -17,7 +17,6 @@ AnitaEventCalibrator::AnitaEventCalibrator(){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
   // std::cerr << "AnitaEventCalibrator::AnitaEventCalibrator()" << std::endl;
   loadCalib();
-
   //  const Int_t bufferSize = 3600; ///< An hour of averging at 1Hz, worked for calibration
   //  clockPeriodRingBuffer = new RingBuffer(bufferSize); 
 
@@ -26,6 +25,7 @@ AnitaEventCalibrator::AnitaEventCalibrator(){
   nominalDeltaT = 1./2.6; ///< in nanoseconds
   fClockProblem = 0; ///< If unreasonable number of zero crossings in clock, raise flag & skip temp correction update
 
+  calledLoadBlindTrees = false;
   initializeVectors();
 
 }
@@ -70,10 +70,69 @@ void AnitaEventCalibrator::initializeVectors(){
 }
 
 
+Int_t AnitaEventCalibrator::isEventToOverwrite(UInt_t eventNumber){
+
+  Int_t fakeTreeEntry = -1;
+  for(UInt_t i=0; i <overwrittenEventInfo.size(); i++){
+    if(overwrittenEventInfo.at(i).first==eventNumber){
+      fakeTreeEntry = overwrittenEventInfo.at(i).second;
+      break;
+    }
+  }
+  return fakeTreeEntry;
+}
+
 
 
 Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, 
-						 WaveCalType::WaveCalType_t calType){  
+						 WaveCalType::WaveCalType_t calType){
+
+  // need a flag to load this after constructor otherwise loadBlindTrees()
+  // puts us into an infinite loop.
+  if(!calledLoadBlindTrees){
+    loadBlindTrees();
+  }
+  
+  UInt_t eventNumber = eventPtr->eventNumber;
+  Int_t fakeEntry = isEventToOverwrite(eventNumber);
+  
+  if(fakeEntry >= 0){
+    // std::cerr << "I'm a fake event! << " << eventNumber << std::endl;
+
+    // keep surfEventId to avoid obvious discontinuity in MagicDisplay
+    std::vector<Int_t> surfEventsIds(NUM_SURF, 0);
+    for(int surf=0; surf < NUM_SURF; surf++){
+      surfEventsIds.at(surf) = eventPtr->surfEventId[surf];
+    }
+    fFakeEventTree->GetEntry(fakeEntry);
+    
+    (*eventPtr) = (*fFakeEvent); // relying on implicitly declared copy constructor... will this work?
+
+    // set eventNumber and surfEventIds back to original
+    // turfEventId/turfEventNumber are swapped in blindHeaderFiles but not fakeHeadTree
+    eventPtr->eventNumber = eventNumber;
+    for(int surf=0; surf < NUM_SURF; surf++){
+      eventPtr->surfEventId[surf] = surfEventsIds.at(surf);
+    }
+
+    // we have a fully calibrated useful anita event
+    // so don't calibrate it unless they want a different calibration type
+    if(calType!=WaveCalType::kDefault){
+      reallyCalibrateUsefulEvent(eventPtr, calType);  
+    }
+  }
+  else{
+    reallyCalibrateUsefulEvent(eventPtr, calType);      
+  }
+  return 0;
+}
+
+
+  
+Int_t AnitaEventCalibrator::reallyCalibrateUsefulEvent(UsefulAnitaEvent *eventPtr, 
+						       WaveCalType::WaveCalType_t calType){  
+  
+
 
 
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
@@ -93,9 +152,9 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   //! Step 1: figure out from WaveCalType_t calType exactly what we're going to do.
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
 
   // Initial states for calibration flags, modified based on calType below
   Bool_t fUnwrap                         = false;
@@ -200,9 +259,9 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   //! Step 2: Figure out RCO phase from clock period (if bin-to-bin dts required)
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   fClockProblem = 0; ///< If we have an issue with the clock (more than 4 zero crossings or less than 3) then we raise this flag to not update rolling average temperature correction.
 
   if(fBinToBinDts==true){
@@ -243,9 +302,9 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   //! Step 3: Update rolling temperature correction (copy to usefulAnitaEvent)
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   if(eventPtr->fFromCalibratedAnitaEvent==0){ // Then figure it out from event information
     if(fClockProblem!=0){
       std::cerr << "Clock problem found in eventNumber = " << eventPtr->eventNumber
@@ -267,9 +326,9 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   //! Steps 4: Unwrap all channels (if requested)
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   if(fUnwrap==true){// Then we call the unwrapping function for every channel
     for(Int_t surf = 0; surf < NUM_SURF; surf++){
       for(Int_t chan = 0; chan < NUM_CHAN; chan++){
@@ -319,9 +378,9 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     }
   }
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   //! Step 5: Apply bin-to-bin timing (if requested)
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   // Actually all the bin-to-bin timings are put in the time array by default..
   // so if they're not wanted we can take them out again.
   if(fBinToBinDts==false){
@@ -340,9 +399,9 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   //! Step 6: Apply voltage calib (if requested)
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   if(fVoltage==true){
     applyVoltageCalibration(eventPtr);
   }
@@ -357,9 +416,9 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   //! Step 7: Find trigger jitter correction
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   if(fApplyTriggerJitterCorrection==true){
     if(eventPtr->fFromCalibratedAnitaEvent==0){
       // If we don't have the calibration then get correction
@@ -392,9 +451,9 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   //! Step 8: Zero mean all non-clock channels
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
 
   if(fZeroMeanNonClockChannels==true){
     zeroMeanNonClockChannels();
@@ -406,10 +465,10 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
   // Combine last two steps...
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   //! Step 9: Apply channel-to-channel cable delays
   //! Step 10: Copy voltage, time (with cable delays) & capacitor arrays to UsefulAnitaEvent
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
   for(Int_t surf=0; surf<NUM_SURF; surf++){
     eventPtr->fRcoArray[surf] = rcoVector.at(surf);
     eventPtr->fClockPhiArray[surf] = clockAlignment.at(surf);
@@ -1447,6 +1506,8 @@ Int_t AnitaEventCalibrator::unwrapChannel(UsefulAnitaEvent* eventPtr, Int_t surf
 }
 
 
+
+
 void AnitaEventCalibrator::loadCalib() {
   char calibDir[FILENAME_MAX];
   char fileName[FILENAME_MAX];
@@ -1572,3 +1633,84 @@ Double_t AnitaEventCalibrator::convertRfPowToKelvin(int surf, int chan, int adc)
   double K = (mW/(1000.*1.38e-23*1e9));
   return K;
 }
+
+
+
+void AnitaEventCalibrator::loadBlindTrees() {
+
+  if(!calledLoadBlindTrees){
+    // zero internal pointers so can check we find everything.
+    fFakeHeadFile = NULL;
+    fFakeEventFile = NULL;
+    fFakeHeadTree = NULL;
+    fFakeEventTree = NULL;
+    fFakeEvent = NULL;
+
+    
+    char calibDir[FILENAME_MAX];
+    char fileName[FILENAME_MAX];
+    char *calibEnv=getenv("ANITA_CALIB_DIR");
+    if(!calibEnv) {
+      char *utilEnv=getenv("ANITA_UTIL_INSTALL_DIR");
+      if(!utilEnv){
+	sprintf(calibDir,"calib");
+      }
+      else{
+	sprintf(calibDir,"%s/share/anitaCalib",utilEnv);
+      }
+    }
+    else {
+      strncpy(calibDir,calibEnv,FILENAME_MAX);
+    }
+
+    // these are the fake events, that will be inserted in place of some min bias events
+    sprintf(fileName, "%s/fakeEventFile.root", calibDir);
+    fFakeEventFile = TFile::Open(fileName);
+    if(fFakeEventFile){
+      fFakeEventTree = (TTree*) fFakeEventFile->Get("eventTree");
+    }
+    // the header data won't actually get used
+    sprintf(fileName, "%s/fakeHeadFile.root", calibDir);
+    fFakeHeadFile = TFile::Open(fileName);
+    if(fFakeHeadFile){
+      fFakeHeadTree = (TTree*) fFakeHeadFile->Get("headTree");
+    }
+
+
+    // these are the min bias event numbers to be overwritten, with the entry in the fakeEventTree
+    // that is used to overwrite the event
+    sprintf(fileName,"%s/anita3OverwrittenEventInfo.txt",calibDir);
+    std::ifstream overwrittenEventInfoFile(fileName);
+    char firstLine[180];
+    overwrittenEventInfoFile.getline(firstLine,179);
+    UInt_t overwrittenEventNumber;
+    Int_t fakeTreeEntry;
+    while(overwrittenEventInfoFile >> overwrittenEventNumber >> fakeTreeEntry){
+      overwrittenEventInfo.push_back(std::pair<UInt_t, Int_t>(overwrittenEventNumber, fakeTreeEntry));
+      // std::cout << overwrittenEventInfo.at(overwrittenEventInfo.size()-1).first << "\t" << overwrittenEventInfo.at(overwrittenEventInfo.size()-1).second << std::endl;
+    }
+    if(overwrittenEventInfo.size()==0){
+      std::cerr << "Warning in " << __FILE__ << std::endl;
+      std::cerr << "Unable to find overwrittenEventInfo" << std::endl;
+    }
+
+    
+    // whinge if you can't find the data
+    if(fFakeEventFile && fFakeHeadTree && fFakeHeadFile && fFakeEventTree){
+      // std::cerr << "fgInstance = " << fgInstance << ", but this = " << this << std::endl;
+      fFakeEventTree->SetBranchAddress("event", &fFakeEvent);
+    }
+    else{
+      std::cerr << "Warning in " << __FILE__ << std::endl;
+      std::cerr << "Unable to find files for blinding" << std::endl;
+      std::cerr << "fFakeHeadFile = " << fFakeHeadFile << std::endl;
+      std::cerr << "fFakeHeadTree = " << fFakeHeadTree << std::endl;
+      std::cerr << "fFakeEventFile = " << fFakeEventFile << std::endl;
+      std::cerr << "fFakeEventTree = " << fFakeEventTree << std::endl;    
+    }
+    
+
+  }
+  calledLoadBlindTrees = true;
+}
+

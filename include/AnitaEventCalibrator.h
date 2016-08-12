@@ -15,6 +15,8 @@
 #include <TH1.h>
 #include <TMath.h>
 #include <TGraph.h>
+#include <TTree.h>
+#include <TFile.h>
 
 #ifdef USE_FFT_TOOLS
 #include "FFTtools.h"
@@ -58,7 +60,9 @@ class AnitaEventCalibrator : public TObject
 
   
   Int_t calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, 
-			     WaveCalType::WaveCalType_t calType);///< Workhorse
+			     WaveCalType::WaveCalType_t calType);/// checks for blinding now
+  Int_t reallyCalibrateUsefulEvent(UsefulAnitaEvent *eventPtr, 
+				   WaveCalType::WaveCalType_t calType);///< Workhorse  
 
   void guessRco(UsefulAnitaEvent* eventPtr); ///< Guess RCO from clock
   void getTempFactors(UsefulAnitaEvent* eventPtr); ///< Interface to RingBuffer of clock periods for temperature correction
@@ -153,7 +157,6 @@ class AnitaEventCalibrator : public TObject
 
 
 
-
   
 
 
@@ -164,6 +167,16 @@ class AnitaEventCalibrator : public TObject
   void loadCalib(); ///< Reads calibration constants from text files into arrays
   PedestalStruct_t fPedStruct; ///< For adding pedestals back onto voltage samples
   ClassDef(AnitaEventCalibrator,0);
+
+  void loadBlindTrees(); ///< Read in the pulses that we are going to swap blinded events out for
+  TFile* fFakeHeadFile;
+  TFile* fFakeEventFile;
+  TTree* fFakeEventTree;
+  TTree* fFakeHeadTree;  
+  UsefulAnitaEvent* fFakeEvent;
+  Int_t isEventToOverwrite(UInt_t eventNumber);
+  std::vector<std::pair<UInt_t, Int_t> > overwrittenEventInfo; /// pair.first is eventNumber of event to overwrite, pair.second is entry in fakeEventTree to overwrite it with.
+  bool calledLoadBlindTrees; /// <  prevents infinite loops by trying to calibrate UsefulAnitaEvents in the AnitaEventCalibrator constructor
   
 };
 
