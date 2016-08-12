@@ -33,7 +33,11 @@ AnitaEventCalibrator::AnitaEventCalibrator(){
 AnitaEventCalibrator::~AnitaEventCalibrator(){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
   // delete clockPeriodRingBuffer;
+  
   deleteClockAlignmentTGraphs();
+  fFakeHeadFile->Close();
+  fFakeEventFile->Close();  
+  
 };
 
 
@@ -369,16 +373,23 @@ Int_t AnitaEventCalibrator::reallyCalibrateUsefulEvent(UsefulAnitaEvent *eventPt
 	Int_t chanIndex = surf*NUM_CHAN + chan;
 	for(Int_t samp=0; samp < numPointsArray[surf]; samp++){
 	  voltsArray[surf][chan][samp] = eventPtr->data[chanIndex][samp];
+	  if(chanIndex==0){
+	    std::cerr << eventPtr->data[chanIndex][samp] << ", ";
+	  }
+
 	  if(fAddPedestal==true){
 	    voltsArray[surf][chan][samp] += fPedStruct.thePeds[surf][labChip][chan][samp];
 	  }
-	  scaArray[surf][samp] = samp;
+	  scaArray[surf][samp] = samp;	  
+	}
+	if(chanIndex==0){
+	  std::cerr << std::endl;
 	}
       }
     }
   }
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
   //! Step 5: Apply bin-to-bin timing (if requested)
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   // Actually all the bin-to-bin timings are put in the time array by default..
@@ -489,10 +500,16 @@ Int_t AnitaEventCalibrator::reallyCalibrateUsefulEvent(UsefulAnitaEvent *eventPt
       }
 
       for(Int_t samp=0; samp<numPointsArray[surf]; samp++){
+	// if(surf==0 && chan==0){
+	//   std::cout << voltsArray[surf][chan][samp] << ", ";
+	// }
 	eventPtr->fTimes[chanIndex][samp] = timeArray[surf][samp] + cableDelay;
 	eventPtr->fVolts[chanIndex][samp] = voltsArray[surf][chan][samp];
 	eventPtr->fCapacitorNum[chanIndex][samp] = scaArray[surf][samp];
       }
+      // if(surf==0 && chan==0){      
+      // 	std::cout << std::endl;
+      // }      
     }
   }
 
@@ -633,9 +650,9 @@ std::vector<Double_t> AnitaEventCalibrator::getClockAlignment(UsefulAnitaEvent* 
     }
     
     // Interpolate clock
-    if(eventPtr->eventNumber == 31455791){
-      std::cerr << surf << "\t" << numPoints[surf] << std::endl;
-    }
+    // if(eventPtr->eventNumber == 31455791){
+    //   std::cerr << surf << "\t" << numPoints[surf] << std::endl;
+    // }
     grClocks.at(surf) = new TGraph(numPoints[surf], times[surf], volts[surf][8]);
     grClockInterps.at(surf) = FFTtools::getInterpolatedGraph(grClocks.at(surf), dtInterp);
 
@@ -646,9 +663,9 @@ std::vector<Double_t> AnitaEventCalibrator::getClockAlignment(UsefulAnitaEvent* 
     if(grClock0s.find(deltaClockKeepNs)==grClock0s.end()){
       // Not already made/played around with this amount of ringing
       TGraph* grTemp0 = new TGraph(numPoints[0], times[0], volts[0][8]); // make clock
-      if(eventPtr->eventNumber == 31455791){
-	std::cerr << 0 << "\t" << numPoints[0] << std::endl;
-      }
+      // if(eventPtr->eventNumber == 31455791){
+      // 	std::cerr << 0 << "\t" << numPoints[0] << std::endl;
+      // }
       
       grClock0 = FFTtools::getInterpolatedGraph(grTemp0, dtInterp);
       delete grTemp0;
