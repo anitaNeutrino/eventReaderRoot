@@ -343,11 +343,20 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
     }
     else 
     {
-      fprintf(stderr,"Could not find head file for run %d, giving up!\n", run); 
-      return false; 
+      fname = TString::Format("%s/run%d/SimulatedAnitaHeadFile%d.root", data_dir, run, run); 
+      if (checkIfFileExists(fname.Data()))
+      {
+        TFile * f = new TFile(fname.Data()); 
+        filesToClose.push_back(f); 
+        fHeadTree = (TTree*) f->Get("headTree"); 
+      }
+      else 
+      {
+        fprintf(stderr,"Could not find head file for run %d, giving up!\n", run); 
+        return false; 
+      }
     }
   }
-
   if (!fDecimated) fHeadTree->SetBranchAddress("header",&fHeader); 
   fHeadTree->BuildIndex("eventNumber"); 
 
@@ -373,10 +382,22 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
        fGpsTree->BuildIndex("realTime"); 
        fHaveGpsEvent = false; 
     }
-    else 
+      else 
     {
-      fprintf(stderr,"Could not find gps file for run %d, giving up!\n",run); 
-      return false; 
+      fname = TString::Format("%s/run%d/SimulatedAnitaGpsFile%d.root", data_dir, run, run); 
+      if (checkIfFileExists(fname.Data()))
+      {
+         TFile * f = new TFile(fname.Data()); 
+         filesToClose.push_back(f); 
+         fGpsTree = (TTree*) f->Get("adu5PatTree"); 
+         fGpsTree->BuildIndex("realTime"); 
+         fHaveGpsEvent = false; 
+      }
+      else 
+      {
+        fprintf(stderr,"Could not find gps file for run %d, giving up!\n",run); 
+        return false; 
+      }
     }
   }
 
@@ -407,8 +428,20 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
     }
     else 
     {
-      fprintf(stderr,"Could not find event file for run %d, giving up!\n",run); 
-      return false; 
+      fname = TString::Format("%s/run%d/SimulatedAnitaEventFile%d.root", data_dir, run, run); 
+      if (checkIfFileExists(fname.Data()))
+      {
+         TFile * f = new TFile(fname.Data()); 
+         filesToClose.push_back(f); 
+         fEventTree = (TTree*) f->Get("eventTree"); 
+         fHaveCalibFile = false; 
+         fEventTree->SetBranchAddress("event",&fRawEvent); 
+      }
+      else 
+      {
+        fprintf(stderr,"Could not find event file for run %d, giving up!\n",run); 
+        return false;
+      }
     }
   }
 
