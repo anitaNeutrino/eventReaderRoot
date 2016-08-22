@@ -204,7 +204,6 @@ RawAnitaEvent * AnitaDataset::raw(bool force_load)
 UsefulAnitaEvent * AnitaDataset::useful(bool force_load) 
 {
 
-
   if (fEventTree->GetReadEntry() != fWantedEntry || force_load) 
   {
 
@@ -227,7 +226,7 @@ UsefulAnitaEvent * AnitaDataset::useful(bool force_load)
     {
       new (fUseful) UsefulAnitaEvent(fCalEvent, fCalType); 
     }
-    else 
+    else if (fRawEvent)
     {
       new (fUseful) UsefulAnitaEvent(fRawEvent, fCalType, header()); 
     }
@@ -404,7 +403,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   fname = TString::Format("%s/run%d/calibratedEventFile%d.root", data_dir, run, run); 
   fname2 = TString::Format("%s/run%d/calEventFile%d.root", data_dir, run, run); 
   fname3 = TString::Format("%s/run%d/SimulatedAnitaEventFile%d.root", data_dir, run, run); 
-  if (const char * the_right_file = checkIfFilesExist(3, fname.Data(), fname2.Data(), fname3.Data()))
+  if (const char * the_right_file = checkIfFilesExist(2, fname.Data(), fname2.Data()))
   {
      TFile * f = new TFile(the_right_file); 
      filesToClose.push_back(f); 
@@ -425,12 +424,20 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
     }
     else 
     {
-      fprintf(stderr,"Could not find event file for run %d, giving up!\n",run); 
-      return false;
-    }
+      if (checkIfFileExists(fname3.Data()))
+      {
+	TFile * f = new TFile(fname3.Data()); 
+	filesToClose.push_back(f); 
+	fEventTree = (TTree*) f->Get("eventTree"); 
+	fHaveCalibFile = false;
+	fEventTree->SetBranchAddress("event",&fUseful);
+      } else {
+	fprintf(stderr,"Could not find event file for run %d, giving up!\n",run); 
+	return false;
+      }
+    } 
   }
-
-
+  
   //try to load hk file 
   fname = TString::Format("%s/run%d/prettyHkFile%d.root", data_dir, run, run); 
   if (checkIfFileExists(fname.Data()))
