@@ -2,7 +2,7 @@
 /////  UsefulAnitaEvent.cxx        ANITA event reading class                  /////
 /////                                                                    /////
 /////  Description:                                                      /////
-/////     A simple class that reads in useful ANITA events and produces     ///// 
+/////     A simple class that reads in useful ANITA events and produces     /////
 /////   calibrated time and voltage stuff                                /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@
 ClassImp(UsefulAnitaEvent);
 
 
-UsefulAnitaEvent::UsefulAnitaEvent() 
+UsefulAnitaEvent::UsefulAnitaEvent()
   : RawAnitaEvent()
 {
   gotCalibTemp=0;
@@ -35,7 +35,7 @@ UsefulAnitaEvent::UsefulAnitaEvent()
 }
 
 
-UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr, WaveCalType::WaveCalType_t calType) 
+UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr, WaveCalType::WaveCalType_t calType)
   : RawAnitaEvent(*calibratedPtr)
 {
 
@@ -53,11 +53,11 @@ UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr, WaveCalT
   }
   fCalType=calType;
   calibrateEvent(fCalType);
-  setAlfaFilterFlag(true);  
+  setAlfaFilterFlag(true);
 }
 
 
-UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, PrettyAnitaHk *theHk) 
+UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, PrettyAnitaHk *theHk)
   : RawAnitaEvent(*eventPtr)
 {
 
@@ -66,7 +66,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
 
   fCalibrator=0;
   fLastEventGuessed=0;
-  fFromCalibratedAnitaEvent=0;  
+  fFromCalibratedAnitaEvent=0;
   if(theHk) {
     gotCalibTemp=1;
     calibTemp=theHk->intTemps[2];
@@ -74,12 +74,12 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   else{
     gotCalibTemp=0;
   }
-  setAlfaFilterFlag(true);  
+  setAlfaFilterFlag(true);
 
   calibrateEvent(calType);
 }
 
-UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, RawAnitaHeader* theHd) 
+UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, RawAnitaHeader* theHd)
   : RawAnitaEvent(*eventPtr)
 {
 
@@ -91,7 +91,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   fLastEventGuessed=0;
   gotCalibTemp=0;
   fClockProblem = 0;
-  setAlfaFilterFlag(true);    
+  setAlfaFilterFlag(true);
   if(theHd->eventNumber != eventPtr->eventNumber){
     std::cerr << "Warning! eventNumber mismatch in " << __FILE__ << " line " << __LINE__ << "." << std::endl;
     std::cerr << "RawAnitaHeader->eventNumber = " << theHd->eventNumber << " but "
@@ -102,7 +102,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   calibrateEvent(calType);
 }
 
-UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, Double_t surfTemp) 
+UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, Double_t surfTemp)
   : RawAnitaEvent(*eventPtr)
 {
 
@@ -113,7 +113,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   gotCalibTemp=1;
   calibTemp=surfTemp;
   setAlfaFilterFlag(true);
-     
+
   calibrateEvent(calType);
 }
 
@@ -131,7 +131,7 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 }
 
 
-TGraph *UsefulAnitaEvent::getGraphFromSurfAndChan(int surf, int chan) 
+TGraph *UsefulAnitaEvent::getGraphFromSurfAndChan(int surf, int chan)
 {
   return getGraph(getChanIndex(surf,chan));
 }
@@ -146,13 +146,19 @@ TGraph *UsefulAnitaEvent::getGraph(int chanIndex)
 			   fTimes[chanIndex],
 			   fVolts[chanIndex]);
 
-#ifdef USE_FFT_TOOLS 
+#ifdef USE_FFT_TOOLS
   // let's try the simplest thing first
   const int alfaChannelIndex = 11*NUM_CHAN + 5;
-  if(fFilterAlfaChannel==true && chanIndex==alfaChannelIndex){    
+  if(fFilterAlfaChannel==true && chanIndex==alfaChannelIndex){
     const double lowPassFreq = 700; // MHz
-    TGraph* grFiltered = FFTtools::simplePassBandFilter(grPtr, 0, lowPassFreq);
+
+    const double nominalDeltaT = 1./2.6;
+    TGraph* grInterpolated = FFTtools::getInterpolatedGraph(grPtr, nominalDeltaT);
     delete grPtr;
+
+    TGraph* grFiltered = FFTtools::simplePassBandFilter(grInterpolated, 0, lowPassFreq);
+    delete grInterpolated;
+
     grPtr = grFiltered;
   }
 #endif
@@ -166,7 +172,7 @@ TGraph *UsefulAnitaEvent::getDeconvolvedALFA()
 
   // You should put the code that uses FFTtools inside the include guard.
 #ifdef USE_FFT_TOOLS
-  // 
+  //
 #endif
 
   return NULL;
@@ -195,7 +201,7 @@ Int_t UsefulAnitaEvent::guessRco(int chanIndex){
   return fRcoArray[surf];
 
   //RJN removed clock guessing for now.
-  // if(fLastEventGuessed!=this->eventNumber) 
+  // if(fLastEventGuessed!=this->eventNumber)
   //   analyseClocksForGuesses();
   // //  if(
   // return fRcoArray[chanIndex/9];
@@ -213,7 +219,7 @@ Int_t UsefulAnitaEvent::getRcoCorrected(int chanIndex)
 
 
 // std::vector<std::vector<Double_t> > UsefulAnitaEvent::getNeighbouringClockCorrelations(Double_t lowPassClockFilterFreq, Int_t giveGraphsToInputArrays, TGraph* grInterpClocksArray[NUM_SURF], TGraph* grCorClocksArray[NUM_SURF][2]){
-//   return fCalibrator->getNeighbouringClockCorrelations(this, lowPassClockFilterFreq, 
+//   return fCalibrator->getNeighbouringClockCorrelations(this, lowPassClockFilterFreq,
 // 						       giveGraphsToInputArrays,
 // 						       grInterpClocksArray,
 // 						       grCorClocksArray);
@@ -288,4 +294,3 @@ Bool_t UsefulAnitaEvent::setAlfaFilterFlag(Bool_t newBoolianFlag){
 #endif
   return fFilterAlfaChannel;
 }
-  
