@@ -96,6 +96,12 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
 
   UShort_t        phiTrigMask; ///< 16-bit phi mask (from TURF)
   UShort_t        phiTrigMaskH; ///< 16-bit phi mask (from TURF)
+
+  UShort_t        l1TrigMaskOffline; ///< 16-bit phi mask (from offline masking)
+  UShort_t        l1TrigMaskHOffline; ///< 16-bit phi mask (from offline masking)
+
+  UShort_t        phiTrigMaskOffline; ///< 16-bit phi mask (from offline masking)
+  UShort_t        phiTrigMaskHOffline; ///< 16-bit phi mask (from offline masking) 
   
 
   //Prioritizer stuff
@@ -196,7 +202,7 @@ The second byte (reserved[1]) is currently reserved.
   Int_t getTriggerBitG12() const;
   Int_t getTriggerBitSoftExt() const;
 
-  ClassDef(RawAnitaHeader,35);
+  ClassDef(RawAnitaHeader,36);
 };
 
 
