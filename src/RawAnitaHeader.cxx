@@ -2,7 +2,7 @@
 /////  RawAnitaHeader.cxx        ANITA header reading class                  /////
 /////                                                                    /////
 /////  Description:                                                      /////
-/////     A simple class that reads in raw ANITA headers and produces     ///// 
+/////     A simple class that reads in raw ANITA headers and produces     /////
 /////   calibrated time and voltage stuff                                /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@
 #include <cstring>
 ClassImp(RawAnitaHeader);
 
-RawAnitaHeader::RawAnitaHeader() 
+RawAnitaHeader::RawAnitaHeader()
 {
    //Default Constructor
 }
@@ -24,17 +24,17 @@ RawAnitaHeader::~RawAnitaHeader() {
    //Default Destructor
 }
 
- 
+
 RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t trealTime,
 			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
 {
  if(hdPtr->gHdr.code!=PACKET_HD ||
      hdPtr->gHdr.verId!=VER_EVENT_HEADER ||
      hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeader_t)) {
-    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
-	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
-	      << "\nversion:\t" << (int)hdPtr->gHdr.verId 
-	      << "\t" << (int)VER_EVENT_HEADER 
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n"
+	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD
+	      << "\nversion:\t" << (int)hdPtr->gHdr.verId
+	      << "\t" << (int)VER_EVENT_HEADER
 	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
 	      << sizeof(AnitaEventHeader_t) << std::endl;
   }
@@ -89,10 +89,10 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer30_t *hdPtr, Int_t trun, UInt_
  if(hdPtr->gHdr.code!=PACKET_HD ||
      hdPtr->gHdr.verId!=VER_EVENT_HEADER ||
      hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeader_t)) {
-    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
-	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
-	      << "\nversion:\t" << (int)hdPtr->gHdr.verId 
-	      << "\t" << (int)VER_EVENT_HEADER 
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n"
+	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD
+	      << "\nversion:\t" << (int)hdPtr->gHdr.verId
+	      << "\t" << (int)VER_EVENT_HEADER
 	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
 	      << sizeof(AnitaEventHeader_t) << std::endl;
   }
@@ -145,9 +145,9 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer13_t *hdPtr, Int_t trun, UInt_
  if(hdPtr->gHdr.code!=PACKET_HD ||
      hdPtr->gHdr.verId!=13 ||
      hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeaderVer13_t)) {
-    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
-	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
-	      << "\nversion:\t" << hdPtr->gHdr.verId 
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n"
+	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD
+	      << "\nversion:\t" << hdPtr->gHdr.verId
 	      << "\t" << 13
 	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
 	      << sizeof(AnitaEventHeaderVer13_t) << std::endl;
@@ -200,9 +200,9 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer12_t *hdPtr, Int_t trun, UInt_
  if(hdPtr->gHdr.code!=PACKET_HD ||
      hdPtr->gHdr.verId!=12 ||
      hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeaderVer12_t)) {
-    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
-	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
-	      << "\nversion:\t" << hdPtr->gHdr.verId 
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n"
+	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD
+	      << "\nversion:\t" << hdPtr->gHdr.verId
 	      << "\t" << 12
 	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
 	      << sizeof(AnitaEventHeaderVer12_t) << std::endl;
@@ -256,9 +256,9 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer11_t *hdPtr, Int_t trun, UInt_
  if(hdPtr->gHdr.code!=PACKET_HD ||
      hdPtr->gHdr.verId!=11 ||
      hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeaderVer11_t)) {
-    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
-	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
-	      << "\nversion:\t" << hdPtr->gHdr.verId 
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n"
+	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD
+	      << "\nversion:\t" << hdPtr->gHdr.verId
 	      << "\t" << 11
 	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
 	      << sizeof(AnitaEventHeaderVer11_t) << std::endl;
@@ -309,9 +309,9 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer10_t *hdPtr, Int_t trun, UInt_
  if(hdPtr->gHdr.code!=PACKET_HD ||
      hdPtr->gHdr.verId!=10 ||
      hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeaderVer10_t)) {
-    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n" 
-	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
-	      << "\nversion:\t" << hdPtr->gHdr.verId 
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << "\n"
+	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD
+	      << "\nversion:\t" << hdPtr->gHdr.verId
 	      << "\t" << 10
 	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
 	      << sizeof(AnitaEventHeaderVer10_t) << std::endl;
@@ -360,9 +360,9 @@ const char *RawAnitaHeader::trigTypeAsString()
    static char theString[20];
    int count=0;
    sprintf(theString,"None");
-   
+
    const char *trigTypes[4]={"RF","PPS1","PPS2","Soft"};
-   
+
    for(int i=0;i<4;i++) {
       if(trigType & (1<<i)) {
 	 if(count==0) {
@@ -382,7 +382,7 @@ UShort_t RawAnitaHeader::getL3TrigPattern(AnitaPol::AnitaPol_t pol){
   return pol == AnitaPol::kHorizontal ? l3TrigPatternH : l3TrigPattern;
 }
 int RawAnitaHeader::isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol)
-{ 
+{
   if(phi<0 || phi>=PHI_SECTORS) return -1;
   switch(pol) {
   case AnitaPol::kVertical:
@@ -391,12 +391,12 @@ int RawAnitaHeader::isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol)
     return  ((l3TrigPatternH&(1<<phi)) ? 1 : 0);
   default:
     return -1;
-  }      
+  }
   return -1;
-  
+
 }
 int RawAnitaHeader::isInPhiMask(int phi, AnitaPol::AnitaPol_t pol)
-{ 
+{
   if(phi<0 || phi>=PHI_SECTORS) return -1;
   switch(pol) {
   case AnitaPol::kVertical:
@@ -405,12 +405,12 @@ int RawAnitaHeader::isInPhiMask(int phi, AnitaPol::AnitaPol_t pol)
     return  ((phiTrigMaskH&(1<<phi)) ? 1 : 0);
   default:
     return -1;
-  }      
+  }
   return -1;
-  
+
 }
 int RawAnitaHeader::isInL1Mask(int phi, AnitaPol::AnitaPol_t pol)
-{ 
+{
   if(phi<0 || phi>=PHI_SECTORS) return -1;
   switch(pol) {
   case AnitaPol::kVertical:
@@ -419,10 +419,42 @@ int RawAnitaHeader::isInL1Mask(int phi, AnitaPol::AnitaPol_t pol)
     return  ((l1TrigMaskH&(1<<phi)) ? 1 : 0);
   default:
     return -1;
-  }      
+  }
   return -1;
-  
+
 }
+
+
+
+int RawAnitaHeader::isInPhiMaskOffline(int phi, AnitaPol::AnitaPol_t pol)
+{
+  if(phi<0 || phi>=PHI_SECTORS) return -1;
+  switch(pol) {
+  case AnitaPol::kVertical:
+    return  ((phiTrigMaskOffline&(1<<(phi))) ? 1 :0);
+  case AnitaPol::kHorizontal:
+    return  ((phiTrigMaskHOffline&(1<<phi)) ? 1 : 0);
+  default:
+    return -1;
+  }
+  return -1;
+
+}
+int RawAnitaHeader::isInL1MaskOffline(int phi, AnitaPol::AnitaPol_t pol)
+{
+  if(phi<0 || phi>=PHI_SECTORS) return -1;
+  switch(pol) {
+  case AnitaPol::kVertical:
+    return  ((l1TrigMaskOffline&(1<<(phi))) ? 1 :0);
+  case AnitaPol::kHorizontal:
+    return  ((l1TrigMaskHOffline&(1<<phi)) ? 1 : 0);
+  default:
+    return -1;
+  }
+  return -1;
+
+}
+
 
 int RawAnitaHeader::getCurrentTurfBuffer()
 ///< Returns the current TURF buffer number (0, 1, 2 or 3);
@@ -454,7 +486,7 @@ int RawAnitaHeader::getNumberOfCurrentTurfHolds()
     if(curHolds & (1<<buffer))
       countHolds++;
   }
-  return countHolds;  
+  return countHolds;
 }
 
 Float_t RawAnitaHeader::getPeakThetaDeg()
@@ -462,11 +494,11 @@ Float_t RawAnitaHeader::getPeakThetaDeg()
 #define THETA_RANGE 150
 #define NUM_BINS_THETA 256
   return -1*THETA_RANGE*((Float_t)peakThetaBin/NUM_BINS_THETA - 0.5);
-  
+
 }
 
 Float_t RawAnitaHeader::getPeakThetaRad()
-{  
+{
   return getPeakThetaDeg()*TMath::DegToRad();
 }
 
@@ -481,16 +513,16 @@ Float_t RawAnitaHeader::getPeakPhiDeg()
 					   202.5,225,247.5,270,292.5,315,337.5,
 					   0,22.5,45,67.5,90,112.5,135,157.5,180,
 					   202.5,225,247.5,270,292.5,315,337.5};
-  // const Float_t phiArray[NUM_SEAVEYS]={0.454076, 0.848837, 1.21946, 1.5909, 1.99256, 2.34755, 
-  // 				 2.70865, 3.069, 3.47166, 3.87134, 4.26593, 4.67822, 5.10608, 
+  // const Float_t phiArray[NUM_SEAVEYS]={0.454076, 0.848837, 1.21946, 1.5909, 1.99256, 2.34755,
+  // 				 2.70865, 3.069, 3.47166, 3.87134, 4.26593, 4.67822, 5.10608,
   // 				 5.51456, 5.89388, 0.044416,
-  // 				 0.387236, 0.778985, 1.17058, 1.56246, 1.965, 2.36015, 
-  // 				 2.74449, 3.13392, 3.5209, 3.92214, 4.31697, 4.71495, 
+  // 				 0.387236, 0.778985, 1.17058, 1.56246, 1.965, 2.36015,
+  // 				 2.74449, 3.13392, 3.5209, 3.92214, 4.31697, 4.71495,
   // 				 5.10387, 5.4971, 5.88069, 6.28301,
-  // 				 0.341474, 0.785398, 1.15377, 1.5708, 1.95866, 2.3562, 
-  // 				 2.75883, 3.14159, 3.52916, 3.92699, 4.34619, 4.71239, 
+  // 				 0.341474, 0.785398, 1.15377, 1.5708, 1.95866, 2.3562,
+  // 				 2.75883, 3.14159, 3.52916, 3.92699, 4.34619, 4.71239,
   // 					      5.1258, 5.49779, 5.87493, 2.30671e-06};
-#define NUM_BINS_PHI 64 
+#define NUM_BINS_PHI 64
 #define PHI_RANGE 22.5
   return phiArrayDeg[phiSector] + PHI_RANGE*((Float_t)phiInd/NUM_BINS_PHI - 0.5);
 }
@@ -506,7 +538,7 @@ Float_t RawAnitaHeader::getImagePeak()
   return Float_t(imagePeak)/65535.;
 
 }
- 
+
 Float_t RawAnitaHeader::getCoherentSumPeak()
 {
   return coherentSumPeak;
@@ -514,11 +546,11 @@ Float_t RawAnitaHeader::getCoherentSumPeak()
 
 AnitaPol::AnitaPol_t RawAnitaHeader::getPeakPol()
 {
-  if(prioritizerStuff&0x1) 
+  if(prioritizerStuff&0x1)
     return AnitaPol::kVertical;
   return AnitaPol::kHorizontal;
 }
-  
+
 Int_t RawAnitaHeader::getAboveThresholdFlag()
 {
   return ((prioritizerStuff & 0x1000)>>12);
