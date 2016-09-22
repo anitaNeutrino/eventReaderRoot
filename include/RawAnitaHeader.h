@@ -71,12 +71,12 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
     -  "Value 2" 5th Attenuator setting (22dB)
     -  "Value 4" 6th Attenuator setting (28dB)
     -  "Value 0" 7th Attenuator setting (33dB)
-    
+
   */
-  UShort_t        calibStatus; 
+  UShort_t        calibStatus;
   UChar_t         priority; ///< Queue (lower 4-bits) and priority (upper 4-bits)
   UChar_t         turfUpperWord; ///< Upper word from TURF, useful for debugging
-  UChar_t         otherFlag; ///< Currently the first two surf evNums 
+  UChar_t         otherFlag; ///< Currently the first two surf evNums
  //!  Error Flag
   /*!
     Here we are coutning bits from 1 to 8
@@ -96,7 +96,13 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
 
   UShort_t        phiTrigMask; ///< 16-bit phi mask (from TURF)
   UShort_t        phiTrigMaskH; ///< 16-bit phi mask (from TURF)
-  
+
+  UShort_t        l1TrigMaskOffline; ///< 16-bit phi mask (from offline masking)
+  UShort_t        l1TrigMaskHOffline; ///< 16-bit phi mask (from offline masking)
+
+  UShort_t        phiTrigMaskOffline; ///< 16-bit phi mask (from offline masking)
+  UShort_t        phiTrigMaskHOffline; ///< 16-bit phi mask (from offline masking)
+
 
   //Prioritizer stuff
   UChar_t peakThetaBin;
@@ -116,7 +122,7 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
   */
   UShort_t prioritizerStuff;
 
-  
+
 
 
   //!  Reserved bytes --- Deprecated
@@ -143,14 +149,14 @@ The second byte (reserved[1]) is currently reserved.
   /*!
     The number of of 65535Hz clock ticks in the current second, upto triggerTimeNs ns, which all four buffers were full. A more consistent definition of deadTime is available in the TurfRate class.
   */
-  UShort_t        deadTime; 
+  UShort_t        deadTime;
   //!  Buffer depth
   /*!
     The lowest two bits (bufferDepth&0x3) are a two-bit number (with range 0-3) that count the number of held buffers at the time of the trigger.
 
     The next lowest two bits (bufferDepth&0xc)>>2 are a two-bit number (with range 0-3) that count the number of held buffers at the time of readout.
   */
-  UChar_t         bufferDepth; // Buffer depth 
+  UChar_t         bufferDepth; // Buffer depth
   UChar_t         turfioReserved; ///< Reserved
   UShort_t        upperL1TrigPattern; ///< Bit mask for upper ring l1 antenna triggers. eg. if the bit 1 (the lowest bit) is active it means the upper ring antenna in phi sector 1 contributes an L1 trigger to the event.
   UShort_t        lowerL1TrigPattern; ///< Bit mask for lower ring l1 antenna triggers. eg. if the bit 1 (the lowest bit) is active it means the lower ring antenna in phi sector 1 contributes an L1 trigger to the event.
@@ -164,18 +170,20 @@ The second byte (reserved[1]) is currently reserved.
   UInt_t          triggerTime; ///< Trigger time from TURF converted to unixTime
   UInt_t          triggerTimeNs; ///< Trigger time in ns from TURF
   Int_t           goodTimeFlag; ///< 1 is good trigger time, 0 is bad trigger time
-   
+
   const char *trigTypeAsString(); ///< Returns trigger type as string
   //  int isInL3Pattern(int phi); ///< Returns 1 if phi sector had l3 trigger
   //  int isInL2Pattern(int phi, AnitaRing::AnitaRing_t ring); ///< Returns 1 if given phi-ring had l2 trigger
   UShort_t getL3TrigPattern(AnitaPol::AnitaPol_t pol);
   int isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
-  int isInPhiMask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
-  int isInL1Mask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
+  int isInPhiMask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical);
+  int isInL1Mask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical);
+  int isInPhiMaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical);
+  int isInL1MaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical);
   int getCurrentTurfBuffer(); ///< Returns the current TURF buffer number (0, 1, 2 or 3);
   unsigned int getCurrentTurfHolds(); ///< Returns a 4-bit bitmask corresponding to the currently held buffers.
   int getNumberOfCurrentTurfHolds(); ///< Returns the number of currently held TURF buffers (0-4)
-  int getTurfRunNumber() 
+  int getTurfRunNumber()
   { return (((turfEventId&0xfff00000)>>20));} ///< Returns the run number portion of the TURF event id
   int getTurfEventNumber()
   { return (turfEventId&0xfffff);} ///< Returns the event number portion of the TURF event id.
@@ -196,7 +204,7 @@ The second byte (reserved[1]) is currently reserved.
   Int_t getTriggerBitG12() const;
   Int_t getTriggerBitSoftExt() const;
 
-  ClassDef(RawAnitaHeader,35);
+  ClassDef(RawAnitaHeader,36);
 };
 
 
