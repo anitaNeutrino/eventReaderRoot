@@ -34,11 +34,11 @@ class TruthAnitaEvent: public TObject
   Double_t        nuMom;                  ///< Neutrino momentum
   Double_t        rfExitNor[5][3];        ///< Normal vector in direction of exit point to balloon - 5 iterations
   Double_t        rfExitPos[5][3];        ///< Position where the RF exits the ice- 5 iterations, 3 dimensions each
-  Double_t        nu_pdg;                 ///< Neutrino PDG code
+  Int_t           nu_pdg;                 ///< Neutrino PDG code
   Double_t        e_component;            ///< E comp along polarization
   Double_t        h_component;            ///< H comp along polarization
   Double_t        n_component;            ///< Normal comp along polarization
-  Double_t        e_component_k;          ///> Component of e-field along the rx e-plane
+  Double_t        e_component_k;          ///< Component of e-field along the rx e-plane
   Double_t        h_component_k;          ///< Component of the e-field along the rx h-plane
   Double_t        n_component_k;          ///< Component of the e-field along the normal 
   Double_t        hitangle_e[48];         ///< Hit angles rel. to e plane stored for each antenna
