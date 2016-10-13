@@ -36,6 +36,7 @@
 #pragma link C++ class SlowRate+;
 #pragma link C++ class GpuPowerSpectra+;
 #pragma link C++ class AnitaDataset+;
+#pragma link C++ class TruthAnitaEvent+;
 
 #pragma link C++ namespace     WaveCalType;
 #pragma link C++ enum          WaveCalType::EWaveCalType;
