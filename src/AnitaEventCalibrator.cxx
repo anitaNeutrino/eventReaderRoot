@@ -35,9 +35,11 @@ AnitaEventCalibrator::~AnitaEventCalibrator(){
   // delete clockPeriodRingBuffer;
   
   deleteClockAlignmentTGraphs();
-  fFakeHeadFile->Close();
-  fFakeEventFile->Close();  
   
+  if (calledLoadBlindTrees){
+    fFakeHeadFile->Close();
+    fFakeEventFile->Close();  
+  }
 };
 
 
