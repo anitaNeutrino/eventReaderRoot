@@ -64,6 +64,7 @@
 #pragma link C++ class GpuPowerSpectra+;
 #pragma link C++ class AnitaDataset+;
 #pragma link C++ class RTLSpectrum+; 
+#pragma link C++ class TruthAnitaEvent+;
 
 #else
 #error "for compilation"
