@@ -44,6 +44,7 @@ class TruthAnitaEvent: public TObject
   Double_t        hitangle_e[48];         ///< Hit angles rel. to e plane stored for each antenna
   Double_t        hitangle_h[48];         ///< Hit angles rel. to h plane stored for each antenna
   Double_t        vmmhz[128];             ///< V/m/MHz at balloon (128 frequency bins)
+  Double_t        vmmhz_max;              ///< Maximum signal at balloon (V/m/MHz)
   Double_t        sourceLon;              ///< RF position when leaving the ice: Longitude (using icemc model)
   Double_t        sourceLat;              ///< RF position when leaving the ice: Latitude  (using icemc model)
   Double_t        sourceAlt;              ///< RF position when leaving the ice: Altitude  (using icemc model)
