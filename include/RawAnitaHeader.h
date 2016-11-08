@@ -180,6 +180,8 @@ The second byte (reserved[1]) is currently reserved.
   int isInL1Mask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical);
   int isInPhiMaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical);
   int isInL1MaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical);
+  int getPhiMaskOffline(AnitaPol::AnitaPol_t pol) const { return pol == AnitaPol::kHorizontal ? phiTrigMaskHOffline : phiTrigMaskOffline ;} 
+  int getL1MaskOffline(AnitaPol::AnitaPol_t pol) const { return pol == AnitaPol::kHorizontal ? l1TrigMaskHOffline : l1TrigMaskOffline ;} 
   int getCurrentTurfBuffer(); ///< Returns the current TURF buffer number (0, 1, 2 or 3);
   unsigned int getCurrentTurfHolds(); ///< Returns a 4-bit bitmask corresponding to the currently held buffers.
   int getNumberOfCurrentTurfHolds(); ///< Returns the number of currently held TURF buffers (0-4)
