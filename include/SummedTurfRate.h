@@ -25,6 +25,7 @@ class SummedTurfRate: public TObject
    ~SummedTurfRate(); ///< Destructor
 
    SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStruct_t *ratePtr); ///< Assignment constructor
+   SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStructVer40_t *ratePtr); ///< Assignment constructor
 
 
 
@@ -67,6 +68,8 @@ class SummedTurfRate: public TObject
    UChar_t          errorFlag; ///< Error flag
    Int_t            intFlag; ///< Interpolation flag -- zero for raw data
 
+   UShort_t         l3RatesGated[PHI_SECTORS]; ///< Summed l3 gated rates
+   
    //   Int_t getL1Rate(int phi, int ring); ///< Returns the l1 rate for ring-phi
    //   Int_t getL2Rate(int phi, int ring); ///< Returns the l2 rate for ring-phi
    //   Int_t getNadirL12Rate(int phi); ///< Returns the nadir l1 + l2 rate fr phi
@@ -79,7 +82,7 @@ class SummedTurfRate: public TObject
    Int_t isL1Masked(int phi,AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi is masked off
    Float_t getDeadTimeFrac() { return deadTime/(65535.*numRates);}
    
-  ClassDef(SummedTurfRate,20);
+  ClassDef(SummedTurfRate,41);
 };
 
 

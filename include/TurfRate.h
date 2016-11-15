@@ -25,7 +25,8 @@ class TurfRate: public TObject
    ~TurfRate(); ///< Destructor
 
    TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *ratePtr); ///< Assignment constructor
-   TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer34_t *ratePtr); ///< Version 16 constructor
+   TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer40_t *ratePtr); ///< Version 40 constructor
+   TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer34_t *ratePtr); ///< Version 34 constructor
    TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer16_t *ratePtr); ///< Version 16 constructor
    TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer15_t *ratePtr); ///< Version 15 constructor
    TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer14_t *ratePtr); ///< Version 14 constructor
@@ -61,7 +62,11 @@ class TurfRate: public TObject
    UChar_t         errorFlag; ///< Error flag (who knows)?
    UInt_t          c3poNum; ///< Number of clock cycles per second
    Int_t           intFlag; ///< Interpolation flag, zero for raw data.
+   UChar_t         l3RatesGated[PHI_SECTORS]; ///< l3 gated rates
+   UShort_t        rfScaler;
+   UChar_t         refPulses;
 
+   
    //Deprecated
    UInt_t          antTrigMask; ///< Which upper+lower ring antennas are masked off?
    UChar_t         nadirAntTrigMask; ///< Which nadir antennas are masked off?
@@ -80,7 +85,7 @@ class TurfRate: public TObject
    Float_t getDeadTimeFrac() {return deadTime/65535.;} ///< Returns the deadtime as a fraction of a second (by dividing by 65535)
    
    
-  ClassDef(TurfRate,34);
+  ClassDef(TurfRate,41);
 };
 
 

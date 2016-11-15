@@ -31,6 +31,37 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *turfPtr)
    realTime=trealTime;
    payloadTime=turfPtr->unixTime;
    ppsNum=turfPtr->ppsNum;   
+   deadTime=turfPtr->deadTime;
+   c3poNum=turfPtr->c3poNum;
+   //   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   //   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
+   for(int i=0;i<PHI_SECTORS;i++) {
+     l3Rates[i]=turfPtr->l3Rates[i];
+     l3RatesH[i]=0;
+     l1Rates[i][0]=turfPtr->l1Rates[i];
+     l1Rates[i][1]=0;
+     l3RatesGated[i]=turfPtr->l3Rates[i];
+   }
+   rfScaler=turfPtr->rfScaler;
+   refPulses=turfPtr->refPulses;
+   l1TrigMask=turfPtr->l1TrigMask;
+   l1TrigMaskH=0;
+   phiTrigMask=turfPtr->phiTrigMask;
+   phiTrigMaskH=0;
+   errorFlag=turfPtr->errorFlag;
+   intFlag=0;
+}
+
+
+
+TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer40_t *turfPtr)
+{
+  simplePacketCheck(&(turfPtr->gHdr),PACKET_TURF_RATE);
+
+   run=trun;
+   realTime=trealTime;
+   payloadTime=turfPtr->unixTime;
+   ppsNum=turfPtr->ppsNum;   
    deadTime=turfPtr->deadTime;   
    //   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
    //   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);

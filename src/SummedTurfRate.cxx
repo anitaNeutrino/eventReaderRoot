@@ -35,6 +35,31 @@ SummedTurfRate::SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStruct
   deadTime=turfPtr->deadTime;
   memcpy(bufferCount,turfPtr->bufferCount,sizeof(UChar_t)*4);
    for(int phi=0;phi<PHI_SECTORS;phi++) {
+     l3Rates[phi]=turfPtr->l3Rates[phi];
+     l3RatesH[phi]=0;
+     l3RatesH[phi]=turfPtr->l3RatesGated[phi];
+   }
+   phiTrigMask=turfPtr->phiTrigMask;   
+   phiTrigMaskH=0;
+   l1TrigMask=turfPtr->l1TrigMask;   
+   l1TrigMaskH=0;
+   errorFlag=turfPtr->errorFlag;
+   intFlag=0;
+
+}
+
+SummedTurfRate::SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStructVer40_t *turfPtr)
+{
+  simplePacketCheck(&(turfPtr->gHdr),PACKET_SUM_TURF_RATE);
+  //All the above does is print a warning message
+  run=trun;
+  realTime=trealTime;
+  payloadTime=turfPtr->unixTime;
+  numRates=turfPtr->numRates;
+  deltaT=turfPtr->deltaT;
+  deadTime=turfPtr->deadTime;
+  memcpy(bufferCount,turfPtr->bufferCount,sizeof(UChar_t)*4);
+   for(int phi=0;phi<PHI_SECTORS;phi++) {
      l3Rates[phi]=turfPtr->l3Rates[phi][0];
      l3RatesH[phi]=turfPtr->l3Rates[phi][1];
    }
