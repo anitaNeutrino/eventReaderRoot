@@ -29,7 +29,7 @@ UsefulAnitaEvent::UsefulAnitaEvent()
   fC3poNum=0;
   fFromCalibratedAnitaEvent=0;
   fCalibrator=0;
-  setAlfaFilterFlag(true);
+  setAlfaFilterFlag(false);
 
   //Default Constructor
 }
@@ -53,7 +53,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr, WaveCalT
   }
   fCalType=calType;
   calibrateEvent(fCalType);
-  setAlfaFilterFlag(true);  
+  setAlfaFilterFlag(false);  
 }
 
 
@@ -74,7 +74,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   else{
     gotCalibTemp=0;
   }
-  setAlfaFilterFlag(true);  
+  setAlfaFilterFlag(false);  
 
   calibrateEvent(calType);
 }
@@ -91,7 +91,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   fLastEventGuessed=0;
   gotCalibTemp=0;
   fClockProblem = 0;
-  setAlfaFilterFlag(true);    
+  setAlfaFilterFlag(false);    
   if(theHd->eventNumber != eventPtr->eventNumber){
     std::cerr << "Warning! eventNumber mismatch in " << __FILE__ << " line " << __LINE__ << "." << std::endl;
     std::cerr << "RawAnitaHeader->eventNumber = " << theHd->eventNumber << " but "
@@ -112,7 +112,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   fFromCalibratedAnitaEvent=0;
   gotCalibTemp=1;
   calibTemp=surfTemp;
-  setAlfaFilterFlag(true);
+  setAlfaFilterFlag(false);
      
   calibrateEvent(calType);
 }
