@@ -40,7 +40,7 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *turfPtr)
      l3RatesH[i]=0;
      l1Rates[i][0]=turfPtr->l1Rates[i];
      l1Rates[i][1]=0;
-     l3RatesGated[i]=turfPtr->l3Rates[i];
+     l3RatesGated[i]=turfPtr->l3RatesGated[i];
    }
    rfScaler=turfPtr->rfScaler;
    refPulses=turfPtr->refPulses;
