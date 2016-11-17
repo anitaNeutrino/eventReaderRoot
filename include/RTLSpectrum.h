@@ -8,10 +8,10 @@ class TGraph;
 
 class RTLSpectrum : public TObject 
 {
-  const double SPECTRUM_OFFSET = -40.; 
-  const double SPECTRUM_SCALE = 4.; 
 
   public: 
+    double SPECTRUM_OFFSET() const { return -40.; }
+    double SPECTRUM_SCALE() const { return 4.; }
     RTLSpectrum(); 
     RTLSpectrum(RtlSdrPowerSpectraStruct_t * raw, TGraph * calibration = 0); 
     ~RTLSpectrum(); 
