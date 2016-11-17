@@ -98,7 +98,6 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
 
   UShort_t        phiTrigMask; ///< 16-bit phi mask (from TURF)
   UShort_t        phiTrigMaskH; ///< 16-bit phi mask (from TURF)
-  
 
   //Prioritizer stuff
   UChar_t peakThetaBin;
@@ -174,6 +173,10 @@ The second byte (reserved[1]) is currently reserved.
   int isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
   int isInPhiMask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
   int isInL1Mask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
+  int isInPhiMaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) { return isInPhiMask(phi,pol); } ///< for anita 4, this is the same as getPhiMask, just for compatibility 
+  int isInL1MaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) { return isInL1Mask(phi,pol);} ///< for anita 4, this is the same as isinL1Mask
+  int getPhiMaskOffline(AnitaPol::AnitaPol_t pol) const { return 0; } ///< for anita 4, this does nothing
+  int getL1MaskOffline( AnitaPol::AnitaPol_t pol) const { return 0;} ///< for anita 4, this does nothing
   int getCurrentTurfBuffer(); ///< Returns the current TURF buffer number (0, 1, 2 or 3);
   unsigned int getCurrentTurfHolds(); ///< Returns a 4-bit bitmask corresponding to the currently held buffers.
   int getNumberOfCurrentTurfHolds(); ///< Returns the number of currently held TURF buffers (0-4)
