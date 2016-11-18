@@ -25,7 +25,7 @@ class RawAnitaHeader: public TObject
    RawAnitaHeader(); ///< Default constructor
    RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t run, UInt_t realTime,
 		  UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Assignment constructor
-  RawAnitaHeader(AnitaEventHeaderVer33_t *hdPtr, Int_t run, UInt_t realTime,
+   RawAnitaHeader(AnitaEventHeaderVer33_t *hdPtr, Int_t run, UInt_t realTime,
   		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 33 constructor
   RawAnitaHeader(AnitaEventHeaderVer30_t *hdPtr, Int_t run, UInt_t realTime,
   		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 30 constructor
@@ -165,7 +165,12 @@ The second byte (reserved[1]) is currently reserved.
   UInt_t          triggerTime; ///< Trigger time from TURF converted to unixTime
   UInt_t          triggerTimeNs; ///< Trigger time in ns from TURF
   Int_t           goodTimeFlag; ///< 1 is good trigger time, 0 is bad trigger time
-   
+
+
+  UInt_t          rawtrigTime; ///< Trigger time in TURF clock ticks before corrections
+  UInt_t          rawc3poNum; ///< Number of TURF clock ticks between GPS pulse per seconds before corrections
+  UShort_t        rawppsNum; ///< Number of GPS PPS since last clear all before corrections
+  
   const char *trigTypeAsString(); ///< Returns trigger type as string
   //  int isInL3Pattern(int phi); ///< Returns 1 if phi sector had l3 trigger
   //  int isInL2Pattern(int phi, AnitaRing::AnitaRing_t ring); ///< Returns 1 if given phi-ring had l2 trigger
@@ -201,7 +206,7 @@ The second byte (reserved[1]) is currently reserved.
   Int_t getTriggerBitG12() const;
   Int_t getTriggerBitSoftExt() const;
 
-  ClassDef(RawAnitaHeader,35);
+  ClassDef(RawAnitaHeader,40);
 };
 
 
