@@ -33,7 +33,7 @@ RTLSpectrum::RTLSpectrum(RtlSdrPowerSpectraStruct_t * raw, TGraph * calibration)
     for (unsigned i = 0; i < raw->nFreq; i++) 
     {
       x[i] = raw->startFreq + i * raw->freqStep; 
-      y[i] = raw->spectrum[i] / SPECTRUM_SCALE + SPECTRUM_OFFSET;   
+      y[i] = raw->spectrum[i] / SPECTRUM_SCALE() + SPECTRUM_OFFSET();   
 
       if (calibration) y[i]-=calibration->Eval(x[i]); 
     }
