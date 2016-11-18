@@ -71,14 +71,16 @@ class SurfHk: public TObject
    Int_t isBandMasked(int surf, int scl)
       { return (surfTrigBandMask[surf]&(1<<scl));} ///< Returns 1 if band is masked
 
-   
-   Int_t getL1Scaler(int phi, AnitaPol::AnitaPol_t pol); ///<Returns the L1 scaler value for given phi-pol
 
-   Int_t getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol); ///< Returns scaler value for given ring-phi-pol
-   Int_t getThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol) ;///< Returns readback threhsold value for given ring-phi-pol
-   Int_t getSetThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol); ///< Returns set threshold value for given ring-phi-pol
-   Int_t isMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol); ///< Returns 1 if given phi-ring-pol is masked
-   Int_t getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol); ///< Returns logical pol index
+   Int_t getL2Scaler(int phi); ///<Returns the L1 scaler value for given phi-pol
+   Int_t getL1Scaler(int phi,  AnitaRing::AnitaRing_t ring); ///<Returns the L1 scaler value for given phi-pol
+
+   Int_t getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol); ///< Returns scaler value for given ring-phi-pol
+   Int_t getThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol) ;///< Returns readback threhsold value for given ring-phi-pol
+   Int_t getSetThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol); ///< Returns set threshold value for given ring-phi-pol
+   Int_t isMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol); ///< Returns 1 if given phi-ring-pol is masked
+   Int_t getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol); ///< Returns logical pol index
+
    Int_t getScalerGoalRing(AnitaRing::AnitaRing_t ring);
    Int_t getScalerGoal(int surf, int scl); ///< Returns scaler goal of surf-scaler
    Double_t getRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.

@@ -81,13 +81,14 @@ class AnitaGeomTool
   static Int_t getSurfChanFromChanIndex(Int_t chanIndex, // input channel index
 				      Int_t &surf,Int_t &chan); ///< Convert logical index to  surf and channel
   static Int_t getPhiRingPolFromSurfChanTrigger(Int_t surf, Int_t chan, Int_t &phi,
-						AnitaRing::AnitaRing_t &ring,AnitaPol::AnitaPol_t &pol);
+						AnitaRing::AnitaRing_t &ring,AnitaTrigPol::AnitaTrigPol_t &pol);
   static Int_t getSurfChanTriggerFromPhiRingPol(Int_t phi, AnitaRing::AnitaRing_t ring,
-						AnitaPol::AnitaPol_t pol,Int_t &surf, Int_t &chan);
-  static Int_t getPhiPolFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &phi,
-				       AnitaPol::AnitaPol_t &pol);
-  static Int_t getSurfL1TriggerChanFromPhiPol(Int_t phi, AnitaPol::AnitaPol_t pol,
-					      Int_t &surf, Int_t &l1Chan);
+						AnitaTrigPol::AnitaTrigPol_t pol,Int_t &surf, Int_t &chan);
+  static Int_t getPhiRingFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &phi,
+					AnitaRing::AnitaRing_t &ring);
+  static Int_t getSurfL1TriggerChanFromPhiRing(Int_t phi, AnitaRing::AnitaRing_t ring,
+					       Int_t &surf, Int_t &l1Chan);
+  static Int_t getSurfL2TriggerChanFromPhi(Int_t phi, Int_t &surf, Int_t &l2Chan);
   static Int_t getAntPolFromSurfChan(Int_t surf, Int_t chan, Int_t &ant,
 				     AnitaPol::AnitaPol_t &pol); ///< Convert surf-chan to ant-pol
   static Int_t getAzimuthPartner(Int_t rx); ///< output the antenna that points to the same place in phi as the input antenna

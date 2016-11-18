@@ -92,6 +92,18 @@ char AnitaPol::polAsChar(AnitaPol::AnitaPol_t pol)
   return 'U';
 }
 
+char AnitaTrigPol::polAsChar(AnitaTrigPol::AnitaTrigPol_t pol)
+{
+  switch(pol) {
+  case kLCP: return 'L';
+  case kRCP: return 'R';
+      default:
+    return 'U';
+  }
+  return 'U';
+}
+
+
 const char *AnitaBand::bandAsString(AnitaBand::AnitaBand_t band)
 {
   switch(band) {

@@ -25,7 +25,10 @@ class RawAnitaHeader: public TObject
    RawAnitaHeader(); ///< Default constructor
    RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t run, UInt_t realTime,
 		  UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Assignment constructor
-   RawAnitaHeader(AnitaEventHeaderVer33_t *hdPtr, Int_t run, UInt_t realTime,
+
+   RawAnitaHeader(AnitaEventHeaderVer40_t *hdPtr, Int_t trun, UInt_t trealTime,
+		  UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag);
+  RawAnitaHeader(AnitaEventHeaderVer33_t *hdPtr, Int_t run, UInt_t realTime,
   		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 33 constructor
   RawAnitaHeader(AnitaEventHeaderVer30_t *hdPtr, Int_t run, UInt_t realTime,
   		 UInt_t triggerTime, UInt_t triggerTimeNs,Int_t tgoodTimeFlag); ///< Version 30 constructor
@@ -93,8 +96,8 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
   UChar_t         nadirAntTrigMask; ///< 8-bit nadir phi mask (from TURF)
   UInt_t          antTrigMask; ///< Deprecated
 
-  UShort_t        l1TrigMask;
-  UShort_t        l1TrigMaskH;
+  UShort_t        l2TrigMask;
+  UShort_t        l2TrigMaskH; ///<Deprecated
 
   UShort_t        phiTrigMask; ///< 16-bit phi mask (from TURF)
   UShort_t        phiTrigMaskH; ///< 16-bit phi mask (from TURF)
@@ -178,9 +181,11 @@ The second byte (reserved[1]) is currently reserved.
   int isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
   int isInPhiMask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
   int isInL1Mask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
+  int getL1Mask( AnitaPol::AnitaPol_t pol) const; ///< Get's the l1 Mask
+  int isInL2Mask(int phi); ///< Returns 1 if given phi-ring had l1 trigger
   int isInPhiMaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) { return isInPhiMask(phi,pol); } ///< for anita 4, this is the same as getPhiMask, just for compatibility 
   int isInL1MaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) { return isInL1Mask(phi,pol);} ///< for anita 4, this is the same as isinL1Mask
-  int getPhiMaskOffline(AnitaPol::AnitaPol_t pol) const { return 0; } ///< for anita 4, this does nothing
+  int getPhiMaskOffline(AnitaPol::AnitaPol_t pol) const { return 0; } ///< for anita 4, this does nothin
   int getL1MaskOffline( AnitaPol::AnitaPol_t pol) const { return 0;} ///< for anita 4, this does nothing
   int getCurrentTurfBuffer(); ///< Returns the current TURF buffer number (0, 1, 2 or 3);
   unsigned int getCurrentTurfHolds(); ///< Returns a 4-bit bitmask corresponding to the currently held buffers.
@@ -206,7 +211,9 @@ The second byte (reserved[1]) is currently reserved.
   Int_t getTriggerBitG12() const;
   Int_t getTriggerBitSoftExt() const;
 
-  ClassDef(RawAnitaHeader,40);
+
+  ClassDef(RawAnitaHeader,41);
+
 };
 
 

@@ -148,7 +148,7 @@
 #else //ANITA_4_DATA
 #define VER_EVENT_BODY 40
 #define VER_PEDSUBBED_EVENT_BODY 40
-#define VER_EVENT_HEADER 40
+#define VER_EVENT_HEADER 41
 #define SLAC_VER_EVENT_HEADER 40
 #define VER_WAVE_PACKET 40
 #define VER_SURF_PACKET 40
@@ -165,7 +165,7 @@
 #define VER_HK_SS 40
 #define VER_CMD_ECHO 40
 #define VER_MONITOR 41
-#define VER_TURF_RATE 41
+#define VER_TURF_RATE 42
 #define VER_LAB_PED 40
 #define VER_FULL_PED 40
 #define VER_SLOW_1 40
@@ -178,7 +178,7 @@
 #define VER_GPSD_START 40
 #define VER_LOGWATCHD_START 40
 #define VER_AVG_SURF_HK 41
-#define VER_SUM_TURF_RATE 41
+#define VER_SUM_TURF_RATE 42
 #define VER_ACQD_START 41
 #define VER_TURF_REG 40
 #define VER_TURF_EVENT_DATA 40
@@ -801,14 +801,14 @@ typedef struct {
   unsigned int c3poNum;
   unsigned short ppsNum; ///<It's only updated every second so no need for sub-second timing
   unsigned short deadTime; ///<How much were we dead??
-  unsigned short l1Rates[PHI_SECTORS]; // L1 rates, 1 per phi sector, in kHz
-  unsigned short rfScaler; 
-  unsigned char l3Rates[PHI_SECTORS]; /// L3 rates, 1 per phi sector, in Hz 
   unsigned char l3RatesGated[PHI_SECTORS]; // Gated L3 Rates 
-  unsigned short l1TrigMask; ///< As read from TURF (16-bit upper phi, lower phi)
+  unsigned short l2Rates[PHI_SECTORS]; // 
+  unsigned char  l3Rates[PHI_SECTORS]; /// to get Hz 
+  unsigned short l2TrigMask; ///< As read from TURF (16-bit upper phi, lower phi)
   unsigned short phiTrigMask; ///< 16 bit phi-sector mask
   unsigned char errorFlag;///<Bit 1-4 bufferdepth, Bits 5,6,7 are for upper,lower,nadir trig mask match
   unsigned char refPulses; 
+  unsigned char reserved[2];
 } TurfRateStruct_t;
 
 //!  Summed Turf Rates -- Telemetered
@@ -822,9 +822,9 @@ typedef struct {
     unsigned short deltaT; ///<Difference in time between first and last 
     unsigned int deadTime; ///<Summed dead time between first and last
     unsigned char bufferCount[4]; ///<Counting filled buffers
-    unsigned short l3Rates[16]; ///</numRates to get Hz z  
-    unsigned short l3RatesGated[16]; ///</numRates to get Hz z  
-    unsigned short l1TrigMask; ///<As read from TURF (16-bit phi)
+    unsigned int l2Rates[PHI_SECTORS]; ///< Divide by numRates to get Hz
+    unsigned short l3Rates[PHI_SECTORS]; ///</numRates to get Hz z  
+    unsigned short l2TrigMask; ///<As read from TURF (16-bit phi)
     unsigned short phiTrigMask; ///<16-bit phi-sector mask
     unsigned char errorFlag;///<Bit 1-4 bufferdepth, Bits 5,6,7 are for upper,lower,nadir trig mask match
 } SummedTurfRateStruct_t;
@@ -866,8 +866,8 @@ typedef struct {
   unsigned char errorFlag; 
   unsigned char surfSlipFlag; ///< Sync Slip between SURF 2-9 and SURF 1
   unsigned char peakThetaBin; ///< 8-bit peak theta bin from Prioritizer
-  unsigned short l1TrigMask; ///< 16-bit phi ant mask (from TURF)
-  unsigned short l1TrigMaskH; ///< 16-bit phi ant mask (from TURF)
+  unsigned short l2TrigMask; ///< 16-bit phi ant mask (from TURF)
+  unsigned short l2TrigMaskH; ///< 16-bit phi ant mask (from TURF)
   unsigned short phiTrigMask; ///< 16-bit phi mask (from TURF)
   unsigned short phiTrigMaskH; ///< 16-bit phi mask (from TURF)
   unsigned short imagePeak; ///< 16-bit image peak from Prioritizer
@@ -1337,13 +1337,13 @@ typedef struct {
 typedef struct __attribute__((packed)) RawAdu5MBNStruct {
   char header[11]; ///< $PASHR,MCA,
   unsigned short sequence_tag;  ///< Sequence ID number in units of 50ms, modulo 30 minutes
-  unsigned char mben_eft; ///< Number of remaining MBEN structures to be sent for current epoch.
+  unsigned char mben_left; ///< Number of remaining MBEN structures to be sent for current epoch.
   unsigned char svpm; ///< Satellite PRN number.
   unsigned char el; ///< Satellite elevation angle (degrees).
   unsigned char az; ///< Satellite azimuth angle (degrees).
   unsigned char chnind; ///< Channel ID (1 to 12).
   unsigned char warn; ///< Warning flag
-  unsigned char good_bad; ///< I3ndicates quality of the position measurement.
+  unsigned char good_bad; ///< Indicates quality of the position measurement.
   unsigned char polarity_know; ///< Indicates synchronization of receiver with NAV message
   unsigned char ireg; ///< Signal-to-noise ratio of satellite observation
   unsigned char qa_phase; ///< Phase quality indicator: 0 - 5 and 95 -100 are normal

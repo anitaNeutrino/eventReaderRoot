@@ -195,6 +195,23 @@ namespace AnitaPol {
    char polAsChar(AnitaPol::AnitaPol_t pol); ///< Returns the polarisation as a character string.
 }
 
+//!  AnitaTrigPol -- Enumeration for the two trigger polarisations
+/*!
+  Really that's all there is to it.
+  \ingroup rootclasses
+*/
+namespace AnitaTrigPol {
+   typedef enum EAnitaTrigPol {
+     kLCP = 0, ///< Left-circular polarisation
+     kRCP = 1, ///< Right-circular polarisation
+     kNotATrigPol ///< USeful in for loops.
+   } AnitaTrigPol_t; ///< Polarisation enumeration.
+   char polAsChar(AnitaTrigPol::AnitaTrigPol_t pol); ///< Returns the polarisation as a character string.
+}
+
+
+
+
 //!  AnitaBand -- Enumeration for the four frequency bands
 /*!
   Really that's all there is to it.

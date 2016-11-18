@@ -42,8 +42,8 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    errorFlag=hdPtr->errorFlag;
    surfSlipFlag=hdPtr->surfSlipFlag;
    //   nadirAntTrigMask=hdPtr->nadirAntTrigMask;
-   l1TrigMask=hdPtr->l1TrigMask;
-   l1TrigMaskH=hdPtr->l1TrigMaskH;
+   l2TrigMask=hdPtr->l2TrigMask;
+   //   l2TrigMaskH=hdPtr->l1TrigMaskH;
    phiTrigMask=hdPtr->phiTrigMask;
    phiTrigMaskH=hdPtr->phiTrigMaskH;
    trigType=hdPtr->turfio.trigType;
@@ -73,6 +73,64 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
 }
 
 
+RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer40_t *hdPtr, Int_t trun, UInt_t trealTime,
+			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
+{
+  if(hdPtr->gHdr.code!=PACKET_HD ||
+     hdPtr->gHdr.verId!=40 ||
+     hdPtr->gHdr.numBytes!=sizeof(AnitaEventHeaderVer40_t)) {
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << " (Ver40)\n" 
+	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
+	      << "\nversion:\t" << (int)hdPtr->gHdr.verId 
+	      << "\t" << (int)VER_EVENT_HEADER 
+	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
+	      << sizeof(AnitaEventHeader_t) << std::endl;
+  }
+
+   payloadTime=hdPtr->unixTime;
+   payloadTimeUs=hdPtr->unixTimeUs;
+   gpsSubTime=hdPtr->gpsSubTime;
+   turfEventId=hdPtr->turfEventId;
+   eventNumber=hdPtr->eventNumber;
+   calibStatus=hdPtr->calibStatus;
+   priority=hdPtr->priority;
+   turfUpperWord=hdPtr->turfUpperWord;
+   otherFlag=hdPtr->otherFlag;
+   errorFlag=hdPtr->errorFlag;
+   surfSlipFlag=hdPtr->surfSlipFlag;
+   //   nadirAntTrigMask=hdPtr->nadirAntTrigMask;
+   l2TrigMask=hdPtr->l1TrigMask;
+   //   l2TrigMaskH=hdPtr->l1TrigMaskH;
+   phiTrigMask=hdPtr->phiTrigMask;
+   phiTrigMaskH=hdPtr->phiTrigMaskH;
+   trigType=hdPtr->turfio.trigType;
+   l3Type1Count=hdPtr->turfio.l3Type1Count;
+   trigNum=hdPtr->turfio.trigNum;
+   trigTime=hdPtr->turfio.trigTime;
+   c3poNum=hdPtr->turfio.c3poNum;
+   ppsNum=hdPtr->turfio.ppsNum;
+   deadTime=hdPtr->turfio.deadTime;
+   bufferDepth=hdPtr->turfio.bufferDepth;
+   turfioReserved=hdPtr->turfio.reserved[0];
+   l3TrigPattern=hdPtr->turfio.l3TrigPattern;
+   l3TrigPatternH=hdPtr->turfio.l3TrigPatternH;
+   //   memcpy(reserved,hdPtr->reserved,2*sizeof(UChar_t));
+   run=trun;
+   realTime=trealTime;
+   triggerTime=ttriggerTime;
+   triggerTimeNs=ttriggerTimeNs;
+   goodTimeFlag=tgoodTimeFlag;
+
+
+  //Prioritizer stuff
+  peakThetaBin=hdPtr->peakThetaBin;
+  imagePeak=hdPtr->imagePeak;
+  coherentSumPeak=hdPtr->coherentSumPeak;
+  prioritizerStuff=hdPtr->prioritizerStuff;
+}
+
+
+
 RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer33_t *hdPtr, Int_t trun, UInt_t trealTime,
 			       UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag)
 {
@@ -99,8 +157,8 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer33_t *hdPtr, Int_t trun, UInt_
    errorFlag=hdPtr->errorFlag;
    surfSlipFlag=hdPtr->surfSlipFlag;
    //   nadirAntTrigMask=hdPtr->nadirAntTrigMask;
-   l1TrigMask=hdPtr->l1TrigMask;
-   l1TrigMaskH=hdPtr->l1TrigMaskH;
+   l2TrigMask=hdPtr->l1TrigMask;
+   l2TrigMaskH=hdPtr->l1TrigMaskH;
    phiTrigMask=hdPtr->phiTrigMask;
    phiTrigMaskH=hdPtr->phiTrigMaskH;
    trigType=hdPtr->turfio.trigType;
@@ -425,6 +483,17 @@ const char *RawAnitaHeader::trigTypeAsString()
    return theString;
 }
 
+int RawAnitaHeader::getL1Mask( AnitaPol::AnitaPol_t pol) const {
+  switch(pol) {
+  case AnitaPol::kVertical:
+    return  l2TrigMask;
+  case AnitaPol::kHorizontal:
+    return  l2TrigMaskH;
+  default:
+    return 0;
+  }      
+  return 0; 
+}
 
 UShort_t RawAnitaHeader::getL3TrigPattern(AnitaPol::AnitaPol_t pol){
   return pol == AnitaPol::kHorizontal ? l3TrigPatternH : l3TrigPattern;
@@ -432,15 +501,16 @@ UShort_t RawAnitaHeader::getL3TrigPattern(AnitaPol::AnitaPol_t pol){
 int RawAnitaHeader::isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol)
 { 
   if(phi<0 || phi>=PHI_SECTORS) return -1;
-  switch(pol) {
-  case AnitaPol::kVertical:
-    return  ((l3TrigPattern&(1<<(phi))) ? 1 :0);
-  case AnitaPol::kHorizontal:
-    return  ((l3TrigPatternH&(1<<phi)) ? 1 : 0);
-  default:
-    return -1;
-  }      
-  return -1;
+  return  ((l3TrigPattern&(1<<(phi))) ? 1 :0);
+  // switch(pol) {
+  // case AnitaPol::kVertical:
+  //   return  ((l3TrigPattern&(1<<(phi))) ? 1 :0);
+  // case AnitaPol::kHorizontal:
+  //   return  ((l3TrigPatternH&(1<<phi)) ? 1 : 0);
+  // default:
+  //   return -1;
+  // }      
+  // return -1;
   
 }
 int RawAnitaHeader::isInPhiMask(int phi, AnitaPol::AnitaPol_t pol)
@@ -458,17 +528,26 @@ int RawAnitaHeader::isInPhiMask(int phi, AnitaPol::AnitaPol_t pol)
   
 }
 int RawAnitaHeader::isInL1Mask(int phi, AnitaPol::AnitaPol_t pol)
-{ 
-  if(phi<0 || phi>=PHI_SECTORS) return -1;
-  switch(pol) {
-  case AnitaPol::kVertical:
-    return  ((l1TrigMask&(1<<(phi))) ? 1 :0);
-  case AnitaPol::kHorizontal:
-    return  ((l1TrigMaskH&(1<<phi)) ? 1 : 0);
-  default:
-    return -1;
-  }      
+{
   return -1;
+  // if(phi<0 || phi>=PHI_SECTORS) return -1;
+  // switch(pol) {
+  // case AnitaPol::kVertical:
+  //   return  ((l1TrigMask&(1<<(phi))) ? 1 :0);
+  // case AnitaPol::kHorizontal:
+  //   return  ((l1TrigMaskH&(1<<phi)) ? 1 : 0);
+  // default:
+  //   return -1;
+  // }      
+  // return -1;
+  
+}
+
+
+int RawAnitaHeader::isInL2Mask(int phi)
+{
+  if(phi<0 || phi>=PHI_SECTORS) return -1;
+  return  ((l2TrigMask&(1<<(phi))) ? 1 :0);
   
 }
 
