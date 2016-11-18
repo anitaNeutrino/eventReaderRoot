@@ -25,18 +25,18 @@ namespace AnitaGeom {
    
   ///< Map from antenna to SURF. Both polarizations from an antenna go to the same SURF.
   Int_t antToSurfMap[NUM_SEAVEYS]={11,5,10,4,11,4,10,5,11,5,10,4,11,4,10,5,
-				  9,3,8,2,8,3,9,2,9,3,8,2,8,3,9,2,
-				  6,0,7,1,6,1,7,0,6,0,7,1,6,1,7,0};
-
+				   9,3,8,2,8,3,9,2,9,3,8,2,8,3,9,2,
+				   6,0,7,1,6,1,7,0,6,0,7,1,6,1,7,0};
+  
   ///< Map for VPOL channel of antenna to channel on SURF. (VPOL channels are 0-3)  
   Int_t vAntToChan[NUM_SEAVEYS]={3,1,3,5,1,3,1,3,2,0,2,0,0,2,0,2,
-			       1,3,1,3,3,1,3,1,0,2,0,2,2,0,2,0,
-			       3,1,3,1,1,3,1,3,2,0,2,0,0,2,0,2};
+				 1,3,1,3,3,1,3,1,0,2,0,2,2,0,2,0,
+				 3,1,3,1,1,3,1,3,2,0,2,0,0,2,0,2};
 				  
   ///< Map for HPOL channel of antenna to channel on SURF. (HPOL channels are 4-7)
   Int_t hAntToChan[NUM_SEAVEYS]={7,5,7,1,5,7,5,7,6,4,6,4,4,6,4,6,
-			       5,7,5,7,7,5,7,5,4,6,4,6,6,4,6,4,
-			       7,5,7,5,5,7,5,7,6,4,6,4,4,6,4,6};
+				 5,7,5,7,7,5,7,5,4,6,4,6,6,4,6,4,
+				 7,5,7,5,5,7,5,7,6,4,6,4,4,6,4,6};
   
    
   ///< 1 is Normal orientation, -1 is 180 degree flip. (Top ring needs to be inverted in software when signals come through seaveys.)
@@ -51,17 +51,17 @@ namespace AnitaGeom {
   ///< The numbers 1-48 indicate antenna as the negative sign is used to indicate polarization.
   ///< The negative sign indicates polarization (-ve is VPOL, +ve is HPOL)
   Int_t surfToAntMap[ACTIVE_SURFS][RFCHAN_PER_SURF]= {{-42,-34,-48,-40,42,34,48,40},
-						    {-44,-36,-46,-38,44,36,46,38},
-						    {-32,-24,-28,-20,32,24,28,20},
-						    {-30,-22,-26,-18,30,22,26,18},
-						    {-12,4,-14,-6,12,-4,14,6},
-						    {-10,-2,-16,-8,10,2,16,8},
-						    {-45,-37,-41,-33,45,37,41,33},
-						    {-47,-39,-43,-35,47,39,43,35},
-						    {-27,-19,-29,-21,27,19,29,21},
-						    {-25,-17,-31,-23,25,17,31,23},
-						    {-15,-7,-11,-3,15,7,11,3},
-						    {-13,-5,-9,-1,13,5,9,1}};
+						      {-44,-36,-46,-38,44,36,46,38},
+						      {-32,-24,-28,-20,32,24,28,20},
+						      {-30,-22,-26,-18,30,22,26,18},
+						      {-12,4,-14,-6,12,-4,14,6},
+						      {-10,-2,-16,-8,10,2,16,8},
+						      {-45,-37,-41,-33,45,37,41,33},
+						      {-47,-39,-43,-35,47,39,43,35},
+						      {-27,-19,-29,-21,27,19,29,21},
+						      {-25,-17,-31,-23,25,17,31,23},
+						      {-15,-7,-11,-3,15,7,11,3},
+						      {-13,-5,-9,-1,13,5,9,1}};
       
   ///< Map from phi-sector to antenna. Both start counting at zero.
   Int_t topAntNums[NUM_PHI]    = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
@@ -94,12 +94,19 @@ namespace AnitaGeom {
   using AnitaPol::kVertical;
   using AnitaPol::kHorizontal;
   ///< Map from SURF trigger channel to polarization  
-  AnitaPol::AnitaPol_t surfTriggerChanToPol[SCALERS_PER_SURF]={kVertical,   kVertical,   kVertical,
-							       kVertical,   kVertical,   kVertical,
-							       kHorizontal, kHorizontal, kHorizontal,
-							       kHorizontal, kHorizontal, kHorizontal};
+  AnitaPol::AnitaPol_t surfTriggerChanToPolAnita3[SCALERS_PER_SURF]={kVertical,   kVertical,   kVertical,
+								     kVertical,   kVertical,   kVertical,
+								     kHorizontal, kHorizontal, kHorizontal,
+								     kHorizontal, kHorizontal, kHorizontal};
 
+  using AnitaTrigPol::kRCP;
+  using AnitaTrigPol::kLCP;
+  AnitaTrigPol::AnitaTrigPol_t surfTriggerChanToPolAnita4[SCALERS_PER_SURF]={kRCP,kRCP,kRCP,
+									     kRCP,kRCP,kRCP,
+									     kLCP,kLCP,kLCP};
   
+
+  //These are from ANITA3
   Int_t phiToSurfTriggerMap[NUM_PHI] = {2,4,3,5,2,4,3,5,9,7,8,6,9,7,8,6};
   Int_t phiToSurfHalf[NUM_PHI]       = {0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0};
 
@@ -274,7 +281,7 @@ void AnitaGeomTool::fillAntPositionsFromPrioritizerdConfig() {
 /// Converts the SURF and channel numbers to phi-sector, ring and polarization
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 Int_t AnitaGeomTool::getPhiRingPolFromSurfChanTrigger(Int_t surf,Int_t chan, Int_t &phi,
-						    AnitaRing::AnitaRing_t &ring,AnitaPol::AnitaPol_t &pol)
+						    AnitaRing::AnitaRing_t &ring,AnitaTrigPol::AnitaTrigPol_t &pol)
 {
   if(surf<0 || surf>=ACTIVE_SURFS) return -1;
   if(chan<0 || chan>=SCALERS_PER_SURF) return -1;
@@ -283,40 +290,45 @@ Int_t AnitaGeomTool::getPhiRingPolFromSurfChanTrigger(Int_t surf,Int_t chan, Int
   if((chan%6)>=3) surfHalf=1;
   phi=AnitaGeom::surfToPhiTriggerMap[surf][surfHalf];
   ring=AnitaGeom::surfTriggerChanToRing[chan];
-  pol=AnitaGeom::surfTriggerChanToPol[chan];
+  pol=AnitaGeom::surfTriggerChanToPolAnita4[chan];
 
+  //ANITA3 had this switch
   //Switched at SURF
-  if(surf==5 && chan==0) pol=AnitaPol::kHorizontal;
-  if(surf==5 && chan==6) pol=AnitaPol::kVertical;
+  //  if(surf==5 && chan==0) pol=AnitaTrigPol::kHorizontal;
+  //  if(surf==5 && chan==6) pol=AnitaTrigPol::kVertical;
   return phi;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Converts the SURF and L1 trigger channel to phi-sector and polarization.
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-Int_t AnitaGeomTool::getPhiPolFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &phi, AnitaPol::AnitaPol_t &pol)
+Int_t AnitaGeomTool::getPhiRingFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &phi, AnitaRing::AnitaRing_t &ring)
 {
   if(phi<0 || phi>=NUM_PHI) return -1;
-  Int_t surfHalf=l1Chan%2;   
+  Int_t surfHalf=l1Chan>2;   
   phi=AnitaGeom::surfToPhiTriggerMap[surf][surfHalf];
-  pol=AnitaPol::kVertical;
-  if(l1Chan>=2) pol=AnitaPol::kHorizontal;
+  if((l1Chan%3)==0) ring=AnitaRing::kTopRing;
+  if((l1Chan%3)==1) ring=AnitaRing::kMiddleRing;
+  if((l1Chan%3)==2) ring=AnitaRing::kBottomRing;
   return phi;
 }
+
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Converts the SURF and L1 trigger channel to phi-sector and polarization.
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-Int_t AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(Int_t phi,AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol ,Int_t &surf, Int_t &chan) {
+Int_t AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(Int_t phi,AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol ,Int_t &surf, Int_t &chan) {
   if(phi<0 || phi>=NUM_PHI) return -1;
   surf=AnitaGeom::phiToSurfTriggerMap[phi];
   Int_t surfHalf=AnitaGeom::phiToSurfHalf[phi];
   chan = (6-6*pol)+ ring + 3*surfHalf; 
 
-  if(phi==3 && ring==AnitaRing::kTopRing) {     
-    if(pol==AnitaPol::kVertical) chan=6;
-    if(pol==AnitaPol::kHorizontal) chan=0;
-  }
+  // if(phi==3 && ring==AnitaRing::kTopRing) {     
+  //   if(pol==AnitaTrigPol::kVertical) chan=6;
+  //   if(pol==AnitaTrigPol::kHorizontal) chan=0;
+  // }
   return surf;
 }
 
@@ -324,20 +336,39 @@ Int_t AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(Int_t phi,AnitaRing::Anita
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Convert phi-sector and polarization from phi-sector and polarization.
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-Int_t AnitaGeomTool::getSurfL1TriggerChanFromPhiPol(Int_t phi, AnitaPol::AnitaPol_t pol, Int_t &surf, Int_t &l1Chan) 
+Int_t AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(Int_t phi, AnitaRing::AnitaRing_t ring, Int_t &surf, Int_t &l1Chan) 
 {
   if(phi<0 || phi>=NUM_PHI) return -1;
   surf=AnitaGeom::phiToSurfTriggerMap[phi];
   Int_t surfHalf=AnitaGeom::phiToSurfHalf[phi];
-  if(pol==AnitaPol::kVertical) {
-    l1Chan=surfHalf;
-  }
-  else {
-    l1Chan=2+surfHalf;
-  }
+  switch(ring) {
+  case AnitaRing::kTopRing:
+    l1Chan=3*surfHalf;
+    break;
+  case AnitaRing::kMiddleRing:
+    l1Chan=1+(3*surfHalf);
+    break;
+  case AnitaRing::kBottomRing:
+    l1Chan=2+(3*surfHalf);
+    break;
+  default:
+    std::cerr << "Unknown ring " << ring << "\n";
+  }       
   return surf;
 }
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Converts phi-sector to surf and l2 trigger channel
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+Int_t AnitaGeomTool::getSurfL2TriggerChanFromPhi(Int_t phi, Int_t &surf, Int_t &l2Chan)
+{
+  if(phi<0 || phi>=NUM_PHI) return -1;
+  surf=AnitaGeom::phiToSurfTriggerMap[phi];
+  Int_t surfHalf=AnitaGeom::phiToSurfHalf[phi];
+  l2Chan=surfHalf;
+  return surf;
+}
 
 
 

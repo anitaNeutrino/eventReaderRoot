@@ -14,11 +14,6 @@
 #include <fstream>
 #include <cstring>
 
-
-
-
-
-
 ClassImp(SurfHk);
 
 SurfHk::SurfHk() 
@@ -291,17 +286,17 @@ SurfHk::SurfHk(Int_t           trun,
 
 }
 
-Int_t SurfHk::getL1Scaler(int phi, AnitaPol::AnitaPol_t pol) 
+Int_t SurfHk::getL1Scaler(int phi, AnitaRing::AnitaRing_t ring) 
 {
   Int_t surf, l1Scl;
-  AnitaGeomTool::getSurfL1TriggerChanFromPhiPol(phi,pol,surf,l1Scl);
+  AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(phi,ring,surf,l1Scl);
   if((surf>=0 && surf<ACTIVE_SURFS) && (l1Scl>=0 && l1Scl<4)) {
     return l1Scaler[surf][l1Scl];
   }
   return -1;
 }
 
-Int_t SurfHk::getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol)
+Int_t SurfHk::getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol)
 {
    Int_t surf,scl;
    AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(phi,ring,pol,surf,scl);
@@ -310,7 +305,7 @@ Int_t SurfHk::getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol
    return -1;
 }
 
-Int_t SurfHk::getThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol)
+Int_t SurfHk::getThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol)
 {
   Int_t surf,scl;
   AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(phi,ring,pol,surf,scl);
@@ -320,7 +315,7 @@ Int_t SurfHk::getThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::Anita
 
 }
 
-Int_t SurfHk::getSetThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol)
+Int_t SurfHk::getSetThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol)
 {
   Int_t surf,scl;
   AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(phi,ring,pol,surf,scl);
@@ -330,7 +325,7 @@ Int_t SurfHk::getSetThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::An
 }
 
 
-Int_t SurfHk::isMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol)
+Int_t SurfHk::isMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol)
 {
   Int_t surf,scl;
   AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(phi,ring,pol,surf,scl);
@@ -339,7 +334,7 @@ Int_t SurfHk::isMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_
   return -1;
 }
 
-Int_t SurfHk::getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaPol::AnitaPol_t pol)
+Int_t SurfHk::getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol)
 {
    Int_t surf,scl;
    AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(phi,ring,pol,surf,scl);
@@ -355,7 +350,7 @@ Int_t SurfHk::getScalerGoal(int surf, int scl)
 {
   Int_t phi=-1;
   AnitaRing::AnitaRing_t ring=AnitaRing::kTopRing;
-  AnitaPol::AnitaPol_t pol=AnitaPol::kVertical;
+  AnitaTrigPol::AnitaTrigPol_t pol=AnitaTrigPol::kLCP;
   
   AnitaGeomTool::getPhiRingPolFromSurfChanTrigger(surf,scl,phi,ring,pol);  
   return getScalerGoalRing(ring);
