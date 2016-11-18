@@ -35,13 +35,48 @@ SummedTurfRate::SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStruct
   deadTime=turfPtr->deadTime;
   memcpy(bufferCount,turfPtr->bufferCount,sizeof(UChar_t)*4);
    for(int phi=0;phi<PHI_SECTORS;phi++) {
+     l3Rates[phi]=turfPtr->l3Rates[phi];
+     l2Rates[phi]=turfPtr->l2Rates[phi];
+   }
+   phiTrigMask=turfPtr->phiTrigMask;  
+   l2TrigMask=turfPtr->l2TrigMask;   
+   errorFlag=turfPtr->errorFlag;
+   intFlag=0;
+
+}
+
+
+
+SummedTurfRate::SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStructVer40_t *turfPtr)
+{
+
+ if(turfPtr->gHdr.code!=PACKET_SUM_TURF_RATE ||
+     turfPtr->gHdr.verId!=VER_SUM_TURF_RATE ||
+     turfPtr->gHdr.numBytes!=sizeof(SummedTurfRateStructVer40_t)) {
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_SUM_TURF_RATE) << "Ver40\n" 
+	      << "code:\t" << (int)turfPtr->gHdr.code << "\t" << PACKET_SUM_TURF_RATE 
+	      << "\nversion:\t" << (int)turfPtr->gHdr.verId 
+	      << "\t" << 40 
+	      << "\nsize:\t" << turfPtr->gHdr.numBytes << "\t"
+	      << sizeof(SummedTurfRateStruct_t) << std::endl;
+  }
+  
+  //All the above does is print a warning message
+  run=trun;
+  realTime=trealTime;
+  payloadTime=turfPtr->unixTime;
+  numRates=turfPtr->numRates;
+  deltaT=turfPtr->deltaT;
+  deadTime=turfPtr->deadTime;
+  memcpy(bufferCount,turfPtr->bufferCount,sizeof(UChar_t)*4);
+   for(int phi=0;phi<PHI_SECTORS;phi++) {
      l3Rates[phi]=turfPtr->l3Rates[phi][0];
-     l3RatesH[phi]=turfPtr->l3Rates[phi][1];
+     //     l3RatesH[phi]=turfPtr->l3Rates[phi][1];
    }
    phiTrigMask=turfPtr->phiTrigMask;   
-   phiTrigMaskH=turfPtr->phiTrigMaskH;   
-   l1TrigMask=turfPtr->l1TrigMask;   
-   l1TrigMaskH=turfPtr->l1TrigMaskH;   
+   //   phiTrigMaskH=turfPtr->phiTrigMaskH;   
+   l2TrigMask=turfPtr->l1TrigMask;   
+   //   l1TrigMaskH=turfPtr->l1TrigMaskH;   
    errorFlag=turfPtr->errorFlag;
    intFlag=0;
 
@@ -91,15 +126,24 @@ SummedTurfRate::SummedTurfRate(Int_t trun, Int_t trealTime, SummedTurfRateStruct
 
 Int_t SummedTurfRate::isPhiMasked(int phi, AnitaPol::AnitaPol_t pol) {
   if(phi<0 || phi>15) return -1;
-  if(pol==AnitaPol::kVertical)
-    return ((phiTrigMask & (1<<phi))?1:0);
-  return ((phiTrigMaskH & (1<<phi))?1:0);
+  //  if(pol==AnitaPol::kVertical)
+  return ((phiTrigMask & (1<<phi))?1:0);
+  //return ((phiTrigMaskH & (1<<phi))?1:0);
 }
 
 
 Int_t SummedTurfRate::isL1Masked(int phi, AnitaPol::AnitaPol_t pol) {
+  return -1;
+  // if(phi<0 || phi>15) return -1;
+  // if(pol==AnitaPol::kVertical)
+  //   return ((l1TrigMask & (1<<phi))?1:0);
+  // return ((l1TrigMaskH & (1<<phi))?1:0);
+}
+
+
+
+Int_t SummedTurfRate::isL2Masked(int phi) {
+  //return -1;
   if(phi<0 || phi>15) return -1;
-  if(pol==AnitaPol::kVertical)
-    return ((l1TrigMask & (1<<phi))?1:0);
-  return ((l1TrigMaskH & (1<<phi))?1:0);
+  return ((l2TrigMask & (1<<phi))?1:0);
 }
