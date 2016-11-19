@@ -82,9 +82,9 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer40_t *hdPtr, Int_t trun, UInt_
     std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_HD) << " (Ver40)\n" 
 	      << "code:\t" << hdPtr->gHdr.code << "\t" << PACKET_HD 
 	      << "\nversion:\t" << (int)hdPtr->gHdr.verId 
-	      << "\t" << (int)VER_EVENT_HEADER 
+	      << "\t" << (int)40
 	      << "\nsize:\t" << hdPtr->gHdr.numBytes << "\t"
-	      << sizeof(AnitaEventHeader_t) << std::endl;
+	      << sizeof(AnitaEventHeaderVer40_t) << std::endl;
   }
 
    payloadTime=hdPtr->unixTime;

@@ -107,8 +107,10 @@ CalibratedSSHk::CalibratedSSHk(RawSSHk *hkPtr, RawSSHk *avzPtr, RawSSHk *calPtr)
 const char *CalibratedSSHk::getName(int ssInd)
 {
   switch(ssInd) {
-  case 2: return "SS2B";
-  case 3: return "SS4B";
+  case 1: return "SS-5";
+  case 2: return "SS-6";
+  case 3: return "SS-7";
+  case 4: return "SS-8";
   default:
     return "n/c";
   }
