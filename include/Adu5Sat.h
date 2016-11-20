@@ -41,6 +41,14 @@ class Adu5Sat: public TObject
    UShort_t        azimuth[4][MAX_SATS]; ///< The azimuth of each visible satellite
    
    void getCirclePlot(TPad *padSat,char *title=0); ///< Creates a 2D elevation-azimuth plot
+   int getNumSats(int whichAnt);
+   int getPRN(int whichAnt,int whichSat);
+   int getSNR(int whichAnt,int whichSat);
+   int getElevation(int whichAnt,int whichSat);
+   int getAzimuth(int whichAnt,int whichSat);
+   int getFlag(int whichAnt,int whichSat);
+   
+   
 
   ClassDef(Adu5Sat,10);
 };

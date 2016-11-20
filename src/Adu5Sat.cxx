@@ -101,3 +101,54 @@ void Adu5Sat::getCirclePlot(TPad *padSat, char *title)
     }
   }
 }
+
+
+
+int Adu5Sat::getNumSats(int whichAnt)
+{
+  if(whichAnt>=0 && whichAnt<4)
+    return numSats[whichAnt];
+  return 0;
+}
+
+int Adu5Sat::getPRN(int whichAnt,int whichSat)
+{
+  if(whichAnt>=0 && whichAnt<4) 
+    if(whichSat<numSats[whichAnt])
+      return prn[whichAnt][whichSat];
+  return 0;
+
+}
+
+int Adu5Sat::getSNR(int whichAnt,int whichSat)
+{
+
+  if(whichAnt>=0 && whichAnt<4) 
+    if(whichSat<numSats[whichAnt])
+      return snr[whichAnt][whichSat];
+  return 0;
+}
+
+int Adu5Sat::getElevation(int whichAnt,int whichSat)
+{
+  if(whichAnt>=0 && whichAnt<4) 
+    if(whichSat<numSats[whichAnt])
+      return elevation[whichAnt][whichSat];
+  return 0;
+}
+
+int Adu5Sat::getAzimuth(int whichAnt,int whichSat)
+{
+  if(whichAnt>=0 && whichAnt<4) 
+    if(whichSat<numSats[whichAnt])
+      return azimuth[whichAnt][whichSat];
+  return 0;
+}
+
+int Adu5Sat::getFlag(int whichAnt,int whichSat)
+{
+  if(whichAnt>=0 && whichAnt<4) 
+    if(whichSat<numSats[whichAnt])
+      return flag[whichAnt][whichSat];
+  return 0;
+}

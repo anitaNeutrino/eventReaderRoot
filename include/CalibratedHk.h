@@ -113,6 +113,7 @@ class CalibratedHk: public TObject
    static const char *getSBSTempName(int index); ///< Return char string name of SBS temperature sensor
    static const char *getNTUTempName(int index); ///< Return char string name of SBS temperature sensor
    static const char *getAttitudeName(int index); ///< Return char string name of attitude sensor
+   static const char *getSSName(int index); ///< Return string name of sun-sensor
 
   ClassDef(CalibratedHk,11);
 };

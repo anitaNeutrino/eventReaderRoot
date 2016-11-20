@@ -88,7 +88,7 @@ float ssOffset[4][2]={{0.08,-0.1572},{-0.32940,-0.17477},
 		      {0.05541,-0.08458},{-0.23773,-0.50356}};
 float ssGain[4][2]={{5.0288,5.0},{4.8515,5.0},{5.0599,5.0},{5.0288,5.0}};
 float ssSep[4]={3.704391,3.618574,3.512025,3.554451};
-float ssAzRel[4]={45,-45,-135,135};
+float ssAzRel[4]={45,0,-45,-90};
 float ssGammaFactor[4]={0.4,0.2,0.3,0.5};
 const float globalGamma=67;
 
@@ -294,6 +294,20 @@ const char *currentNames[NUM_CURRENTS]={"+24","PV","+5_M","+3.3_PCI","+12_PCI","
 
 
 }
+
+
+const char *CalibratedHk::getSSName(int ssInd)
+{
+  switch(ssInd) {
+  case 0: return "SS-1";
+  case 1: return "SS-2";
+  case 2: return "SS-3";
+  case 3: return "SS-4";
+  default:
+    return "n/c";
+  }
+}
+
 
 
  const char *CalibratedHk::getPowerName(int index) {
