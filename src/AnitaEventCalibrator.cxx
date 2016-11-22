@@ -1495,7 +1495,7 @@ void AnitaEventCalibrator::loadCalib() {
     
   Int_t surf,chan,chip,rco,samp;
   Double_t calib;
-  sprintf(fileName,"%s/simpleVoltageCalibrationHarm.txt",calibDir);
+  sprintf(fileName,"%s/simpleVoltageCalibrationAnita4.txt",calibDir);
   std::ifstream CalibFile(fileName);
   char firstLine[180];
   CalibFile.getline(firstLine,179);
