@@ -72,9 +72,16 @@ class SurfHk: public TObject
       { return (surfTrigBandMask[surf]&(1<<scl));} ///< Returns 1 if band is masked
 
 
-   Int_t getL2Scaler(int phi); ///<Returns the L1 scaler value for given phi-pol
+   Int_t getL2Scaler(int phi); ///<Returns the L2 scaler value for given phi-pol
    Int_t getL1Scaler(int phi,  AnitaRing::AnitaRing_t ring); ///<Returns the L1 scaler value for given phi-pol
 
+   Int_t getScalerFromSurfChan(int surf, int chan) {return scaler[surf][chan];}
+   Int_t getThresholdFromSurfChan(int surf, int chan) {return threshold[surf][chan];}
+   Int_t getSetThresholdFromSurfChan(int surf, int chan) {return setThreshold[surf][chan];}
+   Int_t getL2ScalerFromSurfChan(int surf, int chan) { return l2Scaler[surf][chan]; }
+   Int_t getL1ScalerFromSurfChan(int surf, int chan) { return l1Scaler[surf][chan]; }
+   
+   
    Int_t getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol); ///< Returns scaler value for given ring-phi-pol
    Int_t getThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol) ;///< Returns readback threhsold value for given ring-phi-pol
    Int_t getSetThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol); ///< Returns set threshold value for given ring-phi-pol

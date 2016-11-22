@@ -45,6 +45,7 @@ SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr)
   
   for(int surf=0;surf<ACTIVE_SURFS;surf++) {
     if(rawSurfToTrigSurf[surf]>=0) {
+      surfTrigBandMask[surf]=surfPtr->surfTrigBandMask[rawSurfToTrigSurf[surf]];
       for(int l1=0;l1<L1S_PER_SURF;l1++) {
 	l1Scaler[surf][l1]=surfPtr->l1Scaler[rawSurfToTrigSurf[surf]][l1];
       }
@@ -58,6 +59,7 @@ SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr)
       }
     }
     else {
+      surfTrigBandMask[surf]=0;
       for(int l1=0;l1<L1S_PER_SURF;l1++) {
 	l1Scaler[surf][l1]=0;
       }
@@ -72,7 +74,6 @@ SurfHk::SurfHk(Int_t trun, Int_t trealTime, FullSurfHkStruct_t *surfPtr)
     }          
   }
   memcpy(rfPower,surfPtr->rfPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
-  memcpy(surfTrigBandMask,surfPtr->surfTrigBandMask,sizeof(UShort_t)*TRIGGER_SURFS);
   intFlag=0;
 }
 
@@ -295,6 +296,19 @@ Int_t SurfHk::getL1Scaler(int phi, AnitaRing::AnitaRing_t ring)
   }
   return -1;
 }
+
+
+Int_t SurfHk::getL2Scaler(int phi) 
+{
+  Int_t surf, l2Scl;
+  AnitaGeomTool::getSurfL2TriggerChanFromPhi(phi,surf,l2Scl);
+  if((surf>=0 && surf<ACTIVE_SURFS) && (l2Scl>=0 && l2Scl<2)) {
+    return l2Scaler[surf][l2Scl];
+  }
+  return -1;
+}
+
+
 
 Int_t SurfHk::getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol)
 {
