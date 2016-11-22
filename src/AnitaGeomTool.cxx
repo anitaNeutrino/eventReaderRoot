@@ -29,12 +29,18 @@ namespace AnitaGeom {
 				   6,0,7,1,6,1,7,0,6,0,7,1,6,1,7,0};
   
   ///< Map for VPOL channel of antenna to channel on SURF. (VPOL channels are 0-3)  
-  Int_t vAntToChan[NUM_SEAVEYS]={3,1,3,5,1,3,1,3,2,0,2,0,0,2,0,2,
+    Int_t vAntToChanAnita3[NUM_SEAVEYS]={3,1,3,5,1,3,1,3,2,0,2,0,0,2,0,2,
 				 1,3,1,3,3,1,3,1,0,2,0,2,2,0,2,0,
-				 3,1,3,1,1,3,1,3,2,0,2,0,0,2,0,2};
+				   3,1,3,1,1,3,1,3,2,0,2,0,0,2,0,2};
+    Int_t vAntToChan[NUM_SEAVEYS]={3,1,3,1,1,3,1,3,2,0,2,0,0,2,0,2,
+				 1,3,1,3,3,1,3,1,0,2,0,2,2,0,2,0,
+				   3,1,3,1,1,3,1,3,2,0,2,0,0,2,0,2};
 				  
   ///< Map for HPOL channel of antenna to channel on SURF. (HPOL channels are 4-7)
-  Int_t hAntToChan[NUM_SEAVEYS]={7,5,7,1,5,7,5,7,6,4,6,4,4,6,4,6,
+  Int_t hAntToChanAnita3[NUM_SEAVEYS]={7,5,7,1,5,7,5,7,6,4,6,4,4,6,4,6,
+				 5,7,5,7,7,5,7,5,4,6,4,6,6,4,6,4,
+				 7,5,7,5,5,7,5,7,6,4,6,4,4,6,4,6};
+  Int_t hAntToChan[NUM_SEAVEYS]={7,5,7,5,5,7,5,7,6,4,6,4,4,6,4,6,
 				 5,7,5,7,7,5,7,5,4,6,4,6,6,4,6,4,
 				 7,5,7,5,5,7,5,7,6,4,6,4,4,6,4,6};
   

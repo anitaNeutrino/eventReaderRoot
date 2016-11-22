@@ -186,6 +186,7 @@
 #define VER_RTLSDR_POW_SPEC 40 
 #define VER_TUFF_STATUS 40 
 #define VER_TUFF_RAW_CMD 40 
+#define VER_TURF_RAW_BANK3 40 
 #endif
 
 
@@ -598,6 +599,18 @@ typedef struct {
     float z;
 } MagnetometerDataStruct_t;
 
+
+/** 
+ *  Used for interprocess-sharing of magnetometer
+ */
+typedef struct
+{
+  unsigned int unixTime;
+  unsigned int unixTimeUs;
+  MagnetometerDataStruct_t mag; 
+} TimedMagnetometerDataStruct_t; 
+
+
 //!  Debugging use only scaler data
 /*!
   Debugging use only scaler data
@@ -613,7 +626,8 @@ typedef struct {
 /*!
   Debugging use only TURF scaler data
 */
-typedef struct {
+typedef struct __attribute__((packed))
+{
   GenericHeader_t gHdr;
     unsigned int unixTime;
     unsigned int unixTimeUs;
@@ -801,15 +815,53 @@ typedef struct {
   unsigned int c3poNum;
   unsigned short ppsNum; ///<It's only updated every second so no need for sub-second timing
   unsigned short deadTime; ///<How much were we dead??
-  unsigned char l3RatesGated[PHI_SECTORS]; // Gated L3 Rates 
+  unsigned char  l3RatesGated[PHI_SECTORS]; /// to get Hz 
   unsigned short l2Rates[PHI_SECTORS]; // 
   unsigned char  l3Rates[PHI_SECTORS]; /// to get Hz 
   unsigned short l2TrigMask; ///< As read from TURF (16-bit upper phi, lower phi)
   unsigned short phiTrigMask; ///< 16 bit phi-sector mask
   unsigned char errorFlag;///<Bit 1-4 bufferdepth, Bits 5,6,7 are for upper,lower,nadir trig mask match
-  unsigned char refPulses; 
+  unsigned char refPulses; ///< Ref pulses
   unsigned char reserved[2];
+  
+
 } TurfRateStruct_t;
+
+
+/** This is just a mirror of the register contents. 
+ *
+ * Will be copied into TurfRateStruct as needed 
+ *
+ *  NOT telemetered
+ */ 
+typedef struct __attribute__((packed))
+{
+  GenericHeader_t gHdr; 
+  unsigned int unixTime; 
+  unsigned int unixTimeUs; 
+  unsigned int whichBank; //just to match TurfRegisterContents_t
+  unsigned short l2Rates[16]; 
+  unsigned int unused[8]; 
+  unsigned char l3Rates[16]; 
+  unsigned int unused2[4]; 
+  unsigned char l3RatesGated[16]; 
+  unsigned int unused3[4]; 
+  unsigned char refPulses; 
+  unsigned char unused4[3]; 
+  unsigned short deadTime; 
+  unsigned short nothingtoseehere; 
+  unsigned short rfScaler; 
+  unsigned short unused5; 
+  unsigned int moreunused[4];
+  unsigned int c3poNum; 
+  unsigned char morejunk[6]; 
+  unsigned short ppsNum; 
+  unsigned int shadowed[6]; 
+  unsigned int garbage[16]; 
+} TurfRawBank3Struct_t; 
+
+
+
 
 //!  Summed Turf Rates -- Telemetered
 /*!
@@ -1491,6 +1543,57 @@ typedef struct __attribute__((packed)) RawAdu5BFileSatelliteHeader {
 }  RawAdu5BFileSatelliteHeader_t;
 
 
+//! This  is the E-file struct described on page 132 of the ADU5 manual
+/*!
+  This struct contains epheremis raw data. All of the comments come directly from the ADU5 manual
+*/
+typedef struct __attribute__((packed)) RawAdu5EFileStruct {
+  char prnnum; ///< (SV PRN number -1)
+  short weekNumber; ///< GPS week number.
+  int secondsInWeek; ///< Seconds of GPS week.
+  float groupDelay; ///< Group delay (sec).
+  int aodc; ///< Clock data issue.
+  int toc; ///< (sec).
+  float af2; ///< Clock: (sec/sec2)
+  float af1; ///< Clock (sec/sec)
+  float af0; ///< Clock (sec)
+  int aode; ///< Orbit data issue.
+  float deltaN; ///< Mean anomaly correction (semi-circle/sec).
+  double m0; ///< Mean anomaly at reference time (semi-circle).
+  double eccentricity; ///< Eccentricity.
+  double roota; ///< Square root of semi-major axis (meters p)
+  int toe; ///< Reference time for orbit (sec).
+  float cic; ///< Harmonic correction term (radians).
+  float crc; ///< Harmonic correction term (meters).
+  float cis; ///< Harmonic correction term (radians).
+  float crs; ///< Harmonic correction term (meters).
+  float cuc; ///< Harmonic correction term (radians).
+  float cus; ///< Harmonic correction term (radians).
+  double omega0; ///< Lon of Asc. node (semi-circles).
+  double omega; ///< Arg. of Perigee (semi-circles).
+  double i0; ///< Inclination angle at reference time (semi-circles).
+  float omegadot; ///< Rate of right Asc. (semi-circles per sec).
+  float idot; ///< Rate of inclination (semi-circles per sec).
+  short accuracy; ///< (coded).
+  short health; ///< (coded).
+  short fit; ///< Curve fit interval (coded).
+} RawAdu5EFileStruct_t;
+
+//! This is the A-file struct described on page 114 of the ADU5 manual
+/*!
+  A-file contains attitude information. All of the comments come directly from the ADU5 manual
+*/
+typedef struct __attribute__((packed)) RawAdu5AFileStruct {
+  double head; ///< Heading in degrees
+  double roll; ///< Roll in degrees
+  double pitch; ///< Pitch in degrees
+  double brms; ///< BRMS in meters
+  double mrms; ///< MRMS in meters
+  int timeOfWeek; ///< Seconds-of-Week in milliseconds
+  char reset; ///< Attitude reset flag
+  char spare; ///< Spare byte which is not used                                                                                                        
+} RawAdu5AFileStruct_t;
+
 ///////////////////////////////////////////////////////////////////////
 //Utility Structures
 //////////////////////////////////////////////////////////////////////
@@ -1706,7 +1809,7 @@ typedef struct __attribute__((packed))
   unsigned int unixTime;  // The approximate time that this was written. If temperatures are read, the temperatures are read around this time
   unsigned char startSectors[NUM_TUFF_NOTCHES]; //start sectors... 0 to 15 for real sectors, start and stop on 16 means nothing is enabled
   unsigned char endSectors[NUM_TUFF_NOTCHES]; //stop sectors... 0 to 15 for real sectors, start and stop on 16 means nothing is enabled
-  char temperatures[NUM_RFCM];  //-128 if temperatures are not being read 
+  char temperatures[NUM_RFCM];  //-128 if temperatures are not being read , 127 if TUFF not responding. 
 } TuffNotchStatus_t; 
 
 typedef struct __attribute__((packed))
