@@ -13,6 +13,9 @@
 #include <TObject.h>
 #include "AnitaConventions.h"
 #include "simpleStructs.h"
+#include "TGraph.h"
+
+#define NUM_BINS_GPU_POW_SPEC 99
 
 //!  GpuPowerSpectra -- The GPU Power Specta Data
 /*!
@@ -26,11 +29,12 @@ class GpuPowerSpectra: public TObject
    ~GpuPowerSpectra(); ///< Destructor
 
    GpuPowerSpectra(Int_t run, Int_t trealTime, GpuPhiSectorPowerSpectrumStruct_t *gpuPtr); ///< Assignment constructor
+  TGraph* getGraph(AnitaPol::AnitaPol_t pol, AnitaRing::AnitaRing_t ring);
 
 
    Int_t           run; ///< Run number from offline
    UInt_t          realTime; ///< Time in unixTime
-   Short_t powerSpectra[NUM_ANTENNA_RINGS][2][99];
+   Short_t powerSpectra[NUM_ANTENNA_RINGS][2][NUM_BINS_GPU_POW_SPEC];
    unsigned int unixTimeFirstEvent;
    unsigned int unixTimeLastEvent;
    unsigned int numEventsAveraged;
