@@ -13,14 +13,14 @@
 int simplePacketCheck(GenericHeader_t *gHdr, PacketCode_t code) {
   int packetSize=getPacketSize(code);
   unsigned char expVerId=getVersionId(code);
-  
+
   if((gHdr->code&BASE_PACKET_MASK)!=code ||
      gHdr->verId!=expVerId ||
      gHdr->numBytes!=packetSize) {
-    std::cerr << "Mismatched packet\t" << packetCodeAsString(code) <<  "\n" 
-	      << "code:\t" << (int)gHdr->code << "\t" << (int)code 
-	      << "\nversion:\t" << (int)gHdr->verId 
-	      << "\t" << (int)expVerId 
+    std::cerr << "Mismatched packet\t" << packetCodeAsString(code) <<  "\n"
+	      << "code:\t" << (int)gHdr->code << "\t" << (int)code
+	      << "\nversion:\t" << (int)gHdr->verId
+	      << "\t" << (int)expVerId
 	      << "\nsize:\t" << gHdr->numBytes << "\t"
 	      << packetSize << std::endl;
     return -1;
@@ -31,8 +31,8 @@ int simplePacketCheck(GenericHeader_t *gHdr, PacketCode_t code) {
 
 int getPacketSize(PacketCode_t code) {
   switch(code&BASE_PACKET_MASK) {
-  case PACKET_BD: return sizeof(AnitaEventBody_t); break;	    
-  case PACKET_HD: return sizeof(AnitaEventHeader_t); break;	    
+  case PACKET_BD: return sizeof(AnitaEventBody_t); break;
+  case PACKET_HD: return sizeof(AnitaEventHeader_t); break;
   case PACKET_WV: return sizeof(RawWaveformPacket_t); break;
   case PACKET_PEDSUB_WV: return sizeof(PedSubbedWaveformPacket_t); break;
   case PACKET_PEDSUB_SURF: return sizeof(PedSubbedSurfPacket_t); break;
@@ -54,37 +54,41 @@ int getPacketSize(PacketCode_t code) {
   case PACKET_GPS_G12_POS: return sizeof(GpsG12PosStruct_t); break;
   case PACKET_GPS_G12_SAT: return sizeof(GpsG12SatStruct_t); break;
   case PACKET_GPS_GGA: return sizeof(GpsGgaStruct_t); break;
-  case PACKET_HKD: return sizeof(HkDataStruct_t); break;    
-  case PACKET_HKD_SS: return sizeof(SSHkDataStruct_t); break;    
+  case PACKET_HKD: return sizeof(HkDataStruct_t); break;
+  case PACKET_HKD_SS: return sizeof(SSHkDataStruct_t); break;
   case PACKET_CMD_ECHO: return sizeof(CommandEcho_t); break;
   case PACKET_MONITOR: return sizeof(MonitorStruct_t); break;
   case PACKET_WAKEUP_LOS: return WAKEUP_LOS_BUFFER_SIZE; break;
-  case PACKET_WAKEUP_HIGHRATE: return WAKEUP_TDRSS_BUFFER_SIZE; 
+  case PACKET_WAKEUP_HIGHRATE: return WAKEUP_TDRSS_BUFFER_SIZE;
     break;
-  case PACKET_WAKEUP_COMM1: return WAKEUP_LOW_RATE_BUFFER_SIZE; 
+  case PACKET_WAKEUP_COMM1: return WAKEUP_LOW_RATE_BUFFER_SIZE;
     break;
-  case PACKET_WAKEUP_COMM2: return WAKEUP_LOW_RATE_BUFFER_SIZE; 
+  case PACKET_WAKEUP_COMM2: return WAKEUP_LOW_RATE_BUFFER_SIZE;
     break;
-  case PACKET_SLOW1: return sizeof(SlowRateType1_t); 
+  case PACKET_SLOW1: return sizeof(SlowRateType1_t);
     break;
-  case PACKET_SLOW2: return sizeof(SlowRateType1_t); 
+  case PACKET_SLOW2: return sizeof(SlowRateType1_t);
     break;
-  case PACKET_SLOW_FULL: return sizeof(SlowRateFull_t); 
+  case PACKET_SLOW_FULL: return sizeof(SlowRateFull_t);
     break;
-  case PACKET_RUN_START: return sizeof(RunStart_t); 
+  case PACKET_RUN_START: return sizeof(RunStart_t);
     break;
-  case PACKET_OTHER_MONITOR: return sizeof(OtherMonitorStruct_t); 
+  case PACKET_OTHER_MONITOR: return sizeof(OtherMonitorStruct_t);
     break;
   case PACKET_ZIPPED_PACKET: break;
   case PACKET_ZIPPED_FILE: break;
   case PACKET_GPSD_START: return sizeof(GpsdStartStruct_t); break;
   case PACKET_LOGWATCHD_START: return sizeof(LogWatchdStart_t); break;
   case PACKET_ACQD_START: return sizeof(AcqdStartStruct_t); break;
-    //  default: 
+  case PACKET_GPU_AVE_POW_SPEC: return sizeof(GpuPhiSectorPowerSpectrumStruct_t); break;
+
+
+
+    //  default:
     //    retVal+=PKT_E_CODE; break;
   }
   return 0;
-  
+
 }
 
 
@@ -125,7 +129,7 @@ unsigned char getVersionId(PacketCode_t code) {
   case PACKET_GPS_G12_POS: return VER_G12_POS; break;
   case PACKET_GPS_G12_SAT: return VER_G12_SAT; break;
   case PACKET_GPS_GGA: return VER_GPS_GGA; break;
-  case PACKET_HKD: return VER_HK_FULL; break;  
+  case PACKET_HKD: return VER_HK_FULL; break;
 #ifndef ANITA_2_DATA
   case PACKET_HKD_SS: return VER_HK_SS; break;
 #endif
@@ -141,7 +145,8 @@ unsigned char getVersionId(PacketCode_t code) {
   case PACKET_GPSD_START: return VER_GPSD_START; break;
   case PACKET_LOGWATCHD_START: return VER_LOGWATCHD_START; break;
   case PACKET_ACQD_START: return VER_ACQD_START; break;
-  default: 
+  case PACKET_GPU_AVE_POW_SPEC: return VER_GPU_POW_SPEC; break;
+  default:
     return 0; break;
   }
   return 0;
@@ -157,7 +162,7 @@ void fillGenericHeader(void *thePtr, PacketCode_t code, unsigned short numBytes)
   unsigned long dodgyNum=(unsigned long)typedPtr;
   dodgyNum+=sizeof(GenericHeader_t);
   unsigned int *dataPtr=(unsigned int*)dodgyNum;
-  //  unsigned int *dataPtr=(unsigned int*) (typedPtr+sizeof(GenericHeader_t));  
+  //  unsigned int *dataPtr=(unsigned int*) (typedPtr+sizeof(GenericHeader_t));
   //  printf("%u -- %u -- %u\n",thePtr,dataPtr,((unsigned int)(dataPtr)-(unsigned int)(thePtr)));
   gHdr->code=code;
   gHdr->numBytes=numBytes;
@@ -186,7 +191,7 @@ int checkPacket(void *thePtr)
   unsigned long dodgyNum=(unsigned long)typedPtr;
   dodgyNum+=sizeof(GenericHeader_t);
   unsigned int *dataPtr=(unsigned int*)dodgyNum;
-  //  unsigned int *dataPtr=(unsigned int*) (typedPtr+sizeof(GenericHeader_t)); 
+  //  unsigned int *dataPtr=(unsigned int*) (typedPtr+sizeof(GenericHeader_t));
   //  std::cout << thePtr << "\t" << dataPtr << std::endl;
   unsigned int checksum=0;
   if(numInts<4000)
@@ -194,17 +199,17 @@ int checkPacket(void *thePtr)
   PacketCode_t code=gHdr->code;
   if(checksum!=gHdr->checksum) {
     //    printf("Checksum Mismatch (possibly %s (%d)) (%u ints -- %d bytes) %u -- %u \n",
-    //	   packetCodeAsString(code),code,numInts,gHdr->numBytes,checksum,gHdr->checksum);	
+    //	   packetCodeAsString(code),code,numInts,gHdr->numBytes,checksum,gHdr->checksum);
     retVal+=PKT_E_CHECKSUM;
   }
 
   //Now check packet size
   packetSize=getPacketSize(code);
-  if(packetSize && (packetSize!=gHdr->numBytes))  
+  if(packetSize && (packetSize!=gHdr->numBytes))
     retVal+=PKT_E_SIZE;
 
   unsigned char expVerId=getVersionId(code);
-  
+
   if(gHdr->verId!=expVerId) {
     std::cout << "Version mis-match: " << (int) gHdr->verId << "\t" << (int)expVerId << "\n";
   }
@@ -218,8 +223,8 @@ int checkPacket(void *thePtr)
 const char *packetCodeAsString(PacketCode_t code) {
   const char* string ;
   switch(code&BASE_PACKET_MASK) {
-  case PACKET_BD: string="AnitaEventBody_t"; break;	    
-  case PACKET_HD: string="AnitaEventHeader_t"; break;	    
+  case PACKET_BD: string="AnitaEventBody_t"; break;
+  case PACKET_HD: string="AnitaEventHeader_t"; break;
   case PACKET_WV: string="RawWaveformPacket_t"; break;
   case PACKET_PEDSUB_WV: string="PedSubbedWaveformPacket_t"; break;
   case PACKET_SURF: string="RawSurfPacket_t"; break;
@@ -256,8 +261,9 @@ const char *packetCodeAsString(PacketCode_t code) {
   case PACKET_GPS_GGA: string="GpsGgaStruct_t"; break;
   case PACKET_AVG_SURF_HK: string="AveragedSurfHkStruct_t"; break;
   case PACKET_SUM_TURF_RATE: string="SummedTurfRateStruct_t"; break;
+  case PACKET_GPU_AVE_POW_SPEC: string="GpuPhiSectorPowerSpectrumStruct_t"; break;
 
-  default: 
+  default:
     string="Unknown Packet Code"; break;
   }
   return string;
@@ -269,7 +275,7 @@ int unzipZippedPacket(ZippedPacket_t *zipPacket, char *output, unsigned int numB
     char *input = (char*) zipPacket;
     unsigned int returnBytes=numBytesOut;
     int retVal=unzipBuffer(&input[sizeof(ZippedPacket_t)],output,zipPacket->gHdr.numBytes-sizeof(ZippedPacket_t),&returnBytes);
-    if(retVal!=0) 
+    if(retVal!=0)
 	return retVal;
     if(zipPacket->numUncompressedBytes!=returnBytes)
 	return -1;
@@ -290,7 +296,7 @@ int zipBuffer(char *input, char *output, unsigned int inputBytes, unsigned int *
 	    errorCounter++;
 	}
 	return -1;
-    }	
+    }
 }
 
 
@@ -303,7 +309,7 @@ int unzipBuffer(char *input, char *output, unsigned int inputBytes, unsigned int
   //    if(retVal==Z_OK)
   outputBytesLong = *outputBytes;
   int retVal=uncompress((unsigned char*)output,&outputBytesLong,(unsigned char*)input,(unsigned long)inputBytes);
-  if(retVal==Z_OK) 
+  if(retVal==Z_OK)
     {
       *outputBytes = outputBytesLong;
  	return 0;
@@ -313,8 +319,8 @@ int unzipBuffer(char *input, char *output, unsigned int inputBytes, unsigned int
     if(errorCounter<100) {
       fprintf(stderr,"zlib compress returned %d  (%d of 100)\n",retVal,errorCounter);
       errorCounter++;
-      
-      
+
+
 	    //    static int errorCounter=0;
 	    //int retVal=uncompress((unsigned char*)output,(unsigned long*)outputBytes,(unsigned char*)input,(unsigned long)inputBytes);
 	    //if(retVal==Z_OK)
@@ -325,7 +331,7 @@ int unzipBuffer(char *input, char *output, unsigned int inputBytes, unsigned int
 	    // errorCounter++;
     }
     return -1;
-  }	
+  }
 }
 
 
@@ -337,7 +343,7 @@ CompressErrorCode_t AnitaCompress::packPedSubbedEvent(PedSubbedEventBody_t *bdPt
 
     int count=0,surfStart=0;
     int surf=0;
-    int chan=0;  
+    int chan=0;
     EncodedPedSubbedSurfPacketHeader_t *surfHdPtr;
 //    printf("Event %lu\n",bdPtr->eventNumber);
 
@@ -360,7 +366,7 @@ CompressErrorCode_t AnitaCompress::packPedSubbedEvent(PedSubbedEventBody_t *bdPt
 	}
 	//Fill Generic Header_t;
 	fillGenericHeader(surfHdPtr,PACKET_ENC_SURF_PEDSUB,(count-surfStart));
-							 
+
     }
     *numBytes=count;
     encEvWrap->numBytes=count-sizeof(EncodedEventWrapper_t);
@@ -376,30 +382,30 @@ CompressErrorCode_t AnitaCompress::unpackToPedSubbedEvent(PedSubbedEventBody_t *
 							  int numBytes)
 
 {
-  
+
   return unpackToPedSubbedEventWithStats(bdPtr,input,numBytes,0,0);
-    
+
 }
 
 
-CompressErrorCode_t 
+CompressErrorCode_t
 AnitaCompress::unpackOneSurfToPedSubbedEvent(PedSubbedEventBody_t *bdPtr,
 					     unsigned char *input,
 					     int numBytes)
 {
     int count=0;
-    int chan=0;  
+    int chan=0;
     int chanIndex;
     CompressErrorCode_t retVal=COMPRESS_E_OK;
     EncodedPedSubbedSurfPacketHeader_t *surfHdPtr;
     EncodedSurfChannelHeader_t *chanHdPtr;
-    
-    
+
+
     surfHdPtr = (EncodedPedSubbedSurfPacketHeader_t*) &input[count];
     bdPtr->whichPeds=surfHdPtr->whichPeds;
     bdPtr->eventNumber=surfHdPtr->eventNumber;
     count+=sizeof(EncodedPedSubbedSurfPacketHeader_t);
-    for(chan=0;chan<CHANNELS_PER_SURF;chan++) {	
+    for(chan=0;chan<CHANNELS_PER_SURF;chan++) {
       chanHdPtr = (EncodedSurfChannelHeader_t*)&input[count];
       count+=sizeof(EncodedSurfChannelHeader_t);
       //      printf("chan %d, encType %d\n",
@@ -409,23 +415,23 @@ AnitaCompress::unpackOneSurfToPedSubbedEvent(PedSubbedEventBody_t *bdPtr,
 	printf("Error reading encoded Ped Subbed SURF packet, have chanId %d and chan %d\n",chanIndex,chan);
 	return COMPRESS_E_UNPACK;
       }
-      
+
       retVal=decodePSChannel(chanHdPtr,
 			     &input[count],
 			     &(bdPtr->channel[chanIndex]));
 
       //      std::cout << chanIndex << "\t" << bdPtr->channel[chanIndex].data[0]
       //		<< "\n";
-		
 
-      
+
+
       if(retVal!=COMPRESS_E_OK) return retVal;
       count+=chanHdPtr->numBytes;
       if(count>numBytes)
 	return COMPRESS_E_BADSIZE;
     }
 	//Fill Generic Header_t;
-	
+
     fillGenericHeader(bdPtr,PACKET_PED_SUBBED_EVENT,count);
     return COMPRESS_E_OK;
 
@@ -442,13 +448,13 @@ CompressErrorCode_t AnitaCompress::unpackOneWaveToPedSubbedEvent(PedSubbedEventB
     CompressErrorCode_t retVal=COMPRESS_E_OK;
     EncodedPedSubbedChannelPacketHeader_t *waveHdPtr;
     EncodedSurfChannelHeader_t *chanHdPtr;
-    
-    
+
+
     waveHdPtr = (EncodedPedSubbedChannelPacketHeader_t*) &input[count];
     bdPtr->whichPeds=waveHdPtr->whichPeds;
     bdPtr->eventNumber=waveHdPtr->eventNumber;
     count+=sizeof(EncodedPedSubbedChannelPacketHeader_t);
-	
+
     chanHdPtr = (EncodedSurfChannelHeader_t*)&input[count];
     count+=sizeof(EncodedSurfChannelHeader_t);
     chanIndex=chanHdPtr->rawHdr.chanId;
@@ -459,15 +465,15 @@ CompressErrorCode_t AnitaCompress::unpackOneWaveToPedSubbedEvent(PedSubbedEventB
     count+=chanHdPtr->numBytes;
     if(count>numBytes)
 	return COMPRESS_E_BADSIZE;
-    
-	//Fill Generic Header_t;	
+
+	//Fill Generic Header_t;
 //    fillGenericHeader(bdPtr,PACKET_PED_SUBBED_EVENT,count);
     return COMPRESS_E_OK;
 
 }
 
 
-CompressErrorCode_t 
+CompressErrorCode_t
 AnitaCompress::unpackToPedSubbedEventWithStats(PedSubbedEventBody_t *bdPtr,
 					       unsigned char *input,
 					       int numBytes,
@@ -477,13 +483,13 @@ AnitaCompress::unpackToPedSubbedEventWithStats(PedSubbedEventBody_t *bdPtr,
 
     int count=0;
     int surf=0;
-    int chan=0;  
+    int chan=0;
     CompressErrorCode_t retVal=COMPRESS_E_OK;
     EncodedPedSubbedSurfPacketHeader_t *surfHdPtr;
     EncodedSurfChannelHeader_t *chanHdPtr;
 
     GenericHeader_t *gHdr=(GenericHeader_t*) input;
-    if(gHdr->code==PACKET_ENC_PEDSUB_EVENT_WRAPPER && numBytes>(int)sizeof(EncodedEventWrapper_t)) { 
+    if(gHdr->code==PACKET_ENC_PEDSUB_EVENT_WRAPPER && numBytes>(int)sizeof(EncodedEventWrapper_t)) {
 	return unpackToPedSubbedEventWithStats(bdPtr,&input[sizeof(EncodedEventWrapper_t)],numBytes-sizeof(EncodedEventWrapper_t),cntlPtr,sizeArray);
     }
 
@@ -494,7 +500,7 @@ AnitaCompress::unpackToPedSubbedEventWithStats(PedSubbedEventBody_t *bdPtr,
       bdPtr->eventNumber=surfHdPtr->eventNumber;
       count+=sizeof(EncodedPedSubbedSurfPacketHeader_t);
       for(chan=0;chan<CHANNELS_PER_SURF;chan++) {
-	    
+
 	    chanHdPtr = (EncodedSurfChannelHeader_t*)&input[count];
 	    count+=sizeof(EncodedSurfChannelHeader_t);
 //	    printf("surf %d, chan %d, encType %d\n",
@@ -505,7 +511,7 @@ AnitaCompress::unpackToPedSubbedEventWithStats(PedSubbedEventBody_t *bdPtr,
 				   &input[count],
 				   &(bdPtr->channel[AnitaGeomTool::getChanIndex(surf,chan)]));
 	    if(retVal!=COMPRESS_E_OK) return retVal;
-	    count+=chanHdPtr->numBytes;	
+	    count+=chanHdPtr->numBytes;
 	    if(cntlPtr) {
 		cntlPtr->encTypes[surf][chan]=chanHdPtr->encType;;
 	    }
@@ -531,7 +537,7 @@ void AnitaCompress::fillMinMaxMeanRMS(SurfChannelPedSubbed_t *chanPtr) {
     float mean=0,meanSq=0,nsamps=0;
     chanPtr->xMax=-4095;
     chanPtr->xMin=4095;
-	
+
     if(wrappedHitbus) {
 	firstSamp=chanPtr->header.firstHitbus+1;
 	lastSamp=chanPtr->header.lastHitbus;
@@ -539,7 +545,7 @@ void AnitaCompress::fillMinMaxMeanRMS(SurfChannelPedSubbed_t *chanPtr) {
     else {
 	firstSamp=chanPtr->header.lastHitbus+1;
 	lastSamp=MAX_NUMBER_SAMPLES+chanPtr->header.firstHitbus;
-    }    
+    }
     for(samp=firstSamp;samp<lastSamp;samp++) {
 	index=samp;
 	if(index>=MAX_NUMBER_SAMPLES) index-=MAX_NUMBER_SAMPLES;
@@ -560,12 +566,12 @@ void AnitaCompress::fillMinMaxMeanRMS(SurfChannelPedSubbed_t *chanPtr) {
 	if(meanSq>mean*mean)
 	    chanPtr->rms=sqrt(meanSq-mean*mean);
     }
-    
+
 
 }
 
 
-int AnitaCompress::encodeChannel(ChannelEncodingType_t encType, SurfChannelFull_t *chanPtr, unsigned char *buffer) 
+int AnitaCompress::encodeChannel(ChannelEncodingType_t encType, SurfChannelFull_t *chanPtr, unsigned char *buffer)
 {
 //    printf("Event %lu, ChanId %d\n",theHead.eventNumber,
 //	   chanPtr->header.chanId);
@@ -574,12 +580,12 @@ int AnitaCompress::encodeChannel(ChannelEncodingType_t encType, SurfChannelFull_
 
     EncodedSurfChannelHeader_t *chanHdPtr
 	=(EncodedSurfChannelHeader_t*) &buffer[0];
-    int count=0;    
+    int count=0;
     int encSize=0;
     chanHdPtr->rawHdr=chanPtr->header;
     chanHdPtr->encType=encType;
     count+=sizeof(EncodedSurfChannelHeader_t);
-    
+
     switch(encType) {
 	case ENCODE_NONE:
 	    encSize=encodeWaveNone(&buffer[count],chanPtr);
@@ -587,12 +593,12 @@ int AnitaCompress::encodeChannel(ChannelEncodingType_t encType, SurfChannelFull_
 	default:
 	    chanHdPtr->encType=ENCODE_NONE;
 	    encSize=encodeWaveNone(&buffer[count],chanPtr);
-	    break;	    
-    }    
+	    break;
+    }
     chanHdPtr->numBytes=encSize;
     chanHdPtr->crc=simpleCrcShort((unsigned short*)&buffer[count],
 				  encSize/2);
-    return (count+encSize);        
+    return (count+encSize);
 }
 
 
@@ -602,7 +608,7 @@ CompressErrorCode_t AnitaCompress::decodeChannel(EncodedSurfChannelHeader_t *enc
     int numBytes=encChanHdPtr->numBytes;
     int newCrc=simpleCrcShort((unsigned short*)input,numBytes/2);
     if(encChanHdPtr->crc!=newCrc) return COMPRESS_E_BAD_CRC;
-    
+
 
 //    printf("decodePSChannel encType==%d\n",encChanHdPtr->encType);
     chanPtr->header=encChanHdPtr->rawHdr;
@@ -620,13 +626,13 @@ CompressErrorCode_t AnitaCompress::decodeChannel(EncodedSurfChannelHeader_t *enc
 }
 
 
-int AnitaCompress::encodeWaveNone(unsigned char *buffer,SurfChannelFull_t *chanPtr) {    
+int AnitaCompress::encodeWaveNone(unsigned char *buffer,SurfChannelFull_t *chanPtr) {
     int encSize=MAX_NUMBER_SAMPLES*sizeof(unsigned short);
     memcpy(buffer,chanPtr->data,encSize);
     return encSize;
 }
 
-CompressErrorCode_t AnitaCompress::decodeWaveNone(unsigned char *input,int numBytes,SurfChannelFull_t *chanPtr){    
+CompressErrorCode_t AnitaCompress::decodeWaveNone(unsigned char *input,int numBytes,SurfChannelFull_t *chanPtr){
     int encSize=MAX_NUMBER_SAMPLES*sizeof(unsigned short);
     //Check that numBytes is correct
     if(numBytes!=encSize) return COMPRESS_E_BADSIZE;
@@ -635,19 +641,19 @@ CompressErrorCode_t AnitaCompress::decodeWaveNone(unsigned char *input,int numBy
 }
 
 
-int AnitaCompress::encodePSChannel(ChannelEncodingType_t encType, SurfChannelPedSubbed_t *chanPtr, unsigned char *buffer) 
+int AnitaCompress::encodePSChannel(ChannelEncodingType_t encType, SurfChannelPedSubbed_t *chanPtr, unsigned char *buffer)
 {
 //    printf("Event %lu, ChanId %d\n",theHead.eventNumber,
 //	   chanPtr->header.chanId);
 
     EncodedSurfChannelHeader_t *chanHdPtr
 	=(EncodedSurfChannelHeader_t*) &buffer[0];
-    int count=0;    
+    int count=0;
     int encSize=0;
     chanHdPtr->rawHdr=chanPtr->header;
     chanHdPtr->encType=encType;
     count+=sizeof(EncodedSurfChannelHeader_t);
-    
+
     switch(encType) {
 	case ENCODE_NONE:
 	    encSize=encodePSWaveNone(&buffer[count],chanPtr);
@@ -694,12 +700,12 @@ int AnitaCompress::encodePSChannel(ChannelEncodingType_t encType, SurfChannelPed
 	default:
 	    chanHdPtr->encType=ENCODE_NONE;
 	    encSize=encodePSWaveNone(&buffer[count],chanPtr);
-	    break;	    
-    }    
+	    break;
+    }
     chanHdPtr->numBytes=encSize;
     chanHdPtr->crc=simpleCrcShort((unsigned short*)&buffer[count],
 				  encSize/2);
-    return (count+encSize);        
+    return (count+encSize);
 }
 
 CompressErrorCode_t AnitaCompress::decodePSChannel(EncodedSurfChannelHeader_t *encChanHdPtr,unsigned char *input, SurfChannelPedSubbed_t *chanPtr)
@@ -708,7 +714,7 @@ CompressErrorCode_t AnitaCompress::decodePSChannel(EncodedSurfChannelHeader_t *e
     int numBytes=encChanHdPtr->numBytes;
     int newCrc=simpleCrcShort((unsigned short*)input,numBytes/2);
     if(encChanHdPtr->crc!=newCrc) return COMPRESS_E_BAD_CRC;
-    
+
 
 //    printf("decodePSChannel encType==%d\n",encChanHdPtr->encType);
     chanPtr->header=encChanHdPtr->rawHdr;
@@ -790,7 +796,7 @@ CompressErrorCode_t AnitaCompress::decodePSChannel(EncodedSurfChannelHeader_t *e
 }
 
 
-int AnitaCompress::encodePSWaveNone(unsigned char *buffer,SurfChannelPedSubbed_t *chanPtr) {    
+int AnitaCompress::encodePSWaveNone(unsigned char *buffer,SurfChannelPedSubbed_t *chanPtr) {
 //    int samp;
     int encSize=MAX_NUMBER_SAMPLES*sizeof(short);
     memcpy(buffer,chanPtr->data,encSize);
@@ -800,7 +806,7 @@ int AnitaCompress::encodePSWaveNone(unsigned char *buffer,SurfChannelPedSubbed_t
     return encSize;
 }
 
-CompressErrorCode_t AnitaCompress::decodePSWaveNone(unsigned char *input,int numBytes,SurfChannelPedSubbed_t *chanPtr){    
+CompressErrorCode_t AnitaCompress::decodePSWaveNone(unsigned char *input,int numBytes,SurfChannelPedSubbed_t *chanPtr){
 //    int samp;
     int encSize=MAX_NUMBER_SAMPLES*sizeof(unsigned short);
     //Check that numBytes is correct
@@ -815,7 +821,7 @@ CompressErrorCode_t AnitaCompress::decodePSWaveNone(unsigned char *input,int num
 
 #define OFFSET_VALUE 2048
 
-int AnitaCompress::encodePSWave12bitBinary(unsigned char *buffer,SurfChannelPedSubbed_t *chanPtr) {    
+int AnitaCompress::encodePSWave12bitBinary(unsigned char *buffer,SurfChannelPedSubbed_t *chanPtr) {
     int encSize=3*(MAX_NUMBER_SAMPLES/4)*sizeof(unsigned short);
     int samp=0,charNum=0,valNum=0;
     unsigned short value[4];
@@ -823,19 +829,19 @@ int AnitaCompress::encodePSWave12bitBinary(unsigned char *buffer,SurfChannelPedS
 	charNum=(samp*3)/2;
 	for(valNum=0;valNum<4;valNum++)
 	    value[valNum]=chanPtr->data[samp+valNum]+OFFSET_VALUE;
-    
+
 	pack12bit(value,&buffer[charNum]);
     }
     return encSize;
 }
 
-CompressErrorCode_t AnitaCompress::decodePSWave12bitBinary(unsigned char *input,int numBytes,SurfChannelPedSubbed_t *chanPtr){    
+CompressErrorCode_t AnitaCompress::decodePSWave12bitBinary(unsigned char *input,int numBytes,SurfChannelPedSubbed_t *chanPtr){
     int encSize=3*(MAX_NUMBER_SAMPLES/4)*sizeof(unsigned short);
     if(numBytes!=encSize) return COMPRESS_E_BADSIZE;
     unsigned short value[4];
     int samp=0,charNum=0,valNum=0;
     for(charNum=0;charNum<6*(MAX_NUMBER_SAMPLES/4);charNum+=6) {
-	samp=2*(charNum/3);	
+	samp=2*(charNum/3);
 	unpack12bit(value,&input[charNum]);
 	for(valNum=0;valNum<4;valNum++)
 	    chanPtr->data[samp+valNum]=((short)value[valNum])-OFFSET_VALUE;
@@ -843,7 +849,7 @@ CompressErrorCode_t AnitaCompress::decodePSWave12bitBinary(unsigned char *input,
     return COMPRESS_E_OK;
 }
 
-int AnitaCompress::encodePSWaveLosslessBinary(unsigned char *buffer,SurfChannelPedSubbed_t *chanPtr, ChannelEncodingType_t *encTypePtr) {    
+int AnitaCompress::encodePSWaveLosslessBinary(unsigned char *buffer,SurfChannelPedSubbed_t *chanPtr, ChannelEncodingType_t *encTypePtr) {
     //Remember this function works an array of pedestal subtracted shorts
     //Which is what SurfChannelPedSubbed_t contains
     int wordNum=0;
@@ -855,7 +861,7 @@ int AnitaCompress::encodePSWaveLosslessBinary(unsigned char *buffer,SurfChannelP
     unsigned short newVal=0;
     int mean=0;
     short xMax=chanPtr->xMax; //Filled by pedestalLib
-    short xMin=chanPtr->xMin; //Filled by pedestalLib   
+    short xMin=chanPtr->xMin; //Filled by pedestalLib
     short *input = chanPtr->data;
 
     //Find min and max
@@ -871,7 +877,7 @@ int AnitaCompress::encodePSWaveLosslessBinary(unsigned char *buffer,SurfChannelP
     float logValue=(float)(log(rangeTotal+1)/log(2));
     int bitSize=(int)logValue;
     if((logValue-bitSize)>0) bitSize++;
-    
+
     *encTypePtr=getBinaryEncType(bitSize);
 
     mean=xMin+rangeTotal/2;
@@ -892,17 +898,17 @@ int AnitaCompress::encodePSWaveLosslessBinary(unsigned char *buffer,SurfChannelP
 //	printf("cc %u cbit %d:\n",(int)(currentChar-buffer),currentBit);
 	while(numBitsLeft) {
 //	    if(wordNum<5) cout << wordNum << "\t" << numBitsLeft << endl;
-	    if(numBitsLeft>(8-currentBit)) {			
+	    if(numBitsLeft>(8-currentBit)) {
 		bitMask=0;
 		for(bitNum=0;bitNum<(8-currentBit);bitNum++)
-		    bitMask|=(1<<bitNum);	   
+		    bitMask|=(1<<bitNum);
 		(*currentChar)|= (newVal&bitMask)<<currentBit;
 		newVal=(newVal>>(8-currentBit));
 		numBitsLeft-=(8-currentBit);
 		currentChar++;
 		currentBit=0;
 	    }
-	    else {			
+	    else {
 		bitMask=0;
 		for(bitNum=0;bitNum<numBitsLeft;bitNum++)
 		    bitMask|=(1<<bitNum);
@@ -942,7 +948,7 @@ CompressErrorCode_t AnitaCompress::decodePSWaveLosslessBinary(unsigned char *inp
 	int fred = *( (int*) currentChar);
 //	printf("cc %u cbit %d: \t %#x\n",(int)(currentChar-input),currentBit,fred);
 //	bin_prnt_int(fred);
-	tempNum=0;	    
+	tempNum=0;
 	for(bitNum=currentBit;bitNum<currentBit+bitSize;bitNum++) {
 	    tempNum|= (((fred>>bitNum)&0x1)<<(bitNum-currentBit));
 //	    bin_prnt_short(tempNum);
@@ -955,7 +961,7 @@ CompressErrorCode_t AnitaCompress::decodePSWaveLosslessBinary(unsigned char *inp
 
 	chanPtr->data[sampNum]=mean+unbifurcate(tempNum);
 //	printf("samp %d:\t %#x \t %d\n",sampNum,tempNum,chanPtr->data[sampNum]);
-	
+
 	sampNum++;
 	currentBit+=bitSize;
 	while(currentBit>=8) {
@@ -968,7 +974,7 @@ CompressErrorCode_t AnitaCompress::decodePSWaveLosslessBinary(unsigned char *inp
 
 }
 
-int AnitaCompress::encodePSWaveLosslessFibonacci(unsigned char *buffer,SurfChannelPedSubbed_t *chanPtr) {    
+int AnitaCompress::encodePSWaveLosslessFibonacci(unsigned char *buffer,SurfChannelPedSubbed_t *chanPtr) {
     //Remember this function works an array of pedestal subtracted shorts
     //Which is what SurfChannelPedSubbed_t contains
     int wordNum=0;
@@ -982,12 +988,12 @@ int AnitaCompress::encodePSWaveLosslessFibonacci(unsigned char *buffer,SurfChann
     if(mean>127) mean=127;
     if(mean<-127) mean=-127;
 //    short xMax=chanPtr->xMax; //Filled by pedestalLib
-//    short xMin=chanPtr->xMin; //Filled by pedestalLib   
+//    short xMin=chanPtr->xMin; //Filled by pedestalLib
     short *input = chanPtr->data;
 
 //    int rangeTotal=xMax-xMin;
 //    printf("mean %d\txMin %d\txMax %d\n",mean,xMin,xMax);
-    
+
     char *meanPtr=(char*)currentChar;
     (*meanPtr)=(char)(mean);
     currentChar++;
@@ -998,17 +1004,17 @@ int AnitaCompress::encodePSWaveLosslessFibonacci(unsigned char *buffer,SurfChann
 	newVal=encodeFibonacci(newVal,&numBitsLeft);
 	while(numBitsLeft) {
 //	    if(wordNum<5) cout << wordNum << "\t" << numBitsLeft << endl;
-	    if(numBitsLeft>(8-currentBit)) {			
+	    if(numBitsLeft>(8-currentBit)) {
 		bitMask=0;
 		for(bitNum=0;bitNum<(8-currentBit);bitNum++)
-		    bitMask|=(1<<bitNum);	   
+		    bitMask|=(1<<bitNum);
 		(*currentChar)|= (newVal&bitMask)<<currentBit;
 		newVal=(newVal>>(8-currentBit));
 		numBitsLeft-=(8-currentBit);
 		currentChar++;
 		currentBit=0;
 	    }
-	    else {			
+	    else {
 		bitMask=0;
 		for(bitNum=0;bitNum<numBitsLeft;bitNum++)
 		    bitMask|=(1<<bitNum);
@@ -1054,8 +1060,8 @@ CompressErrorCode_t AnitaCompress::decodePSWaveLosslessFibonacci(unsigned char *
 		}
 		unfibNum=unfibonacci(fibNum);
 		chanPtr->data[sampNum]=mean+unbifurcate(unfibNum);
-	
-		
+
+
 
 		tempBit+=2;
 		currentChar+=(tempBit/8);
@@ -1074,7 +1080,7 @@ CompressErrorCode_t AnitaCompress::decodePSWaveLosslessFibonacci(unsigned char *
 
 }
 
-int AnitaCompress::encodePSWaveLosslessBinFibCombo(unsigned char *buffer,SurfChannelPedSubbed_t *chanPtr, ChannelEncodingType_t *encTypePtr) {    
+int AnitaCompress::encodePSWaveLosslessBinFibCombo(unsigned char *buffer,SurfChannelPedSubbed_t *chanPtr, ChannelEncodingType_t *encTypePtr) {
     //Remember this function works an array of pedestal subtracted shorts
     //Which is what SurfChannelPedSubbed_t contains
     float numSigma=3; //Will hard code for now
@@ -1095,7 +1101,7 @@ int AnitaCompress::encodePSWaveLosslessBinFibCombo(unsigned char *buffer,SurfCha
     if(mean<-127) mean=-127;
     float sigma=chanPtr->rms;
     short xMax=chanPtr->xMax; //Filled by pedestalLib
-    short xMin=chanPtr->xMin; //Filled by pedestalLib   
+    short xMin=chanPtr->xMin; //Filled by pedestalLib
     short *input = chanPtr->data;
     int rangeTotal=(int)(numSigma*sigma);
     float logValue=(float)(log(rangeTotal+1)/log(2));
@@ -1109,7 +1115,7 @@ int AnitaCompress::encodePSWaveLosslessBinFibCombo(unsigned char *buffer,SurfCha
     xMax=mean+(1<<(bitSize-1));
     xMax-=1;
 //    printf("mean %d\txMin %d\txMax %d\tbitSize %d\n",mean,xMin,xMax,bitSize);
-    
+
     char *meanPtr=(char*)currentChar;
     (*meanPtr)=(char)(mean);
     currentChar++;
@@ -1141,25 +1147,25 @@ int AnitaCompress::encodePSWaveLosslessBinFibCombo(unsigned char *buffer,SurfCha
 	    }
 	    asFib=encodeFibonacci(fibVal,&fibBits);
 
-	    
+
 //	    cout << "Fib:\t" << fibVal << "\t" << asFib << "\t" << fibBits << endl;
 //	    bin_prnt_int(asFib);
 //	    cout <<
 
-	    numBitsLeft=fibBits;		
+	    numBitsLeft=fibBits;
 	    while(numBitsLeft) {
 //	    if(wordNum<3) cout << wordNum << "\t" << numBitsLeft << endl;
-		if(numBitsLeft>(8-overflowBit)) {			
+		if(numBitsLeft>(8-overflowBit)) {
 		    bitMask=0;
 		    for(bitNum=0;bitNum<(8-overflowBit);bitNum++)
-			bitMask|=(1<<bitNum);	   
+			bitMask|=(1<<bitNum);
 		    (*overflowChar)|= (asFib&bitMask)<<overflowBit;
 		    asFib=(asFib>>(8-overflowBit));
 		    numBitsLeft-=(8-overflowBit);
 		    overflowChar++;
 		    overflowBit=0;
 		}
-		else {			
+		else {
 		    bitMask=0;
 		    for(bitNum=0;bitNum<numBitsLeft;bitNum++)
 			bitMask|=(1<<bitNum);
@@ -1172,23 +1178,23 @@ int AnitaCompress::encodePSWaveLosslessBinFibCombo(unsigned char *buffer,SurfCha
 		    numBitsLeft=0;
 		}
 	    }
-	    
+
 	}
 //	cout << wordNum << "\t" << newVal << endl;
- 	numBitsLeft=bitSize;		
+ 	numBitsLeft=bitSize;
 	while(numBitsLeft) {
 //	    if(wordNum<3) cout << wordNum << "\t" << numBitsLeft << endl;
-	    if(numBitsLeft>(8-currentBit)) {			
+	    if(numBitsLeft>(8-currentBit)) {
 		bitMask=0;
 		for(bitNum=0;bitNum<(8-currentBit);bitNum++)
-		    bitMask|=(1<<bitNum);	   
+		    bitMask|=(1<<bitNum);
 		(*currentChar)|= (newVal&bitMask)<<currentBit;
 		newVal=(newVal>>(8-currentBit));
 		numBitsLeft-=(8-currentBit);
 		currentChar++;
 		currentBit=0;
 	    }
-	    else {			
+	    else {
 		bitMask=0;
 		for(bitNum=0;bitNum<numBitsLeft;bitNum++)
 		    bitMask|=(1<<bitNum);
@@ -1208,7 +1214,7 @@ int AnitaCompress::encodePSWaveLosslessBinFibCombo(unsigned char *buffer,SurfCha
     return (int)(overflowChar-buffer);
 
 }
- 
+
 CompressErrorCode_t AnitaCompress::decodePSWaveLosslessBinFibCombo(unsigned char *input,int numBytes,SurfChannelPedSubbed_t *chanPtr, ChannelEncodingType_t encType) {
 
     char *meanPtr=(char*)input;
@@ -1217,7 +1223,7 @@ CompressErrorCode_t AnitaCompress::decodePSWaveLosslessBinFibCombo(unsigned char
 //    if(mean<-1100 || mean>100)
 //	printf("binfib mean %d %#x\n",mean,mean);
 //    unsigned char flag =  input[1];
-    int bitSize=getBinFibBitSize(encType);   
+    int bitSize=getBinFibBitSize(encType);
     short overFlowVals[256];
     short xMin=mean-(1<<(bitSize-1));
     short xMax=mean+(1<<(bitSize-1));
@@ -1242,7 +1248,7 @@ CompressErrorCode_t AnitaCompress::decodePSWaveLosslessBinFibCombo(unsigned char
    //Loop through overflow
     while(overflowNum<260) {
 	tempBit=overflowBit;
-	int fred = *( (int*) overflowChar);	
+	int fred = *( (int*) overflowChar);
 //	bin_prnt_int(fred);
 	while(tempBit<32) {
 	    //    bin_prnt_int((fred>>tempBit));
@@ -1256,7 +1262,7 @@ CompressErrorCode_t AnitaCompress::decodePSWaveLosslessBinFibCombo(unsigned char
 //		cout << fibNum << endl;
 //		tempNum=decodeFibonacci(fibNum,tempBit+2-overflowBit);
 		tempNum=unfibonacci(fibNum);
-//		cout << fibNum << "\t" << tempBit+2-overflowBit 
+//		cout << fibNum << "\t" << tempBit+2-overflowBit
 //		     <<"\t" << tempNum << endl;
 		if(tempNum&0x1) {
 		    //Positive
@@ -1293,7 +1299,7 @@ CompressErrorCode_t AnitaCompress::decodePSWaveLosslessBinFibCombo(unsigned char
     while(sampNum<MAX_NUMBER_SAMPLES) {
 	int fred = *( (int*) currentChar);
 //	bin_prnt_int(fred);
-	tempNum=0;	    
+	tempNum=0;
 	for(bitNum=currentBit;bitNum<currentBit+bitSize;bitNum++) {
 	    tempNum|= (((fred>>bitNum)&0x1)<<(bitNum-currentBit));
 //	    bin_prnt_short(tempNum);
@@ -1317,7 +1323,7 @@ CompressErrorCode_t AnitaCompress::decodePSWaveLosslessBinFibCombo(unsigned char
 	}
     }
     return COMPRESS_E_OK;
-}   
+}
 
 
 
@@ -1352,8 +1358,8 @@ int AnitaCompress::encodePSWaveLossyMuLaw(unsigned char *buffer,SurfChannelPedSu
     short minVal=-1*maxVal;
 
     short xMax=chanPtr->xMax; //Filled by pedestalLib
-    short xMin=chanPtr->xMin; //Filled by pedestalLib  
-    short rangeTotal=xMax-xMin; 
+    short xMin=chanPtr->xMin; //Filled by pedestalLib
+    short rangeTotal=xMax-xMin;
     short *input = chanPtr->data;
     int mean=xMin+(int)rangeTotal/2;
     short testVal;
@@ -1371,19 +1377,19 @@ int AnitaCompress::encodePSWaveLossyMuLaw(unsigned char *buffer,SurfChannelPedSu
       if(testVal<minVal) testVal=minVal;
       newVal=convertToMuLawUC(testVal,inputBits,mulawBits);
 //      printf("input %d, testVal %d, newVal %d\n",input[wordNum],testVal,newVal);
-      numBitsLeft=bitSize;		
+      numBitsLeft=bitSize;
       while(numBitsLeft) {
-	if(numBitsLeft>(8-currentBit)) {			
+	if(numBitsLeft>(8-currentBit)) {
 	  bitMask=0;
 	  for(bitNum=0;bitNum<(8-currentBit);bitNum++)
-	    bitMask|=(1<<bitNum);	   
+	    bitMask|=(1<<bitNum);
 	  (*currentChar)|= (newVal&bitMask)<<currentBit;
 	  newVal=(newVal>>(8-currentBit));
 	  numBitsLeft-=(8-currentBit);
 	  currentChar++;
 	  currentBit=0;
 	    }
-	else {			
+	else {
 	  bitMask=0;
 	  for(bitNum=0;bitNum<numBitsLeft;bitNum++)
 	    bitMask|=(1<<bitNum);
@@ -1402,8 +1408,8 @@ int AnitaCompress::encodePSWaveLossyMuLaw(unsigned char *buffer,SurfChannelPedSu
     //    }
     if(currentBit) currentChar++;
     return (int)(currentChar-buffer);
-    
-    
+
+
 }
 
 
@@ -1428,7 +1434,7 @@ CompressErrorCode_t AnitaCompress::decodePSWaveLossyMuLaw(unsigned char *input,i
     while(sampNum<MAX_NUMBER_SAMPLES) {
 	int fred = *( (int*) currentChar);
 //	bin_prnt_int(fred);
-	tempNum=0;	    
+	tempNum=0;
 	for(bitNum=currentBit;bitNum<currentBit+bitSize;bitNum++) {
 	    tempNum|= (((fred>>bitNum)&0x1)<<(bitNum-currentBit));
 //	    bin_prnt_short(tempNum);
@@ -1441,7 +1447,7 @@ CompressErrorCode_t AnitaCompress::decodePSWaveLossyMuLaw(unsigned char *input,i
 	chanPtr->data[sampNum]=mean+newVal;
 //	printf("output %d, newVal %d, tempNum %d\n",chanPtr->data[sampNum],
 //	       newVal,tempNum);
-	
+
 	sampNum++;
 	currentBit+=bitSize;
 	while(currentBit>=8) {
@@ -1456,9 +1462,9 @@ CompressErrorCode_t AnitaCompress::decodePSWaveLossyMuLaw(unsigned char *input,i
 }
 
 void AnitaCompress::getInputAndMuLawBits(ChannelEncodingType_t encType, int *inputPtr,
-			  int *mulawPtr) 
+			  int *mulawPtr)
 {
-  switch(encType) {    
+  switch(encType) {
     case ENCODE_LOSSY_MULAW_11_8:
       *inputPtr=11;
       *mulawPtr=8;
@@ -1571,7 +1577,7 @@ void AnitaCompress::getInputAndMuLawBits(ChannelEncodingType_t encType, int *inp
   *inputPtr=11;
   *mulawPtr=11;
   return;
-      
+
 }
 
 ChannelEncodingType_t AnitaCompress::getEncodingTypeFromInputAndMuLawBits(int inputBits,
@@ -1700,13 +1706,13 @@ ChannelEncodingType_t AnitaCompress::getBinaryEncType(int bitSize) {
     }
     return ENCODE_LOSSLESS_12BIT;
 }
-	    
-    
+
+
 int AnitaCompress::getBinaryBitSize(ChannelEncodingType_t encType) {
     switch(encType) {
 	case ENCODE_LOSSLESS_12BIT: return 12;
 	case ENCODE_LOSSLESS_11BIT: return 11;
-	case ENCODE_LOSSLESS_10BIT: return 10;	   
+	case ENCODE_LOSSLESS_10BIT: return 10;
 	case ENCODE_LOSSLESS_9BIT: return 9;
 	case ENCODE_LOSSLESS_8BIT: return 8;
 	case ENCODE_LOSSLESS_7BIT: return 7;
@@ -1740,11 +1746,11 @@ ChannelEncodingType_t AnitaCompress::getBinFibEncType(int bitSize) {
     }
     return ENCODE_LOSSLESS_BINFIB_10BIT;
 }
-	    
-    
+
+
 int AnitaCompress::getBinFibBitSize(ChannelEncodingType_t encType) {
     switch(encType) {
-	case ENCODE_LOSSLESS_BINFIB_10BIT: return 10;	   
+	case ENCODE_LOSSLESS_BINFIB_10BIT: return 10;
 	case ENCODE_LOSSLESS_BINFIB_9BIT: return 9;
 	case ENCODE_LOSSLESS_BINFIB_8BIT: return 8;
 	case ENCODE_LOSSLESS_BINFIB_7BIT: return 7;
@@ -1759,7 +1765,7 @@ int AnitaCompress::getBinFibBitSize(ChannelEncodingType_t encType) {
     }
     return 10;
 }
-    
+
 
 
 
@@ -1776,7 +1782,7 @@ unsigned short AnitaCompress::simpleCrcShort(unsigned short *p, unsigned long n)
     return ((0xffff - sum) + 1);
 }
 
-const char *AnitaCompress::compressErrorCodeAsString(CompressErrorCode_t code) 
+const char *AnitaCompress::compressErrorCodeAsString(CompressErrorCode_t code)
 {
     const char *string;
     switch(code) {
@@ -1810,7 +1816,7 @@ const char *AnitaCompress::compressErrorCodeAsString(CompressErrorCode_t code)
 
    return (string) ;
 }
-	    
+
 #ifndef MEMCPY
 /* For unix, use the following: */
 #define MEMCPY	memcpy
@@ -1851,15 +1857,15 @@ void AnitaCompress::pack12bit(unsigned short *w, unsigned char *destp)
 
 
 unsigned char AnitaCompress::convertToMuLawUC(short input, int inputBits,
-			       int mulawBits) 
+			       int mulawBits)
 {
     char val=convertToMuLaw(input,inputBits,mulawBits);
 //    printf("c %d, uc %d\n",val,charbifurcate(val));
     return charbifurcate(val);
 }
 
-char AnitaCompress::convertToMuLaw(short input, int inputBits, int mulawBits) 
-{    
+char AnitaCompress::convertToMuLaw(short input, int inputBits, int mulawBits)
+{
     //It is the responsibilty of the caller to ensure input is within the range specified.
     //Might add checks as I don't trust the user.
     int index=input+(1<<(inputBits-1));
@@ -1967,14 +1973,14 @@ char AnitaCompress::convertToMuLaw(short input, int inputBits, int mulawBits)
     return 0;
 }
 
-short AnitaCompress::convertFromMuLawUC(unsigned char input, int outputBits, int mulawBits) 
+short AnitaCompress::convertFromMuLawUC(unsigned char input, int outputBits, int mulawBits)
 {
 //    printf("uc %d, c %d\n",input,charunbifurcate(input));
     return convertFromMuLaw(charunbifurcate(input),outputBits,mulawBits);
 }
 
-short AnitaCompress::convertFromMuLaw(char input, int outputBits, int mulawBits) 
-{    
+short AnitaCompress::convertFromMuLaw(char input, int outputBits, int mulawBits)
+{
     int index=input+(1<<(mulawBits-1));
     switch (outputBits) {
 	case 11:
@@ -2083,7 +2089,7 @@ short AnitaCompress::convertFromMuLaw(char input, int outputBits, int mulawBits)
 
 unsigned int fFibNums[24]={1,2,3,5,8,13,21,34,55,89,
 		     144,233,377,610,987,1597,2584,4181,6765,10946,
-		     17711,28657,46368,75025}; 
+		     17711,28657,46368,75025};
 //these are enough to encode unsigned short
 
 //convert a short to its fibonacci representation with a 11 prefix
@@ -2111,7 +2117,7 @@ unsigned int AnitaCompress::encodeFibonacci(unsigned short input,int *numBits){
 	       input -= fFibNums[i];
 	  }
 	  i--;
-     }  
+     }
      return output;
 }
 
@@ -2126,7 +2132,7 @@ unsigned short AnitaCompress::unfibonacci(unsigned int input)
      for (i=0; i<23; i++){
 	  curbit=(input>>i) & 0x0001;
 	  if (curbit==1 && lastbit==1) break;  // done--found the prefix bit
-	  else if (curbit==1) output+=fFibNums[i]; 
+	  else if (curbit==1) output+=fFibNums[i];
 	  lastbit=curbit;
      }
      return output;
@@ -2138,7 +2144,7 @@ unsigned short AnitaCompress::unfibonacci(unsigned int input)
 // integers as a prelude to applying prefix codes (e.g. fibonacci)
 //
 // chosen mapping is 0,-1,1,-2,2... => 1,2,3,4,5
-// 
+//
 // posi integers map to 2*n+1
 // negative integers map 2*abs(n)
 //
@@ -2193,9 +2199,9 @@ char AnitaCompress::charunbifurcate(unsigned char input)
      }
      return output;
 }
-	  
-	  
-	  
+
+
+
 // discard (in place) the last nbits bits of the data, shifting right
 // number of words is nwords
 void AnitaCompress::bitstrip(unsigned short nbits, unsigned short nwords, unsigned short *data)
@@ -2281,11 +2287,11 @@ int AnitaCompress::codepack(int n, unsigned int *in, unsigned char *out)
 	       }
 	  }
      }
-     if (bit==0) return byte; 
+     if (bit==0) return byte;
      else return byte+1;
 }
 
-//unpack fibonacci code 
+//unpack fibonacci code
 
 int AnitaCompress::codeunpack(int m, unsigned char *in, unsigned int *out)
 {
@@ -2301,7 +2307,7 @@ int AnitaCompress::codeunpack(int m, unsigned char *in, unsigned int *out)
      while (inbyte<m){
 	  curbit=(in[inbyte]>>inbit) & 0x1;
 	  out[outword] |= curbit << outbit;
-	  inbit++; outbit++; 
+	  inbit++; outbit++;
 	  if (inbit==8){ inbyte++; inbit=0;}
 	  if ((curbit==1 && lastbit==1)|| outbit==32){
 	       outword++; outbit=0; out[outword]=0;
@@ -2312,8 +2318,3 @@ int AnitaCompress::codeunpack(int m, unsigned char *in, unsigned int *out)
      }
      return outword;
 }
-
-
-
-
-     
