@@ -1530,7 +1530,7 @@ void AnitaEventCalibrator::loadCalib() {
     epsilons[surf][chip][rco]=calib; 
   }
 
-  sprintf(fileName,"%s/relativeCableDelays.dat",calibDir);
+  sprintf(fileName,"%s/relativeCableDelaysAnita4.dat",calibDir);
   std::ifstream relativeCableDelayFile(fileName);
   relativeCableDelayFile.getline(firstLine,179);
   while(relativeCableDelayFile >> surf >> chan >> chip >> calib) {
