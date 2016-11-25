@@ -32,13 +32,13 @@ class GpuPowerSpectra: public TObject
   TGraph* getGraph(Int_t phi);
 
 
-   Int_t           run; ///< Run number from offline
-   UInt_t          realTime; ///< Time in unixTime
-   Short_t powerSpectra[NUM_PHI][NUM_BINS_GPU_POW_SPEC];
-   unsigned int unixTimeFirstEvent;
-   unsigned int unixTimeLastEvent;
-   unsigned int numEventsAveraged;
-   unsigned int firstEventInAverage;
+  Int_t           run; ///< Run number from offline
+  UInt_t          realTime; ///< Time in unixTime
+  UChar_t powerSpectra[NUM_PHI][NUM_BINS_GPU_POW_SPEC];
+  unsigned int unixTimeFirstEvent;
+  unsigned int unixTimeLastEvent;
+  unsigned int numEventsAveraged;
+  unsigned int firstEventInAverage;
   unsigned char pol;
   unsigned char ring;
 
