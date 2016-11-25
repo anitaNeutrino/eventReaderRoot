@@ -17,6 +17,7 @@ class TuffNotchStatus : public TObject
   public:
 
     TuffNotchStatus(Int_t run, const TuffNotchStatus_t * status); 
+    TuffNotchStatus() { ; } 
     virtual ~TuffNotchStatus() {;} 
 
     char getIRFCMTemperature(int i) const { return temperatures[i]; } 
@@ -32,7 +33,7 @@ class TuffNotchStatus : public TObject
     unsigned int unixTime; 
     unsigned char startSectors[NUM_TUFF_NOTCHES]; 
     unsigned char endSectors[NUM_TUFF_NOTCHES]; 
-    char temperatures[NUM_TUFF_NOTCHES]; 
+    char temperatures[NUM_RFCM]; 
 
 
 
