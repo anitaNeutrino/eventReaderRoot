@@ -246,14 +246,9 @@ Float_t   CalibratedHk::getSBSTemp(int index)
 
 Float_t   CalibratedHk::getNTUTemp(int index)
 {
-  if(index==0) return (0.1*ntuTemp[index]);
-  if(index==1) return (ntuTemp[1]&0x1f)*2;
-  if(index==2) return ((ntuTemp[1]&0x3e0)>>5)*2;
-  if(index==3) return ((ntuTemp[1]&0x7c00)>>10)*2;
-  if(index==4) return (ntuTemp[2]&0x1f)*2;
-  if(index==5) return ((ntuTemp[2]&0x3e0)>>5)*2;
-  if(index==6) return ((ntuTemp[2]&0x7c00)>>10)*2;
- 
+  if(index==0) return (0.001*ntuTemp[index]);
+  if(index==1) return ntuTemp[1];
+  if(index==2) return ntuTemp[2];
   return -273;
 }
 
@@ -396,9 +391,9 @@ const char *CalibratedHk::getSBSTempName(int index)
 
 const char *CalibratedHk::getNTUTempName(int index)
 {
-  const char *sbsTempNames[NUM_NTU_TEMPS]={"CPU","Disk0","Disk1","Disk2","Disk3","Disk4","Disk5"};
+  const char *ntuTempNames[NUM_NTU_TEMPS]={"CPU","Disk0","Disk1"};
   if(index>=0 && index<NUM_NTU_TEMPS) 
-   return sbsTempNames[index];
+   return ntuTempNames[index];
   return "None";
 }
 

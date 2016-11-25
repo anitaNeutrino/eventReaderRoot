@@ -46,24 +46,22 @@ GpuPowerSpectra::GpuPowerSpectra(Int_t trun, Int_t trealTime, GpuPhiSectorPowerS
 
   run=trun;
   realTime=trealTime;
-  for(int ring=0;ring<NUM_ANTENNA_RINGS;ring++) {
-    for(int pol=0;pol<2;pol++) {
-      memcpy(&powerSpectra[ring][pol][0],&gpuPtr->powSpectra[ring][pol].bins[0],NUM_BINS_GPU_POW_SPEC*sizeof(Short_t));
-    }
+  for(int phi=0;phi<NUM_PHI;phi++) {
+    memcpy(&powerSpectra[phi][0],&gpuPtr->powSpectra[phi].bins[0],NUM_BINS_GPU_POW_SPEC*sizeof(UChar_t));
   }
   unixTimeFirstEvent=gpuPtr->unixTimeFirstEvent;
   unixTimeLastEvent=gpuPtr->unixTimeLastEvent;
   numEventsAveraged=gpuPtr->numEventsAveraged;
   firstEventInAverage=gpuPtr->firstEventInAverage;
-  phiSector=gpuPtr->phiSector;
-  nothing=gpuPtr->nothing;
+  pol=gpuPtr->pol;
+  ring=gpuPtr->ring;
 }
 
 
-TGraph* GpuPowerSpectra::getGraph(AnitaPol::AnitaPol_t pol, AnitaRing::AnitaRing_t ring){
+TGraph* GpuPowerSpectra::getGraph(Int_t phi){
 
 
-  const double floatToShortConversionForPacket = 32767./80;
+  const double floatToUCharConversionForPacket = 255./60;
 
   // 256 samples per channel on the GPU at the time of writing (ANITA-4)
   const double deltaF_MHz = 2.6e3/256;
@@ -72,7 +70,7 @@ TGraph* GpuPowerSpectra::getGraph(AnitaPol::AnitaPol_t pol, AnitaRing::AnitaRing
   const int freqBinOffset = 20;
   for(int freqInd = 0; freqInd < NUM_BINS_GPU_POW_SPEC; freqInd++){
     freqs.at(freqInd) = (freqInd+freqBinOffset)*deltaF_MHz;
-    power.at(freqInd) = float(powerSpectra[ring][pol][freqInd])/floatToShortConversionForPacket;
+    power.at(freqInd) = float(powerSpectra[phi][freqInd])/floatToUCharConversionForPacket;
     // power.at(freqInd)
   }
 

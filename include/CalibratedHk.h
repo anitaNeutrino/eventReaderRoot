@@ -28,7 +28,7 @@
 #define NUM_SBS_TEMPS 3
 #endif
 #ifndef NUM_NTU_TEMPS
-#define NUM_NTU_TEMPS 7
+#define NUM_NTU_TEMPS 3
 #endif
 #ifndef NUM_EXT_TEMPS
 #define NUM_EXT_TEMPS 15
