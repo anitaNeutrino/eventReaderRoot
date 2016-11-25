@@ -29,22 +29,22 @@ class GpuPowerSpectra: public TObject
    ~GpuPowerSpectra(); ///< Destructor
 
    GpuPowerSpectra(Int_t run, Int_t trealTime, GpuPhiSectorPowerSpectrumStruct_t *gpuPtr); ///< Assignment constructor
-  TGraph* getGraph(AnitaPol::AnitaPol_t pol, AnitaRing::AnitaRing_t ring);
+  TGraph* getGraph(Int_t phi);
 
 
    Int_t           run; ///< Run number from offline
    UInt_t          realTime; ///< Time in unixTime
-   Short_t powerSpectra[NUM_ANTENNA_RINGS][2][NUM_BINS_GPU_POW_SPEC];
+   Short_t powerSpectra[NUM_PHI][NUM_BINS_GPU_POW_SPEC];
    unsigned int unixTimeFirstEvent;
    unsigned int unixTimeLastEvent;
    unsigned int numEventsAveraged;
    unsigned int firstEventInAverage;
-   unsigned char phiSector;
-   unsigned char nothing;
+  unsigned char pol;
+  unsigned char ring;
 
 
 
-  ClassDef(GpuPowerSpectra,10);
+  ClassDef(GpuPowerSpectra,11);
 };
 
 
