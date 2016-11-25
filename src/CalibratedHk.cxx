@@ -246,7 +246,7 @@ Float_t   CalibratedHk::getSBSTemp(int index)
 
 Float_t   CalibratedHk::getNTUTemp(int index)
 {
-  if(index==0) return (0.001*ntuTemp[index]);
+  if(index==0) return (0.01*ntuTemp[index]);
   if(index==1) return ntuTemp[1];
   if(index==2) return ntuTemp[2];
   return -273;
