@@ -81,9 +81,12 @@ namespace AnitaGeom {
 
 
   ///< Map from SURF and polarization to phi-sector.
-  Int_t surfToPhiTriggerMap[ACTIVE_SURFS][2]={{-1,-1}, {-1,-1}, { 0, 4}, { 2, 6},
-					      { 1, 5}, { 3, 7}, {15,11}, {13, 9},
-					      {14,10}, {12, 8}, {-1,-1}, {-1,-1}};
+  Int_t surfToPhiTriggerMapAnita3[ACTIVE_SURFS][2]={{-1,-1}, {-1,-1}, { 0, 4}, { 2, 6},
+						    { 1, 5}, { 3, 7}, {15,11}, {13, 9},
+						    {14,10}, {12, 8}, {-1,-1}, {-1,-1}};
+  Int_t surfToPhiTriggerMapAnita4[ACTIVE_SURFS][2]={{-1,-1}, {-1,-1}, { 0, 1}, { 8, 9},
+						    { 2, 3}, { 10,11}, {4,5}, {12, 13},
+						    {6,7}, {14, 15}, {-1,-1}, {-1,-1}};
 
   
   using AnitaRing::kTopRing;
@@ -109,12 +112,17 @@ namespace AnitaGeom {
   using AnitaTrigPol::kLCP;
   AnitaTrigPol::AnitaTrigPol_t surfTriggerChanToPolAnita4[SCALERS_PER_SURF]={kRCP,kRCP,kRCP,
 									     kRCP,kRCP,kRCP,
+									     kLCP,kLCP,kLCP,
 									     kLCP,kLCP,kLCP};
   
+  Int_t phiToSurfTriggerMapAnita4[NUM_PHI] = {2,2,4,4,6,6,8,8,3,3,5,5,7,7,9,9};
+  Int_t phiToSurfHalfAnita4[NUM_PHI]       = {0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1};
 
+  
+  
   //These are from ANITA3
-  Int_t phiToSurfTriggerMap[NUM_PHI] = {2,4,3,5,2,4,3,5,9,7,8,6,9,7,8,6};
-  Int_t phiToSurfHalf[NUM_PHI]       = {0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0};
+  Int_t phiToSurfTriggerMapAnita3[NUM_PHI] = {2,4,3,5,2,4,3,5,9,7,8,6,9,7,8,6};
+  Int_t phiToSurfHalfAnita3[NUM_PHI]       = {0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0};
 
 }
 
@@ -287,21 +295,17 @@ void AnitaGeomTool::fillAntPositionsFromPrioritizerdConfig() {
 /// Converts the SURF and channel numbers to phi-sector, ring and polarization
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 Int_t AnitaGeomTool::getPhiRingPolFromSurfChanTrigger(Int_t surf,Int_t chan, Int_t &phi,
-						    AnitaRing::AnitaRing_t &ring,AnitaTrigPol::AnitaTrigPol_t &pol)
+						      AnitaRing::AnitaRing_t &ring,AnitaTrigPol::AnitaTrigPol_t &pol)
 {
   if(surf<0 || surf>=ACTIVE_SURFS) return -1;
   if(chan<0 || chan>=SCALERS_PER_SURF) return -1;
 
   Int_t surfHalf=0;				
   if((chan%6)>=3) surfHalf=1;
-  phi=AnitaGeom::surfToPhiTriggerMap[surf][surfHalf];
+  phi=AnitaGeom::surfToPhiTriggerMapAnita4[surf][surfHalf];
   ring=AnitaGeom::surfTriggerChanToRing[chan];
   pol=AnitaGeom::surfTriggerChanToPolAnita4[chan];
 
-  //ANITA3 had this switch
-  //Switched at SURF
-  //  if(surf==5 && chan==0) pol=AnitaTrigPol::kHorizontal;
-  //  if(surf==5 && chan==6) pol=AnitaTrigPol::kVertical;
   return phi;
 }
 
@@ -312,7 +316,7 @@ Int_t AnitaGeomTool::getPhiRingFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &p
 {
   if(phi<0 || phi>=NUM_PHI) return -1;
   Int_t surfHalf=l1Chan>2;   
-  phi=AnitaGeom::surfToPhiTriggerMap[surf][surfHalf];
+  phi=AnitaGeom::surfToPhiTriggerMapAnita4[surf][surfHalf];
   if((l1Chan%3)==0) ring=AnitaRing::kTopRing;
   if((l1Chan%3)==1) ring=AnitaRing::kMiddleRing;
   if((l1Chan%3)==2) ring=AnitaRing::kBottomRing;
@@ -327,8 +331,8 @@ Int_t AnitaGeomTool::getPhiRingFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &p
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 Int_t AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(Int_t phi,AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol ,Int_t &surf, Int_t &chan) {
   if(phi<0 || phi>=NUM_PHI) return -1;
-  surf=AnitaGeom::phiToSurfTriggerMap[phi];
-  Int_t surfHalf=AnitaGeom::phiToSurfHalf[phi];
+  surf=AnitaGeom::phiToSurfTriggerMapAnita4[phi];
+  Int_t surfHalf=AnitaGeom::phiToSurfHalfAnita4[phi];
   chan = (6-6*pol)+ ring + 3*surfHalf; 
 
   // if(phi==3 && ring==AnitaRing::kTopRing) {     
@@ -345,8 +349,8 @@ Int_t AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(Int_t phi,AnitaRing::Anita
 Int_t AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(Int_t phi, AnitaRing::AnitaRing_t ring, Int_t &surf, Int_t &l1Chan) 
 {
   if(phi<0 || phi>=NUM_PHI) return -1;
-  surf=AnitaGeom::phiToSurfTriggerMap[phi];
-  Int_t surfHalf=AnitaGeom::phiToSurfHalf[phi];
+  surf=AnitaGeom::phiToSurfTriggerMapAnita4[phi];
+  Int_t surfHalf=AnitaGeom::phiToSurfHalfAnita4[phi];
   switch(ring) {
   case AnitaRing::kTopRing:
     l1Chan=3*surfHalf;
@@ -370,8 +374,8 @@ Int_t AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(Int_t phi, AnitaRing::Anita
 Int_t AnitaGeomTool::getSurfL2TriggerChanFromPhi(Int_t phi, Int_t &surf, Int_t &l2Chan)
 {
   if(phi<0 || phi>=NUM_PHI) return -1;
-  surf=AnitaGeom::phiToSurfTriggerMap[phi];
-  Int_t surfHalf=AnitaGeom::phiToSurfHalf[phi];
+  surf=AnitaGeom::phiToSurfTriggerMapAnita4[phi];
+  Int_t surfHalf=AnitaGeom::phiToSurfHalfAnita4[phi];
   l2Chan=surfHalf;
   return surf;
 }

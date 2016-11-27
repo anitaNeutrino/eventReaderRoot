@@ -37,30 +37,27 @@ AveragedSurfHk::AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct
   deltaT=surfPtr->deltaT;
   hadError=surfPtr->hadError;
   globalThreshold=surfPtr->globalThreshold;
+
+
   memcpy(scalerGoals,surfPtr->scalerGoals,sizeof(UShort_t)*NUM_ANTENNA_RINGS);
-  memcpy(avgScaler,surfPtr->avgScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
 
- 
-  
+  memset(avgScaler,0,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(&avgScaler[2][0],surfPtr->avgScaler,sizeof(UShort_t)*TRIGGER_SURFS*SCALERS_PER_SURF);
+  memset(rmsScaler,0,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(&rmsScaler[2][0],surfPtr->rmsScaler,sizeof(UShort_t)*TRIGGER_SURFS*SCALERS_PER_SURF);
+  memset(avgThresh,0,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(&avgThresh[2][0],surfPtr->avgThresh,sizeof(UShort_t)*TRIGGER_SURFS*SCALERS_PER_SURF);
+  memset(rmsThresh,0,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memcpy(&rmsThresh[2][0],surfPtr->rmsThresh,sizeof(UShort_t)*TRIGGER_SURFS*SCALERS_PER_SURF);
 
-  memcpy(rmsScaler,surfPtr->rmsScaler,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
-  memcpy(avgL1,surfPtr->avgL1,sizeof(UShort_t)*ACTIVE_SURFS*L1S_PER_SURF);
-  memcpy(rmsL1,surfPtr->rmsL1,sizeof(UShort_t)*ACTIVE_SURFS*L1S_PER_SURF);
-  memcpy(avgThresh,surfPtr->avgThresh,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
-  memcpy(rmsThresh,surfPtr->rmsThresh,sizeof(UShort_t)*ACTIVE_SURFS*SCALERS_PER_SURF);
+  memset(avgL1,0,sizeof(UShort_t)*ACTIVE_SURFS*L1S_PER_SURF);
+  memset(rmsL1,0,sizeof(UShort_t)*ACTIVE_SURFS*L1S_PER_SURF);
+  memcpy(&avgL1[2],surfPtr->avgL1,sizeof(UShort_t)*TRIGGER_SURFS*L1S_PER_SURF);
+  memcpy(&rmsL1[2],surfPtr->rmsL1,sizeof(UShort_t)*TRIGGER_SURFS*L1S_PER_SURF);  
   memcpy(avgRFPower,surfPtr->avgRFPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
   memcpy(rmsRFPower,surfPtr->rmsRFPower,sizeof(UShort_t)*ACTIVE_SURFS*RFCHAN_PER_SURF);
   memcpy(surfTrigBandMask,surfPtr->surfTrigBandMask,sizeof(UShort_t)*ACTIVE_SURFS);
   intFlag=0;
- // std::cout << payloadTime << "\t" << numHks << "\n";
- //  for(int surf=0;surf<ACTIVE_SURFS;surf++) {
- //    for(int chan=0;chan<SCALERS_PER_SURF;chan++) {
- //      //      std::cout << surfPtr->avgScaler[surf][chan] << "\t";
- //      std::cout << avgScaler[surf][chan] << "\t";
- //    }
- //    std::cout << "\n";
- //  }
- //  std::cout << "\n";
 }
 
 
@@ -206,74 +203,82 @@ AveragedSurfHk::AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct
 
 
 
-int AveragedSurfHk::getSurfScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band, Int_t &surf, Int_t &scl) {
-  if(phi<0 || phi>16 || ring<0 || ring>2 || band<0 || band>3)
-    return -1;
-  if(ring==AnitaRing::kUpperRing|| ring==AnitaRing::kLowerRing) {
-    surf=phi/2; //SURF 1 has Phi 1 & 2
-    scl=8*(phi%2) + 4*ring + band;
-  }
-  else {
-    surf=8;
-    if(phi>=8) {
-      surf=9;
-      phi-=8;
-    }
-    scl=4*(phi/2) + band;
-  }      
-  return 0;
+
+int AveragedSurfHk::getL1Scaler(int phi, AnitaRing::AnitaRing_t ring) {
+  int surf,l1Chan;
+  AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(phi,ring,surf,l1Chan);
+  if(surf>=0 && surf<ACTIVE_SURFS && l1Chan>=0 && l1Chan<L1S_PER_SURF)
+    return avgL1[surf][l1Chan];
+
+  return -1;
 }
 
-Int_t AveragedSurfHk::getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band)
+int AveragedSurfHk::getL1ScalerRMS(int phi, AnitaRing::AnitaRing_t ring) {
+  int surf,l1Chan;
+  AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(phi,ring,surf,l1Chan);
+  if(surf>=0 && surf<ACTIVE_SURFS && l1Chan>=0 && l1Chan<L1S_PER_SURF)
+    return rmsL1[surf][l1Chan];
+
+  return -1;
+}
+
+int AveragedSurfHk::getSurfScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol, Int_t &surf, Int_t &scl) {
+  AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(phi,ring,pol,surf,scl);
+  if(surf>=0 && surf<ACTIVE_SURFS && scl>=0 && scl<SCALERS_PER_SURF)
+    return 0;
+  return -1;
+}
+
+Int_t AveragedSurfHk::getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol)
 {
    Int_t surf,scl;
-   if(getSurfScaler(phi,ring,band,surf,scl)<0)
+   if(getSurfScaler(phi,ring,pol,surf,scl)<0)
      return -1;
    return avgScaler[surf][scl];
    
 }
 
-Int_t AveragedSurfHk::getThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band)
+Int_t AveragedSurfHk::getThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol)
 {
    Int_t surf,scl;
-   if(getSurfScaler(phi,ring,band,surf,scl)<0)
+   if(getSurfScaler(phi,ring,pol,surf,scl)<0)
      return -1;
    return avgThresh[surf][scl];
 
 }
 
-Int_t AveragedSurfHk::getScalerRMS(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band)
+Int_t AveragedSurfHk::getScalerRMS(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol)
 {
    Int_t surf,scl;
-   if(getSurfScaler(phi,ring,band,surf,scl)<0)
+   if(getSurfScaler(phi,ring,pol,surf,scl)<0)
      return -1;
    return rmsScaler[surf][scl];
 }
 
-Int_t AveragedSurfHk::getThresholdRMS(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band)
+Int_t AveragedSurfHk::getThresholdRMS(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol)
 {
    Int_t surf,scl;
-   if(getSurfScaler(phi,ring,band,surf,scl)<0)
+   if(getSurfScaler(phi,ring,pol,surf,scl)<0)
      return -1;
    return rmsThresh[surf][scl];
 
 }
 
 
-Int_t AveragedSurfHk::isBandMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band)
+Int_t AveragedSurfHk::isBandMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol)
 {
   
   Int_t surf,scl;
-  if(getSurfScaler(phi,ring,band,surf,scl)<0)
+  if(getSurfScaler(phi,ring,pol,surf,scl)<0)
     return -1;
   return isBandMasked(surf,scl);
   
 }
 
-Int_t AveragedSurfHk::getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band)
+Int_t AveragedSurfHk::getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol)
 {
   Int_t surf,scl;
-  if(getSurfScaler(phi,ring,band,surf,scl)<0)
+  if(getSurfScaler(phi,ring,pol,surf,scl)<0)
     return -1;
   return scl +surf*SCALERS_PER_SURF;
 }
@@ -281,17 +286,13 @@ Int_t AveragedSurfHk::getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, Anit
 
 Int_t AveragedSurfHk::getScalerGoal(int surf, int scl)
 {
-  int band=scl%4;
-  if(surf<8) {
-    //Upper or lower ring
-    return scalerGoals[band];
-  }
-  else if(surf<ACTIVE_SURFS) {
-    //Nadir Ring
-    //    return scalerGoalsNadir[band];
-  }
-  return -1;
+  int phi;
+  AnitaRing::AnitaRing_t ring;
+  AnitaTrigPol::AnitaTrigPol_t trigPol;
+  AnitaGeomTool::getPhiRingPolFromSurfChanTrigger(surf,scl,phi,ring,trigPol);
+  return scalerGoals[ring];
 }
+
 
 
 Double_t AveragedSurfHk::getRFPowerInK(int surf, int chan)
