@@ -56,13 +56,15 @@ class AveragedSurfHk: public TObject
    
    Int_t isBandMasked(int surf, int scl)
       { return (surfTrigBandMask[surf]&(1<<scl));} ///< Was the given band masked off (1 is band excluded from trigger, 0 is band included)
-   Int_t getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band); ///< Get scaler for given phi-ring-band
-   Int_t getScalerRMS(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band); ///< Get scaler RMS for given phi-ring-band
-   Int_t getThreshold(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band); ///< Get threhsold for given phi-ring-band
-   Int_t getThresholdRMS(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band); ///< Get threhsold RMS for given phi-ring-band
-   Int_t isBandMasked(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band); ///< Get band masking for given phi-ring-band
-   Int_t getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band); ///< Get logical index for phi-ring-band
-   int getSurfScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaBand::AnitaBand_t band, Int_t &surf, Int_t &scl); ///< Get surf and scaler for  phi-ring-band
+   Int_t getL1Scaler(int phi, AnitaRing::AnitaRing_t ring); ///< Get L1 scaler for given phi-ring
+   Int_t getL1ScalerRMS(int phi, AnitaRing::AnitaRing_t ring); ///< Get L1 scaler for given phi-ring
+   Int_t getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol); ///< Get scaler for given phi-ring-pol
+   Int_t getScalerRMS(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol); ///< Get scaler RMS for given phi-ring-pol
+   Int_t getThreshold(int phi, AnitaRing::AnitaRing_t ring,  AnitaTrigPol::AnitaTrigPol_t pol); ///< Get threhsold for given phi-ring-pol
+   Int_t getThresholdRMS(int phi, AnitaRing::AnitaRing_t ring,  AnitaTrigPol::AnitaTrigPol_t pol); ///< Get threhsold RMS for given phi-ring-pol
+   Int_t isBandMasked(int phi, AnitaRing::AnitaRing_t ring,  AnitaTrigPol::AnitaTrigPol_t pol); ///< Get band masking for given phi-ring-pol
+   Int_t getLogicalIndex(int phi, AnitaRing::AnitaRing_t ring,  AnitaTrigPol::AnitaTrigPol_t pol); ///< Get logical index for phi-ring-pol
+   int getSurfScaler(int phi, AnitaRing::AnitaRing_t ring,  AnitaTrigPol::AnitaTrigPol_t pol, Int_t &surf, Int_t &scl); ///< Get surf and scaler for  phi-ring-pol
    Int_t getScalerGoal(int surf, int scl); ///< Get scaler goal for given surf-scaler
    Double_t getRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
    Double_t getRMSRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
