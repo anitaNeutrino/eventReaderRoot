@@ -36,11 +36,13 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *turfPtr)
    for(int i=0;i<PHI_SECTORS;i++) {
      l3Rates[i]=turfPtr->l3Rates[i];
      l2Rates[i]=turfPtr->l2Rates[i];
+     l3RatesGated[i]=turfPtr->l3RatesGated[i];
    }
    memcpy(reserved,turfPtr->reserved,sizeof(UChar_t)*3);
    l2TrigMask=turfPtr->l2TrigMask;
    phiTrigMask=turfPtr->phiTrigMask;
    errorFlag=turfPtr->errorFlag;
+   refPulses=turfPtr->refPulses;
    intFlag=0;
 }
 
