@@ -33,11 +33,11 @@ class TuffNotchStatus : public TObject
     unsigned int unixTime; 
     unsigned char startSectors[NUM_TUFF_NOTCHES]; 
     unsigned char endSectors[NUM_TUFF_NOTCHES]; 
-    char temperatures[NUM_RFCM]; 
+    short temperatures[NUM_RFCM]; 
 
 
 
-    ClassDef(TuffNotchStatus, 1); 
+    ClassDef(TuffNotchStatus, 2); 
 
 }; 
 
