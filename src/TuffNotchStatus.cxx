@@ -14,7 +14,11 @@ TuffNotchStatus::TuffNotchStatus(Int_t run, const TuffNotchStatus_t * status )
   unixTime = status->unixTime; 
   memcpy(startSectors, status->startSectors, sizeof(startSectors)); 
   memcpy(endSectors, status->endSectors, sizeof(endSectors)); 
-  memcpy(temperatures, status->temperatures, sizeof(temperatures)); 
+  for (int i = 0; i < NUM_RFCM; i++) 
+  {
+    temperatures[i] = status->temperatures[i];  
+  }
+
 
 }
 

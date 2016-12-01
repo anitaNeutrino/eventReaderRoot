@@ -359,8 +359,10 @@ Float_t CalibratedHk::getAttitude(int index) {
 
  const char *CalibratedHk::getExternalTempName(int index)
 {
-
-  const char *extTempNames[NUM_EXT_TEMPS]={"Radiator Plate, top right","Radiator Plate, bottom left","AMPA 16TH","Battery Box","AMPA 02TV","AMPA 02TV","ANITA box near He Drives","ANITA box near IRFMCs","PV17","Radiator Plate, middle","PV02","PV14","PV05","PV23","PV11"};//,"A27V (RFCM11)","A29V (RFCM04)","A31V (RFCM01)","A??V (RFCM 17)","A??V (RFCM18)","A??V (RFCM19)","A??V (RFCM20)","Radiator Plate","PV 5 (phi 12)","PV 7 (phi 16)"};
+  // ANITA3
+  //  const char *extTempNames[NUM_EXT_TEMPS]={"Radiator Plate, top right","Radiator Plate, bottom left","AMPA 16TH","Battery Box","AMPA 02TV","AMPA 02TV","ANITA box near He Drives","ANITA box near IRFMCs","PV17","Radiator Plate, middle","PV02","PV14","PV05","PV23","PV11"};//,"A27V (RFCM11)","A29V (RFCM04)","A31V (RFCM01)","A??V (RFCM 17)","A??V (RFCM18)","A??V (RFCM19)","A??V (RFCM20)","Radiator Plate","PV 5 (phi 12)","PV 7 (phi 16)"};
+  // ANITA4
+  const char *extTempNames[NUM_EXT_TEMPS]={"Radiator Plate","Lid Center","Battery Box (Aft Starboard)","AMPA 01TH","AMPA 05TH","AMPA 09TH","AMPA 13TH","AMPA 01MH","AMPA 05MH","AMPA 09MH","AMPA 13MH","PV1","PV3","PV5","PV7"};
  if(index>=0 && index<NUM_EXT_TEMPS) 
     return extTempNames[index];
   return "None";
