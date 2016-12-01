@@ -26,6 +26,7 @@ class TuffNotchStatus : public TObject
     unsigned int getUnixTime() const { return unixTime; } 
     unsigned int getNotchSetTime() const { return notchSetTime; } 
     unsigned short getNotchedSectors(int inotch) const; 
+    Int_t getRun() const { return run; } 
 
   private:
     Int_t run;
