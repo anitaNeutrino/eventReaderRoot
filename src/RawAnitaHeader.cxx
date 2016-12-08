@@ -588,7 +588,9 @@ Float_t RawAnitaHeader::getPeakThetaDeg()
 {
 #define THETA_RANGE 150
 #define NUM_BINS_THETA 256
-  return -1*THETA_RANGE*((Float_t)peakThetaBin/NUM_BINS_THETA - 0.5);
+  //Removing -1
+  
+  return THETA_RANGE*((Float_t)peakThetaBin/NUM_BINS_THETA - 0.5);
   
 }
 
@@ -602,12 +604,12 @@ Float_t RawAnitaHeader::getPeakPhiDeg()
   Int_t phiInd2=(prioritizerStuff&0x7ff)>>1;
   Int_t phiInd=(phiInd2&0x3f);
   Int_t phiSector=(phiInd2>>6);
-  const Float_t phiArrayDeg[NUM_SEAVEYS]={0,22.5,45,67.5,90,112.5,135,157.5,180,
-					   202.5,225,247.5,270,292.5,315,337.5,
-					   0,22.5,45,67.5,90,112.5,135,157.5,180,
-					   202.5,225,247.5,270,292.5,315,337.5,
-					   0,22.5,45,67.5,90,112.5,135,157.5,180,
-					   202.5,225,247.5,270,292.5,315,337.5};
+  const Float_t phiArrayDeg[NUM_SEAVEYS]={-45,-22.5,0,22.5,45,67.5,90,112.5,135,157.5,180,
+					  202.5,225,247.5,270,292.5,315,337.5,
+					  0,22.5,45,67.5,90,112.5,135,157.5,180,
+					  202.5,225,247.5,270,292.5,315,337.5,
+					  0,22.5,45,67.5,90,112.5,135,157.5,180,
+					  202.5,225,247.5,270,292.5};
   // const Float_t phiArray[NUM_SEAVEYS]={0.454076, 0.848837, 1.21946, 1.5909, 1.99256, 2.34755, 
   // 				 2.70865, 3.069, 3.47166, 3.87134, 4.26593, 4.67822, 5.10608, 
   // 				 5.51456, 5.89388, 0.044416,
