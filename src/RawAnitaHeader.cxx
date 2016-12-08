@@ -56,7 +56,7 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    bufferDepth=hdPtr->turfio.bufferDepth;
    turfioReserved=hdPtr->turfio.reserved[0];
    l3TrigPattern=hdPtr->turfio.l3TrigPattern;
-   l3TrigPatternH=hdPtr->turfio.l3TrigPatternH;
+   //   l3TrigPatternH=hdPtr->turfio.l3TrigPatternH;
    //   memcpy(reserved,hdPtr->reserved,2*sizeof(UChar_t));
    run=trun;
    realTime=trealTime;
