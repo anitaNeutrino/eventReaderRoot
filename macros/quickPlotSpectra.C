@@ -15,6 +15,7 @@ void quickPlotSpectra(const char * gpuFile, bool backwards = false, int nplot = 
   c->Divide(4,4); 
 
 
+  if (nplot < 0 || nplot > gpuTree->GetEntries()) nplot = gpuTree->GetEntries();
   for (int i = 0; i < nplot; i++) 
   {
 
