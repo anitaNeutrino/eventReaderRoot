@@ -178,6 +178,7 @@ The second byte (reserved[1]) is currently reserved.
   int isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
   int isInPhiMask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical);
   int isInL1Mask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical);
+  int getL1Mask( AnitaPol::AnitaPol_t pol) const; ///< Get's the l1 Mask
   int isInPhiMaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical);
   int isInL1MaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical);
   int getPhiMaskOffline(AnitaPol::AnitaPol_t pol) const { return pol == AnitaPol::kHorizontal ? phiTrigMaskHOffline : phiTrigMaskOffline ;} 

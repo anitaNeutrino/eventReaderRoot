@@ -377,6 +377,18 @@ const char *RawAnitaHeader::trigTypeAsString()
    return theString;
 }
 
+int RawAnitaHeader::getL1Mask( AnitaPol::AnitaPol_t pol) const {
+  switch(pol) {
+  case AnitaPol::kVertical:
+    return  l1TrigMask;
+  case AnitaPol::kHorizontal:
+    return  l1TrigMaskH;
+  default:
+    return 0;
+  }      
+  return 0; 
+}
+
 
 UShort_t RawAnitaHeader::getL3TrigPattern(AnitaPol::AnitaPol_t pol){
   return pol == AnitaPol::kHorizontal ? l3TrigPatternH : l3TrigPattern;
