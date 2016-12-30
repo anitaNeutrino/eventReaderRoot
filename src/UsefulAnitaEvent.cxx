@@ -160,16 +160,147 @@ TGraph *UsefulAnitaEvent::getGraph(int chanIndex)
 }
 
 
-TGraph *UsefulAnitaEvent::getDeconvolvedALFA()
+TGraph *UsefulAnitaEvent::getDeconvolvedALFA(bool filterLo, int downConvertMode)
 {
   // todo...
-
+  // For ANITA-3, ALFA was upconverted to 710-870 MHz (mixed with 790 MHz LO) and coupled with 05TH
+  const int alfaChannelIndex = 11*NUM_CHAN + 5;
+    
+  const double freqLo = 790.0;
+  const double alfaFreqMin = 25.0;
+  const double alfaFreqMax = 80.0;
+  double freqMin = 0.;
+  double freqMax = 0.;
+    
+  //only works if the 700 MHz low pass filter is turned off
+  setAlfaFilterFlag(false);
+  TGraph *grPtr = getGraph(alfaChannelIndex);
+    
   // You should put the code that uses FFTtools inside the include guard.
 #ifdef USE_FFT_TOOLS
-  // 
-#endif
+  
+   //choose the sideband to downConvert
+  switch( downConvertMode ){
+      case 1: // lower sideband
+          freqMin = freqLo - alfaFreqMax;
+          freqMax = freqLo - alfaFreqMin;
+          break;
+      case 2: // upper sideband
+          freqMin = freqLo + alfaFreqMin;
+          freqMax = freqLo + alfaFreqMax;
+          break;
+          
+      case 3: // both sidebandss
+          freqMin = freqLo - alfaFreqMax;
+          freqMax = freqLo + alfaFreqMax;
+          break;
 
-  return NULL;
+      case 4: // I-Q downconversion
+          // not implemented yet
+          return grPtr;
+          break;
+      default:
+          //lower sideband
+          freqMin = freqLo - alfaFreqMax;
+          freqMax = freqLo - alfaFreqMin;
+          break;
+  }
+  
+  // need to notch filter the LO
+  grPtr = FFTtools::simpleNotchFilter(grPtr, freqLo - freqMin, freqLo + freqMin);
+  // now select the sideband to downConvert
+  grPtr = FFTtools::simplePassBandFilter(grPtr, freqMin, freqMax );
+
+  int length = grPtr->GetN();
+  FFTWComplex *fft = FFTtools::doFFT(length, grPtr->GetY());
+   
+  // initialize variables for the downconversion
+  double *timeArray = grPtr->GetY();
+  double deltaT = timeArray[1]-timeArray[0];
+  double deltaF = 1./(deltaT*length);
+  int loIndex = floor(freqLo/deltaF);
+  FFTWComplex* downcon = new FFTWComplex[length];
+  for(int iFreqIndex=0; iFreqIndex < length; iFreqIndex++){
+      downcon[iFreqIndex].setMagPhase(0., 0.);
+  }
+
+  //zero frequency
+  downcon[loIndex].setMagPhase(0., 0.);
+
+    int minIndex =0;
+    int maxIndex =0;
+  switch( downConvertMode ){
+    case 1:              // lower sideband
+          minIndex = 0;
+          maxIndex = loIndex;
+              for(int iFreqIndex=minIndex; iFreqIndex < maxIndex; iFreqIndex++)
+                {
+                    double newMag = fft[loIndex - iFreqIndex].getAbs();
+                    double newPhase = fft[loIndex - iFreqIndex].getPhase();
+                    
+                    // this part assumes that you know the phase of the LO, which we don't
+                    // used in testing isoAlfa.C macro
+                    // might be useful later on for sine-subtraction
+                    /*if(Lower == true)
+                        newPhase = loPhase - phase;
+                    }
+                    else
+                    {
+                        newPhase = phase - loPhase;
+                    }
+                                            
+                    */
+                    
+                    fft[iFreqIndex].setMagPhase(newMag,newPhase);
+                }
+          break;
+      case 2:          // upper sideband
+          minIndex = 0;
+          maxIndex = length - loIndex;
+
+          for(int iFreqIndex=minIndex; iFreqIndex < maxIndex; iFreqIndex++)
+          {
+              double newMag = fft[loIndex + iFreqIndex].getAbs();
+              double newPhase = fft[loIndex + iFreqIndex].getPhase();
+              fft[iFreqIndex].setMagPhase(newMag,newPhase);
+          }
+          break;
+      case 3: // lower and upper sidebands
+          minIndex = 0;
+          maxIndex = loIndex;
+          
+          for(int iFreqIndex=minIndex; iFreqIndex < maxIndex; iFreqIndex++)
+          {
+              // right now just averaging the upper and lower sidebands
+              // might be able to recover the LO phase
+              double newMag = 0.5*(fft[loIndex - iFreqIndex].getAbs() + fft[loIndex + iFreqIndex].getAbs());
+              double newPhase = 0.5*(fft[loIndex - iFreqIndex].getPhase() + fft[loIndex + iFreqIndex].getPhase());
+              fft[iFreqIndex].setMagPhase(newMag,newPhase);
+          }
+          break;
+      case 4:
+          //not yet implemented
+          break;
+      default:
+          minIndex = 0;
+          maxIndex = loIndex;
+          for(int iFreqIndex=minIndex; iFreqIndex < maxIndex; iFreqIndex++)
+          {
+              double newMag = fft[loIndex - iFreqIndex].getAbs();
+              double newPhase = fft[loIndex - iFreqIndex].getPhase();
+              fft[iFreqIndex].setMagPhase(newMag,newPhase);
+          }
+          break;
+          
+  }
+  double *downWave = FFTtools::doInvFFT(length, fft);
+    for(int iPoint=0; iPoint<grPtr->GetN(); iPoint++){
+        grPtr->SetPoint(iPoint, timeArray[iPoint], downWave[iPoint]);
+
+    }  //
+#endif
+  
+  return grPtr;
 }
 
 
