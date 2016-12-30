@@ -14,6 +14,28 @@ static bool checkIfFileExists(const char * file)
   return access(file, R_OK) !=-1; 
 }
 
+static const char * checkIfFilesExist(int num, ...)
+{
+
+  va_list args; 
+  va_start(args, num); 
+
+  for (int i = 0; i < num; i++) 
+  {
+    const char * f = va_arg(args, const char *); 
+
+    if (checkIfFileExists(f))
+    {
+      return f; 
+    }
+
+  }
+
+  va_end(args); 
+
+  return 0; 
+}
+
 static const char  anita_root_data_dir_env[]  = "ANITA_ROOT_DATA"; 
 static const char  anita_versioned_root_data_dir_env[]  = "ANITA%d_ROOT_DATA"; 
 
@@ -205,7 +227,7 @@ UsefulAnitaEvent * AnitaDataset::useful(bool force_load)
     {
       new (fUseful) UsefulAnitaEvent(fCalEvent, fCalType); 
     }
-    else 
+    else if (fRawEvent)
     {
       new (fUseful) UsefulAnitaEvent(fRawEvent, fCalType, header()); 
     }
@@ -326,26 +348,19 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   // try to load timed header file 
   
   TString fname = TString::Format("%s/run%d/timedHeadFile%d.root", data_dir, run, run); 
-  if (checkIfFileExists(fname.Data()))
+  TString fname2 = TString::Format("%s/run%d/headFile%d.root", data_dir, run, run); 
+  TString fname3 = TString::Format("%s/run%d/SimulatedAnitaHeadFile%d.root", data_dir, run, run);
+
+  if (const char * the_right_file = checkIfFilesExist(3, fname.Data(), fname2.Data(), fname3.Data()))
   {
-    TFile * f = new TFile(fname.Data()); 
+    TFile * f = new TFile(the_right_file); 
     filesToClose.push_back(f); 
     fHeadTree = (TTree*) f->Get("headTree"); 
   }
   else 
   {
-    fname = TString::Format("%s/run%d/headFile%d.root", data_dir, run, run); 
-    if (checkIfFileExists(fname.Data()))
-    {
-      TFile * f = new TFile(fname.Data()); 
-      filesToClose.push_back(f); 
-      fHeadTree = (TTree*) f->Get("headTree"); 
-    }
-    else 
-    {
-      fprintf(stderr,"Could not find head file for run %d, giving up!\n", run); 
-      return false; 
-    }
+    fprintf(stderr,"Could not find head file for run %d, giving up!\n", run); 
+    return false; 
   }
 
   if (!fDecimated) fHeadTree->SetBranchAddress("header",&fHeader); 
@@ -365,9 +380,10 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   else 
   {
     fname = TString::Format("%s/run%d/gpsFile%d.root", data_dir, run, run); 
-    if (checkIfFileExists(fname.Data()))
+    fname2 = TString::Format("%s/run%d/SimulatedAnitaGpsFile%d.root", data_dir, run, run); 
+    if (const char * the_right_file = checkIfFilesExist(2, fname.Data(), fname2.Data()))
     {
-       TFile * f = new TFile(fname.Data()); 
+       TFile * f = new TFile(the_right_file); 
        filesToClose.push_back(f); 
        fGpsTree = (TTree*) f->Get("adu5PatTree"); 
        fGpsTree->BuildIndex("realTime"); 
@@ -386,9 +402,11 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   //try to load calibrated event file 
 
   fname = TString::Format("%s/run%d/calibratedEventFile%d.root", data_dir, run, run); 
-  if (checkIfFileExists(fname.Data()))
+  fname2 = TString::Format("%s/run%d/calEventFile%d.root", data_dir, run, run); 
+  fname3 = TString::Format("%s/run%d/SimulatedAnitaEventFile%d.root", data_dir, run, run); 
+  if (const char * the_right_file = checkIfFilesExist(2, fname.Data(), fname2.Data()))
   {
-     TFile * f = new TFile(fname.Data()); 
+     TFile * f = new TFile(the_right_file); 
      filesToClose.push_back(f); 
      fEventTree = (TTree*) f->Get("eventTree"); 
      fHaveCalibFile = true; 
@@ -404,13 +422,23 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
        fEventTree = (TTree*) f->Get("eventTree"); 
        fHaveCalibFile = false; 
        fEventTree->SetBranchAddress("event",&fRawEvent); 
-    }
-    else 
-    {
-      fprintf(stderr,"Could not find event file for run %d, giving up!\n",run); 
-      return false; 
-    }
+    } 
+    else
+      {
+      if (checkIfFileExists(fname3.Data()))
+	{
+	TFile * f = new TFile(fname3.Data()); 
+	filesToClose.push_back(f); 
+	fEventTree = (TTree*) f->Get("eventTree"); 
+	fHaveCalibFile = false;
+	fEventTree->SetBranchAddress("event",&fUseful);
+	} else {
+	fprintf(stderr,"Could not find event file for run %d, giving up!\n",run); 
+	return false;
+      }
+      }
   }
+
 
 
   //try to load hk file 
