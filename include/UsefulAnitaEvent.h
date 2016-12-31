@@ -49,7 +49,7 @@ class UsefulAnitaEvent: public RawAnitaEvent
   TGraph *getGraph(AnitaRing::AnitaRing_t ring,
 		   int phi,
 		   AnitaPol::AnitaPol_t pol); ///< Returns a voltage-time waveform for given ring-phi-pol
-  TGraph *getDeconvolvedALFA(); // 
+  TGraph *getDeconvolvedALFA(bool filterLo, int downConvertMode); // Returns a downconverted voltage-time waveform of the ALFA channel
   Int_t guessRco(int chanIndex); ///< Looks at clock channel to try and guess which RCO phase we are in.
   Int_t getRcoCorrected(int chanIndex); ///< Returns firmware RCO after correcting for latch delay (and factor of -1 for different definitions of which phase getRCO and guessRCO return)
   // Double_t getTempCorrectionFactor(); ///< Returns the temperature correction factor (or guesses at it using clock periods if necessary)
