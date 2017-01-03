@@ -8,10 +8,16 @@
 
 #include "AnitaEventCalibrator.h"
 #include "UsefulAnitaEvent.h"
+#include "AnitaVersion.h" 
 
 ClassImp(AnitaEventCalibrator);
 
-AnitaEventCalibrator*  AnitaEventCalibrator::fgInstance = NULL;
+
+static AnitaEventCalibrator*  instances[] = { 0, 0, 0, 0, 0} ; 
+
+
+static const char * voltageCalibFiles[] = { 0, 0, 0, "simpleVoltageCalibrationHarm.txt", "simpleVoltageCalibrationAnita4.txt" }; 
+static const char * relativeCableDelayFiles[] = { 0,0,0, "relativeCableDelays.dat","relativeCableDelaysAnita4.dat"}; 
 
 AnitaEventCalibrator::AnitaEventCalibrator(){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
@@ -30,6 +36,10 @@ AnitaEventCalibrator::AnitaEventCalibrator(){
 
 }
 
+
+
+
+
 AnitaEventCalibrator::~AnitaEventCalibrator(){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
   // delete clockPeriodRingBuffer;
@@ -40,11 +50,14 @@ AnitaEventCalibrator::~AnitaEventCalibrator(){
 //______________________________________________________________________________
 AnitaEventCalibrator*  AnitaEventCalibrator::Instance(){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
-  if(fgInstance==NULL){
-    fgInstance = new AnitaEventCalibrator();
-  }
 
-  return fgInstance;
+  int v = AnitaVersion::get(); 
+
+  if(!instances[v])
+  {
+    instances[v] = new AnitaEventCalibrator();
+  }
+  return instances[v]; 
 }
 
 
@@ -1493,9 +1506,12 @@ void AnitaEventCalibrator::loadCalib() {
     }
   }
 
+
+
+
   Int_t surf,chan,chip,rco,samp;
   Double_t calib;
-  sprintf(fileName,"%s/simpleVoltageCalibrationAnita4.txt",calibDir);
+  sprintf(fileName,"%s/%s",calibDir, voltageCalibFiles[AnitaVersion::get()]);
   std::ifstream CalibFile(fileName);
   char firstLine[180];
   CalibFile.getline(firstLine,179);
@@ -1530,7 +1546,7 @@ void AnitaEventCalibrator::loadCalib() {
     epsilons[surf][chip][rco]=calib;
   }
 
-  sprintf(fileName,"%s/relativeCableDelaysAnita4.dat",calibDir);
+  sprintf(fileName,"%s/%s",calibDir, relativeCableDelayFiles[AnitaVersion::get()]);
   std::ifstream relativeCableDelayFile(fileName);
   relativeCableDelayFile.getline(firstLine,179);
   while(relativeCableDelayFile >> surf >> chan >> chip >> calib) {

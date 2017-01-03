@@ -68,6 +68,8 @@
 #pragma link C++ class TuffNotchStatus+; 
 #pragma link C++ class TuffRawCmd+; 
 
+#pragma link C++ namespace AnitaVersion;
+
 #else
 #error "for compilation"
 #endif
