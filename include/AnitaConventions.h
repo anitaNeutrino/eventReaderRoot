@@ -278,6 +278,8 @@ namespace AnitaLocations {
 // #define OFFSET_ADU5_HEADING -0.32
 
 
+// Number of ANITA payloads.  
+#define NUM_ANITAS 4 
 
 
 #endif //ANITACONVENTIONS_H

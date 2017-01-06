@@ -15,8 +15,7 @@ Double_t deltaRL = 0.0;
 Double_t deltaUD = 0.0;
 
 
-static AnitaGeomTool * instances[] = {0, 0, 0, 0, 0, 0}; 
-
+static AnitaGeomTool * instances[NUM_ANITAS+1] = {0}; 
 
 
 
