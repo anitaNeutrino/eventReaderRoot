@@ -17,6 +17,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include "AnitaVersion.h" 
 
 ClassImp(UsefulAnitaEvent);
 
@@ -53,7 +54,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr, WaveCalT
   }
   fCalType=calType;
   calibrateEvent(fCalType);
-  setAlfaFilterFlag(false);  
+  setAlfaFilterFlag(AnitaVersion::get() == 3);  
 }
 
 
@@ -61,6 +62,9 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   : RawAnitaEvent(*eventPtr)
 {
 
+
+  //In this case, we can automatically detect the ANITA version  
+  AnitaVersion::setVersionFromUnixTime(theHk->realTime); 
 
   checkIfTreatingCalibratedEventAsRawEvent(eventPtr, __PRETTY_FUNCTION__);
 
@@ -74,14 +78,17 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   else{
     gotCalibTemp=0;
   }
-  setAlfaFilterFlag(false);  
 
+  setAlfaFilterFlag(AnitaVersion::get() == 3);  
   calibrateEvent(calType);
 }
 
 UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, RawAnitaHeader* theHd) 
   : RawAnitaEvent(*eventPtr)
 {
+
+  //In this case, we can automatically detect the ANITA version  
+  AnitaVersion::setVersionFromUnixTime(theHd->realTime); 
 
   checkIfTreatingCalibratedEventAsRawEvent(eventPtr, __PRETTY_FUNCTION__);
 
@@ -91,7 +98,10 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   fLastEventGuessed=0;
   gotCalibTemp=0;
   fClockProblem = 0;
-  setAlfaFilterFlag(false);    
+
+
+  setAlfaFilterFlag(AnitaVersion::get() == 3);  
+
   if(theHd->eventNumber != eventPtr->eventNumber){
     std::cerr << "Warning! eventNumber mismatch in " << __FILE__ << " line " << __LINE__ << "." << std::endl;
     std::cerr << "RawAnitaHeader->eventNumber = " << theHd->eventNumber << " but "

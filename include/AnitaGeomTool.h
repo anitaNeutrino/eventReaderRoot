@@ -52,14 +52,14 @@ class AnitaGeomTool
   /********************************************************************************************************
   Constructor and destructor functions
   ********************************************************************************************************/
-  AnitaGeomTool();
-  ~AnitaGeomTool();
+  virtual ~AnitaGeomTool();
 
 
   /********************************************************************************************************
   Static member functions
   ********************************************************************************************************/
-  static AnitaGeomTool*  Instance(); ///<Instance generator
+
+  static AnitaGeomTool*  Instance( int anita_version = 0); ///<Instance generator. If version_number == 0, uses AnitaVersion::get(); 
   static AnitaRing::AnitaRing_t getRingFromAnt(Int_t ant); ///< Get ring form antenna number (0-39)
   static void getSurfChanAntFromRingPhiPol(AnitaRing::AnitaRing_t ring,
 					   Int_t phi,
@@ -335,17 +335,13 @@ class AnitaGeomTool
         lat=getLat(getTheta(thePos));
     } ///<Converts cartesian coordinates to latitude and longitude
 
- protected:
-   static AnitaGeomTool *fgInstance;  
-   // protect against multiple instances
-
  private:
   void readPhotogrammetry();
   void readAnita3Photogrammetry();
   void readSimonsNumbers();
   void readAnita3PhaseCenterNumbers();
   Int_t fUseKurtAnita3Numbers;
-  
+  AnitaGeomTool();
 
 
 };

@@ -13,8 +13,6 @@
  *  -it also supports reading decimated files, but also requires the full header file (to get the correct entry in the other trees). 
  *
  *
- *  In the future, it might support loading stuff from multiple ANITA versions. 
- *
  *
  *  Cosmin Deaconu <cozzyd@kicp.uchicago.edu> 
  *
@@ -120,6 +118,7 @@ class AnitaDataset
     Adu5Pat * fGps; 
     TTree* fHkTree; 
     PrettyAnitaHk * fHk; 
+
 
     int fWantedEntry; 
     int fDecimatedEntry; 

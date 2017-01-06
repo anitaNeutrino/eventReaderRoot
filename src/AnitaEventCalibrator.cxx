@@ -48,10 +48,10 @@ AnitaEventCalibrator::~AnitaEventCalibrator(){
 
 
 //______________________________________________________________________________
-AnitaEventCalibrator*  AnitaEventCalibrator::Instance(){
+AnitaEventCalibrator*  AnitaEventCalibrator::Instance(int v){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
 
-  int v = AnitaVersion::get(); 
+  if (!v) v = AnitaVersion::get(); 
 
   if(!instances[v])
   {

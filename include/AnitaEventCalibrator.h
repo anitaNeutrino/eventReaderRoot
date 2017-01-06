@@ -46,7 +46,7 @@ class AnitaEventCalibrator : public TObject
   public:
 
   virtual ~AnitaEventCalibrator();
-  static AnitaEventCalibrator* Instance(); ///< Instance generator
+  static AnitaEventCalibrator* Instance(int version = 0); ///< Instance generator
 
   /*! \brief Calibration Routine
    *         The routine that is used to calibrate the voltage time waveforms in a UsefulAnitaEvent

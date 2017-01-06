@@ -7,11 +7,15 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "AnitaGeomTool.h"
+#include "AnitaVersion.h" 
 
 #define INCHTOMETER 0.0254
 
 Double_t deltaRL = 0.0;
 Double_t deltaUD = 0.0;
+
+
+static AnitaGeomTool * instances[] = {0, 0, 0, 0, 0, 0}; 
 
 
 
@@ -47,10 +51,15 @@ namespace AnitaGeom {
    
   ///< 1 is Normal orientation, -1 is 180 degree flip. (Top ring needs to be inverted in software when signals come through seaveys.)
   // Apparently -2 is a 90 degree flip.
-//  Int_t antOrientationMap[NUM_SEAVEYS]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-    Int_t antOrientationMap[NUM_SEAVEYS]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-				      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-				      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; 
+    Int_t antOrientationMapAnita3[NUM_SEAVEYS] =
+      {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; 
+
+    Int_t antOrientationMap[NUM_SEAVEYS] =
+      {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; 
 
 
   ///< Map from SURF to antenna+polarization.
@@ -100,10 +109,10 @@ namespace AnitaGeom {
 								  kTopRing, kMiddleRing, kBottomRing};
   
 
-  using AnitaPol::kVertical;
-  using AnitaPol::kHorizontal;
+  using AnitaTrigPol::kVertical;
+  using AnitaTrigPol::kHorizontal;
   ///< Map from SURF trigger channel to polarization  
-  AnitaPol::AnitaPol_t surfTriggerChanToPolAnita3[SCALERS_PER_SURF]={kVertical,   kVertical,   kVertical,
+  AnitaTrigPol::AnitaTrigPol_t surfTriggerChanToPolAnita3[SCALERS_PER_SURF]={kVertical,   kVertical,   kVertical,
 								     kVertical,   kVertical,   kVertical,
 								     kHorizontal, kHorizontal, kHorizontal,
 								     kHorizontal, kHorizontal, kHorizontal};
@@ -128,71 +137,13 @@ namespace AnitaGeom {
 
 
 
-static void readAntennaOrientations()
-{
-
-  char calibDir[FILENAME_MAX];
-  char fileName[FILENAME_MAX];
-  char *calibEnv=getenv("ANITA_CALIB_DIR");
-  if(!calibEnv) {
-    char *utilEnv=getenv("ANITA_UTIL_INSTALL_DIR");
-    if(!utilEnv)
-      sprintf(calibDir,"calib");
-    else
-      sprintf(calibDir,"%s/share/anitaCalib",utilEnv);    
-  }
-  else {
-    strncpy(calibDir,calibEnv,FILENAME_MAX);
-  }
-
-  sprintf(fileName,"%s/antenna_orientations.csv",calibDir);
-
-  FILE * oriFile = fopen(fileName, "r"); 
-
-  if (!oriFile)
-  {
-    fprintf(stderr, "Could not read %s. Defaulting to A3 layout\n",fileName); 
-  }
-
-  char line[1024]; 
-
-  
-
-  int index =0; 
-  while(fgets(line, sizeof(line), oriFile)) 
-  {
-    if (char * comment = strchr(line,'#')) 
-    {
-      *comment = 0; 
-    }
-
-    if (int val = atoi(line))
-    {
-      if (index >= NUM_SEAVEYS)
-      {
-        fprintf(stderr,"WARNING! More orientations than SEAVEYS in %s!\n", fileName); 
-        break; 
-      }
-      AnitaGeom::antOrientationMap[index++] =  val; 
-    }
-   }
-
-  if (index < NUM_SEAVEYS)
-  {
-    fprintf(stderr,"WARNING! Not as many orientations as SEAVEYS in %s\n",fileName); 
-  }
-}
-
-
-
-
-AnitaGeomTool*  AnitaGeomTool::fgInstance = NULL; ///< Global pointer, init with AnitaGeomTool::Instance()
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Default constructor: defines antenna phase centre locations.
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 AnitaGeomTool::AnitaGeomTool()
 {
+  int v = AnitaVersion::get(); 
+
   //Default constructor
   ringPhaseCentreOffset[0]=0.2-0.042685;
   ringPhaseCentreOffset[1]=0.2+0.00653;
@@ -201,11 +152,21 @@ AnitaGeomTool::AnitaGeomTool()
   //  readSimonsNumbers();
   //  readPhotogrammetry();
 
+
+  //TODO need this for A4 
   readAnita3PhaseCenterNumbers(); // This one has to come before reading ANITA-3 photogrammetry
   readAnita3Photogrammetry();
+
+  if (v == 4) 
+  {
+
+    printf("Warning, don't have proper A4 phase centers yet\n"); 
+
+  }
+
   fUseKurtAnita3Numbers=0;
 
-  //readAntennaOrientations(); 
+
 
   // Moved from fillAntPositionsFromPrioritizerdConfig
   // Who knows where else these get set in this crazy place...
@@ -229,7 +190,6 @@ AnitaGeomTool::AnitaGeomTool()
   // fillAntPositionsFromPrioritizerdConfig();
 
   
-  fgInstance=this;
 }
 
 
@@ -302,9 +262,19 @@ Int_t AnitaGeomTool::getPhiRingPolFromSurfChanTrigger(Int_t surf,Int_t chan, Int
 
   Int_t surfHalf=0;				
   if((chan%6)>=3) surfHalf=1;
-  phi=AnitaGeom::surfToPhiTriggerMapAnita4[surf][surfHalf];
+
+  Int_t v = AnitaVersion::get(); 
+
+  phi = v == 4 ? AnitaGeom::surfToPhiTriggerMapAnita4[surf][surfHalf] : 
+        v == 3 ? AnitaGeom::surfToPhiTriggerMapAnita3[surf][surfHalf] : 
+        -1;
+
   ring=AnitaGeom::surfTriggerChanToRing[chan];
-  pol=AnitaGeom::surfTriggerChanToPolAnita4[chan];
+
+  pol = v == 4 ? AnitaGeom::surfTriggerChanToPolAnita4[chan] : 
+        v == 3 ? AnitaGeom::surfTriggerChanToPolAnita3[chan] :
+        AnitaTrigPol::kNotATrigPol  ;
+
 
   return phi;
 }
@@ -316,7 +286,13 @@ Int_t AnitaGeomTool::getPhiRingFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &p
 {
   if(phi<0 || phi>=NUM_PHI) return -1;
   Int_t surfHalf=l1Chan>2;   
-  phi=AnitaGeom::surfToPhiTriggerMapAnita4[surf][surfHalf];
+
+  Int_t v = AnitaVersion::get(); 
+
+  phi = v == 4 ? AnitaGeom::surfToPhiTriggerMapAnita4[surf][surfHalf] : 
+        v == 3 ? AnitaGeom::surfToPhiTriggerMapAnita3[surf][surfHalf] : 
+        -1;         
+
   if((l1Chan%3)==0) ring=AnitaRing::kTopRing;
   if((l1Chan%3)==1) ring=AnitaRing::kMiddleRing;
   if((l1Chan%3)==2) ring=AnitaRing::kBottomRing;
@@ -331,8 +307,17 @@ Int_t AnitaGeomTool::getPhiRingFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &p
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 Int_t AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(Int_t phi,AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol ,Int_t &surf, Int_t &chan) {
   if(phi<0 || phi>=NUM_PHI) return -1;
-  surf=AnitaGeom::phiToSurfTriggerMapAnita4[phi];
-  Int_t surfHalf=AnitaGeom::phiToSurfHalfAnita4[phi];
+
+  Int_t v = AnitaVersion::get(); 
+
+  surf = v == 4 ? AnitaGeom::phiToSurfTriggerMapAnita4[phi] : 
+         v == 3 ? AnitaGeom::phiToSurfTriggerMapAnita3[phi] : 
+         -1 ;
+
+  Int_t surfHalf = v == 4 ? AnitaGeom::phiToSurfHalfAnita4[phi] : 
+                   v == 3 ? AnitaGeom::phiToSurfHalfAnita3[phi] : 
+                  -1; 
+
   chan = (6-6*pol)+ ring + 3*surfHalf; 
 
   // if(phi==3 && ring==AnitaRing::kTopRing) {     
@@ -349,8 +334,18 @@ Int_t AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(Int_t phi,AnitaRing::Anita
 Int_t AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(Int_t phi, AnitaRing::AnitaRing_t ring, Int_t &surf, Int_t &l1Chan) 
 {
   if(phi<0 || phi>=NUM_PHI) return -1;
-  surf=AnitaGeom::phiToSurfTriggerMapAnita4[phi];
-  Int_t surfHalf=AnitaGeom::phiToSurfHalfAnita4[phi];
+
+  Int_t v = AnitaVersion::get(); 
+
+
+  surf = v == 4 ? AnitaGeom::phiToSurfTriggerMapAnita4[phi] : 
+         v == 3 ? AnitaGeom::phiToSurfTriggerMapAnita3[phi] : 
+        -1 ;
+
+  Int_t surfHalf = v == 4 ? AnitaGeom::phiToSurfHalfAnita4[phi] : 
+                   v == 3 ? AnitaGeom::phiToSurfHalfAnita3[phi] : 
+                   -1; 
+
   switch(ring) {
   case AnitaRing::kTopRing:
     l1Chan=3*surfHalf;
@@ -374,8 +369,17 @@ Int_t AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(Int_t phi, AnitaRing::Anita
 Int_t AnitaGeomTool::getSurfL2TriggerChanFromPhi(Int_t phi, Int_t &surf, Int_t &l2Chan)
 {
   if(phi<0 || phi>=NUM_PHI) return -1;
-  surf=AnitaGeom::phiToSurfTriggerMapAnita4[phi];
-  Int_t surfHalf=AnitaGeom::phiToSurfHalfAnita4[phi];
+
+  Int_t v = AnitaVersion::get(); 
+
+  surf = v == 4 ? AnitaGeom::phiToSurfTriggerMapAnita4[phi] : 
+         v == 3 ? AnitaGeom::phiToSurfTriggerMapAnita3[phi] :
+         -1; 
+
+  Int_t surfHalf= v == 4 ? AnitaGeom::phiToSurfHalfAnita4[phi] : 
+                  v == 3 ? AnitaGeom::phiToSurfHalfAnita3[phi] : 
+                  -1  ;
+
   l2Chan=surfHalf;
   return surf;
 }
@@ -385,11 +389,15 @@ Int_t AnitaGeomTool::getSurfL2TriggerChanFromPhi(Int_t phi, Int_t &surf, Int_t &
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Generates an instance of AnitaGeomTool, required for non-static functions.
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-AnitaGeomTool*  AnitaGeomTool::Instance()
+AnitaGeomTool*  AnitaGeomTool::Instance(int v )
 {
-  //static function
-  return (fgInstance) ? (AnitaGeomTool*) fgInstance : new AnitaGeomTool();
+
+
+  if (!v) v = AnitaVersion::get(); 
+  if (!instances[v]) instances[v] = new AnitaGeomTool(); 
+  return instances[v];
 }
+
 
 
 Int_t AnitaGeomTool::getChanIndex(Int_t surf, Int_t chan){
@@ -762,7 +770,8 @@ Int_t AnitaGeomTool::getAntPolFromSurfChan(Int_t surf,Int_t chan,Int_t &ant, Ani
 Int_t AnitaGeomTool::getAntOrientation(Int_t ant) {
   if(ant<0 || ant>=NUM_SEAVEYS)
     return 0;
-  return AnitaGeom::antOrientationMap[ant];
+
+  return AnitaVersion::get() == 3 ?  AnitaGeom::antOrientationMapAnita3[ant] : AnitaGeom::antOrientationMap[ant];
 }
 
 Int_t AnitaGeomTool::getLayer(Int_t irx) 

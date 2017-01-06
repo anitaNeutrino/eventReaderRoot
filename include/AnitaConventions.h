@@ -202,8 +202,10 @@ namespace AnitaPol {
 */
 namespace AnitaTrigPol {
    typedef enum EAnitaTrigPol {
-     kLCP = 0, ///< Left-circular polarisation
-     kRCP = 1, ///< Right-circular polarisation
+     kLCP = 0, ///< Left-circular polarisation (e.g. A4) 
+     kRCP = 1, ///< Right-circular polarisation (e.g. A4) 
+     kHorizontal = 2, ///< Horizontal Polarisation (e.g. A3) 
+     kVertical = 3, ///< Vertical Polarisation (e.g. A3) 
      kNotATrigPol ///< USeful in for loops.
    } AnitaTrigPol_t; ///< Polarisation enumeration.
    char polAsChar(AnitaTrigPol::AnitaTrigPol_t pol); ///< Returns the polarisation as a character string.
@@ -228,6 +230,9 @@ namespace AnitaBand {
 }
 
 //!  AnitaLocations -- A selection of useful ANITA-I related locations, now updated for ANITA-3.
+//
+// TODO this needs to be updated properly to support multiple ANITA's 
+//
 /*!
   Things like the calibration antennas and pulsers etc.
   \ingroup rootclasses
