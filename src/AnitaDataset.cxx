@@ -4,7 +4,6 @@
 #include "Adu5Pat.h"
 #include "PrettyAnitaHk.h"
 #include "CalibratedAnitaEvent.h"
-#include "AnitaVersion.h" 
 #include "TFile.h" 
 #include "TTree.h" 
 #include <stdlib.h>
@@ -225,7 +224,6 @@ UsefulAnitaEvent * AnitaDataset::useful(bool force_load)
 
     if (fHaveCalibFile)
     {
-      
       new (fUseful) UsefulAnitaEvent(fCalEvent, fCalType); 
     }
     else if (fRawEvent)
@@ -259,11 +257,6 @@ int AnitaDataset::getEntry(int entryNumber)
     fCalDirty = true; 
     fGpsDirty = true; 
   }
-
-
-  // use the header to set the ANITA version 
-  AnitaVersion::setVersionFromUnixTime(header()->realTime); 
-
   return fDecimated ? fDecimatedEntry : fWantedEntry; 
 }
 
@@ -325,10 +318,6 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   fWantedEntry = 0; 
 
   const char * data_dir = getDataDir(version); 
-
-
-  //seems like a good idea 
-  if (version) AnitaVersion::set(version); 
 
   //if decimated, try to load decimated tree
 
