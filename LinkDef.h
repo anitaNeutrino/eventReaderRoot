@@ -9,6 +9,9 @@
 #pragma link off all globals;
 #pragma link off all classes;
 
+// Change l1 to l2 for Header's.   
+
+
 
 #pragma link C++ namespace     WaveCalType;
 #pragma link C++ enum          WaveCalType::EWaveCalType;
@@ -31,9 +34,9 @@
 
 
 #pragma link C++ class GenericHeader_t+;
+#pragma link C++ class RawAnitaHeader+;
 #pragma link C++ class AnitaGeomTool+;
 #pragma link C++ class RawAnitaEvent+;
-#pragma link C++ class RawAnitaHeader+;
 #pragma link C++ class TimedAnitaHeader+;
 #pragma link C++ class UsefulAnitaEvent+;
 #pragma link C++ class CalibratedAnitaEvent+;
@@ -67,25 +70,12 @@
 #pragma link C++ class TruthAnitaEvent+;
 #pragma link C++ class TuffNotchStatus+; 
 #pragma link C++ class TuffRawCmd+; 
-
 #pragma link C++ namespace AnitaVersion;
 
 
-
-// Change l1 to l2 for Header's.   
-
-#pragma read                                                     \
-  sourceClass="RawAnitaHeader"                                   \
-  targetClass="RawAnitaHeader"                                   \
-  version="[-40]"                                                \
-  source="UShort_t l1TrigMask; UShort_t l1TrigMaskH;"            \
-  target="UShort_t l2TrigMask; UShort_t l2TrigMaskH;"            \
-  embed="true"                                                   \
-  include="string"                                               \
-  code="{                                                        \
-    memcpy(l2TrigMask,onfile.l1TrigMask, sizeof(l2TrigMask));    \
-    memcpy(l2TrigMaskH,onfile.l1TrigMaskH, sizeof(l2TrigMaskH)); \
-  }"    
+#pragma read sourceClass="RawAnitaHeader" targetClass="RawAnitaHeader"  \
+  source="UShort_t l1TrigMask; UShort_t l1TrigMaskH" version="[1-36]" target="l2TrigMask,l2TrigMaskH" \
+  code="{l2TrigMask=onfile.l1TrigMask;l2TrigMaskH=onfile.l1TrigMaskH;}"    
 
 
 
