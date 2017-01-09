@@ -13,7 +13,7 @@
 ClassImp(AnitaEventCalibrator);
 
 
-static AnitaEventCalibrator*  instances[NUM_ANITAS+1] = {0}; 
+static AnitaEventCalibrator*  instances[] = { 0, 0, 0, 0, 0} ; 
 
 
 static const char * voltageCalibFiles[] = { 0, 0, 0, "simpleVoltageCalibrationHarm.txt", "simpleVoltageCalibrationAnita4.txt" }; 
