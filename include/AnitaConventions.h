@@ -209,6 +209,10 @@ namespace AnitaTrigPol {
      kNotATrigPol ///< USeful in for loops.
    } AnitaTrigPol_t; ///< Polarisation enumeration.
    char polAsChar(AnitaTrigPol::AnitaTrigPol_t pol); ///< Returns the polarisation as a character string.
+
+   /** Conversion from AnitaPol_t to AnitaTrigPol_t */ 
+   AnitaTrigPol::AnitaTrigPol_t fromAnitaPol(AnitaPol::AnitaPol_t pol); 
+   
 }
 
 

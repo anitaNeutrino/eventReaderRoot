@@ -92,11 +92,23 @@ char AnitaPol::polAsChar(AnitaPol::AnitaPol_t pol)
   return 'U';
 }
 
+AnitaTrigPol::AnitaTrigPol_t AnitaTrigPol::fromAnitaPol(AnitaPol::AnitaPol_t pol)
+{
+  switch (pol)
+  {
+    case AnitaPol::kHorizontal: return AnitaTrigPol::kHorizontal; 
+    case AnitaPol::kVertical: return AnitaTrigPol::kVertical; 
+    default: return AnitaTrigPol::kNotATrigPol; 
+  }
+}
+
 char AnitaTrigPol::polAsChar(AnitaTrigPol::AnitaTrigPol_t pol)
 {
   switch(pol) {
   case kLCP: return 'L';
   case kRCP: return 'R';
+  case kHorizontal: return 'H'; 
+  case kVertical: return 'V'; 
       default:
     return 'U';
   }

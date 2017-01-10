@@ -64,7 +64,7 @@ namespace AnitaGeom {
   ///< Map from SURF to antenna+polarization.
   ///< The numbers 1-48 indicate antenna as the negative sign is used to indicate polarization.
   ///< The negative sign indicates polarization (-ve is VPOL, +ve is HPOL)
-  Int_t surfToAntMap[ACTIVE_SURFS][RFCHAN_PER_SURF]= {{-42,-34,-48,-40,42,34,48,40},
+  Int_t surfToAntMapAnita4[ACTIVE_SURFS][RFCHAN_PER_SURF]= {{-42,-34,-48,-40,42,34,48,40},
 						      {-44,-36,-46,-38,44,36,46,38},
 						      {-32,-24,-28,-20,32,24,28,20},
 						      {-30,-22,-26,-18,30,22,26,18},
@@ -77,6 +77,19 @@ namespace AnitaGeom {
 						      {-15,-7,-11,-3,15,7,11,3},
 						      {-13,-5,-9,-1,13,5,9,1}};
       
+  Int_t surfToAntMapAnita3[ACTIVE_SURFS][RFCHAN_PER_SURF]= {{-42,-34,-48,-40,42,34,48,40},
+						      {-44,-36,-46,-38,44,36,46,38},
+						      {-32,-24,-28,-20,32,24,28,20},
+						      {-30,-22,-26,-18,30,22,26,18},
+						      {-12,4,-14,-6,12,-4,14,6}, 
+						      {-10,-2,-16,-8,10,2,16,8},
+						      {-45,-37,-41,-33,45,37,41,33},
+						      {-47,-39,-43,-35,47,39,43,35},
+						      {-27,-19,-29,-21,27,19,29,21},
+						      {-25,-17,-31,-23,25,17,31,23},
+						      {-15,-7,-11,-3,15,7,11,3},
+						      {-13,-5,-9,-1,13,5,9,1}};
+ 
   ///< Map from phi-sector to antenna. Both start counting at zero.
   Int_t topAntNums[NUM_PHI]    = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
   Int_t middleAntNums[NUM_PHI] = {16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
@@ -317,12 +330,13 @@ Int_t AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(Int_t phi,AnitaRing::Anita
                    v == 3 ? AnitaGeom::phiToSurfHalfAnita3[phi] : 
                   -1; 
 
-  chan = (6-6*pol)+ ring + 3*surfHalf; 
+  chan = (6-6*(pol % 2))+ ring + 3*surfHalf; 
 
-  // if(phi==3 && ring==AnitaRing::kTopRing) {     
-  //   if(pol==AnitaTrigPol::kVertical) chan=6;
-  //   if(pol==AnitaTrigPol::kHorizontal) chan=0;
-  // }
+
+  if(v == 3 && phi==3 && ring==AnitaRing::kTopRing) {     
+    if(pol==AnitaTrigPol::kVertical) chan=6;
+    if(pol==AnitaTrigPol::kHorizontal) chan=0;
+  }
   return surf;
 }
 
@@ -752,7 +766,14 @@ Int_t AnitaGeomTool::getSurfChanFromChanIndex(Int_t chanIndex, // input channel 
 Int_t AnitaGeomTool::getAntPolFromSurfChan(Int_t surf,Int_t chan,Int_t &ant, AnitaPol::AnitaPol_t &pol) 
 {
 
-  ant=AnitaGeom::surfToAntMap[surf][chan];
+  int v = AnitaVersion::get(); 
+
+  if (v >4 && v < 3) return 0; 
+
+  ant= v == 4 ? AnitaGeom::surfToAntMapAnita4[surf][chan] : 
+       v == 3 ? AnitaGeom::surfToAntMapAnita3[surf][chan] :
+       0 ; 
+
 
   //  std::cout << "surf, chan, ant are " << surf << " " << chan << "\n";
 
