@@ -27,7 +27,7 @@ class TurfRate: public TObject
    TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *ratePtr); ///< Assignment constructor
    TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer41_t *ratePtr); ///< Version 41 constructor
    TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer40_t *ratePtr); ///< Version 40 constructor
-   TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer34_t *ratePtr); ///< Version 34 constructor
+   TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer35_t *ratePtr); ///< Version 34 constructor
    //   TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer16_t *ratePtr); ///< Version 16 constructor
    //   TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer15_t *ratePtr); ///< Version 15 constructor
    //   TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer14_t *ratePtr); ///< Version 14 constructor
@@ -49,10 +49,14 @@ class TurfRate: public TObject
     Users are encouraged to use the getDeadTimeFrac function where available. A differential dead time number is available in the RawAnitaHeader, which only includes the fraction of the current second before the event trigger in the count.
   */ 
    UShort_t        deadTime; 
-   UShort_t        l2Rates[PHI_SECTORS]; ///< Really the L2 rate for ANITA-4
-   UChar_t         l3Rates[PHI_SECTORS]; ///< l3 rates
-   UShort_t        l2TrigMask; ///< Which L2 were masked off
-   UShort_t        phiTrigMask; ///< Which phi sectors are masked off?
+   UShort_t        l2Rates[PHI_SECTORS]; ///< L2 rates (or VPol A3 rates) 
+   UShort_t        l2RatesH[PHI_SECTORS]; ///< HPol l2 rates (called l1rates in A3) for A3 compatibility. 0 for A4. 
+   UChar_t         l3Rates[PHI_SECTORS]; ///< l3 rates (or VPol A3 rates) 
+   UChar_t         l3RatesH[PHI_SECTORS]; ///< HPol l3 rates, for A3 compatibility. 0 for A4. 
+   UShort_t        l2TrigMask; ///< Which L2 were masked off in A4 (VPol only in A3) 
+   UShort_t        l2TrigMaskH; ///< Which HPol L2 were masked off in A3 (== l2TrigMask in A4)
+   UShort_t        phiTrigMask; ///< Which phi sectors are masked off (VPol only in A3)?
+   UShort_t        phiTrigMaskH; ///< Which phi sectors are masked off (Hpol, == phiTrigMask in A4)?
    UChar_t         errorFlag; ///< Error flag (who knows)?
    UInt_t          c3poNum; ///< Number of clock cycles per second
    Int_t           intFlag; ///< Interpolation flag, zero for raw data.
@@ -62,13 +66,6 @@ class TurfRate: public TObject
    UChar_t         refPulses;
    UChar_t         reserved[3]; ///< Reserved???
    
-   //   UChar_t         upperL2Rates[PHI_SECTORS]; ///< Deprecated
-   //   UChar_t         lowerL2Rates[PHI_SECTORS]; ///< Deprecated
-   //   UChar_t         l3RatesH[PHI_SECTORS]; ///< Deprecated
-   //   UShort_t        nadirL1Rates[NADIR_ANTS]; ///< Deprecated
-   //   UChar_t         nadirL2Rates[NADIR_ANTS]; ///< Deprecated
-   //   UShort_t        l2TrigMaskH; ///< Deprecated
-   //   UShort_t        phiTrigMaskH; ///< Deprecated
 
    
    //Deprecated
@@ -94,7 +91,7 @@ class TurfRate: public TObject
    Int_t isL1MaskedHPol(int phi); ///< Deprecated
    
    
-  ClassDef(TurfRate,42);
+  ClassDef(TurfRate,43);
 
 };
 
