@@ -8,6 +8,7 @@
 
 #include "AnitaGeomTool.h"
 #include "AnitaVersion.h" 
+#include <assert.h>
 
 #define INCHTOMETER 0.0254
 
@@ -300,10 +301,10 @@ Int_t AnitaGeomTool::getPhiRingFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &p
   Int_t surfHalf=l1Chan>2;   
 
   Int_t v = AnitaVersion::get(); 
+  // this method only makes sends for A4
+  assert(v==4); 
 
-  phi = v == 4 ? AnitaGeom::surfToPhiTriggerMapAnita4[surf][surfHalf] : 
-        v == 3 ? AnitaGeom::surfToPhiTriggerMapAnita3[surf][surfHalf] : 
-        -1;         
+  phi = AnitaGeom::surfToPhiTriggerMapAnita4[surf][surfHalf] ; 
 
   if((l1Chan%3)==0) ring=AnitaRing::kTopRing;
   if((l1Chan%3)==1) ring=AnitaRing::kMiddleRing;
@@ -312,7 +313,24 @@ Int_t AnitaGeomTool::getPhiRingFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &p
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Converts the SURF and L1 trigger channel to phi-sector and polarization.
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+Int_t AnitaGeomTool::getPhiPolFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &phi, AnitaPol::AnitaPol_t & pol)
+{
+  if(phi<0 || phi>=NUM_PHI) return -1;
 
+  Int_t v = AnitaVersion::get(); 
+
+  //this method only makes sense for A3
+  assert(v == 3); 
+
+  Int_t surfHalf=l1Chan%2;   
+  phi=AnitaGeom::surfToPhiTriggerMapAnita3[surf][surfHalf];
+  pol=AnitaPol::kVertical;
+  if(l1Chan>=2) pol=AnitaPol::kHorizontal;
+  return phi;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Converts the SURF and L1 trigger channel to phi-sector and polarization.
@@ -375,6 +393,26 @@ Int_t AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(Int_t phi, AnitaRing::Anita
   return surf;
 }
 
+Int_t AnitaGeomTool::getSurfL1TriggerChanFromPhiPol(Int_t phi, AnitaPol::AnitaPol_t pol, Int_t &surf, Int_t &l1Chan) 
+{
+  if(phi<0 || phi>=NUM_PHI) return -1;
+
+  Int_t v = AnitaVersion::get(); 
+  assert(v==3); 
+
+  surf=AnitaGeom::phiToSurfTriggerMapAnita3[phi];
+  Int_t surfHalf=AnitaGeom::phiToSurfHalfAnita3[phi];
+  if(pol==AnitaPol::kVertical)
+  {
+    l1Chan=surfHalf;
+  }
+  else 
+  {
+    l1Chan=2+surfHalf;
+  }
+
+  return surf;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Converts phi-sector to surf and l2 trigger channel
@@ -384,14 +422,9 @@ Int_t AnitaGeomTool::getSurfL2TriggerChanFromPhi(Int_t phi, Int_t &surf, Int_t &
   if(phi<0 || phi>=NUM_PHI) return -1;
 
   Int_t v = AnitaVersion::get(); 
-
-  surf = v == 4 ? AnitaGeom::phiToSurfTriggerMapAnita4[phi] : 
-         v == 3 ? AnitaGeom::phiToSurfTriggerMapAnita3[phi] :
-         -1; 
-
-  Int_t surfHalf= v == 4 ? AnitaGeom::phiToSurfHalfAnita4[phi] : 
-                  v == 3 ? AnitaGeom::phiToSurfHalfAnita3[phi] : 
-                  -1  ;
+  assert(v==4); 
+  surf = AnitaGeom::phiToSurfTriggerMapAnita4[phi] ; 
+  Int_t surfHalf=  AnitaGeom::phiToSurfHalfAnita4[phi] ; 
 
   l2Chan=surfHalf;
   return surf;

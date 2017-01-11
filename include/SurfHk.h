@@ -73,7 +73,7 @@ class SurfHk: public TObject
 
 
    Int_t getL2Scaler(int phi); ///<Returns the L2 scaler value for given phi-pol
-   Int_t getL1Scaler(int phi,  AnitaRing::AnitaRing_t ring); ///<Returns the L1 scaler value for given phi-pol
+   Int_t getL1Scaler(int phi, AnitaPol::AnitaPol_t pol,  AnitaRing::AnitaRing_t ring); ///<Returns the L1 scaler value for given phi-ring-pol 
 
    Int_t getScalerFromSurfChan(int surf, int chan) {return scaler[surf][chan];}
    Int_t getThresholdFromSurfChan(int surf, int chan) {return threshold[surf][chan];}
