@@ -4,6 +4,7 @@
 #include "Adu5Pat.h"
 #include "PrettyAnitaHk.h"
 #include "CalibratedAnitaEvent.h"
+#include "TTreeIndex.h" 
 #include "AnitaVersion.h" 
 #include <math.h>
 #include "TFile.h" 
@@ -299,7 +300,7 @@ int AnitaDataset::getEvent(int eventNumber)
   int entry  =  (fDecimated ? fDecimatedHeadTree : fHeadTree)->GetEntryNumberWithIndex(eventNumber); 
   if (entry < 0) 
   {
-    fprintf(stderr,"WARNING: event %d not found in header tree\n", fWantedEntry); 
+    fprintf(stderr,"WARNING: event %lld not found in header tree\n", fWantedEntry); 
     if (fDecimated) 
     {
       fprintf(stderr,"\tWe are using decimated tree, so maybe that's why?\n"); 
@@ -380,7 +381,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
       fDecimatedHeadTree = (TTree*) f->Get("headTree"); 
       fDecimatedHeadTree->BuildIndex("eventNumber"); 
       fDecimatedHeadTree->SetBranchAddress("header",&fHeader); 
-      fIndices = fDecimatedHeadTree->GetIndex(); 
+      fIndices = ((TTreeIndex*) fDecimatedHeadTree->GetTreeIndex())->GetIndex(); 
     }
     else
     {
@@ -416,7 +417,10 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
 
   fHeadTree->BuildIndex("eventNumber"); 
 
-  if (!fDecimated) fIndices = fHeadTree->GetIndex(); 
+
+  fIndices = 0; 
+  if (!fDecimated) fIndices = ((TTreeIndex*) fHeadTree->GetTreeIndex())->GetIndex(); 
+  printf("%p\n", fIndices); 
 
   //try to load gps event file  
   TString fname = TString::Format("%s/run%d/gpsEvent%d.root", data_dir, run, run); 

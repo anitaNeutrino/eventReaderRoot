@@ -164,8 +164,8 @@ class AnitaDataset
     void unloadRun(); 
     TTree * fHeadTree; 
     TTree * fDecimatedHeadTree; //only used when using decimated 
-    Int_t * fIndices; 
-    Int_t fIndex; 
+    Long64_t * fIndices; 
+    Long64_t fIndex; 
     RawAnitaHeader * fHeader;
     TTree *fEventTree; 
     CalibratedAnitaEvent * fCalEvent; 
@@ -188,8 +188,8 @@ class AnitaDataset
     Bool_t fSurfDirty; 
 
 
-    Int_t fWantedEntry; 
-    Int_t fDecimatedEntry; 
+    Long64_t fWantedEntry; 
+    Long64_t fDecimatedEntry; 
     Bool_t fHaveGpsEvent; 
     Bool_t fHaveCalibFile; 
     WaveCalType::WaveCalType_t fCalType; 
