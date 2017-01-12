@@ -211,6 +211,8 @@ The second byte (reserved[1]) is currently reserved.
   Int_t getTriggerBitG12() const;
   Int_t getTriggerBitSoftExt() const;
 
+  Int_t setMask (UShort_t newL1Mask, UShort_t newPhiMask, AnitaPol::AnitaPol_t pol); // sets phi and l1 masking (used in icemc)
+  Int_t setTrigPattern (UShort_t newTrigPattern, AnitaPol::AnitaPol_t pol);          // sets l3 trigger (used in icemc)
 
   ClassDef(RawAnitaHeader,41);
 
