@@ -98,6 +98,27 @@
          }}"
 
 
+/** Fills in A3 compatibility fields for older ROOTified Turf Stuff */ 
+#pragma read sourceClass="SummedTurfRate" targetClass="SummedTurfRate" \
+ source="UShort_t phiTrigMask; UShort_t l2TrigMask;"\
+ target="l2TrigMaskH,phiTrigMaskH,l2RatesH,l3RatesH" version="[40-42]" \
+ embed="true" code="{phiTrigMaskH=onfile.phiTrigMask; l2TrigMaskH=onfile.l2TrigMask; memset(l2RatesH,0,sizeof(l2RatesH)); memset(l3RatesH,0,sizeof(l3RatesH));}"
+
+/** Fills in compatibility fields for A3 ROOTified Turf Stuff */ 
+#pragma read sourceClass="SummedTurfRate" targetClass="SummedTurfRate" \
+ source="UShort_t l1Rates[16][2]; UChar_t l3Rates[16][2]" \
+ target="l2Rates,l3Rates,l2RatesH,l3RatesH" version="[30-34]" \
+ embed="true"\
+ code="{ for (int i = 0; i< 16; i++) \
+         { \
+           l2Rates[i]=onfile.l1Rates[i][0]; \
+           l2RatesH[i]=onfile.l1Rates[i][1]; \
+           l3Rates[i]=onfile.l3Rates[i][0]; \
+           l3RatesH[i]=onfile.l3Rates[i][1];\
+         }}"
+
+
+
 
 
 
