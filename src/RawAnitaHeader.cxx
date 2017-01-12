@@ -389,6 +389,33 @@ int RawAnitaHeader::getL1Mask( AnitaPol::AnitaPol_t pol) const {
   return 0; 
 }
 
+Int_t RawAnitaHeader::setMask (UShort_t newL1Mask, UShort_t newPhiMask, AnitaPol::AnitaPol_t pol) {
+
+  switch(pol) {
+  case AnitaPol::kVertical:
+    l1TrigMask   = newL1Mask;
+    phiTrigMask  = newPhiMask;
+  case AnitaPol::kHorizontal:
+    l1TrigMaskH  = newL1Mask;
+    phiTrigMaskH = newPhiMask;
+  default:
+    return -1;
+  }     
+  return 0;
+}
+
+Int_t RawAnitaHeader::setTrigPattern (UShort_t newTrigPattern, AnitaPol::AnitaPol_t pol) {
+
+  switch(pol) {
+  case AnitaPol::kVertical:
+    l3TrigPattern  = newTrigPattern;
+  case AnitaPol::kHorizontal:
+    l3TrigPatternH = newTrigPattern;
+  default:
+    return -1;
+  }     
+  return 0;
+}
 
 UShort_t RawAnitaHeader::getL3TrigPattern(AnitaPol::AnitaPol_t pol){
   return pol == AnitaPol::kHorizontal ? l3TrigPatternH : l3TrigPattern;
