@@ -57,6 +57,10 @@
  *
  *        RawAnitaHeader manual schema migration 
  *
+ *        TurfRate manual schema migration and compatibility structure. 
+ *
+ *        SurfHK added methods for both A3 and A4 for l1 scalers.  
+ *
  *          
  *   TODO 
  *      
@@ -66,9 +70,6 @@
  *
  *      Handle the following, which are not currently backward's compatible: 
  *
- *        TurfRate
- *        SummedTurfRate
- *        SurfHk
  *        CalibratedHk 
  *        Probably other stuff... 
  *        
@@ -100,8 +101,11 @@ namespace AnitaVersion
    * when processing data etc. */ 
   int getVersionFromUnixTime(unsigned time); 
 
-  /** Sets the version from unix time  (equivalent to calling set(getVersionFromUnixTime(t)) )*/ 
-  void setVersionFromUnixTime(unsigned time); 
+  /** Sets the version from unix time  (equivalent to calling set(getVersionFromUnixTime(t)) )
+   *
+   * returns 0 if successful, 1 if time is suspicious
+   * */ 
+  int setVersionFromUnixTime(unsigned time); 
 
 
 } 

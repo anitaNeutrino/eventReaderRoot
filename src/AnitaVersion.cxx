@@ -1,8 +1,11 @@
 #include "AnitaVersion.h" 
 
-#ifdef ANITA_VERSION_DEBUG
+//uncomment this to get a whole bunch of printouts  (or you can define it while compiling) 
+//#define ANITA_VERSION_DEBUG 1
+
 #include <stdio.h>
-#endif
+
+
 
 
 /** This is the thread-safe version, where multiple threads may be working
@@ -20,6 +23,10 @@
 /* If accessing different versions with different threads is unnnecessary, we
 * can use a slightly optimized version here. More importantly, this is more
 * likely to compile on someone's MacOS X system. 
+*
+*
+*  I tried making this an extern in the header file, but that didn't work so well with inlining 
+*  which would mostly defeat the point. 
 */
 
   static int version = DEFAULT_ANITA_VERSION; 
@@ -50,9 +57,19 @@ int AnitaVersion::get()
   return version; 
 } 
 
-void AnitaVersion::setVersionFromUnixTime(unsigned t) 
+int AnitaVersion::setVersionFromUnixTime(unsigned t) 
 {
-  set(getVersionFromUnixTime(t)); 
+  int v = getVersionFromUnixTime(t); 
+  if (v>0) 
+  {
+    set(v); 
+    return 0; 
+  }
+  else
+  {
+    fprintf(stderr,"Attempting to set a version based on suspicious timestamp: %u\n", t); 
+    return 1; 
+  }
 }
 
 int AnitaVersion::getVersionFromUnixTime(unsigned t) 
@@ -67,14 +84,4 @@ int AnitaVersion::getVersionFromUnixTime(unsigned t)
 
   return -1; 
 }
-
-
-
-
-
-
-
-
-
-
 
