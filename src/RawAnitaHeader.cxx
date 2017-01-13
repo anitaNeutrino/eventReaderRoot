@@ -9,6 +9,8 @@
 
 #include "RawAnitaHeader.h"
 #include "AnitaPacketUtil.h"
+#include "AnitaVersion.h" 
+#include <assert.h>
 #include "TMath.h"
 #include <iostream>
 #include <fstream>
@@ -56,6 +58,7 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    bufferDepth=hdPtr->turfio.bufferDepth;
    turfioReserved=hdPtr->turfio.reserved[0];
    l3TrigPattern=hdPtr->turfio.l3TrigPattern;
+   l3TrigPatternH = l3TrigPattern; 
    //   l3TrigPatternH=hdPtr->turfio.l3TrigPatternH;
    //   memcpy(reserved,hdPtr->reserved,2*sizeof(UChar_t));
    run=trun;
@@ -64,6 +67,11 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    triggerTimeNs=ttriggerTimeNs;
    goodTimeFlag=tgoodTimeFlag;
 
+
+   phiTrigMaskOffline = phiTrigMask; 
+   phiTrigMaskHOffline = phiTrigMaskH; 
+   l1TrigMaskOffline = l2TrigMask; 
+   l1TrigMaskHOffline = l2TrigMaskH; 
 
   //Prioritizer stuff
   peakThetaBin=hdPtr->peakThetaBin;
@@ -120,6 +128,11 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer40_t *hdPtr, Int_t trun, UInt_
    triggerTime=ttriggerTime;
    triggerTimeNs=ttriggerTimeNs;
    goodTimeFlag=tgoodTimeFlag;
+
+   phiTrigMaskOffline = phiTrigMask; 
+   phiTrigMaskHOffline = phiTrigMaskH; 
+   l1TrigMaskOffline = l2TrigMask; 
+   l1TrigMaskHOffline = l2TrigMaskH; 
 
 
   //Prioritizer stuff
@@ -178,6 +191,12 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer33_t *hdPtr, Int_t trun, UInt_
    triggerTime=ttriggerTime;
    triggerTimeNs=ttriggerTimeNs;
    goodTimeFlag=tgoodTimeFlag;
+
+
+   phiTrigMaskOffline = phiTrigMask; 
+   phiTrigMaskHOffline = phiTrigMaskH; 
+   l1TrigMaskOffline = l2TrigMask; 
+   l1TrigMaskHOffline = l2TrigMaskH; 
 
 
   //Prioritizer stuff
@@ -461,7 +480,7 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer10_t *hdPtr, Int_t trun, UInt_
 }
 
 
-const char *RawAnitaHeader::trigTypeAsString()
+const char *RawAnitaHeader::trigTypeAsString() const
 {
    static char theString[20];
    int count=0;
@@ -483,7 +502,38 @@ const char *RawAnitaHeader::trigTypeAsString()
    return theString;
 }
 
+int RawAnitaHeader::getL1MaskOffline( AnitaPol::AnitaPol_t pol) const {
+
+  //we are not going to be nice
+  assert(AnitaVersion::get() == 3); 
+
+  switch(pol) {
+  case AnitaPol::kVertical:
+    return  l1TrigMaskOffline;
+  case AnitaPol::kHorizontal:
+    return  l1TrigMaskHOffline;
+  default:
+    return 0;
+  }      
+  return 0; 
+}
+
+int RawAnitaHeader::getPhiMaskOffline( AnitaPol::AnitaPol_t pol) const {
+  switch(pol) {
+  case AnitaPol::kVertical:
+    return  phiTrigMaskOffline;
+  case AnitaPol::kHorizontal:
+    return  phiTrigMaskHOffline;
+  default:
+    return 0;
+  }      
+  return 0; 
+}
+
+
+
 int RawAnitaHeader::getL1Mask( AnitaPol::AnitaPol_t pol) const {
+
   switch(pol) {
   case AnitaPol::kVertical:
     return  l2TrigMask;
@@ -495,25 +545,38 @@ int RawAnitaHeader::getL1Mask( AnitaPol::AnitaPol_t pol) const {
   return 0; 
 }
 
-UShort_t RawAnitaHeader::getL3TrigPattern(AnitaPol::AnitaPol_t pol){
+int RawAnitaHeader::getPhiMask( AnitaPol::AnitaPol_t pol) const {
+  switch(pol) {
+  case AnitaPol::kVertical:
+    return  phiTrigMask;
+  case AnitaPol::kHorizontal:
+    return  phiTrigMaskH;
+  default:
+    return 0;
+  }      
+  return 0; 
+}
+
+
+UShort_t RawAnitaHeader::getL3TrigPattern(AnitaPol::AnitaPol_t pol) const{
   return pol == AnitaPol::kHorizontal ? l3TrigPatternH : l3TrigPattern;
 }
-int RawAnitaHeader::isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol)
+int RawAnitaHeader::isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol) const
 { 
   if(phi<0 || phi>=PHI_SECTORS) return -1;
-  return  ((l3TrigPattern&(1<<(phi))) ? 1 :0);
-  // switch(pol) {
-  // case AnitaPol::kVertical:
-  //   return  ((l3TrigPattern&(1<<(phi))) ? 1 :0);
-  // case AnitaPol::kHorizontal:
-  //   return  ((l3TrigPatternH&(1<<phi)) ? 1 : 0);
-  // default:
-  //   return -1;
-  // }      
-  // return -1;
+//  return  ((l3TrigPattern&(1<<(phi))) ? 1 :0);
+  switch(pol) {
+    case AnitaPol::kVertical:
+      return  ((l3TrigPattern&(1<<(phi))) ? 1 :0);
+    case AnitaPol::kHorizontal:
+      return  ((l3TrigPatternH&(1<<phi)) ? 1 : 0);
+    default:
+      return -1;
+  }      
+  return -1;
   
 }
-int RawAnitaHeader::isInPhiMask(int phi, AnitaPol::AnitaPol_t pol)
+int RawAnitaHeader::isInPhiMask(int phi, AnitaPol::AnitaPol_t pol) const
 { 
   if(phi<0 || phi>=PHI_SECTORS) return -1;
   switch(pol) {
@@ -527,31 +590,32 @@ int RawAnitaHeader::isInPhiMask(int phi, AnitaPol::AnitaPol_t pol)
   return -1;
   
 }
-int RawAnitaHeader::isInL1Mask(int phi, AnitaPol::AnitaPol_t pol)
+int RawAnitaHeader::isInL1Mask(int phi, AnitaPol::AnitaPol_t pol) const
 {
-  return -1;
-  // if(phi<0 || phi>=PHI_SECTORS) return -1;
-  // switch(pol) {
-  // case AnitaPol::kVertical:
-  //   return  ((l1TrigMask&(1<<(phi))) ? 1 :0);
-  // case AnitaPol::kHorizontal:
-  //   return  ((l1TrigMaskH&(1<<phi)) ? 1 : 0);
-  // default:
-  //   return -1;
-  // }      
-  // return -1;
+
+
+   if(phi<0 || phi>=PHI_SECTORS) return -1;
+   switch(pol) {
+   case AnitaPol::kVertical:
+     return  ((l2TrigMask&(1<<(phi))) ? 1 :0);
+   case AnitaPol::kHorizontal:
+     return  ((l2TrigMaskH&(1<<phi)) ? 1 : 0);
+   default:
+     return -1;
+   }      
+   return -1;
   
 }
 
 
-int RawAnitaHeader::isInL2Mask(int phi)
+int RawAnitaHeader::isInL2Mask(int phi) const
 {
   if(phi<0 || phi>=PHI_SECTORS) return -1;
   return  ((l2TrigMask&(1<<(phi))) ? 1 :0);
   
 }
 
-int RawAnitaHeader::getCurrentTurfBuffer()
+int RawAnitaHeader::getCurrentTurfBuffer() const
 ///< Returns the current TURF buffer number (0, 1, 2 or 3);
 {
   int curBuf=reserved[0]&0xf;
@@ -564,7 +628,7 @@ int RawAnitaHeader::getCurrentTurfBuffer()
   }
 }
 
-unsigned int RawAnitaHeader::getCurrentTurfHolds()
+unsigned int RawAnitaHeader::getCurrentTurfHolds() const
 ///< Returns a 4-bit bitmask corresponding to the currently held buffers.
 {
 
@@ -572,7 +636,7 @@ unsigned int RawAnitaHeader::getCurrentTurfHolds()
   return curHolds;
 }
 
-int RawAnitaHeader::getNumberOfCurrentTurfHolds()
+int RawAnitaHeader::getNumberOfCurrentTurfHolds() const
 ///< Returns the number of currently held TURF buffers (0-4)
 {
   int countHolds=0;
@@ -584,7 +648,7 @@ int RawAnitaHeader::getNumberOfCurrentTurfHolds()
   return countHolds;  
 }
 
-Float_t RawAnitaHeader::getPeakThetaDeg()
+Float_t RawAnitaHeader::getPeakThetaDeg() const
 {
 #define THETA_RANGE 150
 #define NUM_BINS_THETA 256
@@ -594,12 +658,12 @@ Float_t RawAnitaHeader::getPeakThetaDeg()
   
 }
 
-Float_t RawAnitaHeader::getPeakThetaRad()
+Float_t RawAnitaHeader::getPeakThetaRad() const
 {  
   return getPeakThetaDeg()*TMath::DegToRad();
 }
 
-Float_t RawAnitaHeader::getPeakPhiDeg()
+Float_t RawAnitaHeader::getPeakPhiDeg() const
 {
   Int_t phiInd2=(prioritizerStuff&0x7ff)>>1;
   Int_t phiInd=(phiInd2&0x3f);
@@ -625,38 +689,38 @@ Float_t RawAnitaHeader::getPeakPhiDeg()
 }
 
 
-Float_t RawAnitaHeader::getPeakPhiRad()
+Float_t RawAnitaHeader::getPeakPhiRad() const
 {
   return getPeakPhiDeg()*TMath::DegToRad();
 }
 
-Float_t RawAnitaHeader::getImagePeak()
+Float_t RawAnitaHeader::getImagePeak() const
 {
   return Float_t(imagePeak)/65535.;
 
 }
  
-Float_t RawAnitaHeader::getCoherentSumPeak()
+Float_t RawAnitaHeader::getCoherentSumPeak() const
 {
   return coherentSumPeak;
 }
 
-AnitaPol::AnitaPol_t RawAnitaHeader::getPeakPol()
+AnitaPol::AnitaPol_t RawAnitaHeader::getPeakPol() const
 {
   if(prioritizerStuff&0x1) 
     return AnitaPol::kVertical;
   return AnitaPol::kHorizontal;
 }
   
-Int_t RawAnitaHeader::getAboveThresholdFlag()
+Int_t RawAnitaHeader::getAboveThresholdFlag() const
 {
   return ((prioritizerStuff & 0x1000)>>12);
 }
-Int_t RawAnitaHeader::getBinToBinIncreaseFlag()
+Int_t RawAnitaHeader::getBinToBinIncreaseFlag() const
 {
   return ((prioritizerStuff & 0x2000)>>13);
 }
-Int_t RawAnitaHeader::getSaturationFlag()
+Int_t RawAnitaHeader::getSaturationFlag() const
 {
   return ((prioritizerStuff & 0x4000)>>14);
 }
