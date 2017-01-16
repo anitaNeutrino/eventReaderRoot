@@ -83,6 +83,10 @@
 #endif 
 
 
+ /** Define this macro so other code can act accordingly*/ 
+#define MULTIVERSION_ANITA_ENABLED 1
+
+
 namespace AnitaVersion 
 {
 
