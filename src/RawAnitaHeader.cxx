@@ -576,6 +576,39 @@ int RawAnitaHeader::isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol) const
   return -1;
   
 }
+
+int RawAnitaHeader::isInPhiMaskOffline(int phi, AnitaPol::AnitaPol_t pol) const
+{ 
+  if(phi<0 || phi>=PHI_SECTORS) return -1;
+  switch(pol) {
+  case AnitaPol::kVertical:
+    return  ((phiTrigMaskOffline&(1<<(phi))) ? 1 :0);
+  case AnitaPol::kHorizontal:
+    return  ((phiTrigMaskHOffline&(1<<phi)) ? 1 : 0);
+  default:
+    return -1;
+  }      
+  return -1;
+  
+}
+int RawAnitaHeader::isInL1MaskOffline(int phi, AnitaPol::AnitaPol_t pol) const
+{
+
+
+   if(phi<0 || phi>=PHI_SECTORS) return -1;
+   switch(pol) {
+   case AnitaPol::kVertical:
+     return  ((l1TrigMaskOffline&(1<<(phi))) ? 1 :0);
+   case AnitaPol::kHorizontal:
+     return  ((l1TrigMaskHOffline&(1<<phi)) ? 1 : 0);
+   default:
+     return -1;
+   }      
+   return -1;
+  
+}
+
+
 int RawAnitaHeader::isInPhiMask(int phi, AnitaPol::AnitaPol_t pol) const
 { 
   if(phi<0 || phi>=PHI_SECTORS) return -1;
