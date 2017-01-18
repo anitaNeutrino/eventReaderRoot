@@ -9,6 +9,7 @@
 #include "AnitaEventCalibrator.h"
 #include "UsefulAnitaEvent.h"
 #include "AnitaVersion.h" 
+#include "TMutex.h" 
 
 ClassImp(AnitaEventCalibrator);
 
@@ -47,16 +48,30 @@ AnitaEventCalibrator::~AnitaEventCalibrator(){
 };
 
 
+static TMutex instance_lock; 
+
 //______________________________________________________________________________
 AnitaEventCalibrator*  AnitaEventCalibrator::Instance(int v){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
 
   if (!v) v = AnitaVersion::get(); 
 
-  if(!instances[v])
+  AnitaEventCalibrator * tmp = instances[v]; 
+  __asm__ __volatile__ ("" ::: "memory"); //memory fence! 
+
+  if (!tmp) 
   {
-    instances[v] = new AnitaEventCalibrator();
+    instance_lock.Lock(); 
+    tmp = instances[v]; 
+    if (!tmp) 
+    {
+      tmp = new AnitaEventCalibrator(); 
+      __asm__ __volatile__ ("" ::: "memory");
+      instances[v] = tmp; 
+    }
+    instance_lock.UnLock(); 
   }
+
   return instances[v]; 
 }
 

@@ -9,6 +9,7 @@
 #include "AnitaGeomTool.h"
 #include "AnitaVersion.h" 
 #include <assert.h>
+#include "TMutex.h" 
 
 #define INCHTOMETER 0.0254
 
@@ -16,7 +17,7 @@ Double_t deltaRL = 0.0;
 Double_t deltaUD = 0.0;
 
 
-static AnitaGeomTool * instances[NUM_ANITAS+1] = {0}; 
+static AnitaGeomTool * instances[NUM_ANITAS+1] = {0,0,0,0,0}; 
 
 
 
@@ -432,15 +433,43 @@ Int_t AnitaGeomTool::getSurfL2TriggerChanFromPhi(Int_t phi, Int_t &surf, Int_t &
 
 
 
+
+static TMutex instance_lock; 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Generates an instance of AnitaGeomTool, required for non-static functions.
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 AnitaGeomTool*  AnitaGeomTool::Instance(int v )
 {
 
+  /**************************************************************************************************
+   *                                                                                                *
+   * Yeah, the classic singleton pattern isn't thread-safe.                                         *
+   * We got away it before because we usually statically initialized AnitaGeomTool instances, but   *
+   * with multiple versions, we can't necessarily do that.                                          *
+   *                                                                                                *
+   * If we required c++11, static initialization is guaranteed thread-safe, although                *
+   * we'd have to use templates or something like that for this multiton pattern.                   *
+   *                                                                                                *
+   **************************************************************************************************/ 
 
   if (!v) v = AnitaVersion::get(); 
-  if (!instances[v]) instances[v] = new AnitaGeomTool(); 
+
+  AnitaGeomTool * tmp = instances[v]; 
+
+  __asm__ __volatile__ ("" ::: "memory"); //memory fence! 
+  if (!tmp) 
+  {
+    instance_lock.Lock(); 
+    tmp = instances[v]; 
+    if (!tmp) 
+    {
+      tmp = new AnitaGeomTool(); 
+      __asm__ __volatile__ ("" ::: "memory");
+      instances[v] = tmp; 
+    }
+    instance_lock.UnLock(); 
+  }
+
   return instances[v];
 }
 
