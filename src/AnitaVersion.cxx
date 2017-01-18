@@ -16,7 +16,7 @@
 * clang supporting it for years) */
 
 #ifdef THREADSAFE_ANITA_VERSION
-  static __thread int version = DEFAULT_ANITA_VERSION;
+  static __thread volatile int version = DEFAULT_ANITA_VERSION;
 
 #else 
 
@@ -29,7 +29,7 @@
 *  which would mostly defeat the point. 
 */
 
-  static int version = DEFAULT_ANITA_VERSION; 
+  static int volatile version = DEFAULT_ANITA_VERSION; 
 #endif 
  
 
