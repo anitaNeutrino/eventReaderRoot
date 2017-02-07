@@ -56,7 +56,7 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
    bufferDepth=hdPtr->turfio.bufferDepth;
    turfioReserved=hdPtr->turfio.reserved[0];
    l3TrigPattern=hdPtr->turfio.l3TrigPattern;
-   l3TrigPatternH=hdPtr->turfio.l3TrigPatternH;
+   //   l3TrigPatternH=hdPtr->turfio.l3TrigPatternH;
    //   memcpy(reserved,hdPtr->reserved,2*sizeof(UChar_t));
    run=trun;
    realTime=trealTime;
@@ -494,6 +494,36 @@ int RawAnitaHeader::getL1Mask( AnitaPol::AnitaPol_t pol) const {
   }      
   return 0; 
 }
+
+Int_t RawAnitaHeader::setMask (UShort_t newL1Mask, UShort_t newPhiMask, AnitaPol::AnitaPol_t pol) {
+
+  switch(pol) {
+  case AnitaPol::kVertical:
+    l2TrigMask   = newL1Mask;
+    phiTrigMask  = newPhiMask;
+  case AnitaPol::kHorizontal:
+    l2TrigMaskH  = 0; // deprecated for ANITA-4
+    phiTrigMaskH = 0; // deprecated for ANITA-4
+  default:
+    return -1;
+  }     
+  return 0;
+}
+
+Int_t RawAnitaHeader::setTrigPattern (UShort_t newTrigPattern, AnitaPol::AnitaPol_t pol) {
+
+  switch(pol) {
+  case AnitaPol::kVertical:
+    l3TrigPattern  = newTrigPattern;
+  case AnitaPol::kHorizontal:
+    l3TrigPatternH = 0; // deprecated for ANITA-4
+  default:
+    return -1;
+  }     
+  return 0;
+}
+
+
 
 UShort_t RawAnitaHeader::getL3TrigPattern(AnitaPol::AnitaPol_t pol){
   return pol == AnitaPol::kHorizontal ? l3TrigPatternH : l3TrigPattern;

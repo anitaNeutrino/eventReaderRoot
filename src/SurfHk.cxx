@@ -291,7 +291,7 @@ Int_t SurfHk::getL1Scaler(int phi, AnitaRing::AnitaRing_t ring)
 {
   Int_t surf, l1Scl;
   AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(phi,ring,surf,l1Scl);
-  if((surf>=0 && surf<ACTIVE_SURFS) && (l1Scl>=0 && l1Scl<4)) {
+  if((surf>=0 && surf<ACTIVE_SURFS) && (l1Scl>=0 && l1Scl<L1S_PER_SURF)) {
     return l1Scaler[surf][l1Scl];
   }
   return -1;
@@ -302,7 +302,7 @@ Int_t SurfHk::getL2Scaler(int phi)
 {
   Int_t surf, l2Scl;
   AnitaGeomTool::getSurfL2TriggerChanFromPhi(phi,surf,l2Scl);
-  if((surf>=0 && surf<ACTIVE_SURFS) && (l2Scl>=0 && l2Scl<2)) {
+  if((surf>=0 && surf<ACTIVE_SURFS) && (l2Scl>=0 && l2Scl<L2S_PER_SURF)) {
     return l2Scaler[surf][l2Scl];
   }
   return -1;

@@ -346,11 +346,13 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   }
   // try to load timed header file 
   
-  TString fname = TString::Format("%s/run%d/timedHeadFile%d.root", data_dir, run, run); 
+  // For telemetered crap 
+  TString fname0 = TString::Format("%s/run%d/eventHeadFile%d.root", data_dir, run, run); 
+  TString fname1 = TString::Format("%s/run%d/timedHeadFile%d.root", data_dir, run, run); 
   TString fname2 = TString::Format("%s/run%d/headFile%d.root", data_dir, run, run); 
   TString fname3 = TString::Format("%s/run%d/SimulatedAnitaHeadFile%d.root", data_dir, run, run);
 
-  if (const char * the_right_file = checkIfFilesExist(3, fname.Data(), fname2.Data(), fname3.Data()))
+  if (const char * the_right_file = checkIfFilesExist(4, fname0.Data(), fname1.Data(), fname2.Data(), fname3.Data()))
   {
     TFile * f = new TFile(the_right_file); 
     filesToClose.push_back(f); 
@@ -366,7 +368,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   fHeadTree->BuildIndex("eventNumber"); 
 
   //try to load gps event file  
-  fname = TString::Format("%s/run%d/gpsEvent%d.root", data_dir, run, run); 
+  TString fname = TString::Format("%s/run%d/gpsEvent%d.root", data_dir, run, run); 
   if (checkIfFileExists(fname.Data()))
   {
      TFile * f = new TFile(fname.Data()); 

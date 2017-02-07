@@ -45,9 +45,7 @@ class AnitaEventCalibrator : public TObject
 {
   public:
 
-  AnitaEventCalibrator();
-  ~AnitaEventCalibrator();
-
+  virtual ~AnitaEventCalibrator();
   static AnitaEventCalibrator* Instance(); ///< Instance generator
 
   /*! \brief Calibration Routine
@@ -152,15 +150,9 @@ class AnitaEventCalibrator : public TObject
 
 
 
-
-
-  
-
-
- protected:
-  static AnitaEventCalibrator *fgInstance; ///< Just one instance
-
  private:
+
+  AnitaEventCalibrator(); // don't want multiple calibrators lying around for no reason 
   void loadCalib(); ///< Reads calibration constants from text files into arrays
   PedestalStruct_t fPedStruct; ///< For adding pedestals back onto voltage samples
   ClassDef(AnitaEventCalibrator,0);
