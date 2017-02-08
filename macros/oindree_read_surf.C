@@ -12,7 +12,7 @@
 //#include <stdio.h>
 #include <iostream>
 #include <TString.h>
-#include "SurfHk.h" 
+//#include "SurfHk.h" 
 
 using namespace std;
 
@@ -34,7 +34,7 @@ void oindree_read_surf(int start_run,int end_run)
   { 
     char surfHk_filename[1000]; 
     
-    sprintf(surfHk_filename,"/Users/oindreebanerjee/OneDrive/telem1617-south/root/run%d/surfHkFile%d.root",run_number,run_number);
+    sprintf(surfHk_filename,"/data/anita/anita3/flightData/root/run%d/surfHkFile%d.root",run_number,run_number);
 
     surfHkTree -> Add(surfHk_filename);
 
@@ -47,7 +47,7 @@ void oindree_read_surf(int start_run,int end_run)
    int num_entries = surfHkTree->GetEntries();
    cout << "number of entries is " << num_entries << endl; ; 
 
-   for (ientry = 0; ientry < num_entries; ientry++) 
+   for (int ientry = 0; ientry < num_entries; ientry++) 
    {
     surfHkTree->GetEntry(ientry); // after doing get entry you can forget about the tree
     //cout << "scaler goals are " << surf->scalerGoals[0] << "  " << surf->scalerGoals[1] << "  " << surf->scalerGoals[2] << "  " << surf->scalerGoals[3] << endl;
@@ -75,19 +75,19 @@ g1a->GetXaxis()->SetTitle("Time");
 g1a->GetXaxis()->SetTimeDisplay(1);
 g1a->GetXaxis()->SetTimeFormat("%m-%d");
 g1a->GetYaxis()->SetTitle("scaler goals");
-g1a->SetTitle("ANITA 4 south telemetry data"); 
+g1a->SetTitle("ANITA 3 data"); 
 c1a->SaveAs("surfHk_plots/scaler_goals.png"); 
 
-TCanvas *c1b = new TCanvas("c1b","c1b",850,850); 
-g2a->Draw("alp");
-g2b->SetLineColor(3);
-g2b->Draw("same");
-g2c->SetLineColor(2); 
-g2c->Draw("same"); 
-g2a->GetXaxis()->SetTitle("Run Number");
-g2a->GetYaxis()->SetTitle("scaler goals");
-g2a->SetTitle("ANITA 4 south telemetry data");
-c1b->SaveAs("surfHK_plots/scaler_goals_run.png");
+//TCanvas *c1b = new TCanvas("c1b","c1b",850,850); 
+//g2a->Draw("alp");
+//g2b->SetLineColor(3);
+//g2b->Draw("same");
+//g2c->SetLineColor(2); 
+//g2c->Draw("same"); 
+//g2a->GetXaxis()->SetTitle("Run Number");
+//g2a->GetYaxis()->SetTitle("scaler goals");
+//g2a->SetTitle("ANITA 3 data");
+//c1b->SaveAs("surfHK_plots/scaler_goals_run.png");
 
 //TCanvas *c1c = new TCanvas("c1c","c1c",1100,1100); 
 

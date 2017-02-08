@@ -12,7 +12,7 @@
 //#include <stdio.h>
 #include <iostream>
 #include <TString.h>
-#include "SlowRate.h" 
+//#include "SlowRate.h" 
 
 using namespace std;
 
@@ -69,39 +69,41 @@ void oindree_read_mon(int start_run,int end_run)
 
 TCanvas *c1a = new TCanvas("c1a","c1a",850,850); 
 g1->Draw("A*"); 
-g1->SetTitle("ANITA 4 south telemetry data"); 
+g1->SetTitle("ANITA 3 data"); 
 g1->GetXaxis()->SetTitle("Time");
 g1->GetXaxis()->SetTimeDisplay(1); 
-//g1->GetXaxis()->SetNdivisions(-503); 
 g1->GetXaxis()->SetTimeFormat("%m-%d"); 
 g1->GetYaxis()->SetTitle("Event Rate (10 min) (Hz)"); 
-//g1->SetMarkerSize(2); 
 c1a->SaveAs("slow_plots/eventRate10Min.png"); 
 
 TCanvas *c1b = new TCanvas("c1b","c1b",850,850); 
-g2->Draw("alp"); 
-g2->SetTitle("ANITA 4 south telemetry data"); 
+g2->Draw("A*"); 
+g2->SetTitle("ANITA 3 data"); 
 g2->GetXaxis()->SetTitle("Time");
 g2->GetXaxis()->SetTimeDisplay(1); 
+g1->GetXaxis()->SetTimeFormat("%m-%d"); 
 g2->GetYaxis()->SetTitle("Event Rate (1 min) (Hz)"); 
-//g2->SetMarkerStyle(10); 
 c1b->SaveAs("slow_plots/eventRate1min.png"); 
 
 TCanvas *c1c = new TCanvas("c1c","c1c",1100,1100); 
-g3->Draw("alp"); 
-g3->SetTitle("ANITA 4 south telemetry data"); 
+g3->Draw("A*"); 
+g3->SetTitle("ANITA 3 data"); 
 g3->GetXaxis()->SetTitle("Run Number");
 g3->GetYaxis()->SetTitle("Event Rate (10 min) (Hz)"); 
-//g3->SetMarkerStyle(10); 
 c1c->SaveAs("slow_plots/eventRate10Min_run.png"); 
 
 TCanvas *c1d = new TCanvas("c1d","c1d",1100,1100); 
-g4->Draw("alp"); 
-g4->SetTitle("ANITA 4 south telemetry data"); 
+g4->Draw("A*"); 
+g4->SetTitle("ANITA 3 data"); 
 g4->GetXaxis()->SetTitle("Run Number");
 g4->GetYaxis()->SetTitle("Event Rate (1 min) (Hz)"); 
-//g4->SetMarkerStyle(10); 
 c1d->SaveAs("slow_plots/eventRate1Min_run.png"); 
+
+
+delete c1a;
+delete c1b;
+delete c1c;
+delete c1d; 
 
 } //macro
 
