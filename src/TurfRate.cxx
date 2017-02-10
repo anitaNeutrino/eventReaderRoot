@@ -32,7 +32,8 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *turfPtr)
    realTime=trealTime;
    payloadTime=turfPtr->unixTime;
    ppsNum=turfPtr->ppsNum;   
-   deadTime=turfPtr->deadTime;   
+   deadTime=turfPtr->deadTime;
+   c3poNum=turfPtr->c3poNum; // it seems this was not included!
    for(int i=0;i<PHI_SECTORS;i++) {
      l3Rates[i]=turfPtr->l3Rates[i];
      l2Rates[i]=turfPtr->l2Rates[i];
@@ -97,7 +98,8 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer40_t *turfPtr)
    realTime=trealTime;
    payloadTime=turfPtr->unixTime;
    ppsNum=turfPtr->ppsNum;   
-   deadTime=turfPtr->deadTime;   
+   deadTime=turfPtr->deadTime;
+   c3poNum=turfPtr->c3poNum; // it seems this was not included!
    //   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
    //   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
    for(int i=0;i<PHI_SECTORS;i++) {
@@ -130,7 +132,8 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer34_t *turfPtr)
    realTime=trealTime;
    payloadTime=turfPtr->unixTime;
    ppsNum=turfPtr->ppsNum;   
-   deadTime=turfPtr->deadTime;   
+   deadTime=turfPtr->deadTime;
+   c3poNum=turfPtr->c3poNum; // it seems this was not included!
    //   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
    //   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
    //   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
