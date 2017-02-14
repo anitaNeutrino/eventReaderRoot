@@ -18,7 +18,7 @@ RTLSpectrum::RTLSpectrum(RtlSdrPowerSpectraStruct_t * raw, TGraph * calibration)
   rtlNum = raw->rtlNum; 
   unixTimeStart = raw->unixTimeStart; 
   scanTime = raw->scanTime; 
-  gain = raw->gain; 
+  gain = raw->gain/10.; 
   if (raw->nFreq == 0) 
   {
     spectrum = 0; 
