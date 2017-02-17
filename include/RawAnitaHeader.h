@@ -76,12 +76,12 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
     -  "Value 2" 5th Attenuator setting (22dB)
     -  "Value 4" 6th Attenuator setting (28dB)
     -  "Value 0" 7th Attenuator setting (33dB)
-    
+
   */
-  UShort_t        calibStatus; 
+  UShort_t        calibStatus;
   UChar_t         priority; ///< Queue (lower 4-bits) and priority (upper 4-bits)
   UChar_t         turfUpperWord; ///< Upper word from TURF, useful for debugging
-  UChar_t         otherFlag; ///< Currently the first two surf evNums 
+  UChar_t         otherFlag; ///< Currently the first two surf evNums
  //!  Error Flag
   /*!
     Here we are coutning bits from 1 to 8
@@ -101,7 +101,7 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
 
 
   //these are l1's because there is no need for L2 offline trig masks in A4 (since the scaler worked properly)
-  // andl l1=l2 in A3, and this way we don't have to write a #pragma read rule for these  
+  // andl l1=l2 in A3, and this way we don't have to write a #pragma read rule for these
   UShort_t        l1TrigMaskOffline;
   UShort_t        l1TrigMaskHOffline; ///<Deprecated
 
@@ -128,7 +128,7 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
   */
   UShort_t prioritizerStuff;
 
-  
+
 
 
   //!  Reserved bytes --- Deprecated
@@ -155,14 +155,14 @@ The second byte (reserved[1]) is currently reserved.
   /*!
     The number of of 65535Hz clock ticks in the current second, upto triggerTimeNs ns, which all four buffers were full. A more consistent definition of deadTime is available in the TurfRate class.
   */
-  UShort_t        deadTime; 
+  UShort_t        deadTime;
   //!  Buffer depth
   /*!
     The lowest two bits (bufferDepth&0x3) are a two-bit number (with range 0-3) that count the number of held buffers at the time of the trigger.
 
     The next lowest two bits (bufferDepth&0xc)>>2 are a two-bit number (with range 0-3) that count the number of held buffers at the time of readout.
   */
-  UChar_t         bufferDepth; // Buffer depth 
+  UChar_t         bufferDepth; // Buffer depth
   UChar_t         turfioReserved; ///< Reserved
   UShort_t        upperL1TrigPattern; ///< Bit mask for upper ring l1 antenna triggers. eg. if the bit 1 (the lowest bit) is active it means the upper ring antenna in phi sector 1 contributes an L1 trigger to the event.
   UShort_t        lowerL1TrigPattern; ///< Bit mask for lower ring l1 antenna triggers. eg. if the bit 1 (the lowest bit) is active it means the lower ring antenna in phi sector 1 contributes an L1 trigger to the event.
@@ -181,7 +181,7 @@ The second byte (reserved[1]) is currently reserved.
   UInt_t          rawtrigTime; ///< Trigger time in TURF clock ticks before corrections
   UInt_t          rawc3poNum; ///< Number of TURF clock ticks between GPS pulse per seconds before corrections
   UShort_t        rawppsNum; ///< Number of GPS PPS since last clear all before corrections
-  
+
   const char *trigTypeAsString() const; ///< Returns trigger type as string
   UShort_t getL3TrigPattern(AnitaPol::AnitaPol_t pol) const;
 
@@ -193,7 +193,7 @@ The second byte (reserved[1]) is currently reserved.
   int isInL2Mask(int phi) const; ///< Returns 1 if given phi-ring had l1 trigger
   int getL2Mask() const { return l2TrigMask; }
   int isInPhiMaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) const; // pol does nothing in A4
-  int isInL1MaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) const; //A3 only 
+  int isInL1MaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) const; //A3 only
 
   int getPhiMaskOffline(AnitaPol::AnitaPol_t pol = AnitaPol::kHorizontal) const; //pol does nothing in A4
   int getL1MaskOffline( AnitaPol::AnitaPol_t pol) const;  //a3 only
@@ -205,7 +205,7 @@ The second byte (reserved[1]) is currently reserved.
   int getTurfEventNumber() const
   { return (turfEventId&0xfffff);} ///< Returns the event number portion of the TURF event id.
 
-  Int_t getAboveThresholdFlag() const; 
+  Int_t getAboveThresholdFlag() const;
   Int_t getBinToBinIncreaseFlag() const;
   Int_t getSaturationFlag() const;
   Float_t getPeakThetaRad() const;
@@ -221,6 +221,8 @@ The second byte (reserved[1]) is currently reserved.
   Int_t getTriggerBitG12() const;
   Int_t getTriggerBitSoftExt() const;
 
+  Int_t setMask (UShort_t newL2Mask, UShort_t newPhiMask, AnitaPol::AnitaPol_t pol); // sets phi and l1 masking (used in icemc)
+  Int_t setTrigPattern (UShort_t newTrigPattern, AnitaPol::AnitaPol_t pol);          // sets l3 trigger (used in icemc)
 
   ClassDef(RawAnitaHeader,42);
 
