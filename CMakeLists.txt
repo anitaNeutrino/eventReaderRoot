@@ -36,6 +36,8 @@ else()
     set(INC_UTIL /usr/local/include)
 endif()
 
+set (DEFAULT_ANITA_VERSION "4" CACHE STRING "Default ANITA Version" ) 
+
 
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${UTIL_SHARE_DIR}/cmake/modules/") 
@@ -70,6 +72,7 @@ message("ROOT_INCLUDE_DIRS is set to ${ROOT_INCLUDE_DIRS}")
 
 include_directories(${PROJECT_SOURCE_DIR} ${ROOT_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/include ${FFTW_INCLUDES} ${ZLIB_INCLUDES} ${UTIL_INC_DIR})
 add_definitions(${ROOT_CXX_FLAGS} -DUSE_FFT_TOOLS)
+add_definitions(-DDEFAULT_ANITA_VERSION=${DEFAULT_ANITA_VERSION}) 
 
 file(GLOB HEADER_FILES
     "include/*.h"    
