@@ -19,6 +19,8 @@
 
 #define ANITA_FLIGHT_H
 
+#include "AnitaVersion.h"
+
 //!  WaveCalType -- The Calibration Type
 /*!
   There are a number of calibration options available to create a UsefulAnitaEvent.
@@ -249,11 +251,29 @@ namespace AnitaLocations {
   const double LATITUDE_TD=-77.8803;
   const double ALTITUDE_TD=2260-97.;
 
+  //Anita3 WAIS pulser location
   // WAIS divide position taken from Steph's e-log
   // https://www.phys.hawaii.edu/elog/anita_notes/595
+  const Double_t LATITUDE_WAIS_A3 = - (79 + (27.93728/60)); ///< Latitude of WAIS divide pulser
+  const Double_t LONGITUDE_WAIS_A3 = -(112 + (6.74974/60)); ///< Longitude of WAIS divide pulser
+  const Double_t ALTITUDE_WAIS_A3 = 1813.42;///< Altitude of WAIS divide pulser
+
+  //keeping this around until we can inform people they should use getWais() type calls instead.
   const Double_t LATITUDE_WAIS = - (79 + (27.93728/60)); ///< Latitude of WAIS divide pulser
   const Double_t LONGITUDE_WAIS = -(112 + (6.74974/60)); ///< Longitude of WAIS divide pulser
   const Double_t ALTITUDE_WAIS = 1813.42;///< Altitude of WAIS divide pulser
+
+
+  //Anita 4 location (from Ben Strutt on Slack)
+  const Double_t LATITUDE_WAIS_A4 = - (-79.468116); ///< Latitude of WAIS divide pulser
+  const Double_t LONGITUDE_WAIS_A4 = -(112.059258); ///< Longitude of WAIS divide pulser
+  const Double_t ALTITUDE_WAIS_A4 = 1779.80;///< Altitude of WAIS divide pulser
+  
+  //Flight independent calls
+  const Double_t getWaisLatitude();
+  const Double_t getWaisLongitude();
+  const Double_t getWaisAltitude();
+
 
   // LDB position taken from Steph's e-log
   // https://www.phys.hawaii.edu/elog/anita_notes/617

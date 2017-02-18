@@ -126,3 +126,9 @@ void WaveCalType::listAllCalTypes()
    }
    std::cout << std::endl;
 }
+
+  
+const Double_t AnitaLocations::getWaisLatitude() {return AnitaVersion::get() == 3 ? LATITUDE_WAIS : LATITUDE_WAIS_A4;};
+const Double_t AnitaLocations::getWaisLongitude() {return AnitaVersion::get() == 3 ? LONGITUDE_WAIS : LONGITUDE_WAIS_A4;};
+const Double_t AnitaLocations::getWaisAltitude() {return AnitaVersion::get() == 3 ? ALTITUDE_WAIS : ALTITUDE_WAIS_A4;};
+  
