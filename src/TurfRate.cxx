@@ -119,11 +119,11 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer34_t *turfPtr)
 
  if(turfPtr->gHdr.code!=PACKET_TURF_RATE ||
      turfPtr->gHdr.verId!=VER_TURF_RATE ||
-     turfPtr->gHdr.numBytes!=sizeof(TurfRateStructVer35_t)) {
-    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_TURF_RATE) << "Ver35\n" 
+     turfPtr->gHdr.numBytes!=sizeof(TurfRateStructVer34_t)) {
+    std::cerr << "Mismatched packet:\t" << packetCodeAsString(PACKET_TURF_RATE) << "Ver34\n" 
 	      << "code:\t" << (int)turfPtr->gHdr.code << "\t" << PACKET_TURF_RATE 
 	      << "\nversion:\t" << (int)turfPtr->gHdr.verId 
-	      << "\t" << 35
+	      << "\t" << 34
 	      << "\nsize:\t" << turfPtr->gHdr.numBytes << "\t"
 	      << sizeof(TurfRateStruct_t) << std::endl;
   }
