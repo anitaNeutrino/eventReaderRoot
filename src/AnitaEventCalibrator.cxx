@@ -208,6 +208,18 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     // Don't break just do full calibration but add pedestal...
     // Not sure if this is the same as the previous implementation of this flag.
 
+
+  case WaveCalType::kOnlyTiming:
+    fUnwrap = true;
+    fBinToBinDts = true;
+    fApplyTempCorrection = true;
+    fApplyTriggerJitterCorrection = true;
+    fApplyCableDelays = true;
+    fZeroMeanNonClockChannels = true;
+    fApplyExtraDelayFromPhaseCenter = true;
+    break;
+
+
   case WaveCalType::kFull:
     fUnwrap = true;
     fBinToBinDts = true;

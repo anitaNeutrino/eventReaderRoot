@@ -43,6 +43,7 @@ namespace WaveCalType {
     kDefault = 0x0a, ///< What you should call for analysis work
     kVTFast = 0x1b, ///< Faster, but no algorithm for it
     kAddPeds = 0x1c, ///< New thing
+    kOnlyTiming = 0x1d, ///< All the timing of kFull, but none of the voltage calibration (Ped corrected ADC counts)
     kNotACalib ///< Useful for looping over all calibrations 
   } WaveCalType_t; ///< The calibration enumeration type
 
