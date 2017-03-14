@@ -37,19 +37,14 @@ void GPSresolution(int firstRun, int lastRun) {
   char adu5AName[FILENAME_MAX];
   char adu5BName[FILENAME_MAX];
 
-  Adu5Pat *patA = 0;
   TChain *adu5AChain = new TChain("adu5PatTree");
-
-  Adu5Pat *patB = 0;
+  
   TChain *adu5BChain = new TChain("adu5bPatTree");
 
-  adu5AChain->SetBranchAddress("pat",&patA); 
-  adu5BChain->SetBranchAddress("pat",&patB);
-  adu5BChain->BuildIndex("realTime"); 
   
   for (int run=firstRun;run<lastRun+1; run++)
     { 
-      sprintf(adu5AName,"/unix/anita4/flight2016/root/run%d/gpsFile%d.root",run,run);
+      sprintf(adu5AName,"/home/berg/Dropbox/LinuxSync/PhD/ANITA/2017Work/gpsEvent/run%d/gpsFile%d.root",run,run);
       if(gSystem->GetPathInfo(adu5AName,staty))
 	{
 	  continue;
@@ -58,7 +53,7 @@ void GPSresolution(int firstRun, int lastRun) {
 
       //
 
-      sprintf(adu5BName,"/unix/anita4/flight2016/root/run%d/gpsFile%d.root",run,run);
+      sprintf(adu5BName,"/home/berg/Dropbox/LinuxSync/PhD/ANITA/2017Work/gpsEvent/run%d/gpsFile%d.root",run,run);
       if(gSystem->GetPathInfo(adu5BName,staty))
 	{
 	  continue;
@@ -67,16 +62,24 @@ void GPSresolution(int firstRun, int lastRun) {
       
     }
 
+  
+  Adu5Pat *patA = 0;
+  Adu5Pat *patB = 0;
+
+  adu5AChain->SetBranchAddress("pat",&patA); 
+  adu5BChain->SetBranchAddress("pat",&patB);
+  adu5BChain->BuildIndex("realTime"); 
+
   // Latitude
-  TH1D *latHistoDiff = new TH1D(Form("latHistoDiff"), Form("latHisto, Runs %d - %d;adu5A lat -adu5B lat ; Entries", firstRun, lastRun), 10000, -1, 1);
+  TH1D *latHistoDiff = new TH1D(Form("latHistoDiff"), Form("latHisto, Runs %d - %d;adu5A lat -adu5B lat ; Entries", firstRun, lastRun), 10000, -0.0007, 0.0007);
   TH2D *latHisto = new TH2D(Form("latHisto"), Form("latHisto, Runs %d - %d;adu5A lat ;adu5B lat ", firstRun, lastRun), 10000, -90, -75, 10000, -90, -75);
 
   // Longitude
-  TH1D *longHistoDiff = new TH1D(Form("longHistoDiff"), Form("longHisto, Runs %d - %d;adu5A long -adu5B long ; Entries", firstRun, lastRun), 10000, -30, 30);
-  TH2D *longHisto = new TH2D(Form("longHisto"), Form("longHisto, Runs %d - %d;adu5A long ;adu5B long ", firstRun, lastRun), 10000, -360, 360, 10000, -360, 360);
+  TH1D *longHistoDiff = new TH1D(Form("longHistoDiff"), Form("longHisto, Runs %d - %d;adu5A long -adu5B long ; Entries", firstRun, lastRun), 1000, -0.01, 0.01); // 10000 bins makes it look weird
+  TH2D *longHisto = new TH2D(Form("longHisto"), Form("longHisto, Runs %d - %d;adu5A long ;adu5B long ", firstRun, lastRun), 10000, -360, 360, 10000, -360, 360); //
 
-  // Altitude
-  TH1D *altHistoDiff = new TH1D(Form("altHistoDiff"), Form("altHisto, Runs %d - %d;adu5A alt (m)-adu5B alt (m); Entries", firstRun, lastRun), 10000, -1300, 1300);
+  // Altitud
+  TH1D *altHistoDiff = new TH1D(Form("altHistoDiff"), Form("altHisto, Runs %d - %d;adu5A alt (m)-adu5B alt (m); Entries", firstRun, lastRun), 1000, -8, 8);
   TH2D *altHisto = new TH2D(Form("altHisto"), Form("altHisto, Runs %d - %d;adu5A alt (m);adu5B alt (m)", firstRun, lastRun), 10000, 37000, 41000, 10000, 37000, 41000);
 
   // Heading
@@ -92,7 +95,7 @@ void GPSresolution(int firstRun, int lastRun) {
   TH2D *rollHisto = new TH2D(Form("rollHisto"), Form("rollHisto, Runs %d - %d;adu5A roll ;adu5B roll ", firstRun, lastRun), 10000, -20, 20, 10000, -20, 20);
   
   //Test
-  TH2D *longHistoTest = new TH2D(Form("longHistoTest"), Form("longHistoTest, Runs %d - %d;realTime ;adu5A long ", firstRun, lastRun), 10000, 1480000000, 1484000000, 10000, -200, 200);
+  TH2D *longHistoTest = new TH2D(Form("longHistoTest"), Form("longHistoTest, Runs %d - %d;run ;adu5A long - adu5B long ", firstRun, lastRun), 10000, 41, 367, 10000, -20, 20);
 
   TH1D *mrmsDistro = new TH1D(Form("mrms Dist"), Form("mrms Dist, Runs %d - %d;adu5A mrms ; Entries", firstRun, lastRun), 10000, 0, 2000);
   TH2D *mrmsHistoTest = new TH2D(Form("mrms"), Form("mrms, Runs %d - %d;realTime ;adu5A mrms ", firstRun, lastRun), 10000, 1480000000, 1484000000, 10000, 0, 2000);
@@ -110,7 +113,10 @@ void GPSresolution(int firstRun, int lastRun) {
    {
      
     adu5AChain->GetEntry(entry);
-    adu5BChain->GetEntry(entry);
+
+    Int_t trueEntry = adu5BChain->GetEntryNumberWithBestIndex(patA->realTime); 
+    adu5BChain->GetEntry(trueEntry);
+    //adu5BChain->GetEntry(entry);
 
     // Things to skip (CUT ON)
     if( patA->attFlag != 0 || patB->attFlag != 0 || patA->altitude == 0 || patB->altitude == 0 /*|| cpatA->mrms !=0 || patB->mrms != 0 || patA->brms != 0 || patB->brms != 0 */) // if flag isn't zero (normal), skip it
@@ -128,7 +134,7 @@ void GPSresolution(int firstRun, int lastRun) {
     latHistoDiff->Fill(patA->latitude - patB->latitude);
     
     longHisto->Fill(patA->longitude, patB->longitude);
-    longHistoDiff->Fill( FFTtools::wrap( patA->longitude - patB->longitude , 180, 0) );
+    longHistoDiff->Fill( FFTtools::wrap( patA->longitude - patB->longitude , 180, 0 ) );
     
     altHisto->Fill(patA->altitude, patB->altitude);
     altHistoDiff->Fill(patA->altitude - patB->altitude);
@@ -142,15 +148,15 @@ void GPSresolution(int firstRun, int lastRun) {
     rollHisto->Fill(patA->roll, patB->roll);
     rollHistoDiff->Fill(patA->roll - patB->roll);
 
-    longHistoTest->Fill(patA->realTime, patA->longitude);
+    // Tests
+    longHistoTest->Fill(patA->run, patA->longitude - patB->longitude);
+    
 
-    // NO CUT
     mrmsHistoTest->Fill(patA->realTime, patA->mrms);
     brmsHistoTest->Fill(patA->realTime, patA->brms);
 
     mrmsDistro->Fill(patA->mrms);
     brmsDistro->Fill(patA->brms);
-    // end of NO CUT
 
     // end of WITH CUTS
     
@@ -180,9 +186,9 @@ void GPSresolution(int firstRun, int lastRun) {
   latHisto->Draw();
   cLat->SaveAs("lat_FurtherCut.png");
   cLat->SaveAs("lat_FurtherCut.pdf");
-
+  
   // Long
-  TCanvas *cLong = new TCanvas();
+  TCanvas *cLong = new TCanvas("cLong","cLong",2550,1440);
   cLong->Divide(1,2);
   cLong->cd(1);
   gPad->SetLogy();
@@ -195,7 +201,7 @@ void GPSresolution(int firstRun, int lastRun) {
 
   
   // Alt
-  TCanvas *cAlt = new TCanvas();
+  TCanvas *cAlt = new TCanvas("cAlt","cAlt",2550,1440);
   cAlt->Divide(1,2);
   cAlt->cd(1);
   gPad->SetLogy();
@@ -207,7 +213,7 @@ void GPSresolution(int firstRun, int lastRun) {
   cAlt->SaveAs("alt_FurtherCut.pdf");
 
   // Head
-  TCanvas *cHead = new TCanvas();
+  TCanvas *cHead = new TCanvas("cHead","cHead",2550,1440);
   cHead->Divide(1,2);
   cHead->cd(1);
   gPad->SetLogy();
@@ -217,7 +223,9 @@ void GPSresolution(int firstRun, int lastRun) {
   headHisto->Draw();
   cHead->SaveAs("head_FurtherCut.png");
   cHead->SaveAs("head_FurtherCut.pdf");
+  
 
+  /*
   TCanvas *cPitch = new TCanvas();
   cPitch->Divide(1,2);
   cPitch->cd(1);
@@ -239,14 +247,14 @@ void GPSresolution(int firstRun, int lastRun) {
   rollHisto->Draw();
   cRoll->SaveAs("roll_FurtherCut.png");
   cRoll->SaveAs("roll_FurtherCut.pdf");
-*/  
+  */
   // Just some testing
-  /*
-  TCanvas *testCanv = new TCanvas();
+  
+  TCanvas *testCanv = new TCanvas("l","l",2550,1440);
   testCanv->cd(1);
   longHistoTest->Draw();
-  */
-
+  
+  /*
   TCanvas *testCanv2 = new TCanvas();
   testCanv2->Divide(2,2);
   testCanv2->cd(1);
@@ -264,6 +272,7 @@ void GPSresolution(int firstRun, int lastRun) {
   testCanv2->cd(4);
   gPad->SetLogy();
   brmsDistro->Draw();
+  */
   }
 
 
