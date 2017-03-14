@@ -357,6 +357,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
 {
 
   fDecimated = dec; 
+  fIndices = 0; 
 
   unloadRun(); 
   fWantedEntry = 0; 
@@ -403,6 +404,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
 
   if (const char * the_right_file = checkIfFilesExist(4, fname0.Data(), fname1.Data(), fname2.Data(), fname3.Data()))
   {
+    printf("Using head file: %s\n",the_right_file); 
     TFile * f = new TFile(the_right_file); 
     filesToClose.push_back(f); 
     fHeadTree = (TTree*) f->Get("headTree"); 
@@ -417,10 +419,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
 
   fHeadTree->BuildIndex("eventNumber"); 
 
-
-  fIndices = 0; 
   if (!fDecimated) fIndices = ((TTreeIndex*) fHeadTree->GetTreeIndex())->GetIndex(); 
-  printf("%p\n", fIndices); 
 
   //try to load gps event file  
   TString fname = TString::Format("%s/run%d/gpsEvent%d.root", data_dir, run, run); 
