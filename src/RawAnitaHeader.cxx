@@ -70,8 +70,8 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t tre
 
    phiTrigMaskOffline = phiTrigMask;
    phiTrigMaskHOffline = phiTrigMaskH;
-   l1TrigMaskOffline = l2TrigMask;
-   l1TrigMaskHOffline = l2TrigMaskH;
+   l1TrigMaskOffline = 0; //should be unneeded in A4
+   l1TrigMaskHOffline = 0; //should be unneeded in A4
 
   //Prioritizer stuff
   peakThetaBin=hdPtr->peakThetaBin;
@@ -131,8 +131,8 @@ RawAnitaHeader::RawAnitaHeader(AnitaEventHeaderVer40_t *hdPtr, Int_t trun, UInt_
 
    phiTrigMaskOffline = phiTrigMask;
    phiTrigMaskHOffline = phiTrigMaskH;
-   l1TrigMaskOffline = l2TrigMask;
-   l1TrigMaskHOffline = l2TrigMaskH;
+   l1TrigMaskOffline = 0; //should be unneeded in A4
+   l1TrigMaskHOffline = 0; //should be unneeded in A4
 
 
   //Prioritizer stuff

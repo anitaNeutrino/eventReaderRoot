@@ -78,6 +78,12 @@
   embed="true" code="{l2TrigMask=onfile.l1TrigMask;l2TrigMaskH=onfile.l1TrigMaskH;}"    
 
 
+// add offline stuff for older ROOTified headers
+#pragma read sourceClass="RawAnitaHeader" targetClass="RawAnitaHeader"  \
+  source="UShort_t phiTrigMask; UShort_t phiTrigMaskH;" version="[40-41]" target="phiTrigMaskOffline,phiTrigMaskHOffline, l1TrigMaskOffline, l1TrigMaskHOffline" \
+  embed="true" code="{phiTrigMaskOffline=onfile.phiTrigMask;phiTrigMaskHOffline=onfile.phiTrigMaskH; l1TrigMaskOffline=0; l1TrigMaskHOffline=0;}"    
+
+
 /** Fills in A3 compatibility fields for older ROOTified Turf Stuff */ 
 #pragma read sourceClass="TurfRate" targetClass="TurfRate" \
  source="UShort_t phiTrigMask; UShort_t l2TrigMask;"\
