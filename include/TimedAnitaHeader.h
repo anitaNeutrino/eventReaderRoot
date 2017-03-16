@@ -3,8 +3,9 @@
 /////                                                                    /////
 /////  Description:                                                      /////
 /////     A simple class for storing ANITA headers with fixed times      /////
-/////     (from matching to the ADU5 data)                               /////
+/////     (with various corrections)                                     /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
+/////  Author: Cosmin Deacnou (cozzyd@kicp.uchicago.edu)                 /////
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef TIMEDANITAHEADER_H
@@ -18,25 +19,23 @@
 
 //!  TimedAnitaHeader -- Anita Header withe new time
 /*!
-  ANITA-I class after fixing timing. Deprecated in ANITA-II.
+  ANITA-I class after fixing timing. Deprecated in ANITA-II. Updated again for ANITA-IV. 
   \ingroup rootclasses
 */
 class TimedAnitaHeader: public RawAnitaHeader
 {
  public:
    TimedAnitaHeader(); ///<Default constructor
-   TimedAnitaHeader(RawAnitaHeader &old, UInt_t newTriggerTime, Int_t tsecQualFlag); ///< Assignment constructor
-  TimedAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t run, UInt_t realTime,
-		   UInt_t triggerTime, UInt_t triggerTimeNs,
-		   Int_t tgoodTimeFlag, Int_t tsecQualFlag, UInt_t toldTriggerTime); ///< Assignment constructor
+   TimedAnitaHeader(const RawAnitaHeader &old, UInt_t correctedTriggerTime, UInt_t correctedTriggerTimeNs, Double_t tttAlignmentFraction); ///< Assignment constructor
 		 
   ~TimedAnitaHeader(); ///< Destructor
 
-  Int_t secQualFlag; ///< secQualFlag
-  UInt_t oldTriggerTime; ///< oldTriggerTime from before time matching
+  UInt_t oldTriggerTime; ///< oldTriggerTime from before second-stage time matching
+  UInt_t oldTriggerTimeNs; ///< oldTriggerTime from before second-stage time matching
 
+  Double_t tttAlignmentFraction; ///< fraction of the time we match the GpsTTT stuff 
    
-  ClassDef(TimedAnitaHeader,1);
+  ClassDef(TimedAnitaHeader,40);
 };
 
 
