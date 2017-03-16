@@ -26,12 +26,12 @@ TimedAnitaHeader::~TimedAnitaHeader() {
 
 
 
-TimedAnitaHeader::TimedAnitaHeader(const RawAnitaHeader &old, UInt_t correctedTriggerTime, UInt_t correctedTriggerTimeNs, Double_t tttAlignmentFraction)
+TimedAnitaHeader::TimedAnitaHeader(const RawAnitaHeader &old, UInt_t correctedTriggerTime, UInt_t correctedTriggerTimeNs, Double_t tttAlignment)
   : RawAnitaHeader(old)
 {
   oldTriggerTime=triggerTime;
   oldTriggerTimeNs=triggerTimeNs;
   triggerTime=correctedTriggerTime;
   triggerTimeNs=correctedTriggerTimeNs;
-  tttAlignmentFraction = tttAlignmentFraction; 
+  tttAlignmentFraction = tttAlignment; 
 }
