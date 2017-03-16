@@ -1,12 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////
-/////  TimedAnitaHeader.cxx        ANITA header reading class                  /////
+/////  TimedAnitaHeader.h        Timed ANITA header class                /////
 /////                                                                    /////
 /////  Description:                                                      /////
 /////     A simple class for storing ANITA headers with fixed times      /////
-/////     (from matching to the ADU5 data)                               /////
+/////     (with various corrections)                                     /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
+/////  Author: Cosmin Deacnou (cozzyd@kicp.uchicago.edu)                 /////
 //////////////////////////////////////////////////////////////////////////////
-
+//
 #include "TimedAnitaHeader.h"
 #include <iostream>
 #include <fstream>
@@ -24,18 +25,13 @@ TimedAnitaHeader::~TimedAnitaHeader() {
 }
 
 
-TimedAnitaHeader::TimedAnitaHeader(AnitaEventHeader_t *hdPtr, Int_t trun, UInt_t trealTime, UInt_t ttriggerTime, UInt_t ttriggerTimeNs, Int_t tgoodTimeFlag, Int_t tsecQualFlag, UInt_t toldTriggerTime)
-  : RawAnitaHeader(hdPtr,trun,trealTime,ttriggerTime,ttriggerTimeNs,tgoodTimeFlag)
-{
-  secQualFlag=tsecQualFlag;
-  oldTriggerTime=toldTriggerTime;
-}
 
-
-TimedAnitaHeader::TimedAnitaHeader(RawAnitaHeader &old, UInt_t newTriggerTime, Int_t tsecQualFlag)
-  :RawAnitaHeader(old)
+TimedAnitaHeader::TimedAnitaHeader(const RawAnitaHeader &old, UInt_t correctedTriggerTime, UInt_t correctedTriggerTimeNs, Double_t tttAlignmentFraction)
+  : RawAnitaHeader(old)
 {
   oldTriggerTime=triggerTime;
-  triggerTime=newTriggerTime;
-  secQualFlag=tsecQualFlag;
+  oldTriggerTimeNs=triggerTimeNs;
+  triggerTime=correctedTriggerTime;
+  triggerTimeNs=correctedTriggerTimeNs;
+  tttAlignmentFraction = tttAlignmentFraction; 
 }
