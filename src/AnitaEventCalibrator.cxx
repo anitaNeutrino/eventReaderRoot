@@ -8,17 +8,18 @@
 
 #include "AnitaEventCalibrator.h"
 #include "UsefulAnitaEvent.h"
-#include "AnitaVersion.h" 
-#include "TMutex.h" 
+#include "AnitaVersion.h"
+#include "TMutex.h"
+#include "AnalysisBlinding.h"
 
 ClassImp(AnitaEventCalibrator);
 
 
-static AnitaEventCalibrator*  instances[NUM_ANITAS+1] = {0}; 
+static AnitaEventCalibrator*  instances[NUM_ANITAS+1] = {0};
 
 
-static const char * voltageCalibFiles[] = { 0, 0, 0, "simpleVoltageCalibrationHarm.txt", "simpleVoltageCalibrationAnita4.txt" }; 
-static const char * relativeCableDelayFiles[] = { 0,0,0, "relativeCableDelays.dat","relativeCableDelaysAnita4.dat"}; 
+static const char * voltageCalibFiles[] = { 0, 0, 0, "simpleVoltageCalibrationHarm.txt", "simpleVoltageCalibrationAnita4.txt" };
+static const char * relativeCableDelayFiles[] = { 0,0,0, "relativeCableDelays.dat","relativeCableDelaysAnita4.dat"};
 
 AnitaEventCalibrator::AnitaEventCalibrator(){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
@@ -48,31 +49,31 @@ AnitaEventCalibrator::~AnitaEventCalibrator(){
 };
 
 
-static TMutex instance_lock; 
+static TMutex instance_lock;
 
 //______________________________________________________________________________
 AnitaEventCalibrator*  AnitaEventCalibrator::Instance(int v){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
 
-  if (!v) v = AnitaVersion::get(); 
+  if (!v) v = AnitaVersion::get();
 
-  AnitaEventCalibrator * tmp = instances[v]; 
-  __asm__ __volatile__ ("" ::: "memory"); //memory fence! 
+  AnitaEventCalibrator * tmp = instances[v];
+  __asm__ __volatile__ ("" ::: "memory"); //memory fence!
 
-  if (!tmp) 
+  if (!tmp)
   {
-    instance_lock.Lock(); 
-    tmp = instances[v]; 
-    if (!tmp) 
+    instance_lock.Lock();
+    tmp = instances[v];
+    if (!tmp)
     {
-      tmp = new AnitaEventCalibrator(); 
+      tmp = new AnitaEventCalibrator();
       __asm__ __volatile__ ("" ::: "memory");
-      instances[v] = tmp; 
+      instances[v] = tmp;
     }
-    instance_lock.UnLock(); 
+    instance_lock.UnLock();
   }
 
-  return instances[v]; 
+  return instances[v];
 }
 
 
@@ -490,6 +491,12 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   // Finally copy some meta-data about the calibration to the tree.
   eventPtr->fCalType = calType;
   eventPtr->fClockProblem = fClockProblem;
+
+
+
+
+  AnalysisBlinding::applyBlinding(eventPtr);
+
 
 
   // Now enjoy your calibrated event

@@ -9,7 +9,7 @@
 #ifndef ANITAEVENTCALIBRATOR_H
 #define ANITAEVENTCALIBRATOR_H
 
-// ROOT 
+// ROOT
 #include <TObject.h>
 #include <TF1.h>
 #include <TH1.h>
@@ -33,6 +33,8 @@
 #include "RingBuffer.h"
 #include "RawAnitaHeader.h"
 
+
+
 class TGraph;
 class UsefulAnitaEvent;
 
@@ -41,7 +43,7 @@ class UsefulAnitaEvent;
   Used to calibrate the raw ANITA data into voltage-time waveforms
   \ingroup rootclasses
 */
-class AnitaEventCalibrator : public TObject 
+class AnitaEventCalibrator : public TObject
 {
   public:
 
@@ -54,15 +56,15 @@ class AnitaEventCalibrator : public TObject
    *  The routines to calibrate a RawAnitaEvent into an UsefulAnitaEvent. The exact type of calibration applied depends on the WaveCalType::WaveCalType_t selected.
    */
 
-  
-  Int_t calibrateUsefulEvent(UsefulAnitaEvent *eventPtr, 
+
+  Int_t calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 			     WaveCalType::WaveCalType_t calType);///< Workhorse
 
   void guessRco(UsefulAnitaEvent* eventPtr); ///< Guess RCO from clock
   void getTempFactors(UsefulAnitaEvent* eventPtr); ///< Interface to RingBuffer of clock periods for temperature correction
   void updateTemperatureCorrection(UsefulAnitaEvent* eventPtr); ///< Update RingBuffer for this event
-  Int_t unwrapChannel(UsefulAnitaEvent* eventPtr, Int_t surf, Int_t chan, Int_t rco, 
-		      Bool_t fApplyTempCorrection, Bool_t fAddPedestal, 
+  Int_t unwrapChannel(UsefulAnitaEvent* eventPtr, Int_t surf, Int_t chan, Int_t rco,
+		      Bool_t fApplyTempCorrection, Bool_t fAddPedestal,
 		      Double_t* voltsArray, Double_t* timeArray, Int_t* scaArray);
   void applyVoltageCalibration(UsefulAnitaEvent* eventPtr);
   void keepOnlySomeTimeAfterClockUptick(TGraph* grClock, Double_t deltaClockKeepNs);
@@ -80,26 +82,26 @@ class AnitaEventCalibrator : public TObject
   void zeroMeanNonClockChannels();
 
   Double_t getTimeOfZeroCrossing(Double_t x1, Double_t y1, Double_t x2, Double_t y2);
-  Int_t getTimeOfUpwardsClockTicksCrossingZero(Int_t numPoints, Int_t surf, Double_t* times, 
-					       Double_t* volts, 
-					       std::vector<Double_t>& timeZeroCrossings, 
-					       std::vector<Int_t>& sampZeroCrossings, 
+  Int_t getTimeOfUpwardsClockTicksCrossingZero(Int_t numPoints, Int_t surf, Double_t* times,
+					       Double_t* volts,
+					       std::vector<Double_t>& timeZeroCrossings,
+					       std::vector<Int_t>& sampZeroCrossings,
 					       bool raiseFlagIfClocksAreWeird);
 
   void findExtremaSamples(Int_t length, Double_t* volts,
-			  std::vector<Int_t>& maximaSamps, 
+			  std::vector<Int_t>& maximaSamps,
 			  std::vector<Int_t>& minimaSamps);
 
 
   void initializeVectors();
-  
+
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///// Member variables
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   // Primary event data: voltage and time arrays
   Double_t voltsArray[NUM_SURF][CHANNELS_PER_SURF][NUM_SAMP]; ///< Channel volts in mV
-  Double_t timeArray[NUM_SURF][NUM_SAMP]; ///< Channel times in ns 
+  Double_t timeArray[NUM_SURF][NUM_SAMP]; ///< Channel times in ns
   Int_t numPointsArray[NUM_SURF]; ///< Number of samples in each channel
   Int_t scaArray[NUM_SURF][NUM_SAMP]; ///< Capacitor numbers for each sample
 
@@ -149,14 +151,15 @@ class AnitaEventCalibrator : public TObject
 
 
 
+  AnitaEventCalibrator(); // don't want multiple calibrators lying around for no reason
 
  private:
 
-  AnitaEventCalibrator(); // don't want multiple calibrators lying around for no reason 
+  // AnitaEventCalibrator(); // don't want multiple calibrators lying around for no reason
   void loadCalib(); ///< Reads calibration constants from text files into arrays
   PedestalStruct_t fPedStruct; ///< For adding pedestals back onto voltage samples
   ClassDef(AnitaEventCalibrator,0);
-  
+
 };
 
 

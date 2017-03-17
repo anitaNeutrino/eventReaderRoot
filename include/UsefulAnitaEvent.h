@@ -49,7 +49,7 @@ class UsefulAnitaEvent: public RawAnitaEvent
   TGraph *getGraph(AnitaRing::AnitaRing_t ring,
 		   int phi,
 		   AnitaPol::AnitaPol_t pol); ///< Returns a voltage-time waveform for given ring-phi-pol
-  TGraph *getDeconvolvedALFA(); // 
+  TGraph *getDeconvolvedALFA(); //
   Int_t guessRco(int chanIndex); ///< Looks at clock channel to try and guess which RCO phase we are in.
   Int_t getRcoCorrected(int chanIndex); ///< Returns firmware RCO after correcting for latch delay (and factor of -1 for different definitions of which phase getRCO and guessRCO return)
   // Double_t getTempCorrectionFactor(); ///< Returns the temperature correction factor (or guesses at it using clock periods if necessary)
@@ -78,7 +78,7 @@ class UsefulAnitaEvent: public RawAnitaEvent
   UInt_t fLastEventGuessed; ///< Internal variable to see if we've already tried to guess the RCO and temp correction factors for this event
   Int_t fRcoArray[NUM_SURF]; ///< An array to store the guessed at RCO values
   Double_t fTempFactorGuesses[NUM_SURF]; ///< A holder variable to cling on to the temperature correction factor that we are guessing at
-  Int_t fClockProblem; ///< Flag raised if more than 4 upgoing zero crossings in clock, won't update temp correction. RCO guessing may also be negatively affected by this.  
+  Int_t fClockProblem; ///< Flag raised if more than 4 upgoing zero crossings in clock, won't update temp correction. RCO guessing may also be negatively affected by this.
   Double_t fClockPhiArray[NUM_SURF]; ///< An array to store the derived clock calibration numbers (from aligning the clocks)
 
   Bool_t getAlfaFilterFlag();
@@ -86,9 +86,8 @@ class UsefulAnitaEvent: public RawAnitaEvent
 
  private:
   Bool_t fFilterAlfaChannel;
-  AnitaEventCalibrator *fCalibrator; ///< Pointer to the AnitaEventCalibrator
 
-  ClassDef(UsefulAnitaEvent,6);
+  ClassDef(UsefulAnitaEvent,7);
 };
 
 
