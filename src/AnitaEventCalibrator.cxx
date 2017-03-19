@@ -10,7 +10,6 @@
 #include "UsefulAnitaEvent.h"
 #include "AnitaVersion.h"
 #include "TMutex.h"
-#include "AnalysisBlinding.h"
 
 ClassImp(AnitaEventCalibrator);
 
@@ -492,10 +491,6 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   eventPtr->fCalType = calType;
   eventPtr->fClockProblem = fClockProblem;
 
-
-
-
-  AnalysisBlinding::applyBlinding(eventPtr);
 
 
 
