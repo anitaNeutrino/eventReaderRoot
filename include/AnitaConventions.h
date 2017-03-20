@@ -26,14 +26,14 @@
 */
 namespace WaveCalType {
   typedef enum EWaveCalType {
-    
+
     kNoCalib = 0x00, ///< The 260 samples straight from raw data
     kJustUnwrap = 0x01, ///< The X good samples from raw data (260-hitbus)
     kNominal = 0x02, ///< Using mV/ADC = 1 and all dts = 1./2.6 ns
     kVoltageTime = 0x02, ///< Same as kNominal
     kJustTimeNoUnwrap  = 0x03, ///< For calibration: sample-to-sample dts without unwrapping (or voltage calibs)
     kNoTriggerJitterNoZeroMean = 0x05, ///< No inter-SURF timing (or zero meaning)
-    kNoChannelToChannelDelays  = 0x06, ///< Inter-SURF timing (trigger jitter) without cable delay 
+    kNoChannelToChannelDelays  = 0x06, ///< Inter-SURF timing (trigger jitter) without cable delay
     kNoTriggerJitterNoZeroMeanFlipRco = 0x07, ///< For calib: opposite RCO from software algorithm
     kNoTriggerJitterNoZeroMeanFirmwareRco = 0x08, ///< For calib: applies RCO from firmware (no latch delay)
     kNoTriggerJitterNoZeroMeanFirmwareRcoFlipped = 0x09,///< For calib: 1-firmware RCO (no latch delay)
@@ -42,7 +42,7 @@ namespace WaveCalType {
     // kVTFast = 0x1b, ///< Faster, but no algorithm for it
     kAddPeds = 0x1c, ///< New thing
     kOnlyTiming = 0x1d, ///< Does everything except voltage calibration, so it returns 1ADC->1mV
-    kNotACalib ///< Useful for looping over all calibrations 
+    kNotACalib ///< Useful for looping over all calibrations
   } WaveCalType_t; ///< The calibration enumeration type
 
   const char *calTypeAsString(WaveCalType::WaveCalType_t calType); ///< Returns the calibration type as a string
@@ -164,7 +164,7 @@ namespace AnitaRing {
      kNadirRing=kBottomRing,
      kNotARing ///< Useful in for loops.
    } AnitaRing_t; ///< Ring enumeration
-   
+
    const char *ringAsString(AnitaRing::AnitaRing_t ring); ///< Returns the ring as a character string
    char ringAsChar(AnitaRing::AnitaRing_t ring); ///< Returns the ring as a character string
 }
@@ -205,7 +205,7 @@ namespace AnitaTrigPol {
 namespace AnitaBand {
    typedef enum EAnitaBand {
      kLow =0, ///< The low band.
-     kMid =1, ///< The middle band.    
+     kMid =1, ///< The middle band.
      kHigh =2, ///< The high band.
      kFull =3 ///< The full band.x
    } AnitaBand_t; ///< Band enumeration.
@@ -217,7 +217,7 @@ namespace AnitaBand {
   Things like the calibration antennas and pulsers etc.
   \ingroup rootclasses
 */
-namespace AnitaLocations { 
+namespace AnitaLocations {
 
   const double LONGITUDE_SURF_SEAVEY=167.0564667; ///< Longitude of surface seavey.
   const double LATITUDE_SURF_SEAVEY=-77.86185; ///< Latitude of surface seavey.
@@ -245,6 +245,12 @@ namespace AnitaLocations {
   const Double_t LATITUDE_LDB  = - (77 + (51.23017/60)); ///< Latitude at LDB
   const Double_t LONGITUDE_LDB = + (167 + (12.16908/60)); ///< Longitude at LDB
   const Double_t ALTITUDE_LDB  = 0.; ///< Altitude at LDB
+
+    // adding these to the A3 branch for consistency...
+  Double_t getWaisLongitude();
+  Double_t getWaisLatitude();
+  Double_t getWaisAltitude();
+
 
 };
 

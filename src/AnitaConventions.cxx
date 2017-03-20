@@ -5,10 +5,14 @@
 #include <iostream>
 #include <cstring>
 
+Double_t AnitaLocations::getWaisLongitude(){return LONGITUDE_WAIS;}
+Double_t AnitaLocations::getWaisLatitude(){return LATITUDE_WAIS;}
+Double_t AnitaLocations::getWaisAltitude(){return ALTITUDE_WAIS;}
+
 const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
 {
-   switch(calType) {     
-   case kNoCalib: 
+   switch(calType) {
+   case kNoCalib:
      return "The 260 samples straight from raw data";
      break;
    case kJustUnwrap:
@@ -45,7 +49,7 @@ const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
    // case kDefault:
    //   return "Default timing calibration: what you should call for analysis work";
    //   break;
-   case kNotACalib: 
+   case kNotACalib:
      return "Useful for looping over all calibrations";
      break;
 
