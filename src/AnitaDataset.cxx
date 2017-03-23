@@ -244,6 +244,7 @@ UsefulAnitaEvent * AnitaDataset::useful(bool force_load)
 
     if (fHaveCalibFile)
     {
+      
       new (fUseful) UsefulAnitaEvent(fCalEvent, fCalType); 
     }
     else if (fRawEvent)
@@ -284,6 +285,11 @@ int AnitaDataset::getEntry(int entryNumber)
     fTurfDirty = true; 
     fSurfDirty = true; 
   }
+
+
+  // use the header to set the ANITA version 
+  AnitaVersion::setVersionFromUnixTime(header()->realTime); 
+
   return fDecimated ? fDecimatedEntry : fWantedEntry; 
 }
 
@@ -476,14 +482,14 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
     {
       if (checkIfFileExists(fname3.Data()))
       {
-	TFile * f = new TFile(fname3.Data()); 
-	filesToClose.push_back(f); 
-	fEventTree = (TTree*) f->Get("eventTree"); 
-	fHaveCalibFile = false;
-	fEventTree->SetBranchAddress("event",&fUseful);
+        TFile * f = new TFile(fname3.Data()); 
+        filesToClose.push_back(f); 
+        fEventTree = (TTree*) f->Get("eventTree"); 
+        fHaveCalibFile = false;
+        fEventTree->SetBranchAddress("event",&fUseful);
       } else {
-	fprintf(stderr,"Could not find event file for run %d, giving up!\n",run); 
-	return false;
+        fprintf(stderr,"Could not find event file for run %d, giving up!\n",run); 
+        return false;
       }
     } 
   }

@@ -8,17 +8,17 @@
 
 #include "AnitaEventCalibrator.h"
 #include "UsefulAnitaEvent.h"
-#include "AnitaVersion.h" 
+#include "AnitaVersion.h"
 #include "TMutex.h"
 
 ClassImp(AnitaEventCalibrator);
 
 
-static AnitaEventCalibrator*  instances[] = { 0, 0, 0, 0, 0} ; 
+static AnitaEventCalibrator*  instances[NUM_ANITAS+1] = {0};
 
 
-static const char * voltageCalibFiles[] = { 0, 0, 0, "simpleVoltageCalibrationHarm.txt", "simpleVoltageCalibrationAnita4.txt" }; 
-static const char * relativeCableDelayFiles[] = { 0,0,0, "relativeCableDelays.dat","relativeCableDelaysAnita4.dat"}; 
+static const char * voltageCalibFiles[] = { 0, 0, 0, "simpleVoltageCalibrationHarm.txt", "simpleVoltageCalibrationAnita4.txt" };
+static const char * relativeCableDelayFiles[] = { 0,0,0, "relativeCableDelays.dat","relativeCableDelaysAnita4.dat"};
 
 AnitaEventCalibrator::AnitaEventCalibrator(){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
@@ -51,10 +51,10 @@ AnitaEventCalibrator::~AnitaEventCalibrator(){
 static TMutex instance_lock;
 
 //______________________________________________________________________________
-AnitaEventCalibrator*  AnitaEventCalibrator::Instance(){
+AnitaEventCalibrator*  AnitaEventCalibrator::Instance(int v){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
 
-  int v = AnitaVersion::get(); 
+  if (!v) v = AnitaVersion::get();
 
   AnitaEventCalibrator * tmp = instances[v];
   __asm__ __volatile__ ("" ::: "memory"); //memory fence!
@@ -64,15 +64,15 @@ AnitaEventCalibrator*  AnitaEventCalibrator::Instance(){
     instance_lock.Lock();
     tmp = instances[v];
     if (!tmp)
-  {
+    {
       tmp = new AnitaEventCalibrator();
       __asm__ __volatile__ ("" ::: "memory");
       instances[v] = tmp;
-  }
+    }
     instance_lock.UnLock();
   }
 
-  return instances[v]; 
+  return instances[v];
 }
 
 

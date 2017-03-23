@@ -7,8 +7,8 @@
 
 const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
 {
-   switch(calType) {     
-   case kNoCalib: 
+   switch(calType) {
+   case kNoCalib:
      return "The 260 samples straight from raw data";
      break;
    case kJustUnwrap:
@@ -45,7 +45,7 @@ const char *WaveCalType::calTypeAsString(WaveCalType::WaveCalType_t calType)
    // case kDefault:
    //   return "Default timing calibration: what you should call for analysis work";
    //   break;
-   case kNotACalib: 
+   case kNotACalib:
      return "Useful for looping over all calibrations";
      break;
 
@@ -139,7 +139,7 @@ void WaveCalType::listAllCalTypes()
    std::cout << std::endl;
 }
 
-  
+
 Double_t AnitaLocations::getWaisLatitude() {return AnitaVersion::get() == 3 ? LATITUDE_WAIS_A3 : LATITUDE_WAIS_A4;};
 Double_t AnitaLocations::getWaisLongitude() {return AnitaVersion::get() == 3 ? LONGITUDE_WAIS_A3 : LONGITUDE_WAIS_A4;};
 Double_t AnitaLocations::getWaisAltitude() {return AnitaVersion::get() == 3 ? ALTITUDE_WAIS_A3 : ALTITUDE_WAIS_A4;};

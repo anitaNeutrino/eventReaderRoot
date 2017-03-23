@@ -28,14 +28,14 @@
 */
 namespace WaveCalType {
   typedef enum EWaveCalType {
-    
+
     kNoCalib = 0x00, ///< The 260 samples straight from raw data
     kJustUnwrap = 0x01, ///< The X good samples from raw data (260-hitbus)
     kNominal = 0x02, ///< Using mV/ADC = 1 and all dts = 1./2.6 ns
     kVoltageTime = 0x02, ///< Same as kNominal
     kJustTimeNoUnwrap  = 0x03, ///< For calibration: sample-to-sample dts without unwrapping (or voltage calibs)
     kNoTriggerJitterNoZeroMean = 0x05, ///< No inter-SURF timing (or zero meaning)
-    kNoChannelToChannelDelays  = 0x06, ///< Inter-SURF timing (trigger jitter) without cable delay 
+    kNoChannelToChannelDelays  = 0x06, ///< Inter-SURF timing (trigger jitter) without cable delay
     kNoTriggerJitterNoZeroMeanFlipRco = 0x07, ///< For calib: opposite RCO from software algorithm
     kNoTriggerJitterNoZeroMeanFirmwareRco = 0x08, ///< For calib: applies RCO from firmware (no latch delay)
     kNoTriggerJitterNoZeroMeanFirmwareRcoFlipped = 0x09,///< For calib: 1-firmware RCO (no latch delay)
@@ -151,14 +151,14 @@ namespace WaveCalType {
 #define ALL_ID_MASK 0xffff ///< Catch all Id Mask
 
 
-//RTLd stuff   
-#define NUM_RTLSDR 6  /// The number of devices 
+//RTLd stuff
+#define NUM_RTLSDR 6  /// The number of devices
 #define RTLSDR_MAX_SPECTRUM_BINS 4096  // The maximum number of bins we can save in a packet.
 
 
 // TUFF stuff
 #define NUM_TUFF_NOTCHES 3
-#define NUM_RFCM 4 
+#define NUM_RFCM 4
 
 
 
@@ -179,7 +179,7 @@ namespace AnitaRing {
      kNadirRing=kBottomRing,
      kNotARing ///< Useful in for loops.
    } AnitaRing_t; ///< Ring enumeration
-   
+
    const char *ringAsString(AnitaRing::AnitaRing_t ring); ///< Returns the ring as a character string
    char ringAsChar(AnitaRing::AnitaRing_t ring); ///< Returns the ring as a character string
 }
@@ -205,10 +205,10 @@ namespace AnitaPol {
 */
 namespace AnitaTrigPol {
    typedef enum EAnitaTrigPol {
-     kLCP = 0, ///< Left-circular polarisation
-     kRCP = 1, ///< Right-circular polarisation
-     kHorizontal = 2, ///< Horizontal Polarisation (e.g. A3)                                                                           │ 3276 aritrick  20   0   93484   6656   4784 S   0.3  0.0  10:30.13 icewm                                                              
-     kVertical = 3, ///< Vertical Polarisation (e.g. A3) 
+     kLCP = 0, ///< Left-circular polarisation (e.g. A4)
+     kRCP = 1, ///< Right-circular polarisation (e.g. A4)
+     kHorizontal = 2, ///< Horizontal Polarisation (e.g. A3)
+     kVertical = 3, ///< Vertical Polarisation (e.g. A3)
      kNotATrigPol ///< USeful in for loops.
    } AnitaTrigPol_t; ///< Polarisation enumeration.
    char polAsChar(AnitaTrigPol::AnitaTrigPol_t pol); ///< Returns the polarisation as a character string.
@@ -229,7 +229,7 @@ namespace AnitaTrigPol {
 namespace AnitaBand {
    typedef enum EAnitaBand {
      kLow =0, ///< The low band.
-     kMid =1, ///< The middle band.    
+     kMid =1, ///< The middle band.
      kHigh =2, ///< The high band.
      kFull =3 ///< The full band.x
    } AnitaBand_t; ///< Band enumeration.
@@ -237,11 +237,14 @@ namespace AnitaBand {
 }
 
 //!  AnitaLocations -- A selection of useful ANITA-I related locations, now updated for ANITA-3.
+//
+// TODO this needs to be updated properly to support multiple ANITA's
+//
 /*!
   Things like the calibration antennas and pulsers etc.
   \ingroup rootclasses
 */
-namespace AnitaLocations { 
+namespace AnitaLocations {
 
   const double LONGITUDE_SURF_SEAVEY=167.0564667; ///< Longitude of surface seavey.
   const double LATITUDE_SURF_SEAVEY=-77.86185; ///< Latitude of surface seavey.
@@ -276,7 +279,7 @@ namespace AnitaLocations {
   const Double_t LATITUDE_WAIS_A4 = - (-79.468116); ///< Latitude of WAIS divide pulser
   const Double_t LONGITUDE_WAIS_A4 = -(112.059258); ///< Longitude of WAIS divide pulser
   const Double_t ALTITUDE_WAIS_A4 = 1779.80;///< Altitude of WAIS divide pulser
-  
+
   //Flight independent calls
   Double_t getWaisLatitude();
   Double_t getWaisLongitude();
@@ -301,6 +304,8 @@ namespace AnitaLocations {
 // #define OFFSET_ADU5_HEADING -0.32
 
 
+// Number of ANITA payloads.
+#define NUM_ANITAS 4
 
 
 #endif //ANITACONVENTIONS_H

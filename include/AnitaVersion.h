@@ -1,15 +1,11 @@
 #ifndef _ANITA_VERSION_H
 #define _ANITA_VERSION_H
 
-/** 
- * This is an attempt at allowing 
- * multiple ANITA versions with the same code base. This file doesn't do much
- * by itself, but other things can use set() and get() to select an ANITA 
- * version or do something version-dependent. 
+/******************************************************************************
  *
- * Initially 3 and 4 will be supported. 2 Could also be made to be 
- * supported with a bit more work. 
+ *     AnitaVersion.h
  *
+ *     Cosmin Deaconu <cozzyd@kicp.uchicago.edu> Jan 2017
  *
  *    INTRODUCTION
  *  
@@ -70,7 +66,7 @@
  *      
  *      Need phase centers and such for A4 
  *  
- *      Many of the constants in AnitaConventions need to be dispatched according to version (partially complete). 
+ *      Many of the constants in AnitaConventions need to be dispatched according to version. 
  *
  *      Handle the following, which are not currently backward's compatible: 
  *
@@ -91,14 +87,15 @@
 #define MULTIVERSION_ANITA_ENABLED 1
 
 
-namespace AnitaVersion
+namespace AnitaVersion 
 {
-  /** Set the ANITA Version to use for e.g. calibration.
-   *  This is a thread-specifi value, so multiple threads
-   *  could process different ANITA versions.   
-   */ 
-  void set(int anitaVersion); 
 
+/** Set the ANITA Version to use for e.g. calibration.
+   *  If eventReaderRoot is compiled with THREADSAFE_ANITA_VERSION,
+   *  it is safe to use different ANITA versions in different threads 
+   */ 
+
+  void set(int anitaVersion); 
 
   /** Retrieve the current ANITA Version*/ 
   int get(); 
@@ -113,6 +110,7 @@ namespace AnitaVersion
    * returns 0 if successful, 1 if time is suspicious
    * */ 
   int setVersionFromUnixTime(unsigned time); 
+
 
 } 
 

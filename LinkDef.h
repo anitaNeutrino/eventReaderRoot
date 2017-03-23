@@ -71,11 +71,12 @@
 #pragma link C++ class SlowRate+;
 #pragma link C++ class GpuPowerSpectra+;
 #pragma link C++ class AnitaDataset+;
-#pragma link C++ class RTLSpectrum+; 
+#pragma link C++ class RTLSpectrum+;
 #pragma link C++ class TruthAnitaEvent+;
-#pragma link C++ class TuffNotchStatus+; 
-#pragma link C++ class TuffRawCmd+; 
+#pragma link C++ class TuffNotchStatus+;
+#pragma link C++ class TuffRawCmd+;
 #pragma link C++ namespace AnitaVersion;
+
 
 // Change l1 to l2 for Header's.
 #pragma read sourceClass="RawAnitaHeader" targetClass="RawAnitaHeader"  \

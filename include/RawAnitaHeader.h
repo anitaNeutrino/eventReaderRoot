@@ -76,12 +76,12 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
     -  "Value 2" 5th Attenuator setting (22dB)
     -  "Value 4" 6th Attenuator setting (28dB)
     -  "Value 0" 7th Attenuator setting (33dB)
-    
+
   */
-  UShort_t        calibStatus; 
+  UShort_t        calibStatus;
   UChar_t         priority; ///< Queue (lower 4-bits) and priority (upper 4-bits)
   UChar_t         turfUpperWord; ///< Upper word from TURF, useful for debugging
-  UChar_t         otherFlag; ///< Currently the first two surf evNums 
+  UChar_t         otherFlag; ///< Currently the first two surf evNums
  //!  Error Flag
   /*!
     Here we are coutning bits from 1 to 8
@@ -128,7 +128,7 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
   */
   UShort_t prioritizerStuff;
 
-  
+
 
 
   //!  Reserved bytes --- Deprecated
@@ -155,14 +155,14 @@ The second byte (reserved[1]) is currently reserved.
   /*!
     The number of of 65535Hz clock ticks in the current second, upto triggerTimeNs ns, which all four buffers were full. A more consistent definition of deadTime is available in the TurfRate class.
   */
-  UShort_t        deadTime; 
+  UShort_t        deadTime;
   //!  Buffer depth
   /*!
     The lowest two bits (bufferDepth&0x3) are a two-bit number (with range 0-3) that count the number of held buffers at the time of the trigger.
 
     The next lowest two bits (bufferDepth&0xc)>>2 are a two-bit number (with range 0-3) that count the number of held buffers at the time of readout.
   */
-  UChar_t         bufferDepth; // Buffer depth 
+  UChar_t         bufferDepth; // Buffer depth
   UChar_t         turfioReserved; ///< Reserved
   UShort_t        upperL1TrigPattern; ///< Bit mask for upper ring l1 antenna triggers. eg. if the bit 1 (the lowest bit) is active it means the upper ring antenna in phi sector 1 contributes an L1 trigger to the event.
   UShort_t        lowerL1TrigPattern; ///< Bit mask for lower ring l1 antenna triggers. eg. if the bit 1 (the lowest bit) is active it means the lower ring antenna in phi sector 1 contributes an L1 trigger to the event.
@@ -181,7 +181,7 @@ The second byte (reserved[1]) is currently reserved.
   UInt_t          rawtrigTime; ///< Trigger time in TURF clock ticks before corrections
   UInt_t          rawc3poNum; ///< Number of TURF clock ticks between GPS pulse per seconds before corrections
   UShort_t        rawppsNum; ///< Number of GPS PPS since last clear all before corrections
-  
+
   const char *trigTypeAsString() const; ///< Returns trigger type as string
   UShort_t getL3TrigPattern(AnitaPol::AnitaPol_t pol) const;
 

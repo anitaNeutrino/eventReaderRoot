@@ -106,8 +106,6 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer40_t *turfPtr)
    ppsNum=turfPtr->ppsNum;   
    deadTime=turfPtr->deadTime;
    c3poNum=turfPtr->c3poNum; // it seems this was not included!
-   //   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   //   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
    for(int i=0;i<PHI_SECTORS;i++) {
      l3Rates[i]=turfPtr->l3Rates[i][0];
      l2Rates[i]=turfPtr->l1Rates[i][0];
