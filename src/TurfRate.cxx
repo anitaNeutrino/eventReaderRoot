@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////////////
-/////  TurfRate.cxx        ANITA ADU5 VTG reading class                   /////
+/////  TurfRate.cxx        ANITA TURF Rate reading class                 /////
 /////                                                                    /////
 /////  Description:                                                      /////
-/////     A simple class that reads in ADU5 VTG and produces trees       ///// 
+/////     A simple class that reads in TURF Rate and produces trees      ///// 
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -37,11 +37,15 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStruct_t *turfPtr)
    for(int i=0;i<PHI_SECTORS;i++) {
      l3Rates[i]=turfPtr->l3Rates[i];
      l2Rates[i]=turfPtr->l2Rates[i];
+     l3RatesH[i]=0;
+     l2RatesH[i]=0;
      l3RatesGated[i]=turfPtr->l3RatesGated[i];
    }
    memcpy(reserved,turfPtr->reserved,sizeof(UChar_t)*3);
    l2TrigMask=turfPtr->l2TrigMask;
    phiTrigMask=turfPtr->phiTrigMask;
+   l2TrigMaskH=turfPtr->l2TrigMask;
+   phiTrigMaskH=turfPtr->phiTrigMask;
    errorFlag=turfPtr->errorFlag;
    refPulses=turfPtr->refPulses;
    intFlag=0;
@@ -62,14 +66,16 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer41_t *turfPtr)
    c3poNum=turfPtr->c3poNum;
    for(int i=0;i<PHI_SECTORS;i++) {
      l3Rates[i]=turfPtr->l3Rates[i];
-     // l3RatesH[i]=0;
+     l3RatesH[i]=0;
      l2Rates[i]=turfPtr->l1Rates[i];
-     // l1RatesH[i][1]=0;
+     l2RatesH[i]=0;
      l3RatesGated[i]=turfPtr->l3RatesGated[i];
    }
    rfScaler=turfPtr->rfScaler;
    refPulses=turfPtr->refPulses;
    l2TrigMask=turfPtr->l1TrigMask;
+   l2TrigMaskH=turfPtr->l1TrigMask;
+   phiTrigMaskH=turfPtr->phiTrigMask;
    // l1TrigMaskH=0;
    phiTrigMask=turfPtr->phiTrigMask;
    // phiTrigMaskH=0;
@@ -105,16 +111,20 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer40_t *turfPtr)
    for(int i=0;i<PHI_SECTORS;i++) {
      l3Rates[i]=turfPtr->l3Rates[i][0];
      l2Rates[i]=turfPtr->l1Rates[i][0];
+     l3RatesH[i]=0;
+     l2RatesH[i]=0;
    }
    l2TrigMask=turfPtr->l1TrigMask;
    phiTrigMask=turfPtr->phiTrigMask;
+   l2TrigMaskH=turfPtr->l1TrigMask;
+   phiTrigMaskH=turfPtr->phiTrigMask;
    errorFlag=turfPtr->errorFlag;
    memcpy(reserved,turfPtr->reserved,sizeof(UChar_t)*3);
    intFlag=0;
 }
 
 
-TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer34_t *turfPtr)
+TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer35_t *turfPtr)
 {
 
  if(turfPtr->gHdr.code!=PACKET_TURF_RATE ||
@@ -137,14 +147,20 @@ TurfRate::TurfRate(Int_t trun, Int_t trealTime, TurfRateStructVer34_t *turfPtr)
    //   memcpy(l1Rates,turfPtr->l1Rates,sizeof(UShort_t)*PHI_SECTORS*2);
    //   memcpy(upperL2Rates,turfPtr->upperL2Rates,sizeof(UChar_t)*PHI_SECTORS);
    //   memcpy(lowerL2Rates,turfPtr->lowerL2Rates,sizeof(UChar_t)*PHI_SECTORS);
-   for(int i=0;i<PHI_SECTORS;i++) {
+   for(int i=0;i<PHI_SECTORS;i++)
+   {
      l3Rates[i]=turfPtr->l3Rates[i][0];
-     //     l3RatesH[i]=turfPtr->l3Rates[i][1];
+     l3RatesH[i]=turfPtr->l3Rates[i][1];
+     l2Rates[i]=turfPtr->l1Rates[i][0];
+     l2RatesH[i]=turfPtr->l1Rates[i][1];
    }
+
    l2TrigMask=turfPtr->l1TrigMask;
-   //   l1TrigMaskH=turfPtr->l1TrigMaskH;
+   l2TrigMaskH=turfPtr->l1TrigMaskH;
+
    phiTrigMask=turfPtr->phiTrigMask;
-   //   phiTrigMaskH=turfPtr->phiTrigMaskH;
+   phiTrigMaskH=turfPtr->phiTrigMaskH;
+
    errorFlag=turfPtr->errorFlag;
    intFlag=0;
 
@@ -412,21 +428,19 @@ Int_t TurfRate::isL2Masked(int phi) {
 
 
 Int_t TurfRate::isPhiMaskedHPol(int phi) {
-  return isPhiMasked(phi);
-  //  if(phi<0 || phi>15) return -1;
-  //  return ((phiTrigMaskH & (1<<phi)) ? 1:0);
+  if(phi<0 || phi>15) return -1;
+  return ((phiTrigMaskH & (1<<phi)) ? 1:0);
 }
 
 
 Int_t TurfRate::isL1Masked(int phi) {
-  return -1;
-  //  if(phi<0 || phi>15) return -1;
-  //  return ((l1TrigMask & (1<<phi)) ? 1 :0);
+   if(phi<0 || phi>15) return -1;
+   return ((l2TrigMask & (1<<phi)) ? 1 :0);
 }
 Int_t TurfRate::isL1MaskedHPol(int phi) {
   return -1;
-  //  if(phi<0 || phi>15) return -1;
-  //  return ((l1TrigMaskH & (1<<phi)) ? 1:0);
+  if(phi<0 || phi>15) return -1;
+  return ((l2TrigMaskH & (1<<phi)) ? 1:0);
 }
 
 Int_t TurfRate::isAntMasked(int phi, int ring)

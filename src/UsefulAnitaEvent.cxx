@@ -21,6 +21,9 @@
 ClassImp(UsefulAnitaEvent);
 
 
+AnitaEventCalibrator* fCalibrator = NULL;
+
+
 UsefulAnitaEvent::UsefulAnitaEvent() 
   : RawAnitaEvent()
 {
@@ -288,4 +291,3 @@ Bool_t UsefulAnitaEvent::setAlfaFilterFlag(Bool_t newBoolianFlag){
 #endif
   return fFilterAlfaChannel;
 }
-  

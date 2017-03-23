@@ -84,9 +84,13 @@ class AnitaGeomTool
 						AnitaRing::AnitaRing_t &ring,AnitaTrigPol::AnitaTrigPol_t &pol);
   static Int_t getSurfChanTriggerFromPhiRingPol(Int_t phi, AnitaRing::AnitaRing_t ring,
 						AnitaTrigPol::AnitaTrigPol_t pol,Int_t &surf, Int_t &chan);
-  static Int_t getPhiRingFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &phi,
+  static Int_t getPhiRingFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &phi, //a4 only 
 					AnitaRing::AnitaRing_t &ring);
-  static Int_t getSurfL1TriggerChanFromPhiRing(Int_t phi, AnitaRing::AnitaRing_t ring,
+  static Int_t getPhiPolFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &phi, //a3 only 
+					AnitaPol::AnitaPol_t &pol);
+  static Int_t getSurfL1TriggerChanFromPhiRing(Int_t phi, AnitaRing::AnitaRing_t ring, //a4 only 
+					       Int_t &surf, Int_t &l1Chan);
+  static Int_t getSurfL1TriggerChanFromPhiPol(Int_t phi, AnitaPol::AnitaPol_t ring, //a3 only 
 					       Int_t &surf, Int_t &l1Chan);
   static Int_t getSurfL2TriggerChanFromPhi(Int_t phi, Int_t &surf, Int_t &l2Chan);
   static Int_t getAntPolFromSurfChan(Int_t surf, Int_t chan, Int_t &ant,

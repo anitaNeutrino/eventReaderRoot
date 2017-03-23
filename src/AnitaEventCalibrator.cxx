@@ -9,6 +9,7 @@
 #include "AnitaEventCalibrator.h"
 #include "UsefulAnitaEvent.h"
 #include "AnitaVersion.h" 
+#include "TMutex.h"
 
 ClassImp(AnitaEventCalibrator);
 
@@ -47,16 +48,30 @@ AnitaEventCalibrator::~AnitaEventCalibrator(){
 };
 
 
+static TMutex instance_lock;
+
 //______________________________________________________________________________
 AnitaEventCalibrator*  AnitaEventCalibrator::Instance(){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
 
   int v = AnitaVersion::get(); 
 
-  if(!instances[v])
+  AnitaEventCalibrator * tmp = instances[v];
+  __asm__ __volatile__ ("" ::: "memory"); //memory fence!
+
+  if (!tmp)
   {
-    instances[v] = new AnitaEventCalibrator();
+    instance_lock.Lock();
+    tmp = instances[v];
+    if (!tmp)
+  {
+      tmp = new AnitaEventCalibrator();
+      __asm__ __volatile__ ("" ::: "memory");
+      instances[v] = tmp;
   }
+    instance_lock.UnLock();
+  }
+
   return instances[v]; 
 }
 
@@ -192,6 +207,18 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     fAddPedestal = true;
     // Don't break just do full calibration but add pedestal...
     // Not sure if this is the same as the previous implementation of this flag.
+
+
+  case WaveCalType::kOnlyTiming:
+    fUnwrap = true;
+    fBinToBinDts = true;
+    fApplyTempCorrection = true;
+    fApplyTriggerJitterCorrection = true;
+    fApplyCableDelays = true;
+    fZeroMeanNonClockChannels = true;
+    fApplyExtraDelayFromPhaseCenter = true;
+    break;
+
 
   case WaveCalType::kFull:
     fUnwrap = true;
@@ -463,6 +490,8 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   // Finally copy some meta-data about the calibration to the tree.
   eventPtr->fCalType = calType;
   eventPtr->fClockProblem = fClockProblem;
+
+
 
 
   // Now enjoy your calibrated event

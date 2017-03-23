@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "AveragedSurfHk.h"
+#include "AnitaVersion.h"
 #include "AnitaPacketUtil.h"
 #include "AnitaGeomTool.h"
 #include "AnitaEventCalibrator.h"
@@ -204,18 +205,29 @@ AveragedSurfHk::AveragedSurfHk(Int_t trun, Int_t trealTime, AveragedSurfHkStruct
 
 
 
-int AveragedSurfHk::getL1Scaler(int phi, AnitaRing::AnitaRing_t ring) {
+int AveragedSurfHk::getL1Scaler(int phi, AnitaPol::AnitaPol_t pol, AnitaRing::AnitaRing_t ring) {
   int surf,l1Chan;
-  AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(phi,ring,surf,l1Chan);
+
+  if (AnitaVersion::get() == 4) 
+    AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(phi,ring,surf,l1Chan);
+  else 
+    AnitaGeomTool::getSurfL1TriggerChanFromPhiPol(phi,pol,surf,l1Chan);
+
+
   if(surf>=0 && surf<ACTIVE_SURFS && l1Chan>=0 && l1Chan<L1S_PER_SURF)
     return avgL1[surf][l1Chan];
 
   return -1;
 }
 
-int AveragedSurfHk::getL1ScalerRMS(int phi, AnitaRing::AnitaRing_t ring) {
+int AveragedSurfHk::getL1ScalerRMS(int phi, AnitaPol::AnitaPol_t pol, AnitaRing::AnitaRing_t ring) {
   int surf,l1Chan;
-  AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(phi,ring,surf,l1Chan);
+  if (AnitaVersion::get() == 4) 
+    AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(phi,ring,surf,l1Chan);
+  else 
+    AnitaGeomTool::getSurfL1TriggerChanFromPhiPol(phi,pol,surf,l1Chan);
+
+
   if(surf>=0 && surf<ACTIVE_SURFS && l1Chan>=0 && l1Chan<L1S_PER_SURF)
     return rmsL1[surf][l1Chan];
 

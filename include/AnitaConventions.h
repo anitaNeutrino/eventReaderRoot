@@ -43,6 +43,7 @@ namespace WaveCalType {
     kDefault = 0x0a, ///< What you should call for analysis work
     kVTFast = 0x1b, ///< Faster, but no algorithm for it
     kAddPeds = 0x1c, ///< New thing
+    kOnlyTiming = 0x1d, ///< All the timing of kFull, but none of the voltage calibration (Ped corrected ADC counts)
     kNotACalib ///< Useful for looping over all calibrations 
   } WaveCalType_t; ///< The calibration enumeration type
 
@@ -206,9 +207,15 @@ namespace AnitaTrigPol {
    typedef enum EAnitaTrigPol {
      kLCP = 0, ///< Left-circular polarisation
      kRCP = 1, ///< Right-circular polarisation
+     kHorizontal = 2, ///< Horizontal Polarisation (e.g. A3)                                                                           │ 3276 aritrick  20   0   93484   6656   4784 S   0.3  0.0  10:30.13 icewm                                                              
+     kVertical = 3, ///< Vertical Polarisation (e.g. A3) 
      kNotATrigPol ///< USeful in for loops.
    } AnitaTrigPol_t; ///< Polarisation enumeration.
    char polAsChar(AnitaTrigPol::AnitaTrigPol_t pol); ///< Returns the polarisation as a character string.
+
+   /** Conversion from AnitaPol_t to AnitaTrigPol_t */
+   AnitaTrigPol::AnitaTrigPol_t fromAnitaPol(AnitaPol::AnitaPol_t pol);
+
 }
 
 
@@ -265,14 +272,15 @@ namespace AnitaLocations {
 
 
   //Anita 4 location (from Ben Strutt on Slack)
+  // And now with an elog note https://www.phys.hawaii.edu/elog/anita_notes/699
   const Double_t LATITUDE_WAIS_A4 = - (-79.468116); ///< Latitude of WAIS divide pulser
   const Double_t LONGITUDE_WAIS_A4 = -(112.059258); ///< Longitude of WAIS divide pulser
   const Double_t ALTITUDE_WAIS_A4 = 1779.80;///< Altitude of WAIS divide pulser
   
   //Flight independent calls
-  const Double_t getWaisLatitude();
-  const Double_t getWaisLongitude();
-  const Double_t getWaisAltitude();
+  Double_t getWaisLatitude();
+  Double_t getWaisLongitude();
+  Double_t getWaisAltitude();
 
 
   // LDB position taken from Steph's e-log

@@ -56,8 +56,8 @@ class AveragedSurfHk: public TObject
    
    Int_t isBandMasked(int surf, int scl)
       { return (surfTrigBandMask[surf]&(1<<scl));} ///< Was the given band masked off (1 is band excluded from trigger, 0 is band included)
-   Int_t getL1Scaler(int phi, AnitaRing::AnitaRing_t ring); ///< Get L1 scaler for given phi-ring
-   Int_t getL1ScalerRMS(int phi, AnitaRing::AnitaRing_t ring); ///< Get L1 scaler for given phi-ring
+   Int_t getL1Scaler(int phi, AnitaPol::AnitaPol_t pol,  AnitaRing::AnitaRing_t ring); ///<Returns the L1 scaler value for given phi-ring-pol 
+   Int_t getL1ScalerRMS(int phi, AnitaPol::AnitaPol_t pol, AnitaRing::AnitaRing_t ring); ///< Get L1 scaler for given phi-ring
    Int_t getScaler(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol); ///< Get scaler for given phi-ring-pol
    Int_t getScalerRMS(int phi, AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol); ///< Get scaler RMS for given phi-ring-pol
    Int_t getThreshold(int phi, AnitaRing::AnitaRing_t ring,  AnitaTrigPol::AnitaTrigPol_t pol); ///< Get threhsold for given phi-ring-pol
@@ -70,7 +70,7 @@ class AveragedSurfHk: public TObject
    Double_t getRMSRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
    //   Double_t getMeasuredRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
    //   Double_t getMeasuredRMSRFPowerInK(int surf, int chan); ///< Returns the pseudo-calibrated RF power in K.
-  ClassDef(AveragedSurfHk,31);
+  ClassDef(AveragedSurfHk,40);
 };
 
 

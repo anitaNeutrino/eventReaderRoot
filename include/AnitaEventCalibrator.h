@@ -33,6 +33,8 @@
 #include "RingBuffer.h"
 #include "RawAnitaHeader.h"
 
+
+
 class TGraph;
 class UsefulAnitaEvent;
 
@@ -149,10 +151,11 @@ class AnitaEventCalibrator : public TObject
 
 
 
+  AnitaEventCalibrator(); // don't want multiple calibrators lying around for no reason
 
  private:
 
-  AnitaEventCalibrator(); // don't want multiple calibrators lying around for no reason 
+  // AnitaEventCalibrator(); // don't want multiple calibrators lying around for no reason
   void loadCalib(); ///< Reads calibration constants from text files into arrays
   PedestalStruct_t fPedStruct; ///< For adding pedestals back onto voltage samples
   ClassDef(AnitaEventCalibrator,0);

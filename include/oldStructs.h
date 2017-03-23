@@ -438,6 +438,25 @@ typedef struct {
   unsigned int unixTime;
   unsigned short ppsNum; ///<It's only updated every second so no need for sub-second timing
   unsigned short deadTime; ///<How much were we dead??
+  unsigned short l1Rates[PHI_SECTORS][2]; /// to get Hz
+  unsigned char l3Rates[PHI_SECTORS][2]; /// to get Hz
+  unsigned short l1TrigMask; ///< As read from TURF (16-bit upper phi, lower phi)
+  unsigned short l1TrigMaskH; ///< As read from TURF (16-bit upper phi, lower phi)
+  unsigned short phiTrigMask; ///< 16 bit phi-sector mask
+  unsigned short phiTrigMaskH; ///< 16 bit phi-sector mask
+  unsigned char errorFlag;///<Bit 1-4 bufferdepth, Bits 5,6,7 are for upper,lower,nadir trig mask match
+  unsigned char reserved[3];
+  unsigned int c3poNum;
+} TurfRateStructVer35_t;
+
+
+
+
+typedef struct {
+  GenericHeader_t gHdr;
+  unsigned int unixTime;
+  unsigned short ppsNum; ///<It's only updated every second so no need for sub-second timing
+  unsigned short deadTime; ///<How much were we dead??
   unsigned char l3Rates[PHI_SECTORS][2]; /// to get Hz
   unsigned short l1TrigMask; ///< As read from TURF (16-bit upper phi, lower phi)
   unsigned short l1TrigMaskH; ///< As read from TURF (16-bit upper phi, lower phi)

@@ -7,12 +7,17 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "AnitaGeomTool.h"
+#include "AnitaVersion.h" 
+#include <assert.h>
+#include "TMutex.h" 
 
 #define INCHTOMETER 0.0254
 
 Double_t deltaRL = 0.0;
 Double_t deltaUD = 0.0;
 
+
+static AnitaGeomTool * instances[NUM_ANITAS+1] = {0,0,0,0,0}; 
 
 
 
@@ -56,7 +61,7 @@ namespace AnitaGeom {
   ///< Map from SURF to antenna+polarization.
   ///< The numbers 1-48 indicate antenna as the negative sign is used to indicate polarization.
   ///< The negative sign indicates polarization (-ve is VPOL, +ve is HPOL)
-  Int_t surfToAntMap[ACTIVE_SURFS][RFCHAN_PER_SURF]= {{-42,-34,-48,-40,42,34,48,40},
+  Int_t surfToAntMapAnita4[ACTIVE_SURFS][RFCHAN_PER_SURF]= {{-42,-34,-48,-40,42,34,48,40},
 						      {-44,-36,-46,-38,44,36,46,38},
 						      {-32,-24,-28,-20,32,24,28,20},
 						      {-30,-22,-26,-18,30,22,26,18},
@@ -69,6 +74,19 @@ namespace AnitaGeom {
 						      {-15,-7,-11,-3,15,7,11,3},
 						      {-13,-5,-9,-1,13,5,9,1}};
       
+  Int_t surfToAntMapAnita3[ACTIVE_SURFS][RFCHAN_PER_SURF]= {{-42,-34,-48,-40,42,34,48,40},
+						      {-44,-36,-46,-38,44,36,46,38},
+						      {-32,-24,-28,-20,32,24,28,20},
+						      {-30,-22,-26,-18,30,22,26,18},
+						      {-12,4,-14,-6,12,-4,14,6}, 
+						      {-10,-2,-16,-8,10,2,16,8},
+						      {-45,-37,-41,-33,45,37,41,33},
+						      {-47,-39,-43,-35,47,39,43,35},
+						      {-27,-19,-29,-21,27,19,29,21},
+						      {-25,-17,-31,-23,25,17,31,23},
+						      {-15,-7,-11,-3,15,7,11,3},
+						      {-13,-5,-9,-1,13,5,9,1}};
+ 
   ///< Map from phi-sector to antenna. Both start counting at zero.
   Int_t topAntNums[NUM_PHI]    = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
   Int_t middleAntNums[NUM_PHI] = {16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
@@ -316,7 +334,12 @@ Int_t AnitaGeomTool::getPhiRingFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &p
 {
   if(phi<0 || phi>=NUM_PHI) return -1;
   Int_t surfHalf=l1Chan>2;   
-  phi=AnitaGeom::surfToPhiTriggerMapAnita4[surf][surfHalf];
+  Int_t v = AnitaVersion::get(); 
+  // this method only makes sends for A4
+  assert(v==4); 
+
+  phi = AnitaGeom::surfToPhiTriggerMapAnita4[surf][surfHalf] ; 
+
   if((l1Chan%3)==0) ring=AnitaRing::kTopRing;
   if((l1Chan%3)==1) ring=AnitaRing::kMiddleRing;
   if((l1Chan%3)==2) ring=AnitaRing::kBottomRing;
@@ -324,21 +347,46 @@ Int_t AnitaGeomTool::getPhiRingFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &p
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Converts the SURF and L1 trigger channel to phi-sector and polarization.
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+Int_t AnitaGeomTool::getPhiPolFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &phi, AnitaPol::AnitaPol_t & pol)
+{
+  if(phi<0 || phi>=NUM_PHI) return -1;
 
+  Int_t v = AnitaVersion::get(); 
+
+  //this method only makes sense for A3
+  assert(v == 3); 
+
+  Int_t surfHalf=l1Chan%2;   
+  phi=AnitaGeom::surfToPhiTriggerMapAnita3[surf][surfHalf];
+  pol=AnitaPol::kVertical;
+  if(l1Chan>=2) pol=AnitaPol::kHorizontal;
+  return phi;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Converts the SURF and L1 trigger channel to phi-sector and polarization.
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 Int_t AnitaGeomTool::getSurfChanTriggerFromPhiRingPol(Int_t phi,AnitaRing::AnitaRing_t ring, AnitaTrigPol::AnitaTrigPol_t pol ,Int_t &surf, Int_t &chan) {
   if(phi<0 || phi>=NUM_PHI) return -1;
-  surf=AnitaGeom::phiToSurfTriggerMapAnita4[phi];
-  Int_t surfHalf=AnitaGeom::phiToSurfHalfAnita4[phi];
-  chan = (6-6*pol)+ ring + 3*surfHalf; 
+  Int_t v = AnitaVersion::get(); 
 
-  // if(phi==3 && ring==AnitaRing::kTopRing) {     
-  //   if(pol==AnitaTrigPol::kVertical) chan=6;
-  //   if(pol==AnitaTrigPol::kHorizontal) chan=0;
-  // }
+  surf = v == 4 ? AnitaGeom::phiToSurfTriggerMapAnita4[phi] : 
+         v == 3 ? AnitaGeom::phiToSurfTriggerMapAnita3[phi] : 
+         -1 ;
+
+  Int_t surfHalf = v == 4 ? AnitaGeom::phiToSurfHalfAnita4[phi] : 
+                   v == 3 ? AnitaGeom::phiToSurfHalfAnita3[phi] : 
+                  -1; 
+
+  chan = (6-6*(pol % 2))+ ring + 3*surfHalf; 
+
+  if(v == 3 && phi==3 && ring==AnitaRing::kTopRing) {     
+    if(pol==AnitaTrigPol::kVertical) chan=6;
+    if(pol==AnitaTrigPol::kHorizontal) chan=0;
+  }
   return surf;
 }
 
@@ -367,6 +415,26 @@ Int_t AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(Int_t phi, AnitaRing::Anita
   return surf;
 }
 
+Int_t AnitaGeomTool::getSurfL1TriggerChanFromPhiPol(Int_t phi, AnitaPol::AnitaPol_t pol, Int_t &surf, Int_t &l1Chan) 
+{
+  if(phi<0 || phi>=NUM_PHI) return -1;
+
+  Int_t v = AnitaVersion::get(); 
+  assert(v==3); 
+
+  surf=AnitaGeom::phiToSurfTriggerMapAnita3[phi];
+  Int_t surfHalf=AnitaGeom::phiToSurfHalfAnita3[phi];
+  if(pol==AnitaPol::kVertical)
+  {
+    l1Chan=surfHalf;
+  }
+  else 
+  {
+    l1Chan=2+surfHalf;
+  }
+
+  return surf;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Converts phi-sector to surf and l2 trigger channel
@@ -374,21 +442,54 @@ Int_t AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(Int_t phi, AnitaRing::Anita
 Int_t AnitaGeomTool::getSurfL2TriggerChanFromPhi(Int_t phi, Int_t &surf, Int_t &l2Chan)
 {
   if(phi<0 || phi>=NUM_PHI) return -1;
-  surf=AnitaGeom::phiToSurfTriggerMapAnita4[phi];
-  Int_t surfHalf=AnitaGeom::phiToSurfHalfAnita4[phi];
+  Int_t v = AnitaVersion::get(); 
+  assert(v==4); 
+  surf = AnitaGeom::phiToSurfTriggerMapAnita4[phi] ; 
+  Int_t surfHalf=  AnitaGeom::phiToSurfHalfAnita4[phi] ; 
+
   l2Chan=surfHalf;
   return surf;
 }
 
 
 
+
+static TMutex instance_lock; 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Generates an instance of AnitaGeomTool, required for non-static functions.
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 AnitaGeomTool*  AnitaGeomTool::Instance()
 {
-  //static function
-  return (fgInstance) ? (AnitaGeomTool*) fgInstance : new AnitaGeomTool();
+  /**************************************************************************************************
+   *                                                                                                *
+   * Yeah, the classic singleton pattern isn't thread-safe.                                         *
+   * We got away it before because we usually statically initialized AnitaGeomTool instances, but   *
+   * with multiple versions, we can't necessarily do that.                                          *
+   *                                                                                                *
+   * If we required c++11, static initialization is guaranteed thread-safe, although                *
+   * we'd have to use templates or something like that for this multiton pattern.                   *
+   *                                                                                                *
+   **************************************************************************************************/ 
+
+  if (!v) v = AnitaVersion::get(); 
+
+  AnitaGeomTool * tmp = instances[v]; 
+
+  __asm__ __volatile__ ("" ::: "memory"); //memory fence! 
+  if (!tmp) 
+  {
+    instance_lock.Lock(); 
+    tmp = instances[v]; 
+    if (!tmp) 
+    {
+      tmp = new AnitaGeomTool(); 
+      __asm__ __volatile__ ("" ::: "memory");
+      instances[v] = tmp; 
+    }
+    instance_lock.UnLock(); 
+  }
+
+  return instances[v];
 }
 
 
@@ -745,7 +846,14 @@ Int_t AnitaGeomTool::getSurfChanFromChanIndex(Int_t chanIndex, // input channel 
 Int_t AnitaGeomTool::getAntPolFromSurfChan(Int_t surf,Int_t chan,Int_t &ant, AnitaPol::AnitaPol_t &pol) 
 {
 
-  ant=AnitaGeom::surfToAntMap[surf][chan];
+  int v = AnitaVersion::get(); 
+
+  if (v >4 && v < 3) return 0; 
+
+  ant= v == 4 ? AnitaGeom::surfToAntMapAnita4[surf][chan] : 
+       v == 3 ? AnitaGeom::surfToAntMapAnita3[surf][chan] :
+       0 ; 
+
 
   //  std::cout << "surf, chan, ant are " << surf << " " << chan << "\n";
 

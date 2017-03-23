@@ -13,6 +13,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include "AnitaVersion.h" 
 
 ClassImp(SurfHk);
 
@@ -287,10 +288,15 @@ SurfHk::SurfHk(Int_t           trun,
 
 }
 
-Int_t SurfHk::getL1Scaler(int phi, AnitaRing::AnitaRing_t ring) 
+Int_t SurfHk::getL1Scaler(int phi, AnitaPol::AnitaPol_t pol, AnitaRing::AnitaRing_t ring) 
 {
   Int_t surf, l1Scl;
-  AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(phi,ring,surf,l1Scl);
+
+  if (AnitaVersion::get() == 4) 
+    AnitaGeomTool::getSurfL1TriggerChanFromPhiRing(phi,ring,surf,l1Scl);
+  else 
+    AnitaGeomTool::getSurfL1TriggerChanFromPhiPol(phi,pol,surf,l1Scl);
+
   if((surf>=0 && surf<ACTIVE_SURFS) && (l1Scl>=0 && l1Scl<L1S_PER_SURF)) {
     return l1Scaler[surf][l1Scl];
   }
@@ -300,6 +306,8 @@ Int_t SurfHk::getL1Scaler(int phi, AnitaRing::AnitaRing_t ring)
 
 Int_t SurfHk::getL2Scaler(int phi) 
 {
+  if (AnitaVersion::get() == 3) return -1; 
+
   Int_t surf, l2Scl;
   AnitaGeomTool::getSurfL2TriggerChanFromPhi(phi,surf,l2Scl);
   if((surf>=0 && surf<ACTIVE_SURFS) && (l2Scl>=0 && l2Scl<L2S_PER_SURF)) {

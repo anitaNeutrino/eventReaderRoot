@@ -99,8 +99,16 @@ For the attenuator setting take (calibStatus&0xf000)>>12 and:
   UShort_t        l2TrigMask;
   UShort_t        l2TrigMaskH; ///<Deprecated
 
+
+  //these are l1's because there is no need for L2 offline trig masks in A4 (since the scaler worked properly)
+  // andl l1=l2 in A3, and this way we don't have to write a #pragma read rule for these
+  UShort_t        l1TrigMaskOffline;
+  UShort_t        l1TrigMaskHOffline; ///<Deprecated
+
   UShort_t        phiTrigMask; ///< 16-bit phi mask (from TURF)
   UShort_t        phiTrigMaskH; ///< 16-bit phi mask (from TURF)
+  UShort_t        phiTrigMaskOffline; ///< 16-bit phi mask (from TURF)
+  UShort_t        phiTrigMaskHOffline; ///< 16-bit phi mask (from TURF)
 
   //Prioritizer stuff
   UChar_t peakThetaBin;
@@ -174,47 +182,49 @@ The second byte (reserved[1]) is currently reserved.
   UInt_t          rawc3poNum; ///< Number of TURF clock ticks between GPS pulse per seconds before corrections
   UShort_t        rawppsNum; ///< Number of GPS PPS since last clear all before corrections
   
-  const char *trigTypeAsString(); ///< Returns trigger type as string
-  //  int isInL3Pattern(int phi); ///< Returns 1 if phi sector had l3 trigger
-  //  int isInL2Pattern(int phi, AnitaRing::AnitaRing_t ring); ///< Returns 1 if given phi-ring had l2 trigger
-  UShort_t getL3TrigPattern(AnitaPol::AnitaPol_t pol);
-  int isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
-  int isInPhiMask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
-  int isInL1Mask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi-ring had l1 trigger
-  int getL1Mask( AnitaPol::AnitaPol_t pol) const; ///< Get's the l1 Mask
-  int isInL2Mask(int phi); ///< Returns 1 if given phi-ring had l1 trigger
-  int isInPhiMaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) { return isInPhiMask(phi,pol); } ///< for anita 4, this is the same as getPhiMask, just for compatibility 
-  int isInL1MaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) { return isInL1Mask(phi,pol);} ///< for anita 4, this is the same as isinL1Mask
-  int getPhiMaskOffline(AnitaPol::AnitaPol_t pol) const { return 0; } ///< for anita 4, this does nothin
-  int getL1MaskOffline( AnitaPol::AnitaPol_t pol) const { return 0;} ///< for anita 4, this does nothing
-  int getCurrentTurfBuffer(); ///< Returns the current TURF buffer number (0, 1, 2 or 3);
-  unsigned int getCurrentTurfHolds(); ///< Returns a 4-bit bitmask corresponding to the currently held buffers.
-  int getNumberOfCurrentTurfHolds(); ///< Returns the number of currently held TURF buffers (0-4)
-  int getTurfRunNumber() 
+  const char *trigTypeAsString() const; ///< Returns trigger type as string
+  UShort_t getL3TrigPattern(AnitaPol::AnitaPol_t pol) const;
+
+  int isInL3Pattern(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) const; ///< Returns 1 if given phi-ring had l3 trigger. pol does nothing for A4
+  int isInPhiMask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) const; ///< Returns 1 if given phi-pol is in mask
+  int isInL1Mask(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) const; ///< Returns 1 if given phi-pol is in mask
+  int getL1Mask( AnitaPol::AnitaPol_t pol) const; ///< Get's the l1 Mask. In A4 this is the same as l2 mask
+  int getPhiMask(AnitaPol::AnitaPol_t pol = AnitaPol::kVertical) const; ///<pol does nothing for A4
+  int isInL2Mask(int phi) const; ///< Returns 1 if given phi-ring had l1 trigger
+  int getL2Mask() const { return l2TrigMask; }
+  int isInPhiMaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) const; // pol does nothing in A4
+  int isInL1MaskOffline(int phi, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) const; //A3 only
+
+  int getPhiMaskOffline(AnitaPol::AnitaPol_t pol = AnitaPol::kHorizontal) const; //pol does nothing in A4
+  int getL1MaskOffline( AnitaPol::AnitaPol_t pol) const;  //a3 only
+  int getCurrentTurfBuffer() const; ///< Returns the current TURF buffer number (0, 1, 2 or 3);
+  unsigned int getCurrentTurfHolds() const; ///< Returns a 4-bit bitmask corresponding to the currently held buffers.
+  int getNumberOfCurrentTurfHolds() const; ///< Returns the number of currently held TURF buffers (0-4)
+  int getTurfRunNumber() const
   { return (((turfEventId&0xfff00000)>>20));} ///< Returns the run number portion of the TURF event id
-  int getTurfEventNumber()
+  int getTurfEventNumber() const
   { return (turfEventId&0xfffff);} ///< Returns the event number portion of the TURF event id.
 
-  Int_t getAboveThresholdFlag();
-  Int_t getBinToBinIncreaseFlag();
-  Int_t getSaturationFlag();
-  Float_t getPeakThetaRad();
-  Float_t getPeakPhiRad();
-  Float_t getPeakThetaDeg();
-  Float_t getPeakPhiDeg();
-  Float_t getImagePeak();
-  Float_t getCoherentSumPeak();
-  AnitaPol::AnitaPol_t getPeakPol();
+  Int_t getAboveThresholdFlag() const;
+  Int_t getBinToBinIncreaseFlag() const;
+  Int_t getSaturationFlag() const;
+  Float_t getPeakThetaRad() const;
+  Float_t getPeakPhiRad() const;
+  Float_t getPeakThetaDeg() const;
+  Float_t getPeakPhiDeg() const;
+  Float_t getImagePeak() const;
+  Float_t getCoherentSumPeak() const;
+  AnitaPol::AnitaPol_t getPeakPol() const;
 
   Int_t getTriggerBitRF() const;
   Int_t getTriggerBitADU5() const;
   Int_t getTriggerBitG12() const;
   Int_t getTriggerBitSoftExt() const;
 
-  Int_t setMask (UShort_t newL1Mask, UShort_t newPhiMask, AnitaPol::AnitaPol_t pol); // sets phi and l1 masking (used in icemc)
+  Int_t setMask (UShort_t newL2Mask, UShort_t newPhiMask, AnitaPol::AnitaPol_t pol); // sets phi and l1 masking (used in icemc)
   Int_t setTrigPattern (UShort_t newTrigPattern, AnitaPol::AnitaPol_t pol);          // sets l3 trigger (used in icemc)
 
-  ClassDef(RawAnitaHeader,41);
+  ClassDef(RawAnitaHeader,42);
 
 };
 

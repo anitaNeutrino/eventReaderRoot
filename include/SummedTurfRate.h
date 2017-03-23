@@ -40,16 +40,17 @@ class SummedTurfRate: public TObject
    //   UShort_t         upperL2Rates[PHI_SECTORS]; ///< Summed l2 rates (upper) //not ANITA-3
    //   UShort_t         lowerL2Rates[PHI_SECTORS]; ///< Summed l2 rates (lower) //not ANITA-3
    UInt_t         l2Rates[PHI_SECTORS]; ///< Summed l2 rates
+   UShort_t       l2RatesH[PHI_SECTORS]; ///< HPol l2 rates (called l1rates in A3) for A3 compatibility. 0 for A4. 
    UShort_t       l3Rates[PHI_SECTORS]; ///< Summed l3 rates
-   //   UShort_t         l3RatesH[PHI_SECTORS]; ///< Summed l3 rates
+   UShort_t       l3RatesH[PHI_SECTORS]; ///< Summed l3 rates
    //   UInt_t           nadirL1Rates[NADIR_ANTS]; ///< Summed l1 rates (nadir) //not ANITA-3
    //   UShort_t         nadirL2Rates[NADIR_ANTS]; ///< Summed l2 rates (nadir) //not ANITA-3
    //   UInt_t           antTrigMask; ///< Which (upper+lower) ants are excluded?  //not ANITA-3
 
    UShort_t         l2TrigMask; ///< Which phi sectors are masked off?
-   //   UShort_t         l1TrigMaskH; ///< Which phi sectors are masked off?
+   UShort_t         l2TrigMaskH; ///< Which phi sectors are masked off?
    UShort_t         phiTrigMask; ///< Which phi sectors are masked off?
-   //   UShort_t         phiTrigMaskH; ///< Which phi sectors are masked off?
+   UShort_t         phiTrigMaskH; ///< Which phi sectors are masked off?
    //   UChar_t          nadirAntTrigMask; ///< Which nadir ants are excluded? //not ANITA-3
    UChar_t          errorFlag; ///< Error flag
    Int_t            intFlag; ///< Interpolation flag -- zero for raw data
@@ -70,7 +71,7 @@ class SummedTurfRate: public TObject
    Float_t getDeadTimeFrac() { return deadTime/(65535.*numRates);}
 
    Int_t isL1Masked(int phi,AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Deprecated
-   ClassDef(SummedTurfRate,42);
+   ClassDef(SummedTurfRate,44);
 
 };
 

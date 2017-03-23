@@ -92,11 +92,23 @@ char AnitaPol::polAsChar(AnitaPol::AnitaPol_t pol)
   return 'U';
 }
 
+AnitaTrigPol::AnitaTrigPol_t AnitaTrigPol::fromAnitaPol(AnitaPol::AnitaPol_t pol)
+{
+  switch (pol)
+  {
+    case AnitaPol::kHorizontal: return AnitaTrigPol::kHorizontal;
+    case AnitaPol::kVertical: return AnitaTrigPol::kVertical;
+    default: return AnitaTrigPol::kNotATrigPol;
+  }
+}
+
 char AnitaTrigPol::polAsChar(AnitaTrigPol::AnitaTrigPol_t pol)
 {
   switch(pol) {
   case kLCP: return 'L';
   case kRCP: return 'R';
+  case kHorizontal: return 'H';
+  case kVertical: return 'V';
       default:
     return 'U';
   }
@@ -128,7 +140,6 @@ void WaveCalType::listAllCalTypes()
 }
 
   
-const Double_t AnitaLocations::getWaisLatitude() {return AnitaVersion::get() == 3 ? LATITUDE_WAIS : LATITUDE_WAIS_A4;};
-const Double_t AnitaLocations::getWaisLongitude() {return AnitaVersion::get() == 3 ? LONGITUDE_WAIS : LONGITUDE_WAIS_A4;};
-const Double_t AnitaLocations::getWaisAltitude() {return AnitaVersion::get() == 3 ? ALTITUDE_WAIS : ALTITUDE_WAIS_A4;};
-  
+Double_t AnitaLocations::getWaisLatitude() {return AnitaVersion::get() == 3 ? LATITUDE_WAIS_A3 : LATITUDE_WAIS_A4;};
+Double_t AnitaLocations::getWaisLongitude() {return AnitaVersion::get() == 3 ? LONGITUDE_WAIS_A3 : LONGITUDE_WAIS_A4;};
+Double_t AnitaLocations::getWaisAltitude() {return AnitaVersion::get() == 3 ? ALTITUDE_WAIS_A3 : ALTITUDE_WAIS_A4;};
