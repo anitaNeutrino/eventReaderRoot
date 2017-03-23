@@ -31,9 +31,6 @@
 #pragma link C++ namespace     AnitaLocations;
 #pragma link C++ namespace     AnitaCompress;
 
-
-#pragma link C++ namespace     AnalysisBlinding;
-#pragma link C++ enum          AnalysisBlinding::strategy;
 //#pragma link C++ nestedtypedef AnalysisBlinding::strategy_t;
 
 
