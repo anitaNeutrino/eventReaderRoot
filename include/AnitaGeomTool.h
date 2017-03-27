@@ -225,26 +225,26 @@ class AnitaGeomTool
 
 
    //Kurt's ANITA-3 numbers
-   Double_t xAntFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //m
-   Double_t yAntFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //m
-   Double_t zAntFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //m
-   Double_t rAntFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //m
-   Double_t azCentreFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //radians
-   Double_t apertureAzFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //radians
-   Double_t apertureElFromVerticalHornKurtAnita3[NUM_SEAVEYS]; //radians
+   Double_t xAntFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //m
+   Double_t yAntFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //m
+   Double_t zAntFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //m
+   Double_t rAntFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //m
+   Double_t azCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //radians
+   Double_t apertureAzFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //radians
+   Double_t apertureElFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //radians
   
-   Double_t xPhaseCentreFromVerticalHornKurtAnita3[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t yPhaseCentreFromVerticalHornKurtAnita3[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t zPhaseCentreFromVerticalHornKurtAnita3[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t rPhaseCentreFromVerticalHornKurtAnita3[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t azPhaseCentreFromVerticalHornKurtAnita3[NUM_SEAVEYS][NUM_POLS]; //radians
-   Double_t aftForeOffsetAngleVerticalKurtAnita3; //radians
+   Double_t xPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t yPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t zPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t rPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //m
+   Double_t azPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //radians
+   Double_t aftForeOffsetAngleVerticalPhotogrammetry; //radians
 
    void updateAnt(Double_t deltaR,Double_t deltaRL,Double_t deltaUD);
    void printAntPos();
 
-   void useKurtAnita3Numbers(Int_t flag) {
-     fUseKurtAnita3Numbers=flag;
+   void usePhotogrammetryNumbers(Int_t flag) {
+     fUsePhotogrammetryNumbers=flag;
    }
 
 
@@ -340,11 +340,11 @@ class AnitaGeomTool
     } ///<Converts cartesian coordinates to latitude and longitude
 
  private:
-  void readPhotogrammetry();
-  void readAnita3Photogrammetry();
+  void readAnita2Photogrammetry();
+  void readPhotogrammetry(int version);
   void readSimonsNumbers();
-  void readAnita3PhaseCenterNumbers();
-  Int_t fUseKurtAnita3Numbers;
+  void readPhaseCenterNumbers(int version);
+  Int_t fUsePhotogrammetryNumbers;
   AnitaGeomTool();
 
 
