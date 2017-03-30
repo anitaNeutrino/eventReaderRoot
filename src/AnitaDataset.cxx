@@ -422,7 +422,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   if (!fDecimated) fIndices = ((TTreeIndex*) fHeadTree->GetTreeIndex())->GetIndex(); 
 
   //try to load gps event file  
-  TString fname = TString::Format("%s/run%d/gpsEvent%d.root", data_dir, run, run); 
+  TString fname = TString::Format("%s/run%d/gpsEvent%d.root", data_dir, run, run);
   if (checkIfFileExists(fname.Data()))
   {
      TFile * f = new TFile(fname.Data()); 
@@ -434,7 +434,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   // load gps file instead
   else 
   {
-    fname = TString::Format("%s/run%d/gpsFile%d.root", data_dir, run, run); 
+    fname = TString::Format("%s/run%d/gpsFile%d.root", data_dir, run, run);
     fname2 = TString::Format("%s/run%d/SimulatedAnitaGpsFile%d.root", data_dir, run, run); 
     if (const char * the_right_file = checkIfFilesExist(2, fname.Data(), fname2.Data()))
     {
@@ -456,7 +456,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
 
   //try to load calibrated event file 
 
-  fname = TString::Format("%s/run%d/calibratedEventFile%d.root", data_dir, run, run); 
+  fname = TString::Format("%s/run%d/calibratedEventFile%d.root", data_dir, run, run);
   fname2 = TString::Format("%s/run%d/calEventFile%d.root", data_dir, run, run); 
   fname3 = TString::Format("%s/run%d/SimulatedAnitaEventFile%d.root", data_dir, run, run); 
   if (const char * the_right_file = checkIfFilesExist(2, fname.Data(), fname2.Data()))
@@ -529,7 +529,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   }
 
   // try to load tusf file 
-  fname = TString::TString::Format("%s/run%d/SurfHkFile%d.root",data_dir,run,run); 
+  fname = TString::TString::Format("%s/run%d/surfHkFile%d.root",data_dir,run,run);
   if (checkIfFileExists(fname.Data()))
   {
 

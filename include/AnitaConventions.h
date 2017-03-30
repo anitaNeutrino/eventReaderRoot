@@ -285,6 +285,13 @@ namespace AnitaLocations {
   Double_t getWaisLongitude();
   Double_t getWaisAltitude();
 
+  // Siple Dome position taken from Steph's e-log
+  // https://www.phys.hawaii.edu/elog/anita_notes/595
+  const Double_t LATITUDE_SIPLE = - (81 + (39.139/60)); ///< Latitude of Siple dome pulser
+  const Double_t LONGITUDE_SIPLE = -(149 + (0.01/60)); ///< Longitude of Siple dome pulser
+  // bvv: The next constant is the best I could find at the moment. elog
+  // 595 doens't have any information on altitude:
+  const Double_t ALTITUDE_SIPLE = 601;///< Altitude of Siple dome pulser according to http://mapcarta.com/25623620
 
   // LDB position taken from Steph's e-log
   // https://www.phys.hawaii.edu/elog/anita_notes/617
