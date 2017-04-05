@@ -1,7 +1,7 @@
-// Quick macro for finding live time
-// As some Hk data is unavailable, rendering pat information unfindable, I'm using this to determine the live time instead of say, event data
+// Quick macro for finding Usable time
+// As some Hk data is unavailable, rendering pat information unfindable, I'm using this to determine the Usable time instead of say, event data
 
-// Identifies missing realTime periods, and looks for suspicious gaps
+// Identifies missing realTime periods, and looks for suspicious gapso
 // Successfully finds runs w/ gps outages, missing events etc
 
 #include "AnitaConventions.h"
@@ -34,9 +34,9 @@
 #include "TLine.h"
 #include "TPaveText.h"
 
-void findLiveTime(int firstRun, int lastRun);
+void findUsableTime(int firstRun, int lastRun);
 
-void findLiveTime(int firstRun, int lastRun)
+void findUsableTime(int firstRun, int lastRun)
 {
 
   FileStat_t staty;
@@ -63,7 +63,7 @@ void findLiveTime(int firstRun, int lastRun)
   UInt_t realTimeC = 0; // current realTime entry
   UInt_t realTimeL = 0; // last realTime entry
 
-  UInt_t typicalMaxRunTransitionTime = 21; // realTime difference between runs
+  UInt_t typicalMaxRunTransitionTime = 29; // max realTime difference between runs
   UInt_t currentSuspiciousRun = firstRun;
   UInt_t lastSuspiciousRun = firstRun;
   UInt_t suspiciousRuns = 0;
@@ -71,8 +71,9 @@ void findLiveTime(int firstRun, int lastRun)
   UInt_t missingTimePeriod = 0;
   UInt_t totalTime = 0;
   UInt_t totalTimeMissing = 0;
-  UInt_t liveTime = 0;
-  Double_t liveTimePerc = 0;
+  UInt_t UsableTime = 0;
+  Double_t UsableTimePerc = 0;
+  Double_t fullUsableTimePerc = 0;
 
   for (int entry = 0; entry < maxEntries; entry++) 
    {
@@ -97,11 +98,14 @@ void findLiveTime(int firstRun, int lastRun)
     if( (realTimeC != (realTimeL + 1))  &&  (realTimeC != realTimeL) )
       {
 
-	std::cout << "Run is: " << hk->run << std::endl;
+	if(realTimeC > realTimeL) // weird feature with adu5A outage where current real time < last real time...
+	  {
+	    std::cout << "Run is: " << hk->run << std::endl;
+	    
+	    std::cout << "realTimeC = " << realTimeC << std::endl;
+	    std::cout << "realTimeL = " << realTimeL << std::endl;
+	  }
 	
-	std::cout << "realTimeC = " << realTimeC << std::endl;
-	std::cout << "realTimeL = " << realTimeL << std::endl;
-
 	missingTimePeriod = 0;
 
 	missingTimePeriod = realTimeC - realTimeL;
@@ -123,8 +127,11 @@ void findLiveTime(int firstRun, int lastRun)
 	   
 	    lastSuspiciousRun = hk->run;
 	  }
-	
-	std::cout << "Transition in real time:" << missingTimePeriod << std::endl;
+
+	if(missingTimePeriod != 0) // don't print the corrected error
+	  {
+	    std::cout << "Transition in real time:" << missingTimePeriod << std::endl;
+	  }
 	
 	totalTimeMissing += missingTimePeriod;
 
@@ -139,18 +146,22 @@ void findLiveTime(int firstRun, int lastRun)
 
 	totalTime = finalTime - startTime;
 	
-	liveTime = totalTime - totalTimeMissing;
+	UsableTime = totalTime - totalTimeMissing;
 
 	std::cout << "Total missing time = " << totalTimeMissing << " seconds" << std::endl;
 
 	std::cout << " = " << Double_t(totalTimeMissing)/Double_t(60*60) << " hours " << std::endl;
 	
-	std::cout << "Total live time = " << liveTime << " seconds" << std::endl;
+	std::cout << "Total Usable time = " << UsableTime << " seconds" << std::endl;
 
-	std::cout << "= " << Double_t(liveTime)/(Double_t(60*60*24)) << " days " << std::endl;
+	std::cout << "= " << Double_t(UsableTime)/(Double_t(60*60*24)) << " days " << std::endl;
 	
-	liveTimePerc = Double_t(totalTime - totalTimeMissing)/Double_t(totalTime) * 100;
-	std:: cout << "% live time = " << liveTimePerc << std::endl;
+	UsableTimePerc = Double_t(totalTime - totalTimeMissing)/Double_t(totalTime) * 100;
+	std:: cout << "% Usable time = " << UsableTimePerc << std::endl;
+
+	fullUsableTimePerc = Double_t(totalTime - totalTimeMissing)/Double_t(2.394e+06) * 100;
+
+	std::cout << "% total Usable time = " << fullUsableTimePerc << std::endl;
 
 	std::cout << "Total # suspicious runs = " <<  suspiciousRuns << std::endl;
 
