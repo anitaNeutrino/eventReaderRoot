@@ -106,6 +106,7 @@ void  AnitaDataset::unloadRun()
   fGpsTree = 0; 
   fTurfTree = 0; 
   fSurfTree = 0; 
+  fRunLoaded = false;
 
   if (fCutList) 
   {
@@ -387,6 +388,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
     else
     {
       fprintf(stderr," Could not find decimated head file for run %d, giving up!\n", run); 
+      fRunLoaded = false;
       return false; 
     }
   }
@@ -412,6 +414,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   else 
   {
     fprintf(stderr,"Could not find head file for run %d, giving up!\n", run); 
+    fRunLoaded = false;
     return false; 
   }
 
@@ -447,6 +450,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
     else 
     {
       fprintf(stderr,"Could not find gps file for run %d, giving up!\n",run); 
+      fRunLoaded = false;
       return false; 
     }
   }
@@ -489,6 +493,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
         fEventTree->SetBranchAddress("event",&fUseful);
       } else {
         fprintf(stderr,"Could not find event file for run %d, giving up!\n",run); 
+	fRunLoaded = false;
         return false;
       }
     } 
@@ -550,6 +555,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   getEntry(0); 
   
 
+  fRunLoaded = true;
   return true; 
 }
 

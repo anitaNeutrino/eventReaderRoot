@@ -157,6 +157,8 @@ class AnitaDataset
     /** Loads the SURF Hk. This is indexed so that the the payload times match as closely as possible */
     SurfHk * surf(bool force_reload = false);
 
+    /** Lets you check to see if you have a header and event file actually loaded, or if it failed loading */
+    bool fRunLoaded;
 
 
 
@@ -197,6 +199,7 @@ class AnitaDataset
     bool fDecimated;
     TEventList * fCutList;
     int fCutIndex;
+
 };
 
 #endif
