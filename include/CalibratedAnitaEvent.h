@@ -40,6 +40,7 @@ class CalibratedAnitaEvent: public RawAnitaEvent
   Double_t fTempFactorGuesses[NUM_SURF];  ///< A holder variable to cling on to the temperature correction factor that we are guessing at.
   Double_t fClockPhiArray[NUM_SURF];   ///< An array to store the clock offsets
   Int_t fClockProblem;
+  Int_t fClockSpike;
 
   ClassDef(CalibratedAnitaEvent,5);
 };
