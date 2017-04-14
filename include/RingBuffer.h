@@ -18,9 +18,14 @@
 
 class RingBuffer{
 
+public:
+
+  enum {
+    default_size = 100
+  };
+  
   // I have no idea what the proper stl iterators look like on the inside,
   // so this is probably not how you're supposed to do this  
-
   class iterator{
   public:
     iterator(RingBuffer* rb=NULL, UInt_t vi=0) : ringBuffer(rb), vecIndex(vi){}
@@ -100,13 +105,13 @@ class RingBuffer{
     mutable Int_t vecIndex;
   };
 
+
   friend class iterator;  
   
 
-public:
   explicit RingBuffer(UInt_t numElementsInput);
 
-  void insert(Double_t value); /* Put an element in */
+  Double_t insert(Double_t value); /* Put an element in, returns the value of a removed element */
   Double_t getSum(){return sum;}
   Double_t getMean(){return numRingElements > 0 ? sum/numRingElements : 0;}
   

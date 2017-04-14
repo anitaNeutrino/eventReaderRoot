@@ -10,25 +10,29 @@
 
 RingBuffer::RingBuffer(UInt_t bufferSize){
   
-  if(bufferSize < 2){
+  if(bufferSize < default_size){
     std::cerr << "Error in RingBuffer constructor! Constructor requires numElements >= 2" << std::endl;
-    std::cerr << "Setting RingBuffer.numElements = 2" << std::endl;
-    bufferSize = 2;
+    std::cerr << "Setting RingBuffer.numElements = " << default_size << std::endl;
+    bufferSize = default_size;
   }
-  fSize = bufferSize;
   sum = 0;
-  elements.resize(fSize+1, 0);
+  fSize = bufferSize;
+  numRingElements = 0;
+  nextElement = 0;
+  elements.resize(fSize+1, 0);  
 }
 
 
-void RingBuffer::insert(Double_t value){
+double RingBuffer::insert(Double_t value){
 
+  double retVal = 0;
   // if the buffer is full we must remove an old element
   if(numRingElements==fSize){
     // then need to remove one
     int oe = oldestElement();
-    sum -= elements[oe];
-    elements[oe] = 0; // overwrite value with zero
+    retVal = elements[oe];
+    sum -= retVal;
+    elements[oe] = 0; // overwrite value with zero, not neccessary but will probably help with debugging
   }
 
   // insert new element
@@ -42,4 +46,5 @@ void RingBuffer::insert(Double_t value){
   // (runs through vector elements (with length fSize+1) in sequence)
   nextElement = nextElement < fSize ? nextElement + 1 : 0;			      
 
+  return retVal;
 }
