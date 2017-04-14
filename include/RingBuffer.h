@@ -33,7 +33,7 @@ class RingBuffer{
     }
 
     iterator& operator++(){
-      vecIndex = vecIndex < ringBuffer->size ? vecIndex + 1 : 0;
+      vecIndex = vecIndex < (int)ringBuffer->fSize ? vecIndex + 1 : 0;
       return (*this);
     }
 
@@ -44,7 +44,7 @@ class RingBuffer{
     }
     
     iterator& operator--(){
-      vecIndex = vecIndex == 0 ? ringBuffer->size: vecIndex - 1;
+      vecIndex = vecIndex == 0 ? ringBuffer->fSize: vecIndex - 1;
       return (*this);
     }
 
@@ -57,13 +57,13 @@ class RingBuffer{
     // the underlying order probably isn't what people expect, so I'm gonna leave commented out for now.
     
     // iterator& operator+=(int i){
-    //   vecIndex = (vecIndex + i) % ringBuffer->size;
+    //   vecIndex = (vecIndex + i) % ringBuffer->fSize;
     //   return (*this);
     // }
 
     // iterator& operator-=(int i){
     //   operator+=(i);
-    //   vecIndex = vecIndex < 0 ? vecIndex + ringBuffer->size : vecIndex;
+    //   vecIndex = vecIndex < 0 ? vecIndex + ringBuffer->fSize : vecIndex;
     //   return (*this);
     // }
 
@@ -117,11 +117,14 @@ public:
   iterator end(){
     return iterator(this, nextElement);
   }
+
+  size_t size() const{return fSize;} // logical size of the container
+  size_t numElements() const {return numRingElements;} // the number of elements in the buffer
   
 private:  
 
   Double_t sum;
-  UInt_t size;
+  UInt_t fSize;
   UInt_t numRingElements; // ranges from 0 -> size as the buffer fills (remains at size once the buffer is full)
   UInt_t nextElement; // indexes where we will insert the next element, the 
   std::vector<double> elements; // this will be a vector of (size+1) so that .end() iterator can use normal iterator!=RingBuffer::end() syntax for loops.
@@ -130,10 +133,10 @@ private:
   UInt_t oldestElement(){
     // if we haven't completely filled the buffer, then the oldest element is zero
     UInt_t oldestElement = 0; 
-    if(numRingElements==size){ // if we have filled the buffer,
+    if(numRingElements==fSize){ // if we have filled the buffer,
       // then the oldest is the one in front of the nextElement
       oldestElement = nextElement + 1;
-      oldestElement = oldestElement >= size + 1? oldestElement - (size + 1) : oldestElement;
+      oldestElement = oldestElement >= fSize + 1? oldestElement - (fSize + 1) : oldestElement;
     }
     return oldestElement;
   }

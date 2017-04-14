@@ -15,16 +15,16 @@ RingBuffer::RingBuffer(UInt_t bufferSize){
     std::cerr << "Setting RingBuffer.numElements = 2" << std::endl;
     bufferSize = 2;
   }
-  size = bufferSize;
+  fSize = bufferSize;
   sum = 0;
-  elements.resize(size+1, 0);
+  elements.resize(fSize+1, 0);
 }
 
 
 void RingBuffer::insert(Double_t value){
 
   // if the buffer is full we must remove an old element
-  if(numRingElements==size){
+  if(numRingElements==fSize){
     // then need to remove one
     int oe = oldestElement();
     sum -= elements[oe];
@@ -36,10 +36,10 @@ void RingBuffer::insert(Double_t value){
   elements[nextElement] = value;
 
   // update count (used for getMean())
-  numRingElements = numRingElements < size ? numRingElements + 1 : size;
+  numRingElements = numRingElements < fSize ? numRingElements + 1 : fSize;
 
   // update index pointing to next element
-  // (runs through vector elements (with length size+1) in sequence)
-  nextElement = nextElement < size ? nextElement + 1 : 0;			      
+  // (runs through vector elements (with length fSize+1) in sequence)
+  nextElement = nextElement < fSize ? nextElement + 1 : 0;			      
 
 }
