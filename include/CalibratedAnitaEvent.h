@@ -42,7 +42,7 @@ class CalibratedAnitaEvent: public RawAnitaEvent
   Int_t fClockProblem;
   Int_t fClockSpike;
 
-  ClassDef(CalibratedAnitaEvent,5);
+  ClassDef(CalibratedAnitaEvent,6);
 };
 
 

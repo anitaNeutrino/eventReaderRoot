@@ -112,6 +112,7 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
   Int_t fClockSpike;
   Int_t fClockProblem;
   
+  tempTree->Branch("event",&eventNum,"event/i");
   tempTree->Branch("avgDeltaT",&avgDeltaT,"avgDeltaT/D");
   tempTree->Branch("rmsDeltaT",&rmsDeltaT,"rmsDeltaT/D");
   tempTree->Branch("numDeltaT",&numDeltaT,"numDeltaT/I");
