@@ -81,6 +81,7 @@ int main(int argc, char **argv)
      eventChain->GetEntry(entry);
 
      UsefulAnitaEvent *realEvent = new UsefulAnitaEvent(calEvent);
+     // std::cout<< realEvent->event-
      //Now realEvent contains event data
 
     

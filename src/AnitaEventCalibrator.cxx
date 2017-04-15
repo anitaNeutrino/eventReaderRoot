@@ -32,7 +32,7 @@ AnitaEventCalibrator::AnitaEventCalibrator(){
   dtInterp = 0.01; ///< in nanoseconds, for clock alignment interpolation
   nominalDeltaT = 1./2.6; ///< in nanoseconds
   fClockProblem = 0; ///< If unreasonable number of zero crossings in clock, raise flag & skip temp correction update
-
+  fClockSpike = 0; ///< If clock spike remains, raise this flag
   initializeVectors();
 
 }
@@ -107,15 +107,16 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
   //! The plan for calibration happiness:
   //! Step 1: figure out from WaveCalType_t calType exactly what we're going to do
-  //! Step 2: Figure out RCO phase from clock period (if bin-to-bin dts required)
-  //! Step 3: Update rolling temperature correction (+copy to event)
-  //! Step 4: Unwrap all channels (if requested)
-  //! Step 5: Apply bin-to-bin timing (if requested)
-  //! Step 6: Apply voltage calib (if requested)
-  //! Step 7: Find trigger jitter correction
-  //! Step 8: Zero mean all non-clock channels
-  //! Step 9: Apply channel-to-channel cable delays
-  //! Step 10: Copy everything to UsefulAnitaEvent
+  //! Step 2: Remove the spiky clock
+  //! Step 3: Figure out RCO phase from clock period (if bin-to-bin dts required)
+  //! Step 4: Update rolling temperature correction (+copy to event)
+  //! Step 5: Unwrap all channels (if requested)
+  //! Step 6: Apply bin-to-bin timing (if requested)
+  //! Step 7: Apply voltage calib (if requested)
+  //! Step 8: Find trigger jitter correction
+  //! Step 9: Zero mean all non-clock channels
+  //! Step 10: Apply channel-to-channel cable delays
+  //! Step 11: Copy everything to UsefulAnitaEvent
 
 
 
@@ -138,8 +139,12 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   Bool_t fFirmwareRcoNoLatch             = false;
   Bool_t fAddPedestal                    = false;
   Bool_t fApplyExtraDelayFromPhaseCenter = false;
+  Bool_t fRemoveClockSpike               = false;
 
   switch(calType){
+  case WaveCalType::kJustRemoveClockSpike:
+    fRemoveClockSpike = true;
+    break;
 
   case WaveCalType::kNotACalib:
     std::cerr << "Warning in " << __PRETTY_FUNCTION__ << ", calling kNotACalib will be treated as kNoCalib"
@@ -150,11 +155,13 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     break;
 
   case WaveCalType::kNominal:
+    fRemoveClockSpike = true;
     fBinToBinDts = true;
     fApplyTempCorrection = true;
     break;
 
   case WaveCalType::kJustTimeNoUnwrap:
+    fRemoveClockSpike = true;
     fBinToBinDts = true;
     fApplyTempCorrection = true;
     break;
@@ -164,6 +171,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     break;
 
   case WaveCalType::kNoTriggerJitterNoZeroMean:
+    fRemoveClockSpike = true;
     fUnwrap = true;
     fBinToBinDts = true;
     fVoltage = true;
@@ -171,6 +179,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     break;
 
   case WaveCalType::kNoTriggerJitterNoZeroMeanFlipRco:
+    fRemoveClockSpike = true;
     fUnwrap = true;
     fBinToBinDts = true;
     fVoltage = true;
@@ -178,6 +187,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     break;
 
   case WaveCalType::kNoTriggerJitterNoZeroMeanFirmwareRco:
+    fRemoveClockSpike = true;
     fUnwrap = true;
     fBinToBinDts = true;
     fVoltage = true;
@@ -186,6 +196,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     break;
 
   case WaveCalType::kNoTriggerJitterNoZeroMeanFirmwareRcoFlipped:
+    fRemoveClockSpike = true;
     fUnwrap = true;
     fBinToBinDts = true;
     fVoltage = true;
@@ -194,6 +205,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     break;
 
   case WaveCalType::kNoChannelToChannelDelays:
+    fRemoveClockSpike = true;
     fUnwrap = true;
     fBinToBinDts = true;
     fApplyTempCorrection = true;
@@ -210,6 +222,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
   case WaveCalType::kOnlyTiming:
+    fRemoveClockSpike = true;
     fUnwrap = true;
     fBinToBinDts = true;
     fApplyTempCorrection = true;
@@ -226,6 +239,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     break;
 
   case WaveCalType::kFull:
+    fRemoveClockSpike = true;
     fUnwrap = true;
     fBinToBinDts = true;
     fApplyTempCorrection = true;
@@ -237,6 +251,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     break;
 
   case WaveCalType::kVTFast:
+    fRemoveClockSpike = true;
     fUnwrap = true;
     fBinToBinDts = true;
     fApplyTempCorrection = false;
@@ -252,11 +267,41 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
   }
 
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // ! Step 2: Remove the spiky clock
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  fClockSpike = 0;
+  if(fRemoveClockSpike==true){
+    // First remove spike in Surf10 clock, hopefully the spiky clock in SURF10 chipB will all gone.
+    for(Int_t samp=0;samp<NUM_SAMP;samp++){
+      if(eventPtr->data[9*NUM_CHAN + 8][samp] >300 ){
+        eventPtr->data[9*NUM_CHAN + 8][samp] -= 512;
+      }
+    }
+
+    // Loop through all Surf, add flag if the clock has a problem
+    if(eventPtr->fFromCalibratedAnitaEvent==0){ // Figure out the fClockSpike if we don't have calibrated input
+      for(Int_t surf=0; surf<NUM_SURF; surf++){
+        for(Int_t samp=0;samp<NUM_SAMP;samp++){
+          if(eventPtr->data[surf*NUM_CHAN + 8][samp] <-200 or eventPtr->data[surf*NUM_CHAN + 8][samp] > 200){
+            // std::cout<< eventPtr->eventNumber<< std::endl;
+            // std::cout<< "-----------------------------------------"<< std::endl;
+            fClockSpike = 1;
+          }
+        }
+      }
+    }
+    else{// If have calibrated anita event, then copy result.
+      fClockSpike = eventPtr->fClockSpike;
+    }
+    
+  }
+
 
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //! Step 2: Figure out RCO phase from clock period (if bin-to-bin dts required)
+  //! Step 3: Figure out RCO phase from clock period (if bin-to-bin dts required)
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   fClockProblem = 0; ///< If we have an issue with the clock (more than 4 zero crossings or less than 3) then we raise this flag to not update rolling average temperature correction.
 
@@ -299,7 +344,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //! Step 3: Update rolling temperature correction (copy to usefulAnitaEvent)
+  //! Step 4: Update rolling temperature correction (copy to usefulAnitaEvent)
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   if(eventPtr->fFromCalibratedAnitaEvent==0){ // Then figure it out from event information
     if(fClockProblem!=0){
@@ -323,7 +368,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //! Steps 4: Unwrap all channels (if requested)
+  //! Steps 5: Unwrap all channels (if requested)
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   if(fUnwrap==true){// Then we call the unwrapping function for every channel
     for(Int_t surf = 0; surf < NUM_SURF; surf++){
@@ -375,7 +420,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //! Step 5: Apply bin-to-bin timing (if requested)
+  //! Step 6: Apply bin-to-bin timing (if requested)
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Actually all the bin-to-bin timings are put in the time array by default..
   // so if they're not wanted we can take them out again.
@@ -396,7 +441,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //! Step 6: Apply voltage calib (if requested)
+  //! Step 7: Apply voltage calib (if requested)
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   if(fVoltage==true){
     applyVoltageCalibration(eventPtr);
@@ -413,7 +458,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //! Step 7: Find trigger jitter correction
+  //! Step 8: Find trigger jitter correction
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   if(fApplyTriggerJitterCorrection==true){
     if(eventPtr->fFromCalibratedAnitaEvent==0){
@@ -448,7 +493,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //! Step 8: Zero mean all non-clock channels
+  //! Step 9: Zero mean all non-clock channels
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   if(fZeroMeanNonClockChannels==true){
@@ -462,8 +507,8 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
 
   // Combine last two steps...
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //! Step 9: Apply channel-to-channel cable delays
-  //! Step 10: Copy voltage, time (with cable delays) & capacitor arrays to UsefulAnitaEvent
+  //! Step 10: Apply channel-to-channel cable delays
+  //! Step 11: Copy voltage, time (with cable delays) & capacitor arrays to UsefulAnitaEvent
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   for(Int_t surf=0; surf<NUM_SURF; surf++){
     eventPtr->fRcoArray[surf] = rcoVector.at(surf);
@@ -495,6 +540,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   // Finally copy some meta-data about the calibration to the tree.
   eventPtr->fCalType = calType;
   eventPtr->fClockProblem = fClockProblem;
+  eventPtr->fClockSpike = fClockSpike;
 
 
 

@@ -1,3 +1,5 @@
+
+#include <iostream>
 #include "AnitaConventions.h"
 #include "UsefulAnitaEvent.h"
 #include "RawAnitaEvent.h"
@@ -11,6 +13,10 @@
 #include "TH1.h"
 #include "TF1.h"
 #include "TStyle.h"
+#include "TSystem.h"
+#include "TROOT.h"
+#include "TMath.h"
+#include "TPaveText.h"
 #include "FFTtools.h"
 #include <iostream>
 #include <fstream>
@@ -43,16 +49,16 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
   eventChain->Add(eventName);
   eventChain->SetBranchAddress("event",&event);
 
-   for(int extra=1;extra<100;extra++) {
-     sprintf(eventName,"%s/run%d/eventFile%d_%d.root",baseName,run,run,extra);
-    TFile *fpTest = TFile::Open(eventName);
-    if(!fpTest) 
-      break;
-    else {
-      delete fpTest;
-      eventChain->Add(eventName);
-    }
-  }
+  //  for(int extra=1;extra<100;extra++) {
+  //    sprintf(eventName,"%s/run%d/eventFile%d_%d.root",baseName,run,run,extra);
+  //   TFile *fpTest = TFile::Open(eventName);
+  //   if(!fpTest) 
+  //     break;
+  //   else {
+  //     delete fpTest;
+  //     eventChain->Add(eventName);
+  //   }
+  // }
 
   TFile *fpHead = TFile::Open(headerName);
   TTree *headTree = (TTree*) fpHead->Get("headTree");
@@ -76,9 +82,11 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
   Double_t deltaTDownPostHitbus;
   Double_t deltaTAvgPreHitbus;
   Double_t deltaTAvgPostHitbus;
+  Double_t period;
   Int_t sampPreHitbus,sampPostHitbus;
   Int_t earliestSample,latestSample;
   Int_t surfNum,chipNum,rcoNum;
+  
   clockTree->Branch("event",&eventNum,"event/i");
   clockTree->Branch("sampPreHitbus",&sampPreHitbus,"sampPreHitbus/I");
   clockTree->Branch("sampPostHitbus",&sampPostHitbus,"sampPostHitbus/I");
@@ -88,29 +96,40 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
   clockTree->Branch("deltaTDownPostHitbus",&deltaTDownPostHitbus,"deltaTDownPostHitbus/D");
   clockTree->Branch("deltaTAvgPreHitbus",&deltaTAvgPreHitbus,"deltaTAvgPreHitbus/D");
   clockTree->Branch("deltaTAvgPostHitbus",&deltaTAvgPostHitbus,"deltaTAvgPostHitbus/D");
+  clockTree->Branch("period",&period,"period/D");
   clockTree->Branch("earliestSample",&earliestSample,"earliestSample/I");
   clockTree->Branch("latestSample",&latestSample,"latestSample/I");
   clockTree->Branch("surf",&surfNum,"surf/I");
   clockTree->Branch("chip",&chipNum,"chip/I");
   clockTree->Branch("rco",&rcoNum,"rco/I");
+  // clockTree->Branch("surfDeltaT[10]",surfDeltaT,"surfDeltaT[10]/D");
 
   TTree *tempTree = new TTree("tempTree","Tree of clock temp stuff");
+  Double_t surfDeltaT[10];
   Double_t avgDeltaT;
   Double_t rmsDeltaT;
   Int_t numDeltaT;
-  Double_t surfDeltaT[10];
+  Int_t fClockSpike;
+  Int_t fClockProblem;
+  
+  tempTree->Branch("event",&eventNum,"event/i");
   tempTree->Branch("avgDeltaT",&avgDeltaT,"avgDeltaT/D");
   tempTree->Branch("rmsDeltaT",&rmsDeltaT,"rmsDeltaT/D");
   tempTree->Branch("numDeltaT",&numDeltaT,"numDeltaT/I");
-  tempTree->Branch("surfDeltaT",surfDeltaT,"surfDeltaT[10]/D");
+  tempTree->Branch("fClockSpike",&fClockSpike,"fClockSpike/I");
+  tempTree->Branch("fClockProblem",&fClockProblem,"fClockProblem/I");
+  tempTree->Branch("surfDeltaT[10]",surfDeltaT,"surfDeltaT[10]/D");
 
   Long64_t starEvery=maxEntry/40;
   if(starEvery==0) starEvery++;
 
   Int_t chan=8;
+  Double_t lowerTime = 1;
+  Double_t upperTime = 32;
 
+  // for(Long64_t entry=startEntry;entry<maxEntry;entry+=10) {
   for(Long64_t entry=startEntry;entry<maxEntry;entry++) {
-    
+
     if(entry%starEvery==0) 
       cerr << "*";
 
@@ -161,220 +180,221 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
 
        //    cout << earliestSample << "\t" << latestSample << endl;
        if(latestSample<earliestSample) {
-	  //We have two RCO's
-	 {
-	   Double_t posZcUp[100]={0};
-	   Double_t posZcDown[100]={0};
-	   Int_t numZcUp=0;
-	   Int_t numZcDown=0;
-	   for(int samp=earliestSample;samp<259;samp++) {
-	     Double_t firstVal=adcs[samp]-offset;
-	     Double_t secondVal=adcs[samp+1]-offset;
-	     if((firstVal>=0 && secondVal<=0)) {  
-	       //We have a ZC down
-	       posZcDown[numZcDown]=getZeroCrossingPoint(times[samp],firstVal,times[samp+1],secondVal);
-	       numZcDown++;
-	     }
-	     if((firstVal<=0 && secondVal>=0)) {  
-	       //We have a ZC up
-	       posZcUp[numZcUp]=getZeroCrossingPoint(times[samp],firstVal,times[samp+1],secondVal);
-	       numZcUp++;
-	     }
-	   }
-	   
-	   sampPostHitbus=260-earliestSample;
-	   deltaTDownPostHitbus=0;
-	   deltaTAvgPostHitbus=0;
-	   Int_t countDowns=0;
-	   Int_t countAll=0;
-	   if(numZcDown>1) {
-	     for(int i=1;i<numZcDown;i++) {
-	       if( (posZcDown[i]-posZcDown[i-1])>7.5 && (posZcDown[i]-posZcDown[i-1])<8.5) {
-		 deltaTDownPostHitbus+=(posZcDown[i]-posZcDown[i-1]);
-		 countDowns++;
-		 avgDeltaT+=(posZcDown[i]-posZcDown[i-1]);
-		 surfDeltaT[surf]+=(posZcDown[i]-posZcDown[i-1]);
-		 avgDeltaTSq+=(posZcDown[i]-posZcDown[i-1])*(posZcDown[i]-posZcDown[i-1]);
-		 numDeltaT++;
-		 numDtSurf++;
-	       }
-	     }
-	     if(countDowns>0) { 
-	       deltaTAvgPostHitbus=deltaTDownPostHitbus;
-	       countAll=countDowns;
-	       deltaTDownPostHitbus/=countDowns;
-	     }
-	   }
-	   deltaTUpPostHitbus=0;
-	   Int_t countUps=0;
-	   if(numZcUp>1) {
-	     for(int i=1;i<numZcUp;i++) {
-	       if( (posZcUp[i]-posZcUp[i-1])>7.5 && (posZcUp[i]-posZcUp[i-1])<8.5) {
-		 deltaTUpPostHitbus+=(posZcUp[i]-posZcUp[i-1]);
-		 countUps++;
-		 avgDeltaT+=(posZcUp[i]-posZcUp[i-1]);
-		 surfDeltaT[surf]+=(posZcUp[i]-posZcUp[i-1]);
-		 
-		 avgDeltaTSq+=(posZcUp[i]-posZcUp[i-1])*(posZcUp[i]-posZcUp[i-1]);
-		 numDeltaT++;
-		 numDtSurf++;
-	       }
-	     }
-	     if(countUps>0) {
-	       deltaTAvgPostHitbus+=deltaTUpPostHitbus;
-	       countAll+=countUps;
-	       deltaTUpPostHitbus/=countUps;
-	     }
-	   }
-	   if(countAll>0)
-	     deltaTAvgPostHitbus/=countAll;
-	 }
+			  //We have two RCO's
+			 {
+			   Double_t posZcUp[100]={0};
+			   Double_t posZcDown[100]={0};
+			   Int_t numZcUp=0;
+			   Int_t numZcDown=0;
+			   for(int samp=earliestSample;samp<259;samp++) {
+			     Double_t firstVal=adcs[samp]-offset;
+			     Double_t secondVal=adcs[samp+1]-offset;
+			     if((firstVal>=0 && secondVal<=0)) {  
+			       //We have a ZC down
+			       posZcDown[numZcDown]=getZeroCrossingPoint(times[samp],firstVal,times[samp+1],secondVal);
+			       numZcDown++;
+			     }
+			     if((firstVal<=0 && secondVal>=0)) {  
+			       //We have a ZC up
+			       posZcUp[numZcUp]=getZeroCrossingPoint(times[samp],firstVal,times[samp+1],secondVal);
+			       numZcUp++;
+			     }
+			   }
+			   
+			   sampPostHitbus=260-earliestSample;
+			   deltaTDownPostHitbus=0;
+			   deltaTAvgPostHitbus=0;
+			   Int_t countDowns=0;
+			   Int_t countAll=0;
+			   if(numZcDown>1) {
+			     for(int i=1;i<numZcDown;i++) {
+			       if( (posZcDown[i]-posZcDown[i-1])>lowerTime && (posZcDown[i]-posZcDown[i-1])<upperTime) {
+				 deltaTDownPostHitbus+=(posZcDown[i]-posZcDown[i-1]);
+				 countDowns++;
+				 avgDeltaT+=(posZcDown[i]-posZcDown[i-1]);
+				 surfDeltaT[surf]+=(posZcDown[i]-posZcDown[i-1]);
+				 avgDeltaTSq+=(posZcDown[i]-posZcDown[i-1])*(posZcDown[i]-posZcDown[i-1]);
+				 numDeltaT++;
+				 numDtSurf++;
+			       }
+			     }
+			     if(countDowns>0) { 
+			       deltaTAvgPostHitbus=deltaTDownPostHitbus;
+			       countAll=countDowns;
+			       deltaTDownPostHitbus/=countDowns;
+			     }
+			   }
+			   deltaTUpPostHitbus=0;
+			   Int_t countUps=0;
+			   if(numZcUp>1) {
+			     for(int i=1;i<numZcUp;i++) {
+			       if( (posZcUp[i]-posZcUp[i-1])>lowerTime && (posZcUp[i]-posZcUp[i-1])<upperTime) {
+				 deltaTUpPostHitbus+=(posZcUp[i]-posZcUp[i-1]);
+				 countUps++;
+				 avgDeltaT+=(posZcUp[i]-posZcUp[i-1]);
+				 surfDeltaT[surf]+=(posZcUp[i]-posZcUp[i-1]);
+				 
+				 avgDeltaTSq+=(posZcUp[i]-posZcUp[i-1])*(posZcUp[i]-posZcUp[i-1]);
+				 numDeltaT++;
+				 numDtSurf++;
+			       }
+			     }
+			     if(countUps>0) {
+			       deltaTAvgPostHitbus+=deltaTUpPostHitbus;
+			       countAll+=countUps;
+			       deltaTUpPostHitbus/=countUps;
+			     }
+			   }
+			   if(countAll>0)
+			     deltaTAvgPostHitbus/=countAll;
+			 }
 
-	 {
-	   Double_t posZcUp[100]={0};
-	   Double_t posZcDown[100]={0};
-	   Int_t numZcUp=0;
-	   Int_t numZcDown=0;
-	   if(latestSample>0) {
-	     for(int samp=0;samp<latestSample;samp++) {
+			 {
+			   Double_t posZcUp[100]={0};
+			   Double_t posZcDown[100]={0};
+			   Int_t numZcUp=0;
+			   Int_t numZcDown=0;
+			   if(latestSample>0) {
+			     for(int samp=0;samp<latestSample;samp++) {
 
-	       Double_t firstVal=adcs[samp]-offset;
-	       Double_t secondVal=adcs[samp+1]-offset;
-	       if((firstVal>=0 && secondVal<=0)) {  
-		 //We have a ZC down
-		 posZcDown[numZcDown]=getZeroCrossingPoint(times[samp],firstVal,times[samp+1],secondVal);
-		 numZcDown++;
-	       }
-	       if((firstVal<=0 && secondVal>=0)) {  
-		 //We have a ZC up
-		 posZcUp[numZcUp]=getZeroCrossingPoint(times[samp],firstVal,times[samp+1],secondVal);
-		 numZcUp++;
-	       }
-	     }
-	     sampPreHitbus=latestSample+1;
-	     deltaTDownPreHitbus=0;
-	     deltaTAvgPreHitbus=0;
-	     Int_t countDowns=0;
-	     Int_t countAll=0;
-	     if(numZcDown>1) {
-	       for(int i=1;i<numZcDown;i++) {
-		 if( (posZcDown[i]-posZcDown[i-1])>7.5 && (posZcDown[i]-posZcDown[i-1])<8.5) {
-		   deltaTDownPreHitbus+=(posZcDown[i]-posZcDown[i-1]);
-		   countDowns++;
-		   avgDeltaT+=(posZcDown[i]-posZcDown[i-1]);
-		   surfDeltaT[surf]+=(posZcDown[i]-posZcDown[i-1]);
-		   avgDeltaTSq+=(posZcDown[i]-posZcDown[i-1])*(posZcDown[i]-posZcDown[i-1]);
-		   numDeltaT++;
-		   numDtSurf++;
-		 }
-	       }
-	       if(countDowns>0) {
-		 deltaTAvgPreHitbus=deltaTDownPreHitbus;
-		 countAll=countDowns;
-		 deltaTDownPreHitbus/=countDowns;
-	       }
-	     }
-	     deltaTUpPreHitbus=0;
-	     Int_t countUps=0;
-	     if(numZcUp>1) {
-	       for(int i=1;i<numZcUp;i++) {
-		 if( (posZcUp[i]-posZcUp[i-1])>7.5 && (posZcUp[i]-posZcUp[i-1])<8.5) {
-		   deltaTUpPreHitbus+=(posZcUp[i]-posZcUp[i-1]);
-		   countUps++;
-		   avgDeltaT+=(posZcUp[i]-posZcUp[i-1]);
-		   surfDeltaT[surf]+=(posZcUp[i]-posZcUp[i-1]);
-		   avgDeltaTSq+=(posZcUp[i]-posZcUp[i-1])*(posZcUp[i]-posZcUp[i-1]);
-		   numDeltaT++;
-		   numDtSurf++;
-		 }
-	       }
-	       if(countUps>0) {
-		 deltaTAvgPreHitbus+=deltaTUpPreHitbus;
-		 countAll+=countUps;
-		 deltaTUpPreHitbus/=countUps;
-	       }
-	     }
-	     if(countAll>0)	       
-	       deltaTAvgPreHitbus/=countAll;
-	   }
-	 }	  	  
+			       Double_t firstVal=adcs[samp]-offset;
+			       Double_t secondVal=adcs[samp+1]-offset;
+			       if((firstVal>=0 && secondVal<=0)) {  
+				 //We have a ZC down
+				 posZcDown[numZcDown]=getZeroCrossingPoint(times[samp],firstVal,times[samp+1],secondVal);
+				 numZcDown++;
+			       }
+			       if((firstVal<=0 && secondVal>=0)) {  
+				 //We have a ZC up
+				 posZcUp[numZcUp]=getZeroCrossingPoint(times[samp],firstVal,times[samp+1],secondVal);
+				 numZcUp++;
+			       }
+			     }
+			     sampPreHitbus=latestSample+1;
+			     deltaTDownPreHitbus=0;
+			     deltaTAvgPreHitbus=0;
+			     Int_t countDowns=0;
+			     Int_t countAll=0;
+			     if(numZcDown>1) {
+			       for(int i=1;i<numZcDown;i++) {
+				 if( (posZcDown[i]-posZcDown[i-1])>lowerTime && (posZcDown[i]-posZcDown[i-1])<upperTime) {
+				   deltaTDownPreHitbus+=(posZcDown[i]-posZcDown[i-1]);
+				   countDowns++;
+				   avgDeltaT+=(posZcDown[i]-posZcDown[i-1]);
+				   surfDeltaT[surf]+=(posZcDown[i]-posZcDown[i-1]);
+				   avgDeltaTSq+=(posZcDown[i]-posZcDown[i-1])*(posZcDown[i]-posZcDown[i-1]);
+				   numDeltaT++;
+				   numDtSurf++;
+				 }
+			       }
+			       if(countDowns>0) {
+				 deltaTAvgPreHitbus=deltaTDownPreHitbus;
+				 countAll=countDowns;
+				 deltaTDownPreHitbus/=countDowns;
+			       }
+			     }
+			     deltaTUpPreHitbus=0;
+			     Int_t countUps=0;
+			     if(numZcUp>1) {
+			       for(int i=1;i<numZcUp;i++) {
+				 if( (posZcUp[i]-posZcUp[i-1])>lowerTime && (posZcUp[i]-posZcUp[i-1])<upperTime) {
+				   deltaTUpPreHitbus+=(posZcUp[i]-posZcUp[i-1]);
+				   countUps++;
+				   avgDeltaT+=(posZcUp[i]-posZcUp[i-1]);
+				   surfDeltaT[surf]+=(posZcUp[i]-posZcUp[i-1]);
+				   avgDeltaTSq+=(posZcUp[i]-posZcUp[i-1])*(posZcUp[i]-posZcUp[i-1]);
+				   numDeltaT++;
+				   numDtSurf++;
+				 }
+			       }
+			       if(countUps>0) {
+				 deltaTAvgPreHitbus+=deltaTUpPreHitbus;
+				 countAll+=countUps;
+				 deltaTUpPreHitbus/=countUps;
+			       }
+			     }
+			     if(countAll>0)	       
+			       deltaTAvgPreHitbus/=countAll;
+			   }
+			 }	  	  
+        }else{
+		  //Only one RCO
+		   Double_t posZcUp[100]={0};
+		   Double_t posZcDown[100]={0};
+		   Int_t numZcUp=0;
+		   Int_t numZcDown=0;
+		   for(int samp=earliestSample;samp<latestSample;samp++) {
+		     Double_t firstVal=adcs[samp]-offset;
+		     Double_t secondVal=adcs[samp+1]-offset;
+		     if((firstVal>=0 && secondVal<=0)) {  
+		       //We have a ZC down
+		       posZcDown[numZcDown]=getZeroCrossingPoint(times[samp],firstVal,times[samp+1],secondVal);
+		       numZcDown++;
+		     }
+		     if((firstVal<=0 && secondVal>=0)) {  
+		       //We have a ZC up
+		       posZcUp[numZcUp]=getZeroCrossingPoint(times[samp],firstVal,times[samp+1],secondVal);
+		       numZcUp++;
+		     }
+		   }
+		   sampPostHitbus=(latestSample+1)-earliestSample;
+		   sampPreHitbus=0;
+		   deltaTDownPreHitbus=0;
+		   deltaTDownPostHitbus=0;
+		   deltaTAvgPreHitbus=0;
+		   deltaTAvgPostHitbus=0;
+		   Int_t countDowns=0;
+		   Int_t countAll=0;
+		   if(numZcDown>1) {
+		     for(int i=1;i<numZcDown;i++) {
+		       if( (posZcDown[i]-posZcDown[i-1])>lowerTime && (posZcDown[i]-posZcDown[i-1])<upperTime) {
+			 deltaTDownPostHitbus+=(posZcDown[i]-posZcDown[i-1]);
+			 countDowns++;
+			 avgDeltaT+=(posZcDown[i]-posZcDown[i-1]);
+			 surfDeltaT[surf]+=(posZcDown[i]-posZcDown[i-1]);
+			 avgDeltaTSq+=(posZcDown[i]-posZcDown[i-1])*(posZcDown[i]-posZcDown[i-1]);
+			 numDeltaT++;
+			 numDtSurf++;
+		       }
+		     }
+		     if(countDowns>0) {
+		       deltaTAvgPostHitbus=deltaTDownPostHitbus;
+		       countAll=countDowns;
+		       deltaTDownPostHitbus/=countDowns;
+		     }
+		   }
+		   deltaTUpPreHitbus=0;
+		   deltaTUpPostHitbus=0;
+		   Int_t countUps=0;
+		   if(numZcUp>1) {
+		     for(int i=1;i<numZcUp;i++) {
+		       if( (posZcUp[i]-posZcUp[i-1])>lowerTime && (posZcUp[i]-posZcUp[i-1])<upperTime) {
+			 deltaTUpPostHitbus+=(posZcUp[i]-posZcUp[i-1]);
+			 countUps++;
+			 avgDeltaT+=(posZcUp[i]-posZcUp[i-1]);
+			 surfDeltaT[surf]+=(posZcUp[i]-posZcUp[i-1]);
+			 avgDeltaTSq+=(posZcUp[i]-posZcUp[i-1])*(posZcUp[i]-posZcUp[i-1]);
+			 numDeltaT++;
+			 numDtSurf++;
+		       }
+		     }
+		     if(countUps>0) {
+		       deltaTAvgPostHitbus+=deltaTUpPostHitbus;
+		       countAll+=countUps;
+		       deltaTUpPostHitbus/=countUps;
+		     }
+		   }
+		   if(countAll>0) deltaTAvgPostHitbus/=countAll;
        }
-       else {
-	  //Only one RCO
-	   Double_t posZcUp[100]={0};
-	   Double_t posZcDown[100]={0};
-	   Int_t numZcUp=0;
-	   Int_t numZcDown=0;
-	   for(int samp=earliestSample;samp<latestSample;samp++) {
-	     Double_t firstVal=adcs[samp]-offset;
-	     Double_t secondVal=adcs[samp+1]-offset;
-	     if((firstVal>=0 && secondVal<=0)) {  
-	       //We have a ZC down
-	       posZcDown[numZcDown]=getZeroCrossingPoint(times[samp],firstVal,times[samp+1],secondVal);
-	       numZcDown++;
-	     }
-	     if((firstVal<=0 && secondVal>=0)) {  
-	       //We have a ZC up
-	       posZcUp[numZcUp]=getZeroCrossingPoint(times[samp],firstVal,times[samp+1],secondVal);
-	       numZcUp++;
-	     }
-	   }
-	   sampPostHitbus=(latestSample+1)-earliestSample;
-	   sampPreHitbus=0;
-	   deltaTDownPreHitbus=0;
-	   deltaTDownPostHitbus=0;
-	   deltaTAvgPreHitbus=0;
-	   deltaTAvgPostHitbus=0;
-	   Int_t countDowns=0;
-	   Int_t countAll=0;
-	   if(numZcDown>1) {
-	     for(int i=1;i<numZcDown;i++) {
-	       if( (posZcDown[i]-posZcDown[i-1])>7.5 && (posZcDown[i]-posZcDown[i-1])<8.5) {
-		 deltaTDownPostHitbus+=(posZcDown[i]-posZcDown[i-1]);
-		 countDowns++;
-		 avgDeltaT+=(posZcDown[i]-posZcDown[i-1]);
-		 surfDeltaT[surf]+=(posZcDown[i]-posZcDown[i-1]);
-		 avgDeltaTSq+=(posZcDown[i]-posZcDown[i-1])*(posZcDown[i]-posZcDown[i-1]);
-		 numDeltaT++;
-		 numDtSurf++;
-	       }
-	     }
-	     if(countDowns>0) {
-	       deltaTAvgPostHitbus=deltaTDownPostHitbus;
-	       countAll=countDowns;
-	       deltaTDownPostHitbus/=countDowns;
-	     }
-	   }
-	   deltaTUpPreHitbus=0;
-	   deltaTUpPostHitbus=0;
-	   Int_t countUps=0;
-	   if(numZcUp>1) {
-	     for(int i=1;i<numZcUp;i++) {
-	       if( (posZcUp[i]-posZcUp[i-1])>7.5 && (posZcUp[i]-posZcUp[i-1])<8.5) {
-		 deltaTUpPostHitbus+=(posZcUp[i]-posZcUp[i-1]);
-		 countUps++;
-		 avgDeltaT+=(posZcUp[i]-posZcUp[i-1]);
-		 surfDeltaT[surf]+=(posZcUp[i]-posZcUp[i-1]);
-		 avgDeltaTSq+=(posZcUp[i]-posZcUp[i-1])*(posZcUp[i]-posZcUp[i-1]);
-		 numDeltaT++;
-		 numDtSurf++;
-	       }
-	     }
-	     if(countUps>0) {
-	       deltaTAvgPostHitbus+=deltaTUpPostHitbus;
-	       countAll+=countUps;
-	       deltaTUpPostHitbus/=countUps;
-	     }
-	   }
-	   if(countAll>0)
-	     deltaTAvgPostHitbus/=countAll;
-       }
+       surfDeltaT[surf]/=numDtSurf;
        clockTree->Fill();
        delete gr;
        
-       surfDeltaT[surf]/=numDtSurf;
+       
 
     }
+    fClockSpike=realEvent.fClockSpike;
+    fClockProblem=realEvent.fClockProblem;
     avgDeltaT/=numDeltaT;
     avgDeltaTSq/=numDeltaT;
     rmsDeltaT=avgDeltaTSq-avgDeltaT*avgDeltaT;

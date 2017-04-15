@@ -50,6 +50,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(CalibratedAnitaEvent *calibratedPtr, WaveCalT
   fLastEventGuessed=calibratedPtr->eventNumber;
   gotCalibTemp=0;
   fClockProblem = calibratedPtr->fClockProblem;
+  fClockSpike = calibratedPtr->fClockSpike;
   for(int surf=0;surf<NUM_SURF;surf++) {
     fRcoArray[surf]=calibratedPtr->fRcoArray[surf];
     fClockPhiArray[surf]=calibratedPtr->fClockPhiArray[surf];
@@ -101,6 +102,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   fLastEventGuessed=0;
   gotCalibTemp=0;
   fClockProblem = 0;
+  fClockSpike = 0;
 
 
   setAlfaFilterFlag(AnitaVersion::get() == 3);

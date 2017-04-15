@@ -79,6 +79,7 @@ class UsefulAnitaEvent: public RawAnitaEvent
   Int_t fRcoArray[NUM_SURF]; ///< An array to store the guessed at RCO values
   Double_t fTempFactorGuesses[NUM_SURF]; ///< A holder variable to cling on to the temperature correction factor that we are guessing at
   Int_t fClockProblem; ///< Flag raised if more than 4 upgoing zero crossings in clock, won't update temp correction. RCO guessing may also be negatively affected by this.
+  Int_t fClockSpike; ///<Flag raised if the ADC value is too large or small in clock. If it is due to bits corruption, it can be corrected.
   Double_t fClockPhiArray[NUM_SURF]; ///< An array to store the derived clock calibration numbers (from aligning the clocks)
 
   Bool_t getAlfaFilterFlag();

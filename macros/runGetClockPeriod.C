@@ -1,17 +1,12 @@
 
 
 void runGetClockPeriod() {
-  //  gSystem->AddIncludePath(gSystem->ExpandPathName("-I${EVENT_READER_DIR}"));
-  //  gSystem->AddIncludePath("-I${EVENT_READER_DIR}");
   gSystem->AddIncludePath("-I${ANITA_UTIL_INSTALL_DIR}/include");
-  //  cout << gSystem->GetIncludePath() <<endl;
-
-  gSystem->Load("libMathMore.so");
-  gSystem->Load("libPhysics.so");
-  gSystem->Load("libfftw3.so");
-  gSystem->Load("libRootFftwWrapper.so");		  
-  gSystem->Load("libAnitaEvent.so");
-
+  gSystem->Load("libMathMore.dylib");
+  gSystem->Load("libPhysics.dylib");
+  gSystem->Load("libfftw3.dylib");
+  gSystem->Load("libRootFftwWrapper.dylib");      
+  gSystem->Load("libAnitaEvent.dylib");   
   gSystem->CompileMacro("getClockPeriod.C","k");
-  getClockPeriod("/unix/anita2/palestine08/root/",3871,0,100000);
+  // getClockPeriod("/Users/sylarcp/UCL/ANITA/flight1617/root",292,0,100000);
 }
