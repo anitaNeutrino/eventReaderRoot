@@ -112,8 +112,8 @@ public:
   explicit RingBuffer(UInt_t numElementsInput);
 
   Double_t insert(Double_t value); /* Put an element in, returns the value of a removed element */
-  Double_t getSum(){return sum;}
-  Double_t getMean(){return numRingElements > 0 ? sum/numRingElements : 0;}
+  Double_t getSum() const{return sum;}
+  Double_t getMean() const{return numRingElements > 0 ? sum/numRingElements : 0;}
   
 
   iterator begin(){ // should point to the oldest element    
@@ -135,7 +135,7 @@ private:
   std::vector<double> elements; // this will be a vector of (size+1) so that .end() iterator can use normal iterator!=RingBuffer::end() syntax for loops.
 
   // helper function
-  UInt_t oldestElement(){
+  UInt_t oldestElement() const{
     // if we haven't completely filled the buffer, then the oldest element is zero
     UInt_t oldestElement = 0; 
     if(numRingElements==fSize){ // if we have filled the buffer,
