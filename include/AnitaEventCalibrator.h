@@ -139,6 +139,7 @@ class AnitaEventCalibrator : public TObject
   Double_t dtInterp; ///< Interpolating clock for alignment step
   Double_t nominalDeltaT; ///< If we don't want bin-to-bin deltaTs
   Int_t fClockProblem; ///< Flag raised if more than 4 or less than 2 upgoing zero crossings in a SURF clock
+  Int_t fClockSpike; ///< Flag raised if the voltage is too large or too small in Surf clock
 
 
   //Ben Rotter's rfPower calibration :)

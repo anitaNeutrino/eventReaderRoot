@@ -2,14 +2,13 @@
 
 void runClockPlotter() {
   gSystem->AddIncludePath("-I${ANITA_UTIL_INSTALL_DIR}/include");
-  //  cout << gSystem->GetIncludePath() <<endl;
-
-  gSystem->Load("libMathMore.so");
-  gSystem->Load("libPhysics.so");
-  gSystem->Load("libfftw3.so");
-  gSystem->Load("libRootFftwWrapper.so");		  
-  gSystem->Load("libAnitaEvent.so"); 
-
+  gSystem->Load("libMathMore.dylib");
+  gSystem->Load("libPhysics.dylib");
+  gSystem->Load("libfftw3.dylib");
+  gSystem->Load("libRootFftwWrapper.dylib");		  
+  gSystem->Load("libAnitaEvent.dylib"); 
   gSystem->CompileMacro("plotAllClocks.C","k");
-  plotAllClocks("root://anita@192.168.10.100///TBdata/anita/antarctica08/root",185,4,10);
+  // gSystem->CompileMacro("getClockPeriod.C","k");
+
+  // plotAllClocks("/Users/sylarcp/UCL/ANITA/flight1617/root",292,0,10);
 }
