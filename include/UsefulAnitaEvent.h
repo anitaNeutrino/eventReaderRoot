@@ -43,12 +43,12 @@ class UsefulAnitaEvent: public RawAnitaEvent
      {return chan+(CHANNELS_PER_SURF*surf);} ///< Utility function
 
 
-  TGraph *getGraphFromSurfAndChan(int surf, int chan); ///< Returns a voltage-time waveform for given SURF and channel
-  TGraph *getGraph(int chanIndex); ///< Returns a voltage-time waveform for given channel index
-  TGraph *getGraph(int ant, AnitaPol::AnitaPol_t pol); ///< Returns a voltage time waveform for given ant-pol
+  TGraph *getGraphFromSurfAndChan(int surf, int chan) const; ///< Returns a voltage-time waveform for given SURF and channel
+  TGraph *getGraph(int chanIndex) const; ///< Returns a voltage-time waveform for given channel index
+  TGraph *getGraph(int ant, AnitaPol::AnitaPol_t pol) const; ///< Returns a voltage time waveform for given ant-pol
   TGraph *getGraph(AnitaRing::AnitaRing_t ring,
 		   int phi,
-		   AnitaPol::AnitaPol_t pol); ///< Returns a voltage-time waveform for given ring-phi-pol
+		   AnitaPol::AnitaPol_t pol) const; ///< Returns a voltage-time waveform for given ring-phi-pol
   TGraph *getDeconvolvedALFA(); //
   Int_t guessRco(int chanIndex); ///< Looks at clock channel to try and guess which RCO phase we are in.
   Int_t getRcoCorrected(int chanIndex); ///< Returns firmware RCO after correcting for latch delay (and factor of -1 for different definitions of which phase getRCO and guessRCO return)
