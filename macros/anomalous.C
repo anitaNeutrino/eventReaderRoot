@@ -33,7 +33,8 @@ void anomalous(int start_run, int end_run, int channel)
 
   for (int ientry = 0; ientry < nentries; ientry++)
    {
-     cout << ientry << " " << " anomalous event number is " << eventNum[ientry] << " " << "xMax is " << xMax[ientry] << endl; 
+      cout.setf(ios::fixed); 
+      cout << ientry << " " << " anomalous event number is " << setprecision(0) << eventNum[ientry] << " " << "xMax is " << xMax[ientry] << endl; 
    } 
 
   TString save_png1 = "../plots/anomalous/xMax_eventNum_ch" + TString::Itoa(channel,10) + "_run" + TString::Itoa(start_run,10) + "to" + TString::Itoa(end_run,10) + ".png"; 
