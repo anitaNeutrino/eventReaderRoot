@@ -1,4 +1,5 @@
 ////////////////////////// macro written by Oindree Banerjee on April 26 2017 while visiting UCL ///////////////////////////////////////////
+///////////////////////// to run do findPriority9.C"(42,367)" for ANITA-IV runs
 
 #include "TH2D.h"
 #include "TChain.h"
