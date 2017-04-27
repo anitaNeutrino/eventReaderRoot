@@ -45,7 +45,8 @@ namespace WaveCalType {
     kAddPeds = 0x1c, ///< New thing
     kOnlyTiming = 0x1d, ///< All the timing of kFull, but none of the voltage calibration (Ped corrected ADC counts)
     kJustRemoveClockSpike = 0x1e, /// Remove the spiky clock in early stage.
-    kNotACalib ///< Useful for looping over all calibrations
+    kOnlyDTs = 0x1f, ///< Only the dT calibration and unwrapping, none of the voltage calibration (Ped corrected ADC counts), for noise analysis
+    kNotACalib ///< Useful for looping over all calibrations 
   } WaveCalType_t; ///< The calibration enumeration type
 
   const char *calTypeAsString(WaveCalType::WaveCalType_t calType); ///< Returns the calibration type as a string

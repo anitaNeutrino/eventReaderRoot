@@ -148,12 +148,12 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 }
 
 
-TGraph *UsefulAnitaEvent::getGraphFromSurfAndChan(int surf, int chan)
+TGraph *UsefulAnitaEvent::getGraphFromSurfAndChan(int surf, int chan) const 
 {
   return getGraph(getChanIndex(surf,chan));
 }
 
-TGraph *UsefulAnitaEvent::getGraph(int chanIndex)
+TGraph *UsefulAnitaEvent::getGraph(int chanIndex) const
 {
   if(chanIndex<0 || chanIndex>=NUM_DIGITZED_CHANNELS)
     return NULL;
@@ -190,7 +190,7 @@ TGraph *UsefulAnitaEvent::getDeconvolvedALFA()
 }
 
 
-TGraph *UsefulAnitaEvent::getGraph(int ant, AnitaPol::AnitaPol_t pol){
+TGraph *UsefulAnitaEvent::getGraph(int ant, AnitaPol::AnitaPol_t pol) const{
   //Antenna numbers count from 0
   return getGraph(AnitaGeomTool::getChanIndexFromAntPol(ant,pol));
 
@@ -198,7 +198,7 @@ TGraph *UsefulAnitaEvent::getGraph(int ant, AnitaPol::AnitaPol_t pol){
 
 TGraph *UsefulAnitaEvent::getGraph(AnitaRing::AnitaRing_t ring,
 				   int phi,
-				   AnitaPol::AnitaPol_t pol){
+				   AnitaPol::AnitaPol_t pol) const{
   //Phi numbers count from 0
   return getGraph(AnitaGeomTool::getChanIndexFromRingPhiPol(ring,phi,pol));
 

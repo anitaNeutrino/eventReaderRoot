@@ -232,6 +232,11 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     fApplyExtraDelayFromPhaseCenter = true;
     break;
 
+  case WaveCalType::kOnlyDTs:
+    fUnwrap = true;
+    fBinToBinDts = true;
+    fZeroMeanNonClockChannels = true;
+    break;
 
   case WaveCalType::kFull:
     fRemoveClockSpike = true;
