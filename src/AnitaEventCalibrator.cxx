@@ -32,7 +32,6 @@ AnitaEventCalibrator::AnitaEventCalibrator(){
   dtInterp = 0.01; ///< in nanoseconds, for clock alignment interpolation
   nominalDeltaT = 1./2.6; ///< in nanoseconds
   fClockProblem = 0; ///< If unreasonable number of zero crossings in clock, raise flag & skip temp correction update
-  fClockSpike = 0; ///< If clock spike remains, raise this flag
   initializeVectors();
 
 }
@@ -158,6 +157,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     fRemoveClockSpike = true;
     fBinToBinDts = true;
     fApplyTempCorrection = true;
+    fUnwrap = true;
     break;
 
   case WaveCalType::kJustTimeNoUnwrap:
@@ -265,11 +265,10 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
   // ! Step 2: Remove the spiky clock
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  fClockSpike = 0;
   if(fRemoveClockSpike==true){
-    // First remove spike in Surf10 clock, hopefully the spiky clock in SURF10 chipB will all gone.
+    // First remove spike in Surf10 chipB clock, hopefully the spiky clock in SURF10 chipB will all gone.
     for(Int_t samp=0;samp<NUM_SAMP;samp++){
-      if(eventPtr->data[9*NUM_CHAN + 8][samp] >300 ){
+      if((eventPtr->chipIdFlag[9*NUM_CHAN + 8]&0x03) == 0x01 and eventPtr->data[9*NUM_CHAN + 8][samp] >300 ){
         eventPtr->data[9*NUM_CHAN + 8][samp] -= 512;
       }
     }
@@ -277,20 +276,30 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     // Loop through all Surf, add flag if the clock has a problem
     if(eventPtr->fFromCalibratedAnitaEvent==0){ // Figure out the fClockSpike if we don't have calibrated input
       for(Int_t surf=0; surf<NUM_SURF; surf++){
+        //spiky clock channel
         for(Int_t samp=0;samp<NUM_SAMP;samp++){
           if(eventPtr->data[surf*NUM_CHAN + 8][samp] <-200 or eventPtr->data[surf*NUM_CHAN + 8][samp] > 200){
-            // std::cout<< eventPtr->eventNumber<< std::endl;
-            // std::cout<< "-----------------------------------------"<< std::endl;
-            fClockSpike = 1;
+            eventPtr->fClockSpike = 1;
+          }
+        }
+        //Handling spiky RF channel
+        for(Int_t chan=0;chan<NUM_CHAN-1;chan++){
+          for(Int_t samp=0;samp<NUM_SAMP;samp++){
+            // surf10 chipB problem
+            if(surf == 9 and (eventPtr->chipIdFlag[surf*NUM_CHAN + chan]&0x03) == 0x01 and eventPtr->data[surf*NUM_CHAN + chan][samp]>358 and eventPtr->data[surf*NUM_CHAN + chan][samp]<470){
+              eventPtr->data[surf*NUM_CHAN + chan][samp] -= 512;
+            }
+            if(eventPtr->data[surf*NUM_CHAN + chan][samp]< -470 or eventPtr->data[surf*NUM_CHAN + chan][samp]>470){
+              eventPtr->fRFSpike = 1;
+              eventPtr->SpikeyRFChannelList.push_back(surf*NUM_CHAN + chan);
+            }
           }
         }
       }
     }
-    else{// If have calibrated anita event, then copy result.
-      fClockSpike = eventPtr->fClockSpike;
-    }
     
-  }
+  }   
+
 
 
 
@@ -535,9 +544,6 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   // Finally copy some meta-data about the calibration to the tree.
   eventPtr->fCalType = calType;
   eventPtr->fClockProblem = fClockProblem;
-  eventPtr->fClockSpike = fClockSpike;
-
-
 
 
   // Now enjoy your calibrated event
@@ -1122,6 +1128,10 @@ void AnitaEventCalibrator::guessRco(UsefulAnitaEvent* eventPtr){
       else{
 	mostCommonClockPeriod.at(alignedPeriodIndex) = AnitaClock::highPeriodNs;
       }
+      // if the average clock period differs from 30ns by 1ns, then it has a clock problem.
+      if(TMath::Abs(meanClockPeriod.at(alignedPeriodIndex) - 30) > 1){
+        fClockProblem = 1;
+      }
     }
     else{
       mostCommonClockPeriod.at(alignedPeriodIndex) = -1000;
@@ -1323,13 +1333,13 @@ Int_t AnitaEventCalibrator::getTimeOfUpwardsClockTicksCrossingZero(Int_t numPoin
     if(tZcs.size() > (UInt_t)AnitaClock::maxNumZcs || tZcs.size() < (UInt_t)AnitaClock::minNumZcs){
       fClockProblem = 1;
       // std::cerr << "fClockProblem = " << fClockProblem << ", for surf = " << surf << std::endl;
-      for(UInt_t zc=0; zc<sampZcs.size(); zc++){
-	if(zc > 0) std::cerr << ", ";
-      	std::cerr << "(" << sampZcs.at(zc) << ", " << volts[sampZcs.at(zc)] << ")";
-	if(zc==sampZcs.size()-1){
-	  std::cerr << std::endl;
-	}
-      }
+      // for(UInt_t zc=0; zc<sampZcs.size(); zc++){
+      // 	if(zc > 0) std::cerr << ", ";
+      //       	std::cerr << "(" << sampZcs.at(zc) << ", " << volts[sampZcs.at(zc)] << ")";
+      // 	if(zc==sampZcs.size()-1){
+      // 	  std::cerr << std::endl;
+      // 	}
+      // }
     }
   }
 

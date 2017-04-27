@@ -41,8 +41,9 @@ class CalibratedAnitaEvent: public RawAnitaEvent
   Double_t fClockPhiArray[NUM_SURF];   ///< An array to store the clock offsets
   Int_t fClockProblem;
   Int_t fClockSpike;
+  Int_t fRFSpike;
 
-  ClassDef(CalibratedAnitaEvent,6);
+  ClassDef(CalibratedAnitaEvent,7);
 };
 
 
