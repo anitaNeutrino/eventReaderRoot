@@ -110,7 +110,9 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
   Double_t rmsDeltaT;
   Int_t numDeltaT;
   Int_t fClockSpike;
+  Int_t fRFSpike;
   Int_t fClockProblem;
+  UsefulAnitaEvent realEvent;
   
   tempTree->Branch("event",&eventNum,"event/i");
   tempTree->Branch("avgDeltaT",&avgDeltaT,"avgDeltaT/D");
@@ -118,7 +120,9 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
   tempTree->Branch("numDeltaT",&numDeltaT,"numDeltaT/I");
   tempTree->Branch("fClockSpike",&fClockSpike,"fClockSpike/I");
   tempTree->Branch("fClockProblem",&fClockProblem,"fClockProblem/I");
+  tempTree->Branch("fRFSpike",&fRFSpike,"fRFSpike/I");
   tempTree->Branch("surfDeltaT[10]",surfDeltaT,"surfDeltaT[10]/D");
+  // tempTree->Branch("calEvent",&realEvent);
 
   Long64_t starEvery=maxEntry/40;
   if(starEvery==0) starEvery++;
@@ -127,7 +131,7 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
   Double_t lowerTime = 1;
   Double_t upperTime = 32;
 
-  // for(Long64_t entry=startEntry;entry<maxEntry;entry+=10) {
+  // for(Long64_t entry=startEntry;entry<maxEntry;entry+=2) {
   for(Long64_t entry=startEntry;entry<maxEntry;entry++) {
 
     if(entry%starEvery==0) 
@@ -138,7 +142,7 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
     headTree->GetEntry(entry);
     //    prettyHkTree->GetEntry(entry);
    
-    UsefulAnitaEvent realEvent(event,WaveCalType::kJustTimeNoUnwrap,header);
+    realEvent = UsefulAnitaEvent(event,WaveCalType::kVTFast,header);
     eventNum=realEvent.eventNumber;
     numDeltaT=0;
     avgDeltaT=0;
@@ -394,6 +398,7 @@ void getClockPeriod(char *baseName, int run, int startEntry, int numEntries) {
 
     }
     fClockSpike=realEvent.fClockSpike;
+    fRFSpike=realEvent.fRFSpike;
     fClockProblem=realEvent.fClockProblem;
     avgDeltaT/=numDeltaT;
     avgDeltaTSq/=numDeltaT;
