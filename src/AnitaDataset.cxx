@@ -16,6 +16,7 @@
 #include "SurfHk.h"
 #include "TEventList.h" 
 #include "TCut.h" 
+#include "TruthAnitaEvent.h" 
 
 static bool checkIfFileExists(const char * file)
 {
@@ -84,6 +85,7 @@ AnitaDataset::AnitaDataset(int run, bool decimated, WaveCalType::WaveCalType_t c
   fHkTree(0), fHk(0),
   fTurfTree(0), fTurf(0),
   fSurfTree(0), fSurf(0),
+  fTruthTree(0), fTruth(0), 
   fCutList(0)
 {
   setCalType(cal); 
@@ -348,6 +350,8 @@ AnitaDataset::~AnitaDataset()
   if (fSurf) 
     delete fSurf; 
 
+  if (fTruth) 
+    delete fTruth; 
 
   if (fCutList) 
     delete fCutList; 
@@ -404,8 +408,13 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   TString fname2 = TString::Format("%s/run%d/headFile%d.root", data_dir, run, run); 
   TString fname3 = TString::Format("%s/run%d/SimulatedAnitaHeadFile%d.root", data_dir, run, run);
 
+  bool simulated = false; 
+
   if (const char * the_right_file = checkIfFilesExist(4, fname0.Data(), fname1.Data(), fname2.Data(), fname3.Data()))
   {
+
+    if (strcasestr(the_right_file,"SimulatedAnitaHeadFile")) simulated = true; 
+
     printf("Using head file: %s\n",the_right_file); 
     TFile * f = new TFile(the_right_file); 
     filesToClose.push_back(f); 
@@ -493,7 +502,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
         fEventTree->SetBranchAddress("event",&fUseful);
       } else {
         fprintf(stderr,"Could not find event file for run %d, giving up!\n",run); 
-	fRunLoaded = false;
+        fRunLoaded = false;
         return false;
       }
     } 
@@ -533,7 +542,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
     fprintf(stderr,"Could not find TurfRate file for run %d, no Turf will be available!\n",run); 
   }
 
-  // try to load tusf file 
+  // try to load surf file 
   fname = TString::TString::Format("%s/run%d/surfHkFile%d.root",data_dir,run,run);
   if (checkIfFileExists(fname.Data()))
   {
@@ -550,6 +559,18 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
     fprintf(stderr,"Could not find SurfHK file for run %d, no SURF will be available!\n",run); 
   }
 
+  //try to load truth 
+  if (simulated)
+  {
+    fname = TString::TString::Format("%s/run%d/SimulatedAnitaTruthFile%d.root",data_dir,run,run);
+    if (checkIfFileExists(fname.Data()))
+    {
+     TFile * f = new TFile(fname.Data()); 
+     filesToClose.push_back(f); 
+     fTruthTree = (TTree*) f->Get("truthAnitaTree"); 
+     fTruthTree->SetBranchAddress("truth",&fTruth); 
+    }
+  }
 
   //load the first entry 
   getEntry(0); 
@@ -720,5 +741,18 @@ SurfHk* AnitaDataset::surf(bool force_reload)
   }
 
   return fSurf; 
+}
+
+
+TruthAnitaEvent * AnitaDataset::truth(bool force_reload) 
+{
+
+  if (!fTruthTree) return 0; 
+  if (fTruthTree->GetReadEntry() != fWantedEntry || force_reload) 
+  {
+    fTruthTree->GetEntry(fWantedEntry); 
+  }
+
+  return fTruth; 
 }
 

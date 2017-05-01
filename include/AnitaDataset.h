@@ -34,6 +34,7 @@ class TurfRate;
 class TCut;
 class TEventList;
 class SurfHk;
+class TruthAnitaEvent; 
 
 
 class AnitaDataset
@@ -157,6 +158,10 @@ class AnitaDataset
     /** Loads the SURF Hk. This is indexed so that the the payload times match as closely as possible */
     SurfHk * surf(bool force_reload = false);
 
+
+    /** Loads the MCTruth. This will be NULL if there is no truth (like if you're working with real data. */ 
+    TruthAnitaEvent * truth(bool force_reload = true); 
+
     /** Lets you check to see if you have a header and event file actually loaded, or if it failed loading */
     bool fRunLoaded;
 
@@ -188,6 +193,10 @@ class AnitaDataset
     TTree * fSurfTree;
     SurfHk * fSurf;
     Bool_t fSurfDirty;
+
+    TTree * fTruthTree; 
+    TruthAnitaEvent * fTruth; 
+
 
 
     Long64_t fWantedEntry;
