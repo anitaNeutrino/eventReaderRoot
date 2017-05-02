@@ -24,7 +24,7 @@ void plotXmaxXmin(int start_run, int end_run)
 
   TCanvas *cc = new TCanvas("cc","cc",1100,1100);
 
-  c.Draw("xMax >> hist_xMax","","");
+  c.Draw("xMax >> hist_xMax","xMax <= pow(2,12) && xMax >= -pow(2,12)","");
   cc->SetLogy(1); 
   gStyle->SetStatY(0.9); 
   gStyle->SetStatX(0.89); 
@@ -37,7 +37,7 @@ void plotXmaxXmin(int start_run, int end_run)
 
   TCanvas *dd = new TCanvas("dd","dd",1100,1100);
  
-  c.Draw("xMin >> hist_xMin","","");
+  c.Draw("xMin >> hist_xMin","xMin <= pow(2,12) && xMin >= -pow(2,12)","");
   dd->SetLogy(1); 
   gStyle->SetStatY(0.9);
   gStyle->SetStatX(0.325); 
