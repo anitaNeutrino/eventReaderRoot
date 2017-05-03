@@ -29,6 +29,7 @@ CalibratedAnitaEvent::CalibratedAnitaEvent()
 
   fClockProblem=0;
   fClockSpike = 0;
+  fRFSpike = 0;
   for(int surf=0;surf<NUM_SURF;surf++) {
     fRcoArray[surf]=0;
     fClockPhiArray[surf]=0;
@@ -44,6 +45,7 @@ CalibratedAnitaEvent::CalibratedAnitaEvent(UsefulAnitaEvent *usefulPtr)
   fCalType=usefulPtr->fCalType;
   fClockProblem=usefulPtr->fClockProblem;
   fClockSpike=usefulPtr->fClockSpike;
+  fRFSpike=usefulPtr->fRFSpike;
   for(int surf=0;surf<NUM_SURF;surf++) {
     fRcoArray[surf]=usefulPtr->fRcoArray[surf];
     fClockPhiArray[surf]=usefulPtr->fClockPhiArray[surf];
