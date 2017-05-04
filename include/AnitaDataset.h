@@ -43,7 +43,19 @@ class AnitaDataset
     /** Get the data directory for the anita version based on environmental variables.  Negative is default and corresponds to defining ANITA_ROOT_DIR **/
     static const char * getDataDir(int anita_version = -1);
 
-    /** Constructor loading a run with calibration type and anita version.  If decimated is true, the decimated header file is read and you only have access to the 10% dataset.*/
+    /** Returns the run at the requested time */ 
+    static int getRunAtTime(double t, int anita_version = -1);
+
+    /** Constructor loading a run with calibration type and anita version.  If decimated is true, the decimated header file is read and you only have access to the 10% dataset.
+     * 
+     *  cal changes the calibration type. 
+     *
+     *  version is:
+     *    negative to read ANITA_ROOT_DATA
+     *    postivee # to read ANITA#_ROOT_DATA
+     *    0 to read ANITA_MC_DATA 
+     *
+     * */
     AnitaDataset (int run, bool decimated = false, WaveCalType::WaveCalType_t cal = WaveCalType::kDefault, int anita_version = -1 );
 
     /** Change the calibration type */
@@ -53,7 +65,15 @@ class AnitaDataset
     virtual ~AnitaDataset();
 
 
-    /** Loads run. Can use decimated to load the 10% data file */
+    /** Loads run. Can use decimated to load the 10% data file 
+     *
+     *    anita_version is:
+     *    negative to read ANITA_ROOT_DATA
+     *    postive # to read ANITA#_ROOT_DATA
+     *    0 to read ANITA_MC_DATA 
+     *
+     **/
+
     bool loadRun(int run, bool decimated = false, int anita_version = -1);
 
     /** loads the desired eventNumber and returns the current entry**/

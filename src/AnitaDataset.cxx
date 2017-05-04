@@ -16,7 +16,10 @@
 #include "SurfHk.h"
 #include "TEventList.h" 
 #include "TCut.h" 
+#include "TMutex.h" 
 #include "TruthAnitaEvent.h" 
+#include <dirent.h>
+#include <algorithm>
 
 static bool checkIfFileExists(const char * file)
 {
@@ -47,11 +50,12 @@ static const char * checkIfFilesExist(int num, ...)
 
 static const char  anita_root_data_dir_env[]  = "ANITA_ROOT_DATA"; 
 static const char  anita_versioned_root_data_dir_env[]  = "ANITA%d_ROOT_DATA"; 
+static const char  mc_root_data_dir[] = "ANITA_MC_DATA"; 
 
 const char * AnitaDataset::getDataDir(int version) 
 {
 
-  if (version > 1) 
+  if (version > 0) 
   {
 
     char env_string[sizeof(anita_versioned_root_data_dir_env)+20]; 
@@ -64,6 +68,15 @@ const char * AnitaDataset::getDataDir(int version)
     else return tryme; 
   }
 
+  if (version == 0) 
+  {
+    const char * tryme = getenv(mc_root_data_dir); 
+    if (!tryme)
+    {
+      fprintf(stderr,"%s, not defined, will try %s\n",mc_root_data_dir, anita_root_data_dir_env); 
+    }
+    else return tryme; 
+  }
 
   if (const char * tryme = getenv(anita_root_data_dir_env))
   {
@@ -368,7 +381,6 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   fWantedEntry = 0; 
 
   const char * data_dir = getDataDir(version); 
-
 
   //seems like a good idea 
   if (version>0) AnitaVersion::set(version); 
@@ -755,4 +767,71 @@ TruthAnitaEvent * AnitaDataset::truth(bool force_reload)
 
   return fTruth; 
 }
+
+
+struct run_info
+{
+
+  double start_time; 
+  double stop_time; 
+  int run;
+
+  bool operator< (const run_info & other) const 
+  {
+    return start_time < other.start_time; 
+  }
+
+
+}; 
+
+static std::map<const char * , std::vector<run_info> > run_times; 
+
+int AnitaDataset::getRunAtTime(double t, int version)
+{
+
+  const char * data_dir = getDataDir(version); 
+  if (!run_times.count(data_dir))
+  {
+    TMutex m; 
+    m.Lock(); 
+    if (!run_times.count(data_dir)) 
+    {
+      DIR * dir = opendir(data_dir); 
+
+      while(struct dirent * ent = readdir(dir))
+      {
+        int run; 
+        if (sscanf(ent->d_name,"run%d",&run))
+        {
+
+          TString fname1 = TString::Format("%s/run%d/timedHeadFile%d.root", data_dir, run, run); 
+          TString fname2 = TString::Format("%s/run%d/headFile%d.root", data_dir, run, run); 
+
+          if (const char * the_right_file = checkIfFilesExist(2, fname1.Data(), fname2.Data()))
+          {
+            TFile f(the_right_file); 
+            TTree * t = (TTree*) f.Get("headTree"); 
+            if (t) 
+            {
+              run_info  ri; 
+              ri.run = run; 
+              ri.start_time= t->GetMinimum("triggerTime"); 
+              ri.stop_time = t->GetMaximum("triggerTime")+1; 
+              run_times[data_dir].push_back(ri); 
+            }
+          }
+        }
+      }
+      std::sort(run_times[data_dir].begin(), run_times[data_dir].end()); 
+    }
+    m.UnLock(); 
+  }
+  
+  run_info test; 
+  test.start_time =t; 
+  std::vector<run_info>::iterator it = std::lower_bound(run_times[data_dir].begin(), run_times[data_dir].end(), test); 
+
+  return (*it).run; 
+}
+
 
