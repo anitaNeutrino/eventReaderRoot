@@ -44,7 +44,7 @@ class AnitaDataset
     static const char * getDataDir(int anita_version = -1);
 
     /** Returns the run at the requested time */ 
-    static int getRunAtTime(double t, int anita_version = -1);
+    static int getRunAtTime(double t);
 
     /** Constructor loading a run with calibration type and anita version.  If decimated is true, the decimated header file is read and you only have access to the 10% dataset.
      * 

@@ -20,6 +20,7 @@
 #include "TruthAnitaEvent.h" 
 #include <dirent.h>
 #include <algorithm>
+#include "TEnv.h" 
 
 static bool checkIfFileExists(const char * file)
 {
@@ -778,59 +779,122 @@ struct run_info
 
   bool operator< (const run_info & other) const 
   {
-    return start_time < other.start_time; 
+    return stop_time < other.stop_time; 
   }
 
 
 }; 
 
-static std::map<const char * , std::vector<run_info> > run_times; 
+std::vector<run_info> run_times[NUM_ANITAS+1]; 
 
-int AnitaDataset::getRunAtTime(double t, int version)
+int AnitaDataset::getRunAtTime(double t)
 {
 
-  const char * data_dir = getDataDir(version); 
-  if (!run_times.count(data_dir))
+  int version= AnitaVersion::getVersionFromUnixTime(t); 
+
+  if (!run_times[version].size())
   {
     TMutex m; 
     m.Lock(); 
-    if (!run_times.count(data_dir)) 
+    if (!run_times[version].size()) 
     {
-      DIR * dir = opendir(data_dir); 
 
-      while(struct dirent * ent = readdir(dir))
+      // load from cache
+      bool found_cache = false; 
+
+
+      TString cache_file1= TString::Format("%s/timerunmap_%d.txt", getenv("ANITA_CALIB_DIR"),version) ; 
+      TString cache_file2= TString::Format("%s/share/anitaCalib/timerunmap_%d.txt", getenv("ANITA_UTIL_INSTALL_DIR"),version) ; 
+      TString cache_file3= TString::Format("./calib/timerunmap_%d.txt",version); 
+
+      const char * cache_file_name = checkIfFilesExist(3, cache_file1.Data(), cache_file2.Data(), cache_file3.Data()); 
+
+      if (checkIfFileExists(cache_file_name))
       {
-        int run; 
-        if (sscanf(ent->d_name,"run%d",&run))
-        {
 
-          TString fname1 = TString::Format("%s/run%d/timedHeadFile%d.root", data_dir, run, run); 
-          TString fname2 = TString::Format("%s/run%d/headFile%d.root", data_dir, run, run); 
-
-          if (const char * the_right_file = checkIfFilesExist(2, fname1.Data(), fname2.Data()))
+          found_cache = true; 
+          FILE * cf = fopen(cache_file_name,"r"); 
+          run_info r; 
+          while(!feof(cf))
           {
-            TFile f(the_right_file); 
-            TTree * t = (TTree*) f.Get("headTree"); 
-            if (t) 
+            fscanf(cf,"%d %lf %lf\n", &r.run, &r.start_time, &r.stop_time); 
+            run_times[version].push_back(r); 
+          }
+          fclose(cf); 
+      }
+
+
+      if (!found_cache) 
+      {
+        //temporarily suppress errors and disable recovery
+        int old_level = gErrorIgnoreLevel;
+        int recover = gEnv->GetValue("TFile.Recover",1); 
+        gEnv->SetValue("TFile.Recover",1); 
+        gErrorIgnoreLevel = kFatal; 
+
+        const char * data_dir = getDataDir(version); 
+        fprintf(stderr,"Couldn't find run file map. Regenerating %s from header files in %s\n", cache_file_name,data_dir); 
+        DIR * dir = opendir(data_dir); 
+
+        while(struct dirent * ent = readdir(dir))
+        {
+          int run; 
+          if (sscanf(ent->d_name,"run%d",&run))
+          {
+
+            TString fname1 = TString::Format("%s/run%d/timedHeadFile%d.root", data_dir, run, run); 
+            TString fname2 = TString::Format("%s/run%d/headFile%d.root", data_dir, run, run); 
+
+            if (const char * the_right_file = checkIfFilesExist(2, fname1.Data(), fname2.Data()))
             {
-              run_info  ri; 
-              ri.run = run; 
-              ri.start_time= t->GetMinimum("triggerTime"); 
-              ri.stop_time = t->GetMaximum("triggerTime")+1; 
-              run_times[data_dir].push_back(ri); 
+              TFile f(the_right_file); 
+              TTree * t = (TTree*) f.Get("headTree"); 
+              if (t) 
+              {
+                run_info  ri; 
+                ri.run = run; 
+                //TODO do this to nanosecond precision 
+                ri.start_time= t->GetMinimum("triggerTime"); 
+                ri.stop_time = t->GetMaximum("triggerTime") + 1; 
+                run_times[version].push_back(ri); 
+              }
             }
           }
         }
+
+        gErrorIgnoreLevel = old_level; 
+        gEnv->SetValue("TFile.Recover",recover); 
+        std::sort(run_times[version].begin(), run_times[version].end()); 
+
+        TString try2write;  
+        try2write.Form("./calib/timerunmap_%d.txt",version); 
+        FILE * cf = fopen(try2write.Data(),"w"); 
+
+        if (cf) 
+        {
+          const std::vector<run_info> &  v = run_times[version]; 
+          for (unsigned i = 0; i < v.size(); i++)
+          {
+              printf("%d %0.9f %0.9f\n", v[i].run, v[i].start_time, v[i].stop_time); 
+              fprintf(cf,"%d %0.9f %0.9f\n", v[i].run, v[i].start_time, v[i].stop_time); 
+          }
+
+         fclose(cf); 
+        }
+
       }
-      std::sort(run_times[data_dir].begin(), run_times[data_dir].end()); 
     }
     m.UnLock(); 
   }
   
   run_info test; 
   test.start_time =t; 
-  std::vector<run_info>::iterator it = std::lower_bound(run_times[data_dir].begin(), run_times[data_dir].end(), test); 
+  test.stop_time =t; 
+  const std::vector<run_info> & v = run_times[version]; 
+  std::vector<run_info>::const_iterator it = std::upper_bound(v.begin(), v.end(), test); 
 
+  if (it == v.end()) return -1; 
+  if (it == v.begin() && (*it).start_time >t) return -1; 
   return (*it).run; 
 }
 
