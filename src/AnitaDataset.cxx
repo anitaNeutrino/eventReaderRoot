@@ -794,7 +794,7 @@ int AnitaDataset::getRunAtTime(double t)
 
   if (!run_times[version].size())
   {
-    TMutex m; 
+    static TMutex m; 
     m.Lock(); 
     if (!run_times[version].size()) 
     {
