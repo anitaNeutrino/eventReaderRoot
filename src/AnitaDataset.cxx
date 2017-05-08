@@ -345,8 +345,7 @@ AnitaDataset::~AnitaDataset()
 
   if (fUseful) 
   {
-    fUseful->~UsefulAnitaEvent(); 
-    free(fUseful); 
+    delete fUseful; 
   }
 
   if (fRawEvent) 
@@ -448,9 +447,10 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
 
   //try to load gps event file  
   TString fname = TString::Format("%s/run%d/gpsEvent%d.root", data_dir, run, run);
-  if (checkIfFileExists(fname.Data()))
+  fname2 = TString::Format("%s/run%d/SimulatedAnitaGpsFile%d.root", data_dir, run, run); 
+  if (const char * the_right_file = checkIfFilesExist(2,fname.Data(),fname2.Data()))
   {
-     TFile * f = new TFile(fname.Data()); 
+     TFile * f = new TFile(the_right_file); 
      filesToClose.push_back(f); 
      fGpsTree = (TTree*) f->Get("adu5PatTree"); 
      fHaveGpsEvent = true; 
@@ -460,8 +460,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   else 
   {
     fname = TString::Format("%s/run%d/gpsFile%d.root", data_dir, run, run);
-    fname2 = TString::Format("%s/run%d/SimulatedAnitaGpsFile%d.root", data_dir, run, run); 
-    if (const char * the_right_file = checkIfFilesExist(2, fname.Data(), fname2.Data()))
+    if (const char * the_right_file = checkIfFilesExist(1, fname.Data()))
     {
        TFile * f = new TFile(the_right_file); 
        filesToClose.push_back(f); 
