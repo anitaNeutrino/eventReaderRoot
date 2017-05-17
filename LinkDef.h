@@ -73,6 +73,7 @@
 #pragma link C++ class TuffNotchStatus+;
 #pragma link C++ class TuffRawCmd+;
 #pragma link C++ namespace AnitaVersion;
+#pragma link C++ enum AnitaDataset::BlindingStrategy; 
 
 
 // Change l1 to l2 for Header's.

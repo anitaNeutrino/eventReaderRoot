@@ -14,13 +14,20 @@
  *
  *
  *
+ * Now it supports blinding as well. Despite Ben's argument that it is not a property of the data, 
+ * I think it's best that all the data is accessed consistently. 
+ *
+ *
+ *  
  *
  *  Cosmin Deaconu <cozzyd@kicp.uchicago.edu>
+ *  Ben Strutt <strutt@physics.ucla.edu> 
  *
  **/
 
 #include <vector>
 #include "AnitaConventions.h"
+#include "TString.h" 
 
 class RawAnitaHeader;
 class TTree;
@@ -36,10 +43,49 @@ class TEventList;
 class SurfHk;
 class TruthAnitaEvent; 
 
-
 class AnitaDataset
 {
   public:
+
+
+  // All the blinding options.
+  // The plan is to have each one represented by a bit so multiple strategies can be set at the same time.
+  // Any output files should probably save the blinding strategy to the tree.
+    enum BlindingStrategy
+    {
+      kNoBlinding = 0x00, 
+      kInsertedVPolEvents = 0x01, 
+      kInsertedHPolEvents = 0x02, 
+      kRandomizePolarity = 0x04, 
+      kDefault = (kInsertedVPolEvents | kInsertedHPolEvents) 
+    }; 
+
+ /**
+   * Get a one line description of the blinding strategy
+   * (please update this in BlindDataset.cc when you add a strategy.
+   * @param strat is the strategy to describe.
+   * @return the description
+   */
+    TString getDescription(BlindingStrategy strat); 
+
+
+  /**
+   * Set the current strategy (see BlindDataset.h) for strategy options
+   * @param strat is the strategy to use. This can be a combination e.g. (kInsertedEvents | kAnotherStrategy)
+   * @return the strategy that was set
+   */
+   BlindingStrategy setStrategy(BlindingStrategy strat);
+
+
+  /**
+   * Get the currently set strategy
+   * @return the strategy that was set
+   */
+   BlindingStrategy getStrategy();
+
+
+
+
     /** Get the data directory for the anita version based on environmental variables.  Negative is default and corresponds to defining ANITA_ROOT_DIR **/
     static const char * getDataDir(int anita_version = -1);
 
@@ -52,11 +98,14 @@ class AnitaDataset
      *
      *  version is:
      *    negative to read ANITA_ROOT_DATA
-     *    postivee # to read ANITA#_ROOT_DATA
+     *    postive # to read ANITA#_ROOT_DATA
      *    0 to read ANITA_MC_DATA 
      *
+     *  strat is the blinding strategy. 
+     *
      * */
-    AnitaDataset (int run, bool decimated = false, WaveCalType::WaveCalType_t cal = WaveCalType::kDefault, int anita_version = -1 );
+    AnitaDataset (int run, bool decimated = false, WaveCalType::WaveCalType_t cal = WaveCalType::kDefault, 
+                  int anita_version = -1 , BlindingStrategy strat = BlindingStrategy::kDefault);
 
     /** Change the calibration type */
     void setCalType(WaveCalType::WaveCalType_t cal) { fCalType = cal; }
@@ -229,6 +278,43 @@ class AnitaDataset
     TEventList * fCutList;
     int fCutIndex;
 
+
+    /* Blinding stuff */ 
+    void zeroBlindPointers();
+    void loadBlindTrees();
+
+    BlindingStrategy theStrat; ///!< Currently selected blinding strategy
+    bool loadedBlindTrees; ///!< Have we loaded the tree of events to insert?
+    Int_t needToOverwriteEvent(AnitaPol::AnitaPol_t pol, UInt_t eventNumber);
+    void overwriteHeader(RawAnitaHeader* header, AnitaPol::AnitaPol_t pol, Int_t fakeTreeEntry);
+    void overwriteEvent(UsefulAnitaEvent* useful, AnitaPol::AnitaPol_t pol, Int_t fakeTreeEntry);
+
+    // fake things
+    TFile* fBlindFile; ///!< Pointer to file containing tree of UsefulAnitaEvents to insert
+    TTree* fBlindEventTree[AnitaPol::kNotAPol]; ///!< Tree of UsefulAnitaEvents to insert
+    TTree* fBlindHeadTree[AnitaPol::kNotAPol]; ///!< Tree of headers to insert
+
+    UsefulAnitaEvent* fBlindEvent[AnitaPol::kNotAPol]; ///!< Pointer to fake UsefulAnitaEvent
+    RawAnitaHeader* fBlindHeader[AnitaPol::kNotAPol]; ///!< Pointer to fake header
+
+    // Here we have a set of three vectors that should all be the same length as the elements of each match up.
+    // They are filled in loadBlindTrees
+    std::vector<UInt_t> eventsToOverwrite;
+    std::vector<AnitaPol::AnitaPol_t> polarityOfEventToInsert;
+    std::vector<Int_t> fakeTreeEntries;
+
+
 };
+
+// define the bitwise or operator | to combine blinding strategies
+inline AnitaDataset::BlindingStrategy operator|(AnitaDataset::BlindingStrategy strat1,  AnitaDataset::BlindingStrategy strat2){
+  return static_cast<AnitaDataset::BlindingStrategy>(static_cast<UInt_t>(strat1) | static_cast<UInt_t>(strat2));
+}
+// define the bitwise and opterator & to decode the blinding strategies
+inline AnitaDataset::BlindingStrategy operator&(AnitaDataset::BlindingStrategy strat1,  AnitaDataset::BlindingStrategy strat2){
+  return static_cast<AnitaDataset::BlindingStrategy>(static_cast<UInt_t>(strat1) & static_cast<UInt_t>(strat2));
+}
+
+
 
 #endif
