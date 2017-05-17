@@ -55,8 +55,9 @@ static const char  anita_root_data_dir_env[]  = "ANITA_ROOT_DATA";
 static const char  anita_versioned_root_data_dir_env[]  = "ANITA%d_ROOT_DATA"; 
 static const char  mc_root_data_dir[] = "ANITA_MC_DATA"; 
 
-const char * AnitaDataset::getDataDir(int version) 
+const char * AnitaDataset::getDataDir(DataDirectory dir) 
 {
+  int version = (int) dir; 
 
   if (version > 0) 
   {
@@ -93,7 +94,7 @@ const char * AnitaDataset::getDataDir(int version)
 }
 
 
-AnitaDataset::AnitaDataset(int run, bool decimated, WaveCalType::WaveCalType_t cal, int version, BlindingStrategy strategy)
+AnitaDataset::AnitaDataset(int run, bool decimated, WaveCalType::WaveCalType_t cal, DataDirectory version, BlindingStrategy strategy)
   : 
   fHeadTree(0), fHeader(0), 
   fEventTree(0), fCalEvent(0), fRawEvent(0), fUseful(0), 
@@ -418,7 +419,7 @@ AnitaDataset::~AnitaDataset()
 
 }
 
-bool  AnitaDataset::loadRun(int run, bool dec,  int version) 
+bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir) 
 {
 
   fDecimated = dec; 
@@ -427,9 +428,11 @@ bool  AnitaDataset::loadRun(int run, bool dec,  int version)
   unloadRun(); 
   fWantedEntry = 0; 
 
-  const char * data_dir = getDataDir(version); 
+  const char * data_dir = getDataDir(dir); 
 
   //seems like a good idea 
+  
+  int version = (int) dir; 
   if (version>0) AnitaVersion::set(version); 
 
   //if decimated, try to load decimated tree
@@ -878,7 +881,7 @@ int AnitaDataset::getRunAtTime(double t)
         gEnv->SetValue("TFile.Recover",1); 
         gErrorIgnoreLevel = kFatal; 
 
-        const char * data_dir = getDataDir(version); 
+        const char * data_dir = getDataDir((DataDirectory)version); 
         fprintf(stderr,"Couldn't find run file map. Regenerating %s from header files in %s\n", cache_file_name,data_dir); 
         DIR * dir = opendir(data_dir); 
 
