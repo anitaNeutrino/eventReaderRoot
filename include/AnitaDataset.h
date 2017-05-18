@@ -118,7 +118,7 @@ class AnitaDataset
      *
      * */
     AnitaDataset (int run, bool decimated = false, WaveCalType::WaveCalType_t cal = WaveCalType::kDefault, 
-                  DataDirectory dir = ANITA_ROOT_DATA , BlindingStrategy strat = BlindingStrategy::kDefault);
+                  DataDirectory dir = ANITA_ROOT_DATA , BlindingStrategy strat = AnitaDataset::kDefault);
 
     /** Change the calibration type */
     void setCalType(WaveCalType::WaveCalType_t cal) { fCalType = cal; }
