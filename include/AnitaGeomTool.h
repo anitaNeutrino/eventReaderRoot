@@ -242,6 +242,7 @@ class AnitaGeomTool
 
    void updateAnt(Double_t deltaR,Double_t deltaRL,Double_t deltaUD);
    void printAntPos();
+   void addPhaseCenters();
 
    void usePhotogrammetryNumbers(Int_t flag) {
      fUsePhotogrammetryNumbers=flag;
@@ -339,6 +340,8 @@ class AnitaGeomTool
         lat=getLat(getTheta(thePos));
     } ///<Converts cartesian coordinates to latitude and longitude
 
+
+          
  private:
   void readAnita2Photogrammetry();
   void readPhotogrammetry(int version);

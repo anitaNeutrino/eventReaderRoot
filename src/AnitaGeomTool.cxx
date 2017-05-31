@@ -2265,6 +2265,16 @@ void AnitaGeomTool::readPhotogrammetry(int version)
      }
   }
 
+  if (fUsePhotogrammetryNumbers==0){
+    addPhaseCenters();
+  }
+
+
+}
+
+
+void AnitaGeomTool::addPhaseCenters(){
+
 
   // Now add in ANITA-3 phase centre corrections
   // std::cerr << "Inside AnitaGeomTool we have..." << std::endl;
@@ -2288,5 +2298,5 @@ void AnitaGeomTool::readPhotogrammetry(int version)
       
     }
   }
-
+  
 }
