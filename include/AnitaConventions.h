@@ -57,6 +57,7 @@ namespace WaveCalType {
 #define NUM_SEAVEYS_ANITA1 32 ///< The number of Seavey antennas.
 #define NUM_SEAVEYS_ANITA2 40 ///< The number of Seavey antennas.
 #define NUM_SEAVEYS_ANITA3 48 ///< The number of Seavey antennas.
+#define NUM_SEAVEYS_ANITA4 48 ///< The number of Seavey antennas. 
 #define NUM_POLS 2 ///< The number of polarisations per Seavey
 #ifdef ANITA_2_DATA
 #define ACTIVE_SURFS 10 ///< The number of SURF digitizer cards.
