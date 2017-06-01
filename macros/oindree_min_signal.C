@@ -61,8 +61,8 @@ void oindree_min_signal(int start_run, int end_run) {
 
   UInt_t count=0;
 
-  TH1D *hmin_signalV = new TH1D("hmin_signalV",";MinOverVChans(pk-pk voltage);Number of Events",100,-2,100);   
-  TH1D *hmin_signalH = new TH1D("hmin_signalH",";MinOverHChans(pk-pk voltage);Number of Events",100,-2,100);   
+  TH1D *hmin_signalV = new TH1D("hmin_signalV",";MinOverVChans(pk-pk voltage in mV);Number of Events",100,-2,100);   
+  TH1D *hmin_signalH = new TH1D("hmin_signalH",";MinOverHChans(pk-pk voltage in mV);Number of Events",100,-2,100);   
 
   for(int ientry=0; ientry < header_num_entries; ientry=ientry+1000000) 
   {
