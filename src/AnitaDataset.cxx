@@ -23,6 +23,8 @@
 #include "TEnv.h" 
 #include <iostream>
 #include <fstream>
+#include "AnitaConventions.h"
+
 
 static bool checkIfFileExists(const char * file)
 {
@@ -103,7 +105,7 @@ AnitaDataset::AnitaDataset(int run, bool decimated, WaveCalType::WaveCalType_t c
   fTurfTree(0), fTurf(0),
   fSurfTree(0), fSurf(0),
   fTruthTree(0), fTruth(0), 
-  fCutList(0)
+  fCutList(0), fRandy()
 {
   setCalType(cal); 
   loadRun(run, decimated, version); 
@@ -315,12 +317,32 @@ UsefulAnitaEvent * AnitaDataset::useful(bool force_load)
   }
 
 
-  if (theStrat & kRandomizePolarity)
+  if ((theStrat & kRandomizePolarity) && maybeInvertPolarity(fUseful->eventNumber))
   {
-    /* TODO implement flipping */ 
+    // std::cerr << "Inverting event " << fUseful->eventNumber << std::endl;
+    for(int surf=0; surf < NUM_SURF; surf++){
+      for(int chan=0; chan < RFCHAN_PER_SURF; chan++){
+        int chanIndex = surf*NUM_CHAN + chan;
+        for(int samp=0; samp < NUM_SAMP; samp++){
+          fUseful->fVolts[chanIndex][samp] *= -1;
+          fUseful->data[chanIndex][samp] *= -1; // do the pedestal subtracted data too
+        }
+      }
+    }
   }
 
   return fUseful; 
+}
+
+// Calling this function on it's own is just for unblinding, please use honestly
+Bool_t AnitaDataset::maybeInvertPolarity(UInt_t eventNumber){
+  // add additional check here for clarity, in case people call this function on it's own?
+  if((theStrat & kRandomizePolarity) > 0){
+    fRandy.SetSeed(eventNumber); // set seed from event number, makes this deterministic regardless of order events are processed
+    Double_t aboveZeroFiftyPercentOfTheTime = fRandy.Uniform(-1, 1); // uniformly distributed random number between -1 and 1  
+    return (aboveZeroFiftyPercentOfTheTime < 0);
+  }
+  return false;
 }
 
 int AnitaDataset::getEntry(int entryNumber)
