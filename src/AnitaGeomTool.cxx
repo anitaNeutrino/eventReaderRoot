@@ -167,6 +167,7 @@ AnitaGeomTool::AnitaGeomTool()
   //  readAnita2Photogrammetry();
 
 
+  fUsePhotogrammetryNumbers=0;
   //TODO need to add phase-centers for A4 
   readPhaseCenterNumbers(v); // This one has to come before reading photogrammetry
   readPhotogrammetry(v);
@@ -178,7 +179,6 @@ AnitaGeomTool::AnitaGeomTool()
 
   }
 
-  fUsePhotogrammetryNumbers=0;
 
 
 
