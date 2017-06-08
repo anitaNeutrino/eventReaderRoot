@@ -27,7 +27,8 @@
 
 #include <vector>
 #include "AnitaConventions.h"
-#include "TString.h" 
+#include "TString.h"
+#include "TRandom3.h"
 
 class RawAnitaHeader;
 class TTree;
@@ -41,7 +42,7 @@ class TurfRate;
 class TCut;
 class TEventList;
 class SurfHk;
-class TruthAnitaEvent; 
+class TruthAnitaEvent;
 
 class AnitaDataset
 {
@@ -243,7 +244,8 @@ class AnitaDataset
     /** Lets you check to see if you have a header and event file actually loaded, or if it failed loading */
     bool fRunLoaded;
 
-
+    /* Wraps the random number generator for polarity inversion so it is derministic regardless of event processing order */
+    bool maybeInvertPolarity(UInt_t eventNumber);
 
   protected:
     void unloadRun();
@@ -293,6 +295,8 @@ class AnitaDataset
     void loadBlindTrees();
 
     BlindingStrategy theStrat; ///!< Currently selected blinding strategy
+    TRandom3 fRandy; ///!< for deciding whether to do polarity flipping (eventNumber is used as seed)
+
     bool loadedBlindTrees; ///!< Have we loaded the tree of events to insert?
     Int_t needToOverwriteEvent(AnitaPol::AnitaPol_t pol, UInt_t eventNumber);
     void overwriteHeader(RawAnitaHeader* header, AnitaPol::AnitaPol_t pol, Int_t fakeTreeEntry);
