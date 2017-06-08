@@ -107,10 +107,10 @@ AnitaDataset::AnitaDataset(int run, bool decimated, WaveCalType::WaveCalType_t c
   fTruthTree(0), fTruth(0), 
   fCutList(0), fRandy()
 {
+  setStrategy(strategy); 
   setCalType(cal); 
   loadRun(run, decimated, version); 
 
-  setStrategy(strategy); 
   loadedBlindTrees = false;
   zeroBlindPointers();
   loadBlindTrees();
@@ -196,13 +196,9 @@ CalibratedAnitaEvent * AnitaDataset::calibrated(bool force_load)
   {
      if (!fCalEvent) 
      {
-       fCalEvent = (CalibratedAnitaEvent*) malloc(sizeof(CalibratedAnitaEvent)); 
+       fCalEvent = new CalibratedAnitaEvent; 
      }
-     else
-     {
-       fCalEvent->~CalibratedAnitaEvent(); 
-     }
-
+     fCalEvent->~CalibratedAnitaEvent(); 
      fCalEvent = new (fCalEvent) CalibratedAnitaEvent(useful()); 
      fCalDirty = false; 
   }
@@ -280,16 +276,13 @@ UsefulAnitaEvent * AnitaDataset::useful(bool force_load)
   {
     if (!fUseful) 
     {
-      fUseful = (UsefulAnitaEvent *) malloc(sizeof(UsefulAnitaEvent)); 
+      fUseful = new UsefulAnitaEvent; 
     }
-    else
-    {
-     fUseful->~UsefulAnitaEvent();
-    }
+
+    fUseful->~UsefulAnitaEvent();
 
     if (fHaveCalibFile)
     {
-      
       new (fUseful) UsefulAnitaEvent(fCalEvent, fCalType); 
     }
     else if (fRawEvent)
@@ -856,7 +849,7 @@ struct run_info
 
 }; 
 
-std::vector<run_info> run_times[NUM_ANITAS+1]; 
+static std::vector<run_info> run_times[NUM_ANITAS+1]; 
 
 int AnitaDataset::getRunAtTime(double t)
 {
