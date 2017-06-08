@@ -114,7 +114,6 @@ AnitaDataset::AnitaDataset(int run, bool decimated, WaveCalType::WaveCalType_t c
   loadedBlindTrees = false;
   zeroBlindPointers();
   loadBlindTrees();
-  theStrat = strategy; 
 
 }
 
