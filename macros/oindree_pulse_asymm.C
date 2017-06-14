@@ -16,26 +16,26 @@
 #include <fstream>
 #include "TMath.h" 
 
-void oindree_min_signal(int start_run, int end_run);
+void oindree_pulse_asymm(int start_run, int end_run);
 
 
-void oindree_min_signal()
+void oindree_pulse_asymm()
 {
    cout << "Usage: For drawing a distribution of minimum signal over antennas for ANITA-IV, oindree_min_signal(42,367)\n";
    //  oindree_min_signal(42,367);
 }
   
 
-void oindree_min_signal(int start_run, int end_run) {
+void oindree_pulse_asymm(int start_run, int end_run) {
    
   const int num_ant = 48; 
-  double pkpkV[num_ant];
-  double pkpkH[num_ant]; 
+  double pulse_asymmV[num_ant] = {};
+  double pulse_asymmH[num_ant] = {}; 
 
   for (int i = 0; i < num_ant; i++)
   {
-    pkpkV[i] = 0.0;
-    pkpkH[i] = 0.0; 
+    pulse_asymmV[i] = 0.0;
+    pulse_asymmH[i] = 0.0; 
   }
 
   TChain headChain("headTree");
@@ -61,8 +61,8 @@ void oindree_min_signal(int start_run, int end_run) {
 
   UInt_t count=0;
 
-  TH1D *hmin_signalV = new TH1D("hmin_signalV",";MinOverVChans(pk-pk voltage in mV);Number of Events",100,-2,100);   
-  TH1D *hmin_signalH = new TH1D("hmin_signalH",";MinOverHChans(pk-pk voltage in mV);Number of Events",100,-2,100);   
+  TH1D *hpulse_asymmV = new TH1D("hpulse_asymmV",";MaxOverVchans(Abs(Vmax - Abs(Vmin)));Number of Events",100,-2,100);   
+  TH1D *hpulse_asymmH = new TH1D("hpulse_asymmH",";MaxOverHchans(Abs(Vmax - Abs(Vmin)));Number of Events",100,-2,100);   
 
   for(int ientry=0; ientry < header_num_entries; ientry=ientry+1000) 
   {
@@ -82,52 +82,55 @@ void oindree_min_signal(int start_run, int end_run) {
     count++;
 
     //initialize 
-    double min_pkpkV = 0.0;
-    double min_pkpkH = 0.0;  
-    
-    for (int j = 0; j < num_ant; j++)
+    double max_pulse_asymmV = 0.0;
+    double max_pulse_asymmH = 0.0;  
+
+    for (int i = 0; i < num_ant; i++)
     {
-      pkpkH[j] = 0.0; 
-      pkpkV[j] = 0.0; 
-    }  
+     pulse_asymmV[i] = 0.0;
+     pulse_asymmH[i] = 0.0; 
+    }
 
     for (int iant = 0; iant < num_ant; iant++)
     { 
     
       TGraph *gr_hpol = new TGraph(0); 
       gr_hpol = realEvent.getGraph(iant,AnitaPol::kHorizontal);
-      pkpkH[iant] = (gr_hpol->GetY()[TMath::LocMax(gr_hpol->GetN(),gr_hpol->GetY())]) - (gr_hpol->GetY()[TMath::LocMin(gr_hpol->GetN(),gr_hpol->GetY())]);
+      pulse_asymmH[iant] = TMath::Abs(gr_hpol->GetY()[TMath::LocMax(gr_hpol->GetN(),gr_hpol->GetY())] - TMath::Abs(gr_hpol->GetY()[TMath::LocMin(gr_hpol->GetN(),gr_hpol->GetY())]));
 
-      //cout << pkpkH[iant] << endl; 
+      cout << pulse_asymmH[iant] << endl; 
 
       TGraph *gr_vpol = new TGraph(0); 
       gr_vpol = realEvent.getGraph(iant,AnitaPol::kVertical); 
-      pkpkV[iant] = (gr_vpol->GetY()[TMath::LocMax(gr_vpol->GetN(),gr_vpol->GetY())]) - (gr_vpol->GetY()[TMath::LocMin(gr_vpol->GetN(),gr_vpol->GetY())]); 
+      pulse_asymmV[iant] = TMath::Abs(gr_vpol->GetY()[TMath::LocMax(gr_vpol->GetN(),gr_vpol->GetY())] - TMath::Abs(gr_vpol->GetY()[TMath::LocMin(gr_vpol->GetN(),gr_vpol->GetY())]));
 
       delete gr_hpol;
-      delete gr_vpol; 
+      delete gr_vpol;  
 
     } //loop over antennas
 
-    min_pkpkV = pkpkV[TMath::LocMin(num_ant,pkpkV)];  
-    min_pkpkH = pkpkH[TMath::LocMin(num_ant,pkpkH)];
+    max_pulse_asymmV = pulse_asymmV[TMath::LocMax(num_ant,pulse_asymmV)];  
+    max_pulse_asymmH = pulse_asymmH[TMath::LocMax(num_ant,pulse_asymmH)];
 
-    hmin_signalV->Fill(min_pkpkV);
-    hmin_signalH->Fill(min_pkpkH); 
+    //cout << "max_pulse_asymmV is for ientry " << ientry << " is " << max_pulse_asymmV << endl; 
+    //cout << "max_pulse_asymmH is for ientry " << ientry << " is " << max_pulse_asymmH << endl;  
+
+    hpulse_asymmV->Fill(max_pulse_asymmV);
+    hpulse_asymmH->Fill(max_pulse_asymmH); 
 
   } //loop over events ends
   cerr << endl;
   cout << "Processed " << count << " events.\n";
 
   TCanvas *h = new TCanvas("h","h",1000,800); 
-  hmin_signalV->Draw("");
-  h->SaveAs("min_signalV.png");
-  h->SaveAs("min_signalV.root"); 
+  hpulse_asymmV->Draw("");
+  h->SaveAs("pulse_asymmV.png");
+  h->SaveAs("pulse_asymmV.root"); 
 
   TCanvas *hh = new TCanvas("hh","hh",1000,800); 
-  hmin_signalH->Draw("");
-  hh->SaveAs("min_signalH.png");
-  hh->SaveAs("min_signalH.root"); 
+  hpulse_asymmH->Draw("");
+  hh->SaveAs("pulse_asymmH.png");
+  hh->SaveAs("pulse_asymmH.root"); 
 
 }//end of macro
 
