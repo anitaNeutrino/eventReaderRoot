@@ -19,6 +19,7 @@ static AnitaEventCalibrator*  instances[NUM_ANITAS+1] = {0};
 
 static const char * voltageCalibFiles[] = { 0, 0, 0, "simpleVoltageCalibrationHarm.txt", "simpleVoltageCalibrationAnita4.txt" };
 static const char * relativeCableDelayFiles[] = { 0,0,0, "relativeCableDelays.dat","relativeCableDelaysAnita4.dat"};
+static const char * relativePhaseCenterToAmpaDelaysFiles[] = { 0,0,0, "relativePhaseCenterToAmpaDelays.dat","relativePhaseCenterToAmpaDelaysAnita4.dat"};
 
 AnitaEventCalibrator::AnitaEventCalibrator(){
   // std::cout << "Just called " << __PRETTY_FUNCTION__ << std::endl;
@@ -1645,7 +1646,7 @@ void AnitaEventCalibrator::loadCalib() {
   }
 
 
-  sprintf(fileName,"%s/relativePhaseCenterToAmpaDelays.dat",calibDir);
+  sprintf(fileName,"%s/%s", calibDir, relativePhaseCenterToAmpaDelaysFiles[AnitaVersion::get()]);
   std::ifstream relativePhaseCenterToAmpaDelaysFile(fileName);
   relativePhaseCenterToAmpaDelaysFile.getline(firstLine,179);
   while(relativePhaseCenterToAmpaDelaysFile >> surf >> chan >> calib) {

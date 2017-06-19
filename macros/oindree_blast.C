@@ -71,7 +71,7 @@ void oindree_blast(int start_run, int end_run) {
   TH1D *hmax_ratio = new TH1D("hmax_ratio",";MaxOverPhiSectors((Bottom ring pk-pk voltage)/(Top ring pk-pk voltage));Number of Events",100,-2,10); 
   TH1D *hmin_ratio = new TH1D("hmin_ratio",";MinOverPhiSectors((Bottom ring pk-pk voltage)/(Top ring pk-pk voltage));Number of Events",100,-2,10);   
 
-  for(int ientry=0; ientry < header_num_entries; ientry=ientry+1000000) 
+  for(int ientry=0; ientry < header_num_entries; ientry=ientry+1000) 
   {
      eventChain.GetEntry(ientry);
      headChain.GetEntry(ientry);
@@ -121,14 +121,14 @@ void oindree_blast(int start_run, int end_run) {
       top_max = gr_top->GetY()[top_max_index];
       top_min = gr_top->GetY()[top_min_index];    
 
-      //cout << "top max, min in mV are                 " << top_max << ",   " << top_min << endl; 
+      cout << "top max, min in mV are                 " << top_max << ",   " << top_min << endl; 
   
       bottom_max_index = TMath::LocMax(gr_bottom->GetN(),gr_bottom->GetY());
       bottom_min_index = TMath::LocMin(gr_bottom->GetN(),gr_bottom->GetY());
       bottom_max = gr_bottom->GetY()[bottom_max_index]; 
       bottom_min = gr_bottom->GetY()[bottom_min_index]; 
 
-      //cout << "bottom max, min in mV are              " << bottom_max << ",   " << bottom_min << endl; 
+      cout << "bottom max, min in mV are              " << bottom_max << ",   " << bottom_min << endl; 
  
       ratio[iphi] = (bottom_max - bottom_min) / (top_max - top_min); 
       //cout << "ratio for phi number            " << iphi << " is                    " << ratio[iphi] << endl; 
@@ -138,9 +138,9 @@ void oindree_blast(int start_run, int end_run) {
     } //loop over phi sectors ends
 
     max_ratio = ratio[TMath::LocMax(num_phi,ratio)]; //LocMax gives the index 
-    cout << "max_ratio for ientry =  " << ientry << " is " << max_ratio << endl; 
+    //cout << "max_ratio for ientry =  " << ientry << " is " << max_ratio << endl; 
     min_ratio = ratio[TMath::LocMin(num_phi,ratio)];
-    cout << "min_ratio for ientry =  " << ientry << " is " << min_ratio << endl;  
+    //cout << "min_ratio for ientry =  " << ientry << " is " << min_ratio << endl;  
 
     hmax_ratio->Fill(max_ratio); 
     hmin_ratio->Fill(min_ratio); 
