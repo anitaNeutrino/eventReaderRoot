@@ -24,17 +24,12 @@ void oindree_blast()
    cout << "Usage: For drawing a distribution of a ratio to try and find payload blast events in ANITA-IV, oindree_blast(42,367)\n";
    //  oindree_blast(42,367);
 }
-  
-
 void oindree_blast(int start_run, int end_run) {
-
-  
-  //for (int irun = start_run; irun < end_run; irun++)
-  //{
-  // AnitaDataset d(irun); 
-  //}
-  
+ 
   ofstream myfile_passed_blast_cut; 
+  myfile_passed_blast_cut.open("passedBlastCut.txt", std::ofstream::out | std::ofstream::app);
+  myfile_passed_blast_cut << "max ratio        event number           run number \n";
+
   AnitaVersion::set(4); 
   const int num_phi = 16; 
   AnitaPol::AnitaPol_t pol = AnitaPol::kHorizontal;
@@ -76,11 +71,10 @@ void oindree_blast(int start_run, int end_run) {
   cout << "number of entries in prettyHk anita-4 is " << hk_num_entries << endl;
 
   UInt_t count=0;
-  TH1D *hmax_ratio = new TH1D("hmax_ratio",";MaxOverPhiSectors((Bottom ring pk-pk voltage)/(Top ring pk-pk voltage));Number of Events",100,0,15); 
-  TH1D *hmin_ratio = new TH1D("hmin_ratio",";MinOverPhiSectors((Bottom ring pk-pk voltage)/(Top ring pk-pk voltage));Number of Events",100,0,10);   
-  TH2D *hmax_min = new TH2D("hmax_min",";max ratio;min ratio",100,0,15,100,0,10);
 
-  for(int ientry=0; ientry < header_num_entries; ientry=ientry+100000) 
+  TH1D *hmax_ratio = new TH1D("hmax_ratio",";MaxOverPhiSectors((Bottom ring pk-pk voltage)/(Top ring pk-pk voltage));Number of Events",100,0,20); 
+
+  for(int ientry=0; ientry < header_num_entries; ientry++) 
   {
      eventChain.GetEntry(ientry);
      headChain.GetEntry(ientry);
@@ -97,9 +91,8 @@ void oindree_blast(int start_run, int end_run) {
     //  cout << realEvent.gotCalibTemp << " " << realEvent.calibTemp << endl;
     count++;
 
-    //initialize max_ratio and min_ratio
+    //initialize max_ratio
     double max_ratio = 0.0;
-    double min_ratio = 0.0;  
 
     //make sure variables used to calculate max_ratio for each event are re-initialized to zero
     for (int i = 0; i < num_phi; i++)
@@ -148,24 +141,16 @@ void oindree_blast(int start_run, int end_run) {
 
     max_ratio = ratio[TMath::LocMax(num_phi,ratio)]; //LocMax gives the index 
     //cout << "max_ratio for ientry =  " << ientry << " is " << max_ratio << endl; 
-    min_ratio = ratio[TMath::LocMin(num_phi,ratio)];
-    //cout << "min_ratio for ientry =  " << ientry << " is " << min_ratio << endl;  
 
     hmax_ratio->Fill(max_ratio); 
-    hmin_ratio->Fill(min_ratio);
-    hmax_min->Fill(max_ratio,min_ratio); 
 
-    if (max_ratio > 2.8 || max_ratio < 1.1) 
-      {	
-      // cout << "potential cut worthy max_ratio is " << max_ratio << endl;
-      // cout << "associated event number is " << header->eventNumber << endl; 
-      // cout << "associated run number is " << header->run << endl;  
-      //} 
+    if (max_ratio > 2.8) 
+      {
+	cout << "potential cut worthy max_ratio is " << max_ratio << endl;
+	cout << "associated event number is " << header->eventNumber << endl; 
+	cout << "associated run number is " << header->run << endl;   
     
-	myfile_passed_blast_cut.open("passedBlastCut.txt");
-	myfile_passed_blast_cut << "max_ratio        eventNumber           run \n";
-
-	myfile_passed_blast_cut << max_ratio << "         " << setprecision(11) << header->eventNumber << "                " << header->run << "    " <<"\n"; //write to file
+	myfile_passed_blast_cut << setprecision(2) << max_ratio << "             " << setprecision(11) << header->eventNumber << "                " << header->run << "    " <<"\n"; //write to file
       }
 
   } //loop over events ends
@@ -183,29 +168,12 @@ void oindree_blast(int start_run, int end_run) {
 
   //Draw the histogram of max_ratio  - outliers could be due to drop down PV array
   TCanvas *h = new TCanvas("h","h",1000,800); 
+  hmax_ratio->SetStats(0); 
   hmax_ratio->Draw(); 
   h->SetLogy(); 
-  h->SaveAs(Form("max_ratio%i.png",pol)); 
-  hmax_ratio->SaveAs(Form("hmax_ratio%i.root",pol));
-  h->SaveAs(Form("max_ratio%i.root",pol)); 
-
-  //Draw the histogram of min_ratio - outliers could be due to PV cells at the top of the payload that power the SIP 
-  TCanvas *hh = new TCanvas("hh","hh",1000,800); 
-  hmin_ratio->Draw(); 
-  hh->SetLogy(); 
-  hh->SaveAs(Form("min_ratio%i.png",pol)); 
-  hmin_ratio->SaveAs(Form("hmin_ratio%i.root",pol)); 
-  hh->SaveAs(Form("min_ratio%i.root",pol)); 
-
-  //Draw a 2d histogram of max ratio and min ratio
-  TCanvas *hhh = new TCanvas("hhh","hhh",1000,800);
-  hmax_min->Draw("colz");
-  hhh->SetLogz();
-  hhh->SaveAs(Form("max_min%i.png",pol)); 
-  hmax_min->SaveAs(Form("hmax_min%i.root",pol)); 
-  hhh->SaveAs(Form("max_min%i.root",pol));   
-
-
+  h->SaveAs(Form("blast_max_ratio%i.png",pol)); 
+  hmax_ratio->SaveAs(Form("hblast_max_ratio%i.root",pol));
+  h->SaveAs(Form("blast_max_ratio%i.root",pol)); 
 
 }//end of macro
 
