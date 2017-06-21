@@ -29,10 +29,10 @@ void oindree_blast()
 void oindree_blast(int start_run, int end_run) {
 
   
-  //for (int irun = start_run; irun < end_run; irun++)
-  //{
-  // AnitaDataset d(irun); 
-  //}
+  for (int irun = start_run; irun < end_run; irun++)
+  {
+    AnitaDataset d(irun); 
+  }
   
   ofstream myfile_passed_blast_cut; 
   AnitaVersion::set(4); 

@@ -1,7 +1,7 @@
 #include "CalibratedHk.h" 
 #include "CalibratedSSHk.h" 
 
-void dumpHKToAscii(int run, const char * out_dir = ".", bool dump_mag = true, bool dump_accel = true, bool dump_ss = true) 
+void dumpHKToAscii(int run, const char * out_dir = ".", bool dump_mag = true, bool dump_accel = true, bool dump_ss = true, bool dump_gps = true) 
 {
 
 
@@ -15,8 +15,6 @@ void dumpHKToAscii(int run, const char * out_dir = ".", bool dump_mag = true, bo
 
   path.Form("%s/run%d/sshkFile%d.root",getenv("ANITA_ROOT_DATA"), run, run); 
   TFile SShkFile(path.Data()); 
-
-
   TTree * SShkTree = (TTree*) SShkFile.Get("hkTree"); 
 
 
@@ -25,6 +23,22 @@ void dumpHKToAscii(int run, const char * out_dir = ".", bool dump_mag = true, bo
 
   hkTree->SetBranchAddress("hk",&hk); 
   SShkTree->SetBranchAddress("hk",&SShk); 
+
+  path.Form("%s/run%d/gpsFile%d.root",getenv("ANITA_ROOT_DATA"), run, run); 
+  TFile gpsFile(path.Data()); 
+
+  TTree * adu5PatTree = (TTree*) gpsFile.Get("adu5PatTree"); 
+
+  Adu5Pat * patA = new Adu5Pat; adu5PatTree->SetBranchAddress("pat",&patA); 
+
+  TTree * adu5SatTree = (TTree*) gpsFile.Get("adu5SatTree"); 
+  Adu5Sat * satA = new Adu5Sat;  adu5SatTree->SetBranchAddress("sat",&satA); 
+  TTree * adu5bPatTree = (TTree*) gpsFile.Get("adu5bPatTree"); 
+  Adu5Pat * patB = new Adu5Pat; adu5bPatTree->SetBranchAddress("pat",&patB); 
+  TTree * adu5bSatTree = (TTree*) gpsFile.Get("adu5bSatTree"); 
+  Adu5Sat * satB = new Adu5Sat; adu5bSatTree->SetBranchAddress("sat",&satB); 
+
+
 
   if (dump_mag) 
   {
@@ -116,6 +130,146 @@ void dumpHKToAscii(int run, const char * out_dir = ".", bool dump_mag = true, bo
     fclose(f); 
     path = TString("gzip -f ") + path; 
     system(path.Data()); 
+
+  }
+
+  if (dump_gps) 
+  {
+    //dump ADU5APat
+    path.Form("%s/adu5Apat%d.dat",out_dir, run); 
+    FILE * f = fopen(path.Data(),"w"); 
+
+    fprintf(f,"payloadTime\t" 
+              "timeOfDay\t" 
+              "latitude\t"
+              "longitude\t"
+              "altitude\t"
+              "heading\t"
+              "pitch\t"
+              "roll\t"
+              "mrms\t"
+              "brms\t"
+              "attFlag\n"); 
+
+
+    for (int i = 0; i < adu5PatTree->GetEntries(); i++) 
+    {
+      adu5PatTree->GetEntry(i); 
+      fprintf(f,"%f\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%d\n",
+          patA->payloadTime + patA->payloadTimeUs*1e-6, patA->timeOfDay, patA->latitude, patA->longitude,
+          patA->altitude,patA->heading,patA->pitch,patA->roll,patA->mrms,patA->brms,patA->attFlag); 
+    }
+
+    fclose(f); 
+    path = TString("gzip -f ") + path; 
+    system(path.Data()); 
+
+
+    //dump ADU5BPat
+    path.Form("%s/adu5Bpat%d.dat",out_dir, run); 
+    f = fopen(path.Data(),"w"); 
+
+    fprintf(f,"payloadTime\t" 
+              "timeOfDay\t" 
+              "latitude\t"
+              "longitude\t"
+              "altitude\t"
+              "heading\t"
+              "pitch\t"
+              "roll\t"
+              "mrms\t"
+              "brms\t"
+              "attFlag\n"); 
+
+
+    for (int i = 0; i < adu5bPatTree->GetEntries(); i++) 
+    {
+      adu5bPatTree->GetEntry(i); 
+      fprintf(f,"%f\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%d\n",
+          patB->payloadTime + patB->payloadTimeUs*1e-6, patB->timeOfDay, patB->latitude, patB->longitude,
+          patB->altitude,patB->heading,patB->pitch,patB->roll,patB->mrms,patB->brms,patB->attFlag); 
+    }
+
+    fclose(f); 
+    path = TString("gzip -f ") + path; 
+    system(path.Data()); 
+
+
+    //dump ADU5ASat
+    path.Form("%s/adu5Asat%d.dat",out_dir, run); 
+    f = fopen(path.Data(),"w"); 
+    fprintf(f,"payloadTime"); 
+
+    for (int i = 0; i < 4; i++) {  fprintf(f,"\tnumSats%d",i); } 
+
+    const char * fields[] = {"prn","elevation","snr","flag","azimuth",0}; 
+
+    for (const char ** field = &fields[0]; *field; field++)
+    {
+      for (int i = 0; i < 4; i++)
+      {
+        for (int j = 0; j < 12; j++) 
+        {
+          fprintf(f,"\t%s%d_%d",*field,i,j); 
+        }
+      }
+    }
+    fprintf(f,"\n"); 
+
+    for (int e = 0; e < adu5SatTree->GetEntries(); e++)
+    {
+      adu5SatTree->GetEntry(e); 
+      fprintf(f,"%d\t",satA->payloadTime); 
+
+      for (int i = 0; i < 4; i++) fprintf(f,"\t%d",satA->numSats[i]); 
+      for (int i = 0; i < 4; i++) { for (int j = 0; j < 12; j++) { fprintf(f,"\t%d", satA->prn[i][j]);}}
+      for (int i = 0; i < 4; i++) { for (int j = 0; j < 12; j++) { fprintf(f,"\t%d", satA->elevation[i][j]);}}
+      for (int i = 0; i < 4; i++) { for (int j = 0; j < 12; j++) { fprintf(f,"\t%d", satA->snr[i][j]);}}
+      for (int i = 0; i < 4; i++) { for (int j = 0; j < 12; j++) { fprintf(f,"\t%d", satA->flag[i][j]);}}
+      for (int i = 0; i < 4; i++) { for (int j = 0; j < 12; j++) { fprintf(f,"\t%d", satA->azimuth[i][j]);}}
+      fprintf(f,"\n"); 
+    }
+    fclose(f); 
+    path = TString("gzip -f ") + path; 
+    system(path.Data()); 
+              
+
+    //dump ADU5BSat
+    path.Form("%s/adu5Bsat%d.dat",out_dir, run); 
+    f = fopen(path.Data(),"w"); 
+    fprintf(f,"payloadTime"); 
+
+    for (int i = 0; i < 4; i++) {  fprintf(f,"\tnumSats%d",i); } 
+
+    for (const char ** field = &fields[0]; *field; field++)
+    {
+      for (int i = 0; i < 4; i++)
+      {
+        for (int j = 0; j < 12; j++) 
+        {
+          fprintf(f,"\t%s%d_%d",*field,i,j); 
+        }
+      }
+    }
+    fprintf(f,"\n"); 
+
+    for (int e = 0; e < adu5bSatTree->GetEntries(); e++)
+    {
+      adu5bSatTree->GetEntry(e); 
+      fprintf(f,"%d\t",satB->payloadTime); 
+
+      for (int i = 0; i < 4; i++) fprintf(f,"\t%d",satB->numSats[i]); 
+      for (int i = 0; i < 4; i++) { for (int j = 0; j < 12; j++) { fprintf(f,"\t%d", satB->prn[i][j]);}}
+      for (int i = 0; i < 4; i++) { for (int j = 0; j < 12; j++) { fprintf(f,"\t%d", satB->elevation[i][j]);}}
+      for (int i = 0; i < 4; i++) { for (int j = 0; j < 12; j++) { fprintf(f,"\t%d", satB->snr[i][j]);}}
+      for (int i = 0; i < 4; i++) { for (int j = 0; j < 12; j++) { fprintf(f,"\t%d", satB->flag[i][j]);}}
+      for (int i = 0; i < 4; i++) { for (int j = 0; j < 12; j++) { fprintf(f,"\t%d", satB->azimuth[i][j]);}}
+      fprintf(f,"\n"); 
+    }
+    fclose(f); 
+    path = TString("gzip -f ") + path; 
+    system(path.Data()); 
+              
 
   }
 
