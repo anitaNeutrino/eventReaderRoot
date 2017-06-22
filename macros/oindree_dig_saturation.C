@@ -69,7 +69,7 @@ void oindree_dig_saturation(int start_run, int end_run) {
 
   UInt_t count=0;
 
-  TH1D *hdig_saturation = new TH1D("hdig_saturation",";MaxOverChans(|V|);Number of Events",100,0,2000);   
+  TH1D *hdig_saturation = new TH1D("hdig_saturation",";MaxOverChans(|V| in mV);Number of Events",100,0,2000);   
 
   for(int ientry=0; ientry < header_num_entries; ientry=ientry+100000) 
   {
@@ -89,7 +89,7 @@ void oindree_dig_saturation(int start_run, int end_run) {
      count++;
 
      //initialize 
-     double min_absVolt = 0.0;
+     double max_absVolt = 0.0;
 
      max_index = 0;
      min_index = 0;
