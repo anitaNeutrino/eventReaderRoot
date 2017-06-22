@@ -21,7 +21,7 @@ void oindree_min_signal(int start_run, int end_run);
 
 void oindree_min_signal()
 {
-   cout << "Usage: For drawing a distribution of minimum signal over antennas for ANITA-IV, oindree_min_signal(42,367)\n";
+   cout << "Usage: For drawing a distribution of minimum signal over phi sectors for ANITA-IV, oindree_min_signal(42,367)\n";
    //  oindree_min_signal(42,367);
 }
   
@@ -170,7 +170,8 @@ void oindree_min_signal(int start_run, int end_run) {
   //c->SaveAs("gr.png"); 
   //delete c; 
 
-  TCanvas *h = new TCanvas("h","h",1000,800); 
+  TCanvas *h = new TCanvas("h","h",1000,800);
+  h->SetLogy();  
   hmin_signal->SetStats(0); 
   hmin_signal->Draw("");
   hmin_signal->SaveAs(Form("hmin_signal_pol%iring%i.root",pol,ring)); 

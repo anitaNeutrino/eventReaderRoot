@@ -21,7 +21,7 @@ void oindree_pulse_asymm(int start_run, int end_run);
 
 void oindree_pulse_asymm()
 {
-   cout << "Usage: For drawing a distribution of minimum signal over antennas for ANITA-IV, oindree_pulse_asymm(42,367)\n";
+   cout << "Usage: For drawing a distribution of max over phi sectors pulse asymm for ANITA-IV, oindree_pulse_asymm(42,367)\n";
    //  oindree_pulse_asymm(42,367);
 }
   
@@ -140,9 +140,9 @@ void oindree_pulse_asymm(int start_run, int end_run) {
 	max = gr->GetY()[max_index];
 	min = gr->GetY()[min_index];  
 	
-	asymm[iphi] = abs(max - abs(min));  
+	asymm[iphi] = fabs(max - fabs(min));  
 
-	//cout << asymm[iphi] << endl; 
+	cout << asymm[iphi] << endl; 
 
 	//cout << max << "   " << min << endl; 
 	//cout << max_index << "   " << min_index << endl; 
@@ -170,7 +170,8 @@ void oindree_pulse_asymm(int start_run, int end_run) {
   //c->SaveAs("gr.png"); 
   //delete c; 
 
-  TCanvas *h = new TCanvas("h","h",1000,800); 
+  TCanvas *h = new TCanvas("h","h",1000,800);
+  h->SetLogy();  
   hpulse_asymm->SetStats(0); 
   hpulse_asymm->Draw("");
   hpulse_asymm->SaveAs(Form("hpulse_asymm_pol%iring%i.root",pol,ring)); 
