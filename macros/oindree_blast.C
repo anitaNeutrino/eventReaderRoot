@@ -28,7 +28,7 @@ void oindree_blast(int start_run, int end_run) {
  
   ofstream myfile_passed_blast_cut; 
   myfile_passed_blast_cut.open("passedBlastCut.txt", std::ofstream::out | std::ofstream::app);
-  myfile_passed_blast_cut << "max ratio        event number           run number \n";
+  myfile_passed_blast_cut << "max ratio,event number,run number \n";
 
   AnitaVersion::set(4); 
   const int num_phi = 16; 
@@ -146,11 +146,11 @@ void oindree_blast(int start_run, int end_run) {
 
     if (max_ratio > 2.8) 
       {
-	cout << "potential cut worthy max_ratio is " << max_ratio << endl;
-	cout << "associated event number is " << header->eventNumber << endl; 
-	cout << "associated run number is " << header->run << endl;   
+	//cout << "potential cut worthy max_ratio is " << max_ratio << endl;
+	//cout << "associated event number is " << header->eventNumber << endl; 
+	//cout << "associated run number is " << header->run << endl;   
     
-	myfile_passed_blast_cut << setprecision(2) << max_ratio << "             " << setprecision(11) << header->eventNumber << "                " << header->run << "    " <<"\n"; //write to file
+	myfile_passed_blast_cut << setprecision(3) << max_ratio << "," << setprecision(11) << header->eventNumber << "," << header->run << "    " <<"\n"; //write to file
       }
 
   } //loop over events ends
