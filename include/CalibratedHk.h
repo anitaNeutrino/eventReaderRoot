@@ -104,6 +104,9 @@ class CalibratedHk: public TObject
    Int_t getFancySS(int ssInd, Float_t pos[3], Float_t *azimuth,
 		    Float_t *elevation, Float_t *relAzimuth); ///< Convert sunsensor data to elevation and azimuth
 
+   Float_t getSSAzimuth(int ssInd);
+   Float_t getSSAzimuthAdu5(int ssInd);
+   Float_t getSSElevation(int ssInd);
 
    static const char *getPowerName(int index); ///< Return char string name of power
    static const char *getCurrentName(int index); ///< Return char string name of current

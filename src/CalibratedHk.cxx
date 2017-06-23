@@ -546,3 +546,32 @@ Float_t   CalibratedHk::getRawSunsensor(int ssInd, int type)
    return -1;
 
 }
+
+Float_t CalibratedHk::getSSAzimuth(int ssInd) 
+{
+  Float_t azimuth,elevation,relAzimuth;
+  Float_t pos[3];
+  getFancySS(ssInd,pos,&azimuth,&elevation,&relAzimuth);
+  return azimuth;
+}
+
+
+Float_t CalibratedHk::getSSAzimuthAdu5(int ssInd)
+{
+  Float_t azimuth,elevation,relAzimuth;
+  Float_t pos[3];
+  getFancySS(ssInd,pos,&azimuth,&elevation,&relAzimuth);
+  return relAzimuth;
+}
+
+Float_t CalibratedHk::getSSElevation(int ssInd) 
+{
+
+  Float_t azimuth,elevation,relAzimuth;
+  Float_t pos[3];
+  getFancySS(ssInd,pos,&azimuth,&elevation,&relAzimuth);
+  return elevation;
+
+}
+
+ 
