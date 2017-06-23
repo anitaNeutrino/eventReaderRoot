@@ -30,6 +30,10 @@ void oindree_blast(int start_run, int end_run) {
   myfile_passed_blast_cut.open("passedBlastCut.txt", std::ofstream::out | std::ofstream::app);
   myfile_passed_blast_cut << "max ratio,event number,run number \n";
 
+  ofstream myfile_less_than_1;
+  myfile_less_than_1.open("bottomOverTopLessThan1.txt",std::ofstream::out | std::ofstream::app); 
+  myfile_less_than_1 << "max_ratio,event number,run number \n"; 
+
   AnitaVersion::set(4); 
   const int num_phi = 16; 
   AnitaPol::AnitaPol_t pol = AnitaPol::kHorizontal;
@@ -72,9 +76,9 @@ void oindree_blast(int start_run, int end_run) {
 
   UInt_t count=0;
 
-  TH1D *hmax_ratio = new TH1D("hmax_ratio",";MaxOverPhiSectors((Bottom ring pk-pk voltage)/(Top ring pk-pk voltage));Number of Events",100,0,20); 
+  TH1D *hmax_ratio = new TH1D("hmax_ratio",";MaxOverPhiSectors((Bottom ring pk-pk voltage)/(Top ring pk-pk voltage));Number of Events",100,0,30); 
 
-  for(int ientry=0; ientry < header_num_entries; ientry++) 
+  for(int ientry=0; ientry < header_num_entries; ientry = ientry+1000000) 
   {
      eventChain.GetEntry(ientry);
      headChain.GetEntry(ientry);
@@ -111,6 +115,15 @@ void oindree_blast(int start_run, int end_run) {
     
     for (int iphi = 0; iphi < num_phi; iphi++) //loop over phi sectors
     {
+      top_max_index = 0;
+      top_min_index = 0; 
+      top_max = 0.0; 
+      top_min = 0.0;
+      bottom_max_index = 0;
+      bottom_min_index = 0; 
+      bottom_max = 0.0; 
+      bottom_min = 0.0; 
+
       TGraph *gr_top = new TGraph(0); 
       TGraph *gr_bottom = new TGraph(0); 
       //make graphs using realEvent by calling function in UsefulAnitaEvent class
@@ -151,6 +164,11 @@ void oindree_blast(int start_run, int end_run) {
 	//cout << "associated run number is " << header->run << endl;   
     
 	myfile_passed_blast_cut << setprecision(3) << max_ratio << "," << setprecision(11) << header->eventNumber << "," << header->run << "    " <<"\n"; //write to file
+      }
+
+    if (max_ratio < 1.0) 
+      {
+	myfile_less_than_1 << setprecision(3) << max_ratio << "," << setprecision(11) << header->eventNumber << "," << header->run << "    " <<"\n"; //write to file
       }
 
   } //loop over events ends
