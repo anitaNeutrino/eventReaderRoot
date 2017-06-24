@@ -16,41 +16,35 @@
 #include <fstream>
 #include "TMath.h" 
 
-void oindree_min_signal(int start_run, int end_run);
+void oindree_dig_saturation(int start_run, int end_run);
 
 
-void oindree_min_signal()
+void oindree_dig_saturation()
 {
-   cout << "Usage: For drawing a distribution of minimum signal over phi sectors for ANITA-IV, oindree_min_signal(42,367)\n";
-   //  oindree_min_signal(42,367);
+   cout << "Usage: For drawing a distribution of maximum absolute voltage over antennas for ANITA-IV, oindree_dig_saturation(42,367)\n";
+   //  oindree_dig_saturation(42,367);
 }
   
 
-void oindree_min_signal(int start_run, int end_run) {
+void oindree_dig_saturation(int start_run, int end_run) {
    
   const int num_ant = 48; 
   const int num_phi = 16; 
-  //double pkpk[num_ant];
-  double pkpk[num_phi]; 
-  
-  int max_index;
-  int min_index;
-  double max;
-  double min; 
+  double absVolt[num_ant];
+
+  int max_index = 0;
+  int min_index = 0;
+  double max = 0.0;
+  double min = 0.0; 
 
   AnitaVersion::set(4); 
-  AnitaPol::AnitaPol_t pol = AnitaPol::kHorizontal;
-  AnitaRing::AnitaRing_t ring = AnitaRing::kBottomRing; 
+  AnitaPol::AnitaPol_t pol = AnitaPol::kHorizontal; 
 
-  //for (int i = 0; i < num_ant; i++)
-  //{
-  //pkpk[i] = 0.0;
-  //}
-
-  for (int i = 0; i < num_phi; i++)
+  for (int i = 0; i < num_ant; i++)
     {
-      pkpk[i] = 0.0; 
+      absVolt[i] = 0.0;
     }
+
 
   TChain headChain("headTree");
   for (int run_number = start_run; run_number <= end_run; run_number++) { headChain.Add(TString::Format("$ANITA_ROOT_DATA/run%d/timedHeadFile%d.root",run_number,run_number)); }
@@ -75,7 +69,7 @@ void oindree_min_signal(int start_run, int end_run) {
 
   UInt_t count=0;
 
-  TH1D *hmin_signal = new TH1D("hmin_signal",";MinOverPhiSectors(pk-pk voltage in mV);Number of Events",100,0,1000);   
+  TH1D *hdig_saturation = new TH1D("hdig_saturation",";MaxOverChans(|V| in mV);Number of Events",100,0,2000);   
 
   for(int ientry=0; ientry < header_num_entries; ientry=ientry+100000) 
   {
@@ -95,73 +89,57 @@ void oindree_min_signal(int start_run, int end_run) {
      count++;
 
      //initialize 
-     double min_pkpk = 0.0;
-    
-     //for (int j = 0; j < num_ant; j++)
-     //{
-     //pkpk[j] = 0.0; 
-     //} 
+     double max_absVolt = 0.0;
 
-     for (int j = 0; j < num_phi; j++)
+     max_index = 0;
+     min_index = 0;
+     max = 0.0;
+     min = 0.0; 
+   
+     for (int j = 0; j < num_ant; j++)
        {
-	 pkpk[j] = 0.0; 
+	 absVolt[j] = 0.0; 
        } 
 
-    //for (int iant = 0; iant < num_ant; iant++)
-    //{ 
-    
-    //TGraph *gr = new TGraph(0); 
-    // gr = realEvent.getGraph(iant,pol);
-    //pkpk[iant] = (gr->GetY()[TMath::LocMax(gr->GetN(),gr->GetY())]) - (gr->GetY()[TMath::LocMin(gr->GetN(),gr->GetY())]);
-
-    //cout << pkpk[iant] << endl; 
-
-    //delete gr;
-
-      //} //loop over antennas
-     
-     max_index = 0;
-     min_index = 0;         
-     max = 0.0;
-     min = 0.0;
-
-     for (int iphi = 0; iphi < num_phi; iphi++)
+     for (int iant = 0; iant < num_ant; iant++)
       {
 	max_index = 0;
-	min_index = 0;         
+	min_index = 0; 
 	max = 0.0;
-	min = 0.0;
+	min = 0.0; 
 
 	TGraph *gr = new TGraph(0);
-	gr = realEvent.getGraph(ring,iphi,pol); 
+	gr = realEvent.getGraph(iant,pol); 
 
-	max_index = TMath::LocMax(gr->GetN(),gr->GetY());
-	min_index = TMath::LocMin(gr->GetN(),gr->GetY());         
+	max_index = TMath::LocMax(gr->GetN(),gr->GetY()); 
+        min_index = TMath::LocMin(gr->GetN(),gr->GetY());
+
 	max = gr->GetY()[max_index];
-	min = gr->GetY()[min_index];  
-	
-	pkpk[iphi] = max - min;  
-
-	//cout << pkpk[iphi] << endl; 
+	min = gr->GetY()[min_index]; 
 
 	//cout << max << "   " << min << endl; 
+
+	if (fabs(max) > fabs(min)) { absVolt[iant] = fabs(max) ;}
+	if (fabs(min) > fabs(max)) { absVolt[iant] = fabs(min) ;} 
+
+	//cout << absVolt[iant] << endl; 
+
 	//cout << max_index << "   " << min_index << endl; 
 
 	delete gr; 
       } // loop over phi sectors 
+  
+    max_absVolt = absVolt[TMath::LocMax(num_ant,absVolt)]; 
+    //cout << "max absVolt is " << max_absVolt << endl; 
 
-    //min_pkpk = pkpk[TMath::LocMin(num_ant,pkpk)];  
-    min_pkpk = pkpk[TMath::LocMin(num_phi,pkpk)]; 
-    //cout << "min pkpk is " << min_pkpk << endl; 
-
-    hmin_signal->Fill(min_pkpk);
+    hdig_saturation->Fill(max_absVolt);
 
   } //loop over events ends
 
   cerr << endl;
   cout << "Processed " << count << " events.\n";
 
-   //just to check how a graph looks
+  //just to check how a graph looks
   //TCanvas *c = new TCanvas("c","c",1000,800); 
   //gr->Draw("alp"); 
   //gr->GetXaxis()->SetTitle("Time (ns)");
@@ -170,13 +148,13 @@ void oindree_min_signal(int start_run, int end_run) {
   //c->SaveAs("gr.png"); 
   //delete c; 
 
-  TCanvas *h = new TCanvas("h","h",1000,800);
-  h->SetLogy();  
-  hmin_signal->SetStats(0); 
-  hmin_signal->Draw("");
-  hmin_signal->SaveAs(Form("hmin_signal_pol%iring%i.root",pol,ring)); 
-  h->SaveAs(Form("min_signal_pol%iring%i.png",pol,ring));
-  h->SaveAs(Form("min_signal_pol%iring%i.root",pol,ring)); 
+  TCanvas *h = new TCanvas("h","h",1000,800); 
+  h->SetLogy(); 
+  hdig_saturation->SetStats(0); 
+  hdig_saturation->Draw("");
+  hdig_saturation->SaveAs(Form("hdig_saturation_pol%i.root",pol)); 
+  h->SaveAs(Form("dig_saturation_pol%i.png",pol));
+  h->SaveAs(Form("dig_saturation_pol%i.root",pol)); 
 
 }//end of macro
 

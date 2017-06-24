@@ -16,40 +16,27 @@
 #include <fstream>
 #include "TMath.h" 
 
-void oindree_min_signal(int start_run, int end_run);
+void oindree_num_points(int start_run, int end_run);
 
 
-void oindree_min_signal()
+void oindree_num_points()
 {
-   cout << "Usage: For drawing a distribution of minimum signal over phi sectors for ANITA-IV, oindree_min_signal(42,367)\n";
-   //  oindree_min_signal(42,367);
+   cout << "Usage: For drawing a distribution of minimum (over chans) number of points in the waveform for ANITA-IV, oindree_num_points(42,367)\n";
+   //  oindree_num_points(42,367);
 }
   
-
-void oindree_min_signal(int start_run, int end_run) {
+void oindree_num_points(int start_run, int end_run) {
    
   const int num_ant = 48; 
   const int num_phi = 16; 
-  //double pkpk[num_ant];
-  double pkpk[num_phi]; 
-  
-  int max_index;
-  int min_index;
-  double max;
-  double min; 
+  double numPoints[num_ant];
 
   AnitaVersion::set(4); 
-  AnitaPol::AnitaPol_t pol = AnitaPol::kHorizontal;
-  AnitaRing::AnitaRing_t ring = AnitaRing::kBottomRing; 
+  AnitaPol::AnitaPol_t pol = AnitaPol::kHorizontal; 
 
-  //for (int i = 0; i < num_ant; i++)
-  //{
-  //pkpk[i] = 0.0;
-  //}
-
-  for (int i = 0; i < num_phi; i++)
+  for (int i = 0; i < num_ant; i++)
     {
-      pkpk[i] = 0.0; 
+      numPoints[i] = 0.0;
     }
 
   TChain headChain("headTree");
@@ -75,9 +62,9 @@ void oindree_min_signal(int start_run, int end_run) {
 
   UInt_t count=0;
 
-  TH1D *hmin_signal = new TH1D("hmin_signal",";MinOverPhiSectors(pk-pk voltage in mV);Number of Events",100,0,1000);   
+  TH1D *hnum_points = new TH1D("hnum_points",";MinOverChans(Number of points in waveform);Number of Events",100,0,300);   
 
-  for(int ientry=0; ientry < header_num_entries; ientry=ientry+100000) 
+  for(int ientry=0; ientry < header_num_entries; ientry=ientry+1000000) 
   {
      eventChain.GetEntry(ientry);
      headChain.GetEntry(ientry);
@@ -95,73 +82,35 @@ void oindree_min_signal(int start_run, int end_run) {
      count++;
 
      //initialize 
-     double min_pkpk = 0.0;
-    
-     //for (int j = 0; j < num_ant; j++)
-     //{
-     //pkpk[j] = 0.0; 
-     //} 
-
-     for (int j = 0; j < num_phi; j++)
+     double min_numPoints = 0.0;
+   
+     for (int j = 0; j < num_ant; j++)
        {
-	 pkpk[j] = 0.0; 
+	 numPoints[j] = 0.0; 
        } 
 
-    //for (int iant = 0; iant < num_ant; iant++)
-    //{ 
-    
-    //TGraph *gr = new TGraph(0); 
-    // gr = realEvent.getGraph(iant,pol);
-    //pkpk[iant] = (gr->GetY()[TMath::LocMax(gr->GetN(),gr->GetY())]) - (gr->GetY()[TMath::LocMin(gr->GetN(),gr->GetY())]);
-
-    //cout << pkpk[iant] << endl; 
-
-    //delete gr;
-
-      //} //loop over antennas
-     
-     max_index = 0;
-     min_index = 0;         
-     max = 0.0;
-     min = 0.0;
-
-     for (int iphi = 0; iphi < num_phi; iphi++)
+     for (int iant = 0; iant < num_ant; iant++)
       {
-	max_index = 0;
-	min_index = 0;         
-	max = 0.0;
-	min = 0.0;
-
 	TGraph *gr = new TGraph(0);
-	gr = realEvent.getGraph(ring,iphi,pol); 
+	gr = realEvent.getGraph(iant,pol); 
 
-	max_index = TMath::LocMax(gr->GetN(),gr->GetY());
-	min_index = TMath::LocMin(gr->GetN(),gr->GetY());         
-	max = gr->GetY()[max_index];
-	min = gr->GetY()[min_index];  
-	
-	pkpk[iphi] = max - min;  
-
-	//cout << pkpk[iphi] << endl; 
-
-	//cout << max << "   " << min << endl; 
-	//cout << max_index << "   " << min_index << endl; 
+	numPoints[iant] = gr->GetN(); // number of points in the waveform
+	cout << numPoints[iant] << endl; 
 
 	delete gr; 
       } // loop over phi sectors 
+  
+    min_numPoints = numPoints[TMath::LocMin(num_ant,numPoints)]; 
+    cout << "min numPoints is " << min_numPoints << endl; 
 
-    //min_pkpk = pkpk[TMath::LocMin(num_ant,pkpk)];  
-    min_pkpk = pkpk[TMath::LocMin(num_phi,pkpk)]; 
-    //cout << "min pkpk is " << min_pkpk << endl; 
-
-    hmin_signal->Fill(min_pkpk);
+    hnum_points->Fill(min_numPoints);
 
   } //loop over events ends
 
   cerr << endl;
   cout << "Processed " << count << " events.\n";
 
-   //just to check how a graph looks
+  //just to check how a graph looks
   //TCanvas *c = new TCanvas("c","c",1000,800); 
   //gr->Draw("alp"); 
   //gr->GetXaxis()->SetTitle("Time (ns)");
@@ -170,13 +119,13 @@ void oindree_min_signal(int start_run, int end_run) {
   //c->SaveAs("gr.png"); 
   //delete c; 
 
-  TCanvas *h = new TCanvas("h","h",1000,800);
-  h->SetLogy();  
-  hmin_signal->SetStats(0); 
-  hmin_signal->Draw("");
-  hmin_signal->SaveAs(Form("hmin_signal_pol%iring%i.root",pol,ring)); 
-  h->SaveAs(Form("min_signal_pol%iring%i.png",pol,ring));
-  h->SaveAs(Form("min_signal_pol%iring%i.root",pol,ring)); 
+  TCanvas *h = new TCanvas("h","h",1000,800); 
+  h->SetLogy(); 
+  hnum_points->SetStats(0); 
+  hnum_points->Draw("");
+  hnum_points->SaveAs(Form("hnum_points_pol%i.root",pol)); 
+  h->SaveAs(Form("num_points_pol%i.png",pol));
+  h->SaveAs(Form("num_points_pol%i.root",pol)); 
 
 }//end of macro
 

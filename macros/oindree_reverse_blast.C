@@ -16,23 +16,23 @@
 #include <fstream>
 #include "TMath.h" 
 
-void oindree_blast(int start_run, int end_run);
+void oindree_reverse_blast(int start_run, int end_run);
 
 
-void oindree_blast()
+void oindree_reverse_blast()
 {
-   cout << "Usage: For drawing a distribution of a ratio to try and find payload blast events in ANITA-IV, oindree_blast(42,367)\n";
-   //  oindree_blast(42,367);
+   cout << "Usage: For drawing a distribution of a ratio to try and find payload blast events in ANITA-IV, oindree_reverse_blast(42,367)\n";
+   //  oindree_reverse_blast(42,367);
 }
-void oindree_blast(int start_run, int end_run) {
+void oindree_reverse_blast(int start_run, int end_run) {
  
   ofstream myfile_passed_blast_cut; 
-  myfile_passed_blast_cut.open("passedBlastCut.txt", std::ofstream::out | std::ofstream::app);
+  myfile_passed_blast_cut.open("passedReverseBlastCut.txt", std::ofstream::out | std::ofstream::app);
   myfile_passed_blast_cut << "max ratio,event number,run number \n";
 
-  ofstream myfile_less_than_1;
-  myfile_less_than_1.open("bottomOverTopLessThan1.txt",std::ofstream::out | std::ofstream::app); 
-  myfile_less_than_1 << "max_ratio,event number,run number \n"; 
+  ofstream myfile_less_than_1; 
+  myfile_less_than_1.open("topOverBottomLessThan1.txt", std::ofstream::out | std::ofstream::app);
+  myfile_less_than_1 << "max ratio,event number,run number \n";
 
   AnitaVersion::set(4); 
   const int num_phi = 16; 
@@ -76,9 +76,9 @@ void oindree_blast(int start_run, int end_run) {
 
   UInt_t count=0;
 
-  TH1D *hmax_ratio = new TH1D("hmax_ratio",";MaxOverPhiSectors((Bottom ring pk-pk voltage)/(Top ring pk-pk voltage));Number of Events",100,0,30); 
+  TH1D *hmax_ratio = new TH1D("hmax_ratio",";MaxOverPhiSectors((Top ring pk-pk voltage)/(Bottom ring pk-pk voltage));Number of Events",100,0,20); 
 
-  for(int ientry=0; ientry < header_num_entries; ientry = ientry+1000000) 
+  for(int ientry=0; ientry < header_num_entries; ientry = ientry + 100) 
   {
      eventChain.GetEntry(ientry);
      headChain.GetEntry(ientry);
@@ -145,7 +145,7 @@ void oindree_blast(int start_run, int end_run) {
 
       //cout << "bottom max, min in mV are              " << bottom_max << ",   " << bottom_min << endl; 
  
-      ratio[iphi] = (bottom_max - bottom_min) / (top_max - top_min); 
+      ratio[iphi] = (top_max - top_min) / (bottom_max - bottom_min); 
       //cout << "ratio for phi number            " << iphi << " is                    " << ratio[iphi] << endl; 
 
       delete gr_top;
@@ -157,7 +157,7 @@ void oindree_blast(int start_run, int end_run) {
 
     hmax_ratio->Fill(max_ratio); 
 
-    if (max_ratio > 2.8) 
+    if (max_ratio > 1.8) 
       {
 	//cout << "potential cut worthy max_ratio is " << max_ratio << endl;
 	//cout << "associated event number is " << header->eventNumber << endl; 
@@ -170,8 +170,8 @@ void oindree_blast(int start_run, int end_run) {
       {
 	myfile_less_than_1 << setprecision(3) << max_ratio << "," << setprecision(11) << header->eventNumber << "," << header->run << "    " <<"\n"; //write to file
       }
-
   } //loop over events ends
+
   cerr << endl;
   cout << "Processed " << count << " events.\n";
   
@@ -189,9 +189,9 @@ void oindree_blast(int start_run, int end_run) {
   hmax_ratio->SetStats(0); 
   hmax_ratio->Draw(); 
   h->SetLogy(); 
-  h->SaveAs(Form("blast_max_ratio%i.png",pol)); 
-  hmax_ratio->SaveAs(Form("hblast_max_ratio%i.root",pol));
-  h->SaveAs(Form("blast_max_ratio%i.root",pol)); 
+  h->SaveAs(Form("reverse_blast_max_ratio%i.png",pol)); 
+  hmax_ratio->SaveAs(Form("hreverse_blast_max_ratio%i.root",pol));
+  h->SaveAs(Form("reverse_blast_max_ratio%i.root",pol)); 
 
 }//end of macro
 
