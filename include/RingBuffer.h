@@ -135,7 +135,7 @@ private:
   std::vector<double> elements; // this will be a vector of (size+1) so that .end() iterator can use normal iterator!=RingBuffer::end() syntax for loops.
 
   // helper function
-  UInt_t oldestElement() const{
+  inline UInt_t oldestElement() const{
     // if we haven't completely filled the buffer, then the oldest element is zero
     UInt_t oldestElement = 0; 
     if(numRingElements==fSize){ // if we have filled the buffer,
