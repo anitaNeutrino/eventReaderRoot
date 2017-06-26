@@ -484,14 +484,15 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
   // try to load timed header file 
   
   // For telemetered crap 
-  TString fname0 = TString::Format("%s/run%d/eventHeadFile%d.root", data_dir, run, run); 
-  TString fname1 = TString::Format("%s/run%d/timedHeadFile%d.root", data_dir, run, run); 
-  TString fname2 = TString::Format("%s/run%d/headFile%d.root", data_dir, run, run); 
-  TString fname3 = TString::Format("%s/run%d/SimulatedAnitaHeadFile%d.root", data_dir, run, run);
+  TString fname0 = TString::Format("%s/run%d/eventHeadFile%d.root", data_dir, run, run);
+  TString fname1 = TString::Format("%s/run%d/timedHeadFile%dOfflineMask.root", data_dir, run, run);   
+  TString fname2 = TString::Format("%s/run%d/timedHeadFile%d.root", data_dir, run, run); 
+  TString fname3 = TString::Format("%s/run%d/headFile%d.root", data_dir, run, run); 
+  TString fname4 = TString::Format("%s/run%d/SimulatedAnitaHeadFile%d.root", data_dir, run, run);
 
   bool simulated = false; 
 
-  if (const char * the_right_file = checkIfFilesExist(4, fname0.Data(), fname1.Data(), fname2.Data(), fname3.Data()))
+  if (const char * the_right_file = checkIfFilesExist(5, fname0.Data(), fname1.Data(), fname2.Data(), fname3.Data(), fname4.Data()))
   {
 
     if (strcasestr(the_right_file,"SimulatedAnitaHeadFile")) simulated = true; 
