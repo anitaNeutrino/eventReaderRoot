@@ -28,7 +28,7 @@ void oindree_ML(int eventNum, int run) {
 
   ofstream myfile_ML; 
   myfile_ML.open("ML_input.txt", std::ofstream::out | std::ofstream::app);
-  myfile_ML << "run_number,event_number,max_topPkPk,max_bottomPkPk,min_topPkPk,min_bottomPkPk\n";
+  myfile_ML << "run_number,event_number,realTime,triggerTimeNs,priority,max_topPkPk,max_bottomPkPk,min_topPkPk,min_bottomPkPk,+24,PV,+5_M,+3.3_PCI,+12_PCI,+5_PCI,Battery,PeakThetaDeg,PeakPhiDeg,ImagePeak,CoherentSumPeak \n";
   
   AnitaVersion::set(4); 
   const int num_phi = 16; 
@@ -149,7 +149,17 @@ void oindree_ML(int eventNum, int run) {
   min_topPkPk = topPkPk[TMath::LocMin(num_phi,topPkPk)];
   min_bottomPkPk = bottomPkPk[TMath::LocMin(num_phi,bottomPkPk)];
   
-  myfile_ML << run << "," << setprecision(11) << eventNum << "," << max_topPkPk << "," << max_bottomPkPk << "," << min_topPkPk  << "," << min_bottomPkPk << "\n"; //write to file
+  myfile_ML << run << "," << setprecision(11) << eventNum << "," << header->realTime << ",";
+
+  myfile_ML << header->triggerTimeNs << "," << ((header->priority) & 0x0f) << "," << max_topPkPk << ",";
+
+  myfile_ML << max_bottomPkPk << "," << min_topPkPk  << "," << min_bottomPkPk << "," << hk->currents[0] << ",";
+
+  myfile_ML << hk->currents[1] << "," << hk->currents[2] << "," << hk->currents[3] << "," << hk->currents[4] << ",";
+
+  myfile_ML << hk->currents[5] << "," << hk->currents[6] << "," << header->getPeakThetaDeg() << "," << header->getPeakPhiDeg();
+
+  myfile_ML << "," << header->getImagePeak() << "," << header->getCoherentSumPeak() << "\n"; //write to file
 
   cerr << endl;
   cout << "Processed " << count << " events.\n";

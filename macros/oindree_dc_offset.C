@@ -71,7 +71,7 @@ void oindree_dc_offset(int start_run, int end_run) {
 
   TH1D *hdc_offset = new TH1D("hdc_offset",";MaxOverChans(Average voltage or DC Offset in mV);Number of Events",100,-200,200);   
 
-  for(int ientry=0; ientry < header_num_entries; ientry=ientry+1000000) 
+  for(int ientry=0; ientry < header_num_entries; ientry=ientry+1000) 
   {
      eventChain.GetEntry(ientry);
      headChain.GetEntry(ientry);
@@ -142,6 +142,8 @@ void oindree_dc_offset(int start_run, int end_run) {
     //cout << "max dcOffset is " << max_dcOffset << endl; 
 
     hdc_offset->Fill(max_dcOffset);
+   
+    if (max_dcOffset > 10.0 || max_dcOffset < -10.0) {cout << "max_dcOffset is " << max_dcOffset << " run is " << header->run << " event number is " << header->eventNumber << endl; } 
 
   } //loop over events ends
 

@@ -78,7 +78,7 @@ void oindree_blast(int start_run, int end_run) {
 
   TH1D *hmax_ratio = new TH1D("hmax_ratio",";MaxOverPhiSectors((Bottom ring pk-pk voltage)/(Top ring pk-pk voltage));Number of Events",100,0,30); 
 
-  for(int ientry=0; ientry < header_num_entries; ientry = ientry+1000000) 
+  for(int ientry=0; ientry < header_num_entries; ientry = ientry+100) 
   {
      eventChain.GetEntry(ientry);
      headChain.GetEntry(ientry);

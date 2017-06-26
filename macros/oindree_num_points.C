@@ -64,7 +64,7 @@ void oindree_num_points(int start_run, int end_run) {
 
   TH1D *hnum_points = new TH1D("hnum_points",";MinOverChans(Number of points in waveform);Number of Events",100,0,300);   
 
-  for(int ientry=0; ientry < header_num_entries; ientry=ientry+1000000) 
+  for(int ientry=0; ientry < header_num_entries; ientry=ientry+1000) 
   {
      eventChain.GetEntry(ientry);
      headChain.GetEntry(ientry);
@@ -95,13 +95,13 @@ void oindree_num_points(int start_run, int end_run) {
 	gr = realEvent.getGraph(iant,pol); 
 
 	numPoints[iant] = gr->GetN(); // number of points in the waveform
-	cout << numPoints[iant] << endl; 
+	//cout << numPoints[iant] << endl; 
 
 	delete gr; 
       } // loop over phi sectors 
   
     min_numPoints = numPoints[TMath::LocMin(num_ant,numPoints)]; 
-    cout << "min numPoints is " << min_numPoints << endl; 
+    //cout << "min numPoints is " << min_numPoints << endl; 
 
     hnum_points->Fill(min_numPoints);
 
