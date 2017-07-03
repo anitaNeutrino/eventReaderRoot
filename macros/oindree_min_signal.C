@@ -77,7 +77,7 @@ void oindree_min_signal(int start_run, int end_run) {
 
   TH1D *hmin_signal = new TH1D("hmin_signal",";MinOverPhiSectors(pk-pk voltage in mV);Number of Events",100,0,1000);   
 
-  for(int ientry=0; ientry < header_num_entries; ientry=ientry+100000) 
+  for(int ientry=0; ientry < header_num_entries; ientry=ientry+1000) 
   {
      eventChain.GetEntry(ientry);
      headChain.GetEntry(ientry);
@@ -155,6 +155,8 @@ void oindree_min_signal(int start_run, int end_run) {
     //cout << "min pkpk is " << min_pkpk << endl; 
 
     hmin_signal->Fill(min_pkpk);
+
+    if (min_pkpk < 50) { cout << "min pkpk is " << min_pkpk << "run is " << header->run << "event number is " << header->eventNumber << endl; } 
 
   } //loop over events ends
 

@@ -1,7 +1,7 @@
-
 #ifndef OLDSTRUCTS_H
 #define OLDSTRUCTS_H
 
+#include "simpleStructs.h"
 
 //////////////////////////////////////////////////////////////////////////////
 ///// Old versions of structs                                            /////

@@ -71,7 +71,7 @@ void oindree_dig_saturation(int start_run, int end_run) {
 
   TH1D *hdig_saturation = new TH1D("hdig_saturation",";MaxOverChans(|V| in mV);Number of Events",100,0,2000);   
 
-  for(int ientry=0; ientry < header_num_entries; ientry=ientry+100000) 
+  for(int ientry=0; ientry < header_num_entries; ientry=ientry+1000) 
   {
      eventChain.GetEntry(ientry);
      headChain.GetEntry(ientry);
@@ -133,6 +133,8 @@ void oindree_dig_saturation(int start_run, int end_run) {
     //cout << "max absVolt is " << max_absVolt << endl; 
 
     hdig_saturation->Fill(max_absVolt);
+    
+    if (max_absVolt > 1000) { cout << "max_absVolt is " << max_absVolt << " run is " << header->run << " event number is " << header->eventNumber << endl; } 
 
   } //loop over events ends
 

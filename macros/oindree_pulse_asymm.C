@@ -77,7 +77,7 @@ void oindree_pulse_asymm(int start_run, int end_run) {
 
   TH1D *hpulse_asymm = new TH1D("hpulse_asymm",";MaxOverPhiSectors(|Vmax - |Vmin|| in mV);Number of Events",100,0,100);   
 
-  for(int ientry=0; ientry < header_num_entries; ientry=ientry+100000) 
+  for(int ientry=0; ientry < header_num_entries; ientry=ientry+1000) 
   {
      eventChain.GetEntry(ientry);
      headChain.GetEntry(ientry);
@@ -142,7 +142,7 @@ void oindree_pulse_asymm(int start_run, int end_run) {
 	
 	asymm[iphi] = fabs(max - fabs(min));  
 
-	cout << asymm[iphi] << endl; 
+	//cout << asymm[iphi] << endl; 
 
 	//cout << max << "   " << min << endl; 
 	//cout << max_index << "   " << min_index << endl; 
