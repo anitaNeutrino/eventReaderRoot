@@ -74,7 +74,7 @@ void quality(int run)
   TH2D *hblastandreverse = new TH2D("hblastandreverse",";Max((Bottom ring pk-pk voltage)/(Top ring pk-pk voltage));Max((Top ring pk-pk voltage)/(Bottom ring pk-pk voltage))",100,0,30,100,0,30); 
   TH2D *hblastandasymm = new TH2D("hblastandasymm",";MaxOverPhiSectors((Bottom ring pk-pk voltage)/(Top ring pk-pk voltage));MaxOverPhiSectors(|Vmax - |Vmin|| in mV)",100,0,30,100,0,100); 
   
-  for (int ientry = 0; ientry < d.N(); ientry = ientry+1000)
+  for (int ientry = 0; ientry < d.N(); ientry = ientry+1)
 
   {
     count++;
