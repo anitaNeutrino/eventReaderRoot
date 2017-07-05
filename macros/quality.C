@@ -125,8 +125,8 @@ void quality(int run)
       pkpk[iphi] = (bottom_max - bottom_min);
       asymm[iphi] = fabs(bottom_max - fabs(bottom_min)); 
       //cout << "ratio for phi number            " << iphi << " is                    " << ratio[iphi] << endl;
-      if (fabs(bottom_max) > fabs(bottom_min)) { abs_volt[iphi] = bottom_max; } 
-      if (fabs(bottom_min) > fabs(bottom_max)) { abs_volt[iphi] = bottom_min; }          
+      if (fabs(bottom_max) > fabs(bottom_min)) { abs_volt[iphi] = fabs(bottom_max); } 
+      if (fabs(bottom_min) > fabs(bottom_max)) { abs_volt[iphi] = fabs(bottom_min); }          
 
       delete gr_top;
       delete gr_bottom;
