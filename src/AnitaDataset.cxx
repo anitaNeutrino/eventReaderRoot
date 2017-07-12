@@ -109,6 +109,7 @@ AnitaDataset::AnitaDataset(int run, bool decimated, WaveCalType::WaveCalType_t c
 {
   setStrategy(strategy); 
   setCalType(cal); 
+  currRun = run;
   loadRun(run, decimated, version); 
 
   loadedBlindTrees = false;
@@ -439,6 +440,8 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
 
   fDecimated = dec; 
   fIndices = 0; 
+
+  currRun = run;
 
   unloadRun(); 
   fWantedEntry = 0; 
