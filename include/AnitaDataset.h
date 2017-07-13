@@ -244,6 +244,9 @@ class AnitaDataset
     /** Lets you check to see if you have a header and event file actually loaded, or if it failed loading */
     bool fRunLoaded;
 
+    /** Want to see what run you previously loaded?  Look no further */
+    int currRun;
+
     /* Wraps the random number generator for polarity inversion so it is derministic regardless of event processing order */
     bool maybeInvertPolarity(UInt_t eventNumber);
 
