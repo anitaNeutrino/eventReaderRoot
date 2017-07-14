@@ -245,7 +245,7 @@ class AnitaDataset
     bool fRunLoaded;
 
     /** Want to see what run you previously loaded?  Look no further */
-    int currRun;
+    int getCurrRun() { return currRun; };
 
     /* Wraps the random number generator for polarity inversion so it is derministic regardless of event processing order */
     bool maybeInvertPolarity(UInt_t eventNumber);
@@ -281,6 +281,8 @@ class AnitaDataset
     TruthAnitaEvent * fTruth; 
 
 
+    /* place to store the current run but that can't be confusingly changed */
+    int currRun;
 
     Long64_t fWantedEntry;
     Long64_t fDecimatedEntry;
