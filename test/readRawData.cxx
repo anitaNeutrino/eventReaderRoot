@@ -6,6 +6,7 @@
 /////   calibrated time and voltage stuff in text file format            /////
 /////  Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                           /////
 //////////////////////////////////////////////////////////////////////////////
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
 #include <cstring>
