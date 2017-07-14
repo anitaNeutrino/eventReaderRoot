@@ -136,4 +136,16 @@ if (NOT CMAKE_BUILD_TYPE)
     FORCE ) 
 endif()
 
+set (BINSRCDIR test) 
+macro( do_binary binary_name ) 
+  add_executable(${binary_name} ${BINSRCDIR}/${binary_name}.cxx) 
+  target_link_libraries(${binary_name}  ${ZLIB_LIBRARIES} RootFftwWrapper ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} ${libname})
+endmacro() 
+
+do_binary(exampleDumpHk) 
+do_binary(exampleEventLoop) 
+do_binary(printStructSizes) 
+do_binary(readRawData) 
+do_binary(readRootData) 
+
 

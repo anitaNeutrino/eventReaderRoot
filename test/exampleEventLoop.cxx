@@ -68,7 +68,7 @@ void exampleLoopAllEvents(int run) {
     
    
     //This step produces a calibrated UsefulAnitaEvent
-    UsefulAnitaEvent realEvent(event,WaveCalType::kVTLabAG);
+    UsefulAnitaEvent realEvent(event,WaveCalType::kDefault);
     std::cout << realEvent.eventNumber << " " << header->eventNumber << std::endl;
     //  std::cout << realEvent.gotCalibTemp << " " << realEvent.calibTemp << std::endl;
     count++;

@@ -14,6 +14,7 @@
 #include "TurfRate.h" 
 #include "TMath.h"
 #include "SurfHk.h"
+#include "TROOT.h"
 #include "TEventList.h" 
 #include "TCut.h" 
 #include "TMutex.h" 
@@ -107,14 +108,13 @@ AnitaDataset::AnitaDataset(int run, bool decimated, WaveCalType::WaveCalType_t c
   fTruthTree(0), fTruth(0), 
   fCutList(0), fRandy()
 {
-  setStrategy(strategy); 
   setCalType(cal); 
+  setStrategy(strategy); 
   currRun = run;
-  loadRun(run, decimated, version); 
-
   loadedBlindTrees = false;
   zeroBlindPointers();
   loadBlindTrees();
+  loadRun(run, decimated, version); 
 
 }
 
@@ -400,6 +400,8 @@ AnitaDataset::~AnitaDataset()
 {
 
   unloadRun(); 
+
+
 
   if (fHeader) 
     delete fHeader; 
@@ -1122,10 +1124,13 @@ void AnitaDataset::loadBlindTrees() {
 
     // put ROOT's current directory pointer back to what it was before we opened the blinding file in read mode.
 
+    fBlindFile->Close(); 
+    delete fBlindFile; 
     loadedBlindTrees = true;
 
   }
 
+//   gROOT->cd(0); 
   // std::cout << __PRETTY_FUNCTION__ << ": here 4" << std::endl;
 
 }
