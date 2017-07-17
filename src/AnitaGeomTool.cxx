@@ -702,43 +702,26 @@ Int_t AnitaGeomTool::getAzimuthPartner(Int_t rx)
 
 void AnitaGeomTool::getNeighbors(Int_t rx,int& rxleft,int& rxright)
 {
-  // input antenna number 0 to 31
-  if (rx<0 || rx>(NUM_SEAVEYS-1))    
-    std::cout << "Antenna number " << rx << " out of range!\n";  
-  if (rx<8)    
-    rxleft=rx+8;
-  else if (rx==8)
-    rxleft=7; 
-  else if (rx<16)    
-    rxleft=rx-9;  
-  else if (rx==16)    
-    rxleft=31;  
-  else    
-    rxleft=rx-1;  
- 
-  if (rx<7)    
-    rxright=rx+9;  
-  else if (rx==7)    
-    rxright=8;  
-  else if (rx<16)   
-    rxright=rx-8;  
-  else if (rx<31)   
-    rxright=rx+1;  
-  else if (rx==31)    
-    rxright=16;  
 
-  if (rx<39 && rx>31)    
-    rxright=rx+1;  
-  else if (rx==39)   
-    rxright=32;
+  /* for A3 and A4, for the top ring, the neighbors are offset by 2 and in the
+   * bottom / mid ring they are offset by 1
+   */
 
-    if (rx<39 && rx>31)    
-    rxleft=rx-1;  
-  else if (rx==31)   
-    rxleft=39;
+  int ring =  rx / 16; 
 
- 
-  //  std::cout << "rx, rxleft, rxright " << rx << " " << rxleft << " " << rxright << "\n"; 
+  if (ring == 0)
+  {
+    rxleft = (rx + 14)%16; 
+    rxright = (rx + 2)%16; 
+  }
+
+  else
+  {
+    int ant = rx % 16; 
+    rxleft = ring * 16 +   (ant +15) % 16; 
+    rxright = ring * 16 +   (ant +1) % 16; 
+  }
+
 
 }
 
