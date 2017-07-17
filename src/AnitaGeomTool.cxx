@@ -172,16 +172,6 @@ AnitaGeomTool::AnitaGeomTool()
   readPhaseCenterNumbers(v); // This one has to come before reading photogrammetry
   readPhotogrammetry(v);
 
-  if (v == 4) 
-  {
-
-    printf("Warning, don't have proper A4 phase centers yet\n"); 
-
-  }
-
-
-
-
   // Moved from fillAntPositionsFromPrioritizerdConfig
   // Who knows where else these get set in this crazy place...
   fHeadingRotationAxis.SetXYZ(0.,0.,1.);
