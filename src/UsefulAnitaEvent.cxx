@@ -68,8 +68,10 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
 {
 
 
-  //In this case, we can automatically detect the ANITA version
-  AnitaVersion::setVersionFromUnixTime(theHk->realTime);
+  if(theHk){
+    //In this case, we can automatically detect the ANITA version
+    AnitaVersion::setVersionFromUnixTime(theHk->realTime);
+  }
 
   checkIfTreatingCalibratedEventAsRawEvent(eventPtr, __PRETTY_FUNCTION__);
 
