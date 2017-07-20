@@ -136,10 +136,13 @@ if (NOT CMAKE_BUILD_TYPE)
     FORCE ) 
 endif()
 
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
+
 set (BINSRCDIR test) 
 macro( do_binary binary_name ) 
   add_executable(${binary_name} ${BINSRCDIR}/${binary_name}.cxx) 
   target_link_libraries(${binary_name}  ${ZLIB_LIBRARIES} RootFftwWrapper ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} ${libname})
+  INSTALL (PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${binary_name} DESTINATION ${UTIL_BIN_DIR})
 endmacro() 
 
 do_binary(exampleDumpHk) 
