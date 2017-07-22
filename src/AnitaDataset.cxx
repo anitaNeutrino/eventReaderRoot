@@ -433,8 +433,29 @@ AnitaDataset::~AnitaDataset()
     delete fTruth; 
 
   if (fCutList) 
-    delete fCutList; 
+    delete fCutList;
 
+  // Since we've set the directory to 0 for these,
+  // ROOT won't delete them when the fBlindFile is closed
+  // So we need to do it here.
+  for(int pol=0; pol < AnitaPol::kNotAPol; pol++){
+    if(fBlindHeadTree[pol]){
+      delete fBlindHeadTree[pol];
+      fBlindHeadTree[pol] = NULL;
+    }
+    if(fBlindEventTree[pol]){
+      delete fBlindEventTree[pol];
+      fBlindEventTree[pol] = NULL;
+    }
+    if(fBlindHeader[pol]){
+      delete fBlindHeader[pol];
+      fBlindHeader[pol] = NULL;
+    }
+    if(fBlindEvent[pol]){
+      delete fBlindEvent[pol];
+      fBlindEvent[pol] = NULL;
+    }
+  }
 }
 
 bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir) 
@@ -1076,14 +1097,10 @@ void AnitaDataset::loadBlindTrees() {
 	  fBlindHeadTree[pol]->SetBranchAddress("header", &fBlindHeader[pol]);
 	  fBlindEventTree[pol]->SetBranchAddress("event", &fBlindEvent[pol]);
 
-
-	  // for(Long64_t entry=0; entry < fBlindHeadTree[pol]->GetEntries(); entry++){
-	  //   // std::cerr << entry << "\t";
-	  //   fBlindHeadTree[pol]->GetEntry(entry);
-	  //   std::cerr << entry << "\t";
-	  //   fBlindEventTree[pol]->GetEntry(entry);
-	  //   std::cerr << entry << std::endl;
-	  // }
+          // Stop ROOT deleting the trees from the global ROOT memory
+          // when the file is closed. This should unbreak the salting blinding
+          fBlindHeadTree[pol]->SetDirectory(0);
+          fBlindEventTree[pol]->SetDirectory(0);
 	}
 	else{
 	  // complain if you can't find the data
@@ -1125,9 +1142,10 @@ void AnitaDataset::loadBlindTrees() {
     // put ROOT's current directory pointer back to what it was before we opened the blinding file in read mode.
 
     fBlindFile->Close(); 
-    delete fBlindFile; 
-    loadedBlindTrees = true;
+    delete fBlindFile;
+    fBlindFile = NULL;
 
+    loadedBlindTrees = true;
   }
 
 //   gROOT->cd(0); 
