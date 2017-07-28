@@ -111,11 +111,10 @@ AnitaDataset::AnitaDataset(int run, bool decimated, WaveCalType::WaveCalType_t c
   setCalType(cal); 
   setStrategy(strategy); 
   currRun = run;
+  loadRun(run, decimated, version); 
   loadedBlindTrees = false;
   zeroBlindPointers();
-  loadBlindTrees();
-  loadRun(run, decimated, version); 
-
+  loadBlindTrees(); // want this to come after opening the data files to try to have correct ANITA flight
 }
 
 void  AnitaDataset::unloadRun() 
@@ -140,7 +139,7 @@ void  AnitaDataset::unloadRun()
   {
     delete fCutList; 
     fCutList = 0; 
-  }
+  }  
 
 }
 
@@ -435,32 +434,42 @@ AnitaDataset::~AnitaDataset()
   if (fCutList) 
     delete fCutList;
 
-  // Since we've set the directory to 0 for these,
-  // ROOT won't delete them when the fBlindFile is closed
-  // So we need to do it here.
-  for(int pol=0; pol < AnitaPol::kNotAPol; pol++){
-    if(fBlindHeadTree[pol]){
-      delete fBlindHeadTree[pol];
-      fBlindHeadTree[pol] = NULL;
-    }
-    if(fBlindEventTree[pol]){
-      delete fBlindEventTree[pol];
-      fBlindEventTree[pol] = NULL;
-    }
-    if(fBlindHeader[pol]){
-      delete fBlindHeader[pol];
-      fBlindHeader[pol] = NULL;
-    }
-    if(fBlindEvent[pol]){
-      delete fBlindEvent[pol];
-      fBlindEvent[pol] = NULL;
-    }
+  // // Since we've set the directory to 0 for these,
+  // // ROOT won't delete them when the fBlindFile is closed
+  // // So we need to do it here.
+  // for(int pol=0; pol < AnitaPol::kNotAPol; pol++){
+  //   if(fBlindHeadTree[pol]){
+  //     delete fBlindHeadTree[pol];
+  //     fBlindHeadTree[pol] = NULL;
+  //   }
+  //   if(fBlindEventTree[pol]){
+  //     delete fBlindEventTree[pol];
+  //     fBlindEventTree[pol] = NULL;
+  //   }
+  //   if(fBlindHeader[pol]){
+  //     delete fBlindHeader[pol];
+  //     fBlindHeader[pol] = NULL;
+  //   }
+  //   if(fBlindEvent[pol]){
+  //     delete fBlindEvent[pol];
+  //     fBlindEvent[pol] = NULL;
+  //   }
+  // }
+
+  if(fBlindFile){
+    fBlindFile->Close();
+    delete fBlindFile;
   }
+  
 }
 
 bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir) 
 {
 
+  // stop loadRun() changing the ROOT directory
+  // in case you book histograms or trees after instantiating AnitaDataset  
+  const TString theRootPwd = gDirectory->GetPath();
+  
   fDecimated = dec; 
   fIndices = 0; 
 
@@ -681,6 +690,11 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
   
 
   fRunLoaded = true;
+
+  // stop loadRun() changing the ROOT directory
+  // in case you book histograms or trees after instantiating AnitaDataset
+  gDirectory->cd(theRootPwd); 
+  
   return true; 
 }
 
@@ -1043,14 +1057,6 @@ void AnitaDataset::loadBlindTrees() {
   /* for now, just A3 */ 
   if(!loadedBlindTrees && AnitaVersion::get()==3){
 
-    // prepare to put ROOT's current directory pointer back to what it was before we opened the blinding file in read mode.
-    // TDirectory* originalDir = gDirectory;
-
-
-    // std::cout << __PRETTY_FUNCTION__ << ": here 1" << std::endl;
-    // gDirectory->pwd();
-    // gDirectory->ls();
-
     fBlindFile = NULL;
 
     char calibDir[FILENAME_MAX];
@@ -1072,11 +1078,14 @@ void AnitaDataset::loadBlindTrees() {
     // std::cout << __PRETTY_FUNCTION__ << ": here 2" << std::endl;
 
 
-    // these are the fake events, that will be inserted in place of some min bias events
+    // these are the fake events, that will be inserted in place of some min bias events    
     sprintf(fileName, "%s/insertedDataFile.root", calibDir);
+
+    TString theRootPwd = gDirectory->GetPath();
+    // std::cerr << "Before opening blind file" << "\t" << gDirectory->GetPath() << std::endl;
     fBlindFile = TFile::Open(fileName);
-
-
+    // std::cerr << "After opening blind file" << "\t" << gDirectory->GetPath() << std::endl;
+    
     if(fBlindFile){
 
       TString polPrefix[AnitaPol::kNotAPol];
@@ -1095,12 +1104,7 @@ void AnitaDataset::loadBlindTrees() {
 	if(fBlindHeadTree[pol] && fBlindEventTree[pol]){
 
 	  fBlindHeadTree[pol]->SetBranchAddress("header", &fBlindHeader[pol]);
-	  fBlindEventTree[pol]->SetBranchAddress("event", &fBlindEvent[pol]);
-
-          // Stop ROOT deleting the trees from the global ROOT memory
-          // when the file is closed. This should unbreak the salting blinding
-          fBlindHeadTree[pol]->SetDirectory(0);
-          fBlindEventTree[pol]->SetDirectory(0);
+	  fBlindEventTree[pol]->SetBranchAddress("event", &fBlindEvent[pol]);          
 	}
 	else{
 	  // complain if you can't find the data
@@ -1139,11 +1143,12 @@ void AnitaDataset::loadBlindTrees() {
       std::cerr << "Unable to find overwrittenEventInfo" << std::endl;
     }
 
-    // put ROOT's current directory pointer back to what it was before we opened the blinding file in read mode.
-
-    fBlindFile->Close(); 
-    delete fBlindFile;
-    fBlindFile = NULL;
+    gDirectory->cd(theRootPwd);
+    
+    // const char* treeNames[4] = {"HPolHeadTree", "HPolEventTree", "VPolHeadTree", "VPolEventTree"};
+    // for(int i=0; i < 4; i++){
+    //   std::cerr << "after close file " << "\t" << gROOT->FindObject(treeNames[i]) << std::endl;
+    // }    
 
     loadedBlindTrees = true;
   }
@@ -1175,14 +1180,12 @@ Int_t AnitaDataset::needToOverwriteEvent(AnitaPol::AnitaPol_t pol, UInt_t eventN
 
 void AnitaDataset::overwriteHeader(RawAnitaHeader* header, AnitaPol::AnitaPol_t pol, Int_t fakeTreeEntry){
 
-  // std::cerr << pol << "\t" << fBlindHeadTree[pol] << "\t" << fakeTreeEntry << std::endl;
-  // fBlindHeadTree[pol]->GetEntry(fakeTreeEntry);
-  // std::cerr << pol << "\t" << fBlindHeadTree[pol] << "\t" << fakeTreeEntry << std::endl;
+  Int_t numBytes = fBlindHeadTree[pol]->GetEntry(fakeTreeEntry);
 
-  // std::cout << __PRETTY_FUNCTION__ << std::endl;
-  // std::cout << header << "\t" << fBlindHeader[pol] << "\t" << fBlindHeadTree[pol] << "\t" << fakeTreeEntry << std::endl;
-  fBlindHeadTree[pol]->GetEntry(fakeTreeEntry);
-  // std::cout << header << "\t" << fBlindHeader[pol] << "\t" << fBlindHeadTree[pol] << "\t" << fakeTreeEntry << std::endl;
+  if(numBytes <= 0){
+    std::cerr << "Warning in " << __PRETTY_FUNCTION__ << ", I read " << numBytes << " from the blinding tree " << fBlindHeadTree[pol]->GetName()
+              << ". This probably means the salting blinding is broken" << std::endl;    
+  }
 
   // Retain some of the header data for camouflage
   UInt_t realTime = header->realTime;
@@ -1205,18 +1208,14 @@ void AnitaDataset::overwriteHeader(RawAnitaHeader* header, AnitaPol::AnitaPol_t 
 
 void AnitaDataset::overwriteEvent(UsefulAnitaEvent* useful, AnitaPol::AnitaPol_t pol, Int_t fakeTreeEntry){
 
-  // std::cout << __PRETTY_FUNCTION__ << std::endl;
-  // std::cout << useful << "\t" << fBlindEvent[pol] << "\t" << fBlindEventTree[pol] << "\t" << fakeTreeEntry << std::endl;
-  fBlindEventTree[pol]->GetEntry(fakeTreeEntry);
-  // std::cout << useful << "\t" << fBlindEvent[pol] << "\t" << fBlindEventTree[pol] << "\t" << fakeTreeEntry << std::endl;
-
+  Int_t numBytes = fBlindEventTree[pol]->GetEntry(fakeTreeEntry);
+  if(numBytes <= 0){
+    std::cerr << "Warning in " << __PRETTY_FUNCTION__ << ", I read " << numBytes << " from the blinding tree " << fBlindEventTree[pol]->GetName()
+              << ". This probably means the salting blinding is broken" << std::endl;    
+  }
+  
 
   UInt_t eventNumber = useful->eventNumber;
-  // std::cout << std::endl << std::endl;
-  // std::cout << eventNumber << "\t" << fBlindEvent[pol]->eventNumber << std::endl;
-  // std::cout << useful << "\t" << pol << std::endl;
-  // std::cout << (useful->chipIdFlag[0] & 0x3) << "\t" << (fBlindEvent[pol]->chipIdFlag[0]&0x3) << std::endl;
-
   UInt_t surfEventIds[NUM_SURF] = {0};
   UChar_t wrongLabs[NUM_SURF*NUM_CHAN] = {0};
   UChar_t rightLabs[NUM_SURF*NUM_CHAN] = {0};
@@ -1232,15 +1231,6 @@ void AnitaDataset::overwriteEvent(UsefulAnitaEvent* useful, AnitaPol::AnitaPol_t
   }
 
   (*useful) = (*fBlindEvent[pol]);
-  // for(int chanIndex=0; chanIndex < NUM_CHAN*NUM_SURF; chanIndex++){
-  //   useful->fNumPoints[chanIndex] = fBlindEvent[pol]->fNumPoints[chanIndex];
-  //   for(int samp=0; samp < NUM_SAMP; samp++){
-  //     useful->fVolts[chanIndex][samp] = fBlindEvent[pol]->fVolts[chanIndex][samp];
-  //     useful->fTimes[chanIndex][samp] = fBlindEvent[pol]->fTimes[chanIndex][samp];
-  //   }
-  // }
-
-
 
   useful->eventNumber = eventNumber;
   for(int surf=0; surf < NUM_SURF; surf++){
