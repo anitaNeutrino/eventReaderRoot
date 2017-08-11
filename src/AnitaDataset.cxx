@@ -62,6 +62,7 @@ const char * AnitaDataset::getDataDir(DataDirectory dir)
 {
   int version = (int) dir; 
 
+  //if anita version number is defined in argument
   if (version > 0) 
   {
 
@@ -74,7 +75,8 @@ const char * AnitaDataset::getDataDir(DataDirectory dir)
     }
     else return tryme; 
   }
-
+  
+  //if monte carlo
   if (version == 0) 
   {
     const char * tryme = getenv(mc_root_data_dir); 
@@ -85,15 +87,26 @@ const char * AnitaDataset::getDataDir(DataDirectory dir)
     else return tryme; 
   }
 
+  //if version argument is default (-1)
+  //if ANITA_ROOT_DATA exists return that, otherwise return what AnitaVersion thinks it should be
   if (const char * tryme = getenv(anita_root_data_dir_env))
   {
     return tryme; 
   }
   else
   {
+    char env_string[sizeof(anita_versioned_root_data_dir_env)+20]; 
+    sprintf(env_string,anita_versioned_root_data_dir_env, AnitaVersion::get());
+    if (const char *tryme = getenv(env_string)) {
+      return tryme;
+    }
+    else {
       fprintf(stderr,"%s, not defined, please define it!", anita_root_data_dir_env); 
-      return 0; 
+      return 0;
+    }
   }
+
+  
 }
 
 
