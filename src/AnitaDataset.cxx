@@ -24,6 +24,7 @@
 #include "TEnv.h" 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include "AnitaConventions.h"
 
 
@@ -147,6 +148,7 @@ void  AnitaDataset::unloadRun()
   fTurfTree = 0; 
   fSurfTree = 0; 
   fRunLoaded = false;
+	filesToClose.clear();
 
   if (fCutList) 
   {
@@ -843,6 +845,166 @@ int AnitaDataset::previousInCut()
 
 }
 
+int AnitaDataset::setPlaylist(const char* playlist)
+{
+  if (!fPlaylist.empty()) 
+  {
+    fPlaylist.clear(); 
+  }
+
+  int n = loadPlaylist(playlist); 
+  return n; 
+}
+
+int AnitaDataset::NInPlaylist() const
+{
+
+  if (!fPlaylist.empty())
+  {
+    return fPlaylist.size(); 
+  }
+
+  return -1; 
+}
+
+int AnitaDataset::firstInPlaylist() 
+{
+  return nthInPlaylist(0); 
+}
+
+int AnitaDataset::lastInPlaylist() 
+{
+  return nthInPlaylist(NInPlaylist()-1); 
+}
+
+
+int AnitaDataset::nthInPlaylist(int i)
+{
+  if (fPlaylist.empty()) return -1; 
+	fPlaylistIndex = i;
+	if(getCurrRun() != getPlaylistRun()) loadRun(getPlaylistRun());
+  int ret = getEvent(getPlaylistEvent()); 
+
+  return ret;
+}
+
+int AnitaDataset::nextInPlaylist()
+{
+  if (fPlaylist.empty()) return -1; 
+	if(fPlaylistIndex < 0) fPlaylistIndex = 0;
+  if (fPlaylistIndex <  NInPlaylist() - 1) 
+  {
+    fPlaylistIndex++; 
+  }
+  return nthInPlaylist(fPlaylistIndex); 
+
+}
+
+int AnitaDataset::previousInPlaylist()
+{
+  if (fPlaylist.empty()) return -1; 
+	if(fPlaylistIndex < 0) fPlaylistIndex = 0;
+  if (fPlaylistIndex >  0) 
+  {
+    fPlaylistIndex--; 
+  }
+  return nthInPlaylist(fPlaylistIndex); 
+
+}
+
+int AnitaDataset::evToRun(int ev) {
+
+  char* installDir = getenv("ANITA_UTIL_INSTALL_DIR");
+
+	std::stringstream name;
+	std::ifstream runToEv;
+  if (AnitaVersion::get() == 3) {
+    name.str("");
+    name << installDir << "/bin/runToEvA3.txt";
+    runToEv.open(name.str().c_str());
+    if (!runToEv.is_open()) {
+      return -1;
+    }
+
+  }
+  if (AnitaVersion::get() == 4) {
+    name.str("");
+    name << installDir << "/bin/runToEvA4.txt";
+    runToEv.open(name.str().c_str());
+    if (!runToEv.is_open()) {
+      return -1;
+    }
+
+  }
+  else {
+    return -1;
+  }
+
+  int run, evLow,evHigh;
+  int runOut = -1;
+  while (runToEv >> run >> evLow >> evHigh)
+    if (ev >= evLow && ev <= evHigh) {
+      runOut = run;
+    }
+
+  runToEv.close();
+  
+  return runOut;
+
+}
+
+int AnitaDataset::loadPlaylist(const char* playlist)
+{
+	std::vector<std::vector<long> > runEv;
+	int rN;
+	int evN;
+	std::ifstream pl(playlist);
+	pl >> evN;
+	if(evN < 400)
+	{
+		rN = evN;
+		pl >> evN;
+		std::vector<long> Row;
+		Row.push_back(rN);
+		Row.push_back(evN);
+		runEv.push_back(Row);
+		while(pl >> rN >> evN)
+		{
+			std::vector<long> newRow;
+			newRow.push_back(rN);
+			newRow.push_back(evN);
+			runEv.push_back(newRow);
+		}
+	}
+	else
+	{
+		rN = evToRun(evN);
+		if(rN == -1)
+		{
+			fprintf(stderr, "Something is wrong with your playlist\n");
+			return -1;
+		}
+		std::vector<long> Row;
+		Row.push_back(rN);
+		Row.push_back(evN);
+		runEv.push_back(Row);
+		while(pl >> evN)
+		{
+			rN = evToRun(evN);
+			if(rN == -1)
+			{
+				fprintf(stderr, "Something is wrong with your playlist\n");
+				return -1;
+			}
+			std::vector<long> newRow;
+			newRow.push_back(rN);
+			newRow.push_back(evN);
+			runEv.push_back(newRow);
+		}
+	}
+	fPlaylist = runEv;
+	return runEv.size();
+}
 
 TurfRate* AnitaDataset::turf(bool force_reload) 
 {

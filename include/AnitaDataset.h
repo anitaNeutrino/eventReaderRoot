@@ -199,6 +199,27 @@ class AnitaDataset
     /** Loads the nth event passing the cut. Returns the entry number or -1 if no cut applied */
     int nthInCut(int i);
 
+    /** Loads a playlist for your dataset.Playlist format is RUN EVENTNUMBER\n or EVENTNUMBER\n
+     * After applying playlist, use these to iterate through. Need runToEv files from MagicDisplay */
+    int setPlaylist(const char* playlist);
+
+    /** The number of events in the playlist (or -1 if no playlist) */
+    int NInPlaylist() const;
+
+    /** Loads the first event in the playlist. Returns the entry number or -1 if no playlist */
+    int firstInPlaylist();
+
+    /** Loads the last event in the playlist. Returns the entry number or -1 if no playlist */
+    int lastInPlaylist();
+
+    /** Loads the next playlist event. Returns the entry number or -1 if no playlist */
+    int nextInPlaylist();
+
+   /** Loads the previous playlist event. Returns the entry number or -1 if no playlist */
+    int previousInPlaylist();
+
+    /** Loads the nth playlist event. Returns the entry number or -1 if no playlist */
+    int nthInPlaylist(int i);
 
     /** Loads the useful event. If force_reload is true,
      * the event will be reloaded from the tree (in case you made some changes
@@ -293,6 +314,13 @@ class AnitaDataset
     bool fDecimated;
     TEventList * fCutList;
     int fCutIndex;
+
+		int loadPlaylist(const char* playlist);
+		int evToRun(int ev);
+		int fPlaylistIndex;
+		std::vector<std::vector<long> > fPlaylist;
+		int getPlaylistRun() { return fPlaylist[fPlaylistIndex][0]; }
+		Long64_t getPlaylistEvent() { return fPlaylist[fPlaylistIndex][1]; }
 
 
     /* Blinding stuff */ 
