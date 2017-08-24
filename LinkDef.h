@@ -74,6 +74,7 @@
 #pragma link C++ class TuffRawCmd+;
 #pragma link C++ namespace AnitaVersion;
 #pragma link C++ enum AnitaDataset::BlindingStrategy; 
+#pragma link C++ namespace     AnitaFlightInfo;
 
 
 // Change l1 to l2 for Header's.
