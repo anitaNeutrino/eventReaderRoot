@@ -18,10 +18,11 @@ ULong64_t AnitaFlightInfo::getUsableAntennas(const RawAnitaHeader * h, AnitaPol:
   {
     return pol == AnitaPol::kHorizontal ? ~(0ul) : ~( 1ul << 8); 
   }
+  if (v == 4) 
+  {
+    return pol == AnitaPol::kHorizontal ? ~(0ul) : ~( 1ul << 45); 
+  }
 
-
-  //TODO: implement this  for A4 
-  
   if (nagged++ < 10) 
   {
       fprintf(stderr,"getUsableAntennas not implemented yet for ANITA %d, returning all usable\n", v); 
