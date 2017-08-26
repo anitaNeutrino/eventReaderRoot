@@ -98,6 +98,16 @@ class AnitaDataset
    BlindingStrategy getStrategy();
 
 
+  /** 
+   * @brief Get the run that contains the eventNumber.
+   * 
+   * Uses AnitaVersion::get(), if it's not correct you won't get the right answer!
+   * 
+   * @param eventNumber is the eventNumber
+   * 
+   * @return the run
+   */
+   static int getRunContainingEventNumber(UInt_t eventNumber);
 
 
     /** Get the data directory for the anita version based on environmental variables.  */
@@ -315,12 +325,12 @@ class AnitaDataset
     TEventList * fCutList;
     int fCutIndex;
 
-		int loadPlaylist(const char* playlist);
-		int evToRun(int ev);
-		int fPlaylistIndex;
-		std::vector<std::vector<long> > fPlaylist;
-		int getPlaylistRun() { return fPlaylist[fPlaylistIndex][0]; }
-		Long64_t getPlaylistEvent() { return fPlaylist[fPlaylistIndex][1]; }
+    static void loadRunToEv(int anita); // read runToEvA*.txt
+    int loadPlaylist(const char* playlist);
+    int fPlaylistIndex;
+    std::vector<std::vector<long> > fPlaylist;
+    int getPlaylistRun() { return fPlaylist[fPlaylistIndex][0]; }
+    Long64_t getPlaylistEvent() { return fPlaylist[fPlaylistIndex][1]; }
 
 
     /* Blinding stuff */ 
@@ -349,7 +359,7 @@ class AnitaDataset
     std::vector<AnitaPol::AnitaPol_t> polarityOfEventToInsert;
     std::vector<Int_t> fakeTreeEntries;
 
-
+  
 };
 
 // define the bitwise or operator | to combine blinding strategies

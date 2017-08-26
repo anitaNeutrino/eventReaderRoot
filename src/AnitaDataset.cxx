@@ -28,6 +28,46 @@
 #include "AnitaConventions.h"
 
 
+// from runToEvA*.txt
+std::vector<UInt_t> firstEvents[NUM_ANITAS];
+std::vector<UInt_t> lastEvents[NUM_ANITAS];
+std::vector<Int_t> runs[NUM_ANITAS];
+
+void AnitaDataset::loadRunToEv(int anita){
+  static TMutex m;
+  m.Lock();
+
+  const char* installDir = getenv("ANITA_UTIL_INSTALL_DIR");
+
+  TString fileName = TString::Format("%s/share/anitaCalib/runToEvA%d.txt", installDir, anita);
+  std::ifstream runToEv(fileName.Data());
+  if (!runToEv.is_open()) {
+    std::cerr << "Error in " << __PRETTY_FUNCTION__ << " couldn't find " << fileName << std::endl;
+  }
+  else{
+    const int hopefullyMoreThanEnoughRuns = 500;
+    runs[anita].reserve(hopefullyMoreThanEnoughRuns);
+    firstEvents[anita].reserve(hopefullyMoreThanEnoughRuns);
+    lastEvents[anita].reserve(hopefullyMoreThanEnoughRuns);
+
+    int run, evLow,evHigh;
+    // int elem = 0;
+    while (runToEv >> run >> evLow >> evHigh){
+      runs[anita].push_back(run);
+      firstEvents[anita].push_back(evLow);
+      lastEvents[anita].push_back(evHigh);
+      // std::cout << anita << "\t" << elem << "\t" << runs[anita][elem] << "\t" << firstEvents[anita][elem] << "\t" << lastEvents[anita][elem] << std::endl;
+      // elem++;
+    }
+    // std::cout << "Finished reading in " << fileName << "!" << std::endl;
+    runToEv.close();
+  }
+  m.UnLock();
+}
+
+
+
+
 static bool checkIfFileExists(const char * file)
 {
   return access(file, R_OK) !=-1; 
@@ -913,45 +953,59 @@ int AnitaDataset::previousInPlaylist()
 
 }
 
-int AnitaDataset::evToRun(int ev) {
 
-  char* installDir = getenv("ANITA_UTIL_INSTALL_DIR");
 
-	std::stringstream name;
-	std::ifstream runToEv;
-  if (AnitaVersion::get() == 3) {
-    name.str("");
-    name << installDir << "/bin/runToEvA3.txt";
-    runToEv.open(name.str().c_str());
-    if (!runToEv.is_open()) {
+int AnitaDataset::getRunContainingEventNumber(UInt_t ev){
+
+  // TMutex();
+
+  int anita = AnitaVersion::get();
+
+  // read in runToEvA*.txt list only once
+  if(runs[anita].size()==0){
+    loadRunToEv(anita);
+    // If still don't have data, loadRunToEv should have printed something
+    // There's a problem, so just return -1
+    if(runs[anita].size()==0){
       return -1;
     }
-
-  }
-  if (AnitaVersion::get() == 4) {
-    name.str("");
-    name << installDir << "/bin/runToEvA4.txt";
-    runToEv.open(name.str().c_str());
-    if (!runToEv.is_open()) {
-      return -1;
-    }
-
-  }
-  else {
-    return -1;
   }
 
-  int run, evLow,evHigh;
-  int runOut = -1;
-  while (runToEv >> run >> evLow >> evHigh)
-    if (ev >= evLow && ev <= evHigh) {
-      runOut = run;
-    }
+  // Binary search to find first event number which is greater than ev
+  std::vector<UInt_t>::iterator it = std::upper_bound(firstEvents[anita].begin(), firstEvents[anita].end(), ev);
 
-  runToEv.close();
-  
-  return runOut;
+  // Here we convert the iterator to an integer relative to first element, so we can read matching elements in the other array
+  // And -1 so we have the last element isn't greater than ev.
+  int elem = (it - firstEvents[anita].begin()) - 1;
 
+  // std::cout << anita << "\t" << elem << "\t" << runs[anita][elem] << "\t" << firstEvents[anita][elem] << "\t" << lastEvents[anita][elem] << std::endl;
+
+  int run = -1; // signifies error, we will set correctly after doing bounds checking...
+
+  if(elem < 0){ // then we are lower than the first event in the first run
+    std::cerr << "Error in " << __PRETTY_FUNCTION__ << ", for ANITA " << AnitaVersion::get()
+              << " eventNumber " << ev << " is smaller than then first event in the lowest run! "
+              << "(eventNumber " << firstEvents[anita][0] << " in run " << runs[anita][0] << ")"
+              << std::endl;
+  }
+  else if(ev > lastEvents[anita].back()){ // then we are higher than the last event in the last run
+    std::cerr << "Error in " << __PRETTY_FUNCTION__ << ", for ANITA " << AnitaVersion::get()
+              << " eventNumber " << ev << " is larger than then last event I know about in the highest run! "
+              << "(eventNumber " << lastEvents[anita].back() << " in run " << runs[anita].back() << ")"
+              << std::endl;
+  }
+  else if(ev > lastEvents[anita][elem]){ // then we are in the eventNumber gap between two runs
+    std::cerr << "Error in " << __PRETTY_FUNCTION__ << ", for ANITA " << AnitaVersion::get()
+              << " eventNumber " << ev << " is larger than then last event in run " << runs[anita][elem]
+              << " (" << lastEvents[anita][elem] << "), but smaller than the first event in run "
+              << runs[anita][elem+1] << " (" << firstEvents[anita][elem+1] << ")" << std::endl;
+  }
+  else{
+    // preliminarily set run
+    run = runs[anita][elem];
+  }
+
+  return run;
 }
 
 int AnitaDataset::loadPlaylist(const char* playlist)
@@ -979,7 +1033,7 @@ int AnitaDataset::loadPlaylist(const char* playlist)
 	}
 	else
 	{
-		rN = evToRun(evN);
+		rN = getRunContainingEventNumber(evN);
 		if(rN == -1)
 		{
 			fprintf(stderr, "Something is wrong with your playlist\n");
@@ -991,7 +1045,7 @@ int AnitaDataset::loadPlaylist(const char* playlist)
 		runEv.push_back(Row);
 		while(pl >> evN)
 		{
-			rN = evToRun(evN);
+			rN = getRunContainingEventNumber(evN);
 			if(rN == -1)
 			{
 				fprintf(stderr, "Something is wrong with your playlist\n");
