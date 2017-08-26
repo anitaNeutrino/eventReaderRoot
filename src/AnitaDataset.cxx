@@ -273,7 +273,8 @@ RawAnitaEvent * AnitaDataset::raw(bool force_load)
   {
     fEventTree->GetEntry(fWantedEntry); 
   }
-  return fHaveCalibFile ? fCalEvent : fRawEvent; 
+  return fHaveCalibFile ? fCalEvent : 
+              fRawEvent ? fRawEvent : fUseful; 
 }
 
 
@@ -284,7 +285,7 @@ UsefulAnitaEvent * AnitaDataset::useful(bool force_load)
   {
 
     fEventTree->GetEntry(fWantedEntry); 
-    fUsefulDirty = true; 
+    fUsefulDirty = fCalEvent || fRawEvent; //if reading UsefulEvents, then no need to do anything
   }
   
   if (fUsefulDirty)
