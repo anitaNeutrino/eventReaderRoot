@@ -46,7 +46,7 @@ ULong64_t AnitaFlightInfo::getUsableAntennas(const RawAnitaHeader * h, const Raw
 
 }
 
-uint8_t AnitaFlightInfo::getUsableLabs(const RawAnitaHeader * h, AnitaPol::AnitaPol_t pol) 
+UChar_t AnitaFlightInfo::getUsableLabs(const RawAnitaHeader * h, AnitaPol::AnitaPol_t pol) 
 {
 	int v = AnitaVersion::getVersionFromUnixTime(h->realTime);
 

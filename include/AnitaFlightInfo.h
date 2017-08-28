@@ -25,9 +25,10 @@ namespace AnitaFlightInfo
 
    /**
     * Returns a bitmask of the usable LABs for the given event 
-		* Bit 1 corresponds to LAB A, 2 is LAB B, 3 is C, 4 is D
+    * Bit 1 corresponds to LAB A, 2 is LAB B, 3 is C, 4 is D
+    * Bits 5-8 are currently unused.
     **/
-	 uint8_t getUsableLabs(const RawAnitaHeader * h, AnitaPol::AnitaPol_t pol);
+   UChar_t getUsableLabs(const RawAnitaHeader * h, AnitaPol::AnitaPol_t pol);
 
 
 
