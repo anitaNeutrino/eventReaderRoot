@@ -5,6 +5,7 @@
 /* Information about flights (e.g. what channels are broken, etc.) */ 
 
 #include "AnitaConventions.h" 
+#include "RawAnitaEvent.h"
 #include "Rtypes.h" 
 
 class RawAnitaHeader; 
@@ -20,7 +21,7 @@ namespace AnitaFlightInfo
     *    - Crazy clock 
     *
     **/
-   ULong64_t getUsableAntennas(const RawAnitaHeader *h, AnitaPol::AnitaPol_t pol); 
+   ULong64_t getUsableAntennas(const RawAnitaHeader * h, const RawAnitaEvent * ev, AnitaPol::AnitaPol_t pol); 
 
    /**
     * Returns a bitmask of the usable LABs for the given event 
