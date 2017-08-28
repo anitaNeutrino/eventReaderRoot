@@ -22,6 +22,11 @@ namespace AnitaFlightInfo
     **/
    ULong64_t getUsableAntennas(const RawAnitaHeader *h, AnitaPol::AnitaPol_t pol); 
 
+   /**
+    * Returns a bitmask of the usable LABs for the given event 
+		* Bit 1 corresponds to LAB A, 2 is LAB B, 3 is C, 4 is D
+    **/
+	 uint8_t getUsableLabs(const RawAnitaHeader * h, AnitaPol::AnitaPol_t pol);
 
 
 
