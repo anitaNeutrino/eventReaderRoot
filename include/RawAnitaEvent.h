@@ -66,18 +66,18 @@ class RawAnitaEvent: public TObject
    //Waveform Data
    Short_t data[NUM_DIGITZED_CHANNELS][MAX_NUMBER_SAMPLES]; ///< The pedestal subtracted waveform data. Note that these arrays must be unwrapped and calibrated to become UsefulAnitaEvent objects
 
-  Int_t getLabChip(Int_t chanIndex)
+  Int_t getLabChip(Int_t chanIndex) const
      {return chipIdFlag[chanIndex]&0x3;} ///< Returns the LABRADOR number
-  Int_t getRCO(Int_t chanIndex)
+  Int_t getRCO(Int_t chanIndex) const
      {return (chipIdFlag[chanIndex]&0x4)>>2;} ///< Returns the RCO phase
-  Int_t getFirstHitBus(Int_t chanIndex) {
+  Int_t getFirstHitBus(Int_t chanIndex) const {
      return firstHitbus[chanIndex];
   } ///< Returns the firstHitbus value for the channel
-  Int_t getLastHitBus(Int_t chanIndex) {
+  Int_t getLastHitBus(Int_t chanIndex) const {
      if(lastHitbus[chanIndex]<255) return lastHitbus[chanIndex];
      return Int_t(lastHitbus[chanIndex]) + Int_t((chipIdFlag[chanIndex])>>4);
   } ///< Returns the lastHitbus value for the channel
-  Int_t getWrappedHitBus(Int_t chanIndex) {
+  Int_t getWrappedHitBus(Int_t chanIndex) const {
      return ((chipIdFlag[chanIndex])&0x8)>>3;
   } ///< Return the wrapped hitbus flag for the channel. When the HITBUS is wrapped the waveform runs from firstHitbus+1 to lastHitbus-1, otherwise it runs from lastHitbus+1 to firstHitbus-1 (crossing the 259-->0 boudnary).
 
