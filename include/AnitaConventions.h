@@ -269,7 +269,7 @@ namespace AnitaLocations {
   // https://www.phys.hawaii.edu/elog/anita_notes/595
   const Double_t LATITUDE_WAIS_A3 = - (79 + (27.93728/60)); ///< Latitude of WAIS divide pulser
   const Double_t LONGITUDE_WAIS_A3 = -(112 + (6.74974/60)); ///< Longitude of WAIS divide pulser
-  const Double_t ALTITUDE_WAIS_A3 = 1813.42;///< Altitude of WAIS divide pulser
+  const Double_t ALTITUDE_WAIS_A3 = 1775.68;///< Altitude of WAIS divide pulser
 
   //keeping this around until we can inform people they should use getWais() type calls instead.
   const Double_t LATITUDE_WAIS __attribute__((deprecated)) = - (79 + (27.93728/60));///< Latitude of WAIS divide pulser
