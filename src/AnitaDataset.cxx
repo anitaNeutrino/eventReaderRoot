@@ -812,7 +812,8 @@ int AnitaDataset::nextEvent()
 
 int AnitaDataset::N() const
 {
-  return fRunLoaded ? (fDecimated? fDecimatedHeadTree : fHeadTree)->GetEntries() : 0;
+  TTree* t = fDecimated? fDecimatedHeadTree : fHeadTree;
+  return t ? t->GetEntries() : 0;
 }
 
 
