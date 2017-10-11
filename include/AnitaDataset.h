@@ -58,7 +58,7 @@ class AnitaDataset
       kInsertedVPolEvents = 0x01, 
       kInsertedHPolEvents = 0x02, 
       kRandomizePolarity = 0x04, 
-      kDefault = (kInsertedVPolEvents | kInsertedHPolEvents)
+      kDefault = kNoBlinding
     }; 
 
 
