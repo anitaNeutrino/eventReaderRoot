@@ -58,7 +58,7 @@ class AnitaDataset
       kInsertedVPolEvents = 0x01, 
       kInsertedHPolEvents = 0x02, 
       kRandomizePolarity = 0x04, 
-      kDefault = (kInsertedVPolEvents | kInsertedHPolEvents) 
+      kDefault = kNoBlinding
     }; 
 
 
@@ -76,16 +76,16 @@ class AnitaDataset
 
  /**
    * Get a one line description of the blinding strategy
-   * (please update this in BlindDataset.cc when you add a strategy.
+   * (please update this in AnitaDataset.cxx when you add a strategy.
    * @param strat is the strategy to describe.
    * @return the description
    */
-    TString getDescription(BlindingStrategy strat); 
+  static TString getDescription(BlindingStrategy strat); 
 
 
   /**
-   * Set the current strategy (see BlindDataset.h) for strategy options
-   * @param strat is the strategy to use. This can be a combination e.g. (kInsertedEvents | kAnotherStrategy)
+   * Set the current strategy (see AnitaDataset.h) for strategy options
+   * @param strat is the strategy to use. This can be a combination e.g. (kInsertedVPolEvents | kAnotherStrategy)
    * @return the strategy that was set
    */
    BlindingStrategy setStrategy(BlindingStrategy strat);
@@ -96,6 +96,15 @@ class AnitaDataset
    * @return the strategy that was set
    */
    BlindingStrategy getStrategy();
+
+  /** 
+   * Get the description string for the currently enabled strategy
+   * 
+   * @return the description for the current strategy
+   */
+  inline TString describeCurrentStrategy(){
+    return getDescription(getStrategy());
+  }
 
 
   /** 

@@ -188,7 +188,7 @@ void  AnitaDataset::unloadRun()
   fTurfTree = 0; 
   fSurfTree = 0; 
   fRunLoaded = false;
-	filesToClose.clear();
+  filesToClose.clear();
 
   if (fCutList) 
   {
@@ -436,23 +436,23 @@ int AnitaDataset::getEvent(int eventNumber)
   int entry  =  (fDecimated ? fDecimatedHeadTree : fHeadTree)->GetEntryNumberWithIndex(eventNumber); 
   if (entry < 0) 
   {
-		int run = getRunContainingEventNumber(eventNumber);
-		if(run > 0)
-		{
-			loadRun(run);
-			fprintf(stderr, "changed run to %d\n", run);
-			entry = (fDecimated ? fDecimatedHeadTree : fHeadTree)->GetEntryNumberWithIndex(eventNumber); 
-		}
-		if (entry < 0) 
-		{
-			fprintf(stderr,"WARNING: event %lld not found in header tree\n", fWantedEntry); 
-			if (fDecimated) 
-			{
-				fprintf(stderr,"\tWe are using decimated tree, so maybe that's why?\n"); 
-			}
-		}
+    int run = getRunContainingEventNumber(eventNumber);
+    if(run > 0)
+    {
+      loadRun(run);
+      fprintf(stderr, "changed run to %d\n", run);
+      entry = (fDecimated ? fDecimatedHeadTree : fHeadTree)->GetEntryNumberWithIndex(eventNumber); 
+    }
+    if (entry < 0) 
+    {
+      fprintf(stderr,"WARNING: event %lld not found in header tree\n", fWantedEntry); 
+      if (fDecimated) 
+      {
+        fprintf(stderr,"\tWe are using decimated tree, so maybe that's why?\n"); 
+      }
+    }
   }
-	if (!(entry < 0))
+  if (!(entry < 0))
   {
     getEntry(entry);
   }
@@ -812,7 +812,8 @@ int AnitaDataset::nextEvent()
 
 int AnitaDataset::N() const
 {
-  return (fDecimated? fDecimatedHeadTree : fHeadTree)->GetEntries(); 
+  TTree* t = fDecimated? fDecimatedHeadTree : fHeadTree;
+  return t ? t->GetEntries() : 0;
 }
 
 
