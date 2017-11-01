@@ -12,7 +12,13 @@ ClassImp(TruthAnitaEvent);
 
 TruthAnitaEvent::TruthAnitaEvent()
 {
-   //Default Constructor
+  //cheating, don't do this at home! 
+  memset(&run, 0, &weight + sizeof(weight) - &run); 
+
+  payloadPhi = -999; 
+  payloadTheta = -999; 
+
+  //Default Constructor
 }
 
 TruthAnitaEvent::~TruthAnitaEvent() {
