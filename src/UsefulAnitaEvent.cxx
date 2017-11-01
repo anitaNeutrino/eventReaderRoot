@@ -161,7 +161,9 @@ TGraph *UsefulAnitaEvent::getGraph(int chanIndex) const
     return NULL;
   //   std::cout << chanIndex << std::endl;
 
-  TGraph *grPtr=new TGraph(fNumPoints[chanIndex],
+  int N = TMath::Min(fNumPoints[chanIndex], NUM_SAMP); 
+
+  TGraph *grPtr=new TGraph(N,
 			   fTimes[chanIndex],
 			   fVolts[chanIndex]);
 
