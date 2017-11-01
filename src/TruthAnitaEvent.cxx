@@ -13,7 +13,7 @@ ClassImp(TruthAnitaEvent);
 TruthAnitaEvent::TruthAnitaEvent()
 {
   //cheating, don't do this at home! 
-  memset(&run, 0, &weight + sizeof(weight) - &run); 
+  memset(&run, 0, size_t(&weight) + sizeof(weight) - size_t(&run)); 
 
   payloadPhi = -999; 
   payloadTheta = -999; 
