@@ -154,8 +154,10 @@ class AnitaDataset
 
     bool loadRun(int run, bool decimated = false, DataDirectory dir  = ANITA_ROOT_DATA );
 
-    /** loads the desired eventNumber and returns the current entry**/
-    int getEvent(int eventNumber);
+    /** loads the desired eventNumber and returns the current entry
+     * If quiet is true, won't print out a warning about changing runs or missing events. 
+     * **/
+    int getEvent(int eventNumber, bool quiet = false);
 
     /** loads the desired entry within the tree. Returns the current entry afterwards.  */
     int getEntry(int entryNumber);

@@ -430,7 +430,7 @@ int AnitaDataset::getEntry(int entryNumber)
 }
 
 
-int AnitaDataset::getEvent(int eventNumber)
+int AnitaDataset::getEvent(int eventNumber, bool quiet)
 {
 
   int entry  =  (fDecimated ? fDecimatedHeadTree : fHeadTree)->GetEntryNumberWithIndex(eventNumber); 
@@ -440,15 +440,15 @@ int AnitaDataset::getEvent(int eventNumber)
     if(run > 0)
     {
       loadRun(run);
-      fprintf(stderr, "changed run to %d\n", run);
+      if (!quiet) fprintf(stderr, "changed run to %d\n", run);
       entry = (fDecimated ? fDecimatedHeadTree : fHeadTree)->GetEntryNumberWithIndex(eventNumber); 
     }
     if (entry < 0) 
     {
-      fprintf(stderr,"WARNING: event %lld not found in header tree\n", fWantedEntry); 
+      if (!quiet) fprintf(stderr,"WARNING: event %lld not found in header tree\n", fWantedEntry); 
       if (fDecimated) 
       {
-        fprintf(stderr,"\tWe are using decimated tree, so maybe that's why?\n"); 
+        if (!quiet) fprintf(stderr,"\tWe are using decimated tree, so maybe that's why?\n"); 
       }
     }
   }
