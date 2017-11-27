@@ -12,6 +12,8 @@
 //Includes
 #include <TObject.h>
 
+#include "AnitaConventions.h"
+
 //!  TruthAnitaEvent -- The Truth ANITA Event 
 /*!
   The ROOT implementation of the true ANITA event filled in icemc
@@ -51,8 +53,16 @@ class TruthAnitaEvent: public TObject
   Double_t        sourceLat;              ///< RF position when leaving the ice: Latitude  (using icemc model)
   Double_t        sourceAlt;              ///< RF position when leaving the ice: Altitude  (using icemc model)
   Double_t        weight;                 ///< Weight assigned by icemc
+
+
+  Double_t fTimes[NUM_DIGITZED_CHANNELS][NUM_SAMP];           ///< Array of unwrapped (unless kNoCalib) times for each channel
+  Double_t fSignalAtTrigger[NUM_DIGITZED_CHANNELS][NUM_SAMP]; ///< Array of signal at trigger
+  Double_t fNoiseAtTrigger[NUM_DIGITZED_CHANNELS][NUM_SAMP];  ///< Array of noise at trigger
+  Double_t fDiodeOutput[NUM_DIGITZED_CHANNELS][NUM_SAMP];     ///< Array of tunnel diode output
+  Double_t SNRAtTrigger[NUM_DIGITZED_CHANNELS];               ///< Array of SNR at trigger
+  Double_t thresholds[NUM_DIGITZED_CHANNELS];                 ///< Channel thresholds used in icemc
   
-  ClassDef(TruthAnitaEvent,2);
+  ClassDef(TruthAnitaEvent,3);
 };
 
 
