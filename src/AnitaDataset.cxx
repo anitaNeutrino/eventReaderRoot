@@ -439,7 +439,7 @@ int AnitaDataset::getEvent(int eventNumber, bool quiet)
     int run = getRunContainingEventNumber(eventNumber);
     if(run > 0)
     {
-      loadRun(run);
+      loadRun(run, fDecimated ? true : false);
       if (!quiet) fprintf(stderr, "changed run to %d\n", run);
       entry = (fDecimated ? fDecimatedHeadTree : fHeadTree)->GetEntryNumberWithIndex(eventNumber); 
     }
@@ -450,6 +450,7 @@ int AnitaDataset::getEvent(int eventNumber, bool quiet)
       {
         if (!quiet) fprintf(stderr,"\tWe are using decimated tree, so maybe that's why?\n"); 
       }
+      return -1; 
     }
   }
   if (!(entry < 0))
