@@ -35,6 +35,19 @@ AnitaEventCalibrator::AnitaEventCalibrator(){
   fClockProblem = 0; ///< If unreasonable number of zero crossings in clock, raise flag & skip temp correction update
   initializeVectors();
 
+  for(int surf=0; surf < NUM_SURF; surf++){
+    numPointsArray[surf] = 0;
+    for(int samp=0; samp < NUM_SAMP; samp++){
+      timeArray[surf][samp] = 0;
+      scaArray[surf][samp] = 0;
+    }
+    for(int chan=0; chan < NUM_CHAN; chan++){
+      for(int samp=0; samp < NUM_SAMP; samp++){
+	voltsArray[surf][chan][samp] = 0;
+      }
+    }
+  }
+
 }
 
 
