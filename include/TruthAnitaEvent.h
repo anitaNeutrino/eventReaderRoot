@@ -60,9 +60,14 @@ class TruthAnitaEvent: public TObject
   Double_t fNoiseAtTrigger[NUM_DIGITZED_CHANNELS][NUM_SAMP];  ///< Array of noise at trigger
   Double_t fDiodeOutput[NUM_DIGITZED_CHANNELS][NUM_SAMP];     ///< Array of tunnel diode output
   Double_t SNRAtTrigger[NUM_DIGITZED_CHANNELS];               ///< Array of SNR at trigger
+  Double_t maxSNRAtTriggerV;                                  ///< Max SNR at trigger V-POL
+  Double_t maxSNRAtTriggerH;                                  ///< Max SNR at trigger H-POL
+  Double_t SNRAtDigitizer[NUM_DIGITZED_CHANNELS];             ///< Array of SNR at digitizer
+  Double_t maxSNRAtDigitizerV;                                ///< Max SNR at digitizer V-POL
+  Double_t maxSNRAtDigitizerH;                                ///< Max SNR at digitizer H-POL
   Double_t thresholds[NUM_DIGITZED_CHANNELS];                 ///< Channel thresholds used in icemc
   
-  ClassDef(TruthAnitaEvent,3);
+  ClassDef(TruthAnitaEvent,5);
 };
 
 

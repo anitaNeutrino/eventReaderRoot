@@ -84,7 +84,7 @@ class UsefulAnitaEvent: public RawAnitaEvent
   Int_t fClockSpike; ///<Flag raised if the ADC value is too large or small in clock. 
   Int_t fRFSpike; ///<Flag raised if the ADC value is too large or small in RF. 
   Double_t fClockPhiArray[NUM_SURF]; ///< An array to store the derived clock calibration numbers (from aligning the clocks)
-  std::vector<Int_t> SpikeyRFChannelList; /// a list to store the spikey RF channel.
+  std::vector<int> SpikeyRFChannelList; /// a list to store the spikey RF channel.
 
   Bool_t getAlfaFilterFlag();
   Bool_t setAlfaFilterFlag(Bool_t newBoolianFlag);
