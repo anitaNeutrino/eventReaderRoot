@@ -58,6 +58,8 @@ class TruthAnitaEvent: public TObject
   Double_t fTimes[NUM_DIGITZED_CHANNELS][NUM_SAMP];           ///< Array of unwrapped (unless kNoCalib) times for each channel
   Double_t fSignalAtTrigger[NUM_DIGITZED_CHANNELS][NUM_SAMP]; ///< Array of signal at trigger
   Double_t fNoiseAtTrigger[NUM_DIGITZED_CHANNELS][NUM_SAMP];  ///< Array of noise at trigger
+  Double_t fSignalAtDigitizer[NUM_DIGITZED_CHANNELS][NUM_SAMP]; ///< Array of signal at digitizer
+  Double_t fNoiseAtDigitizer[NUM_DIGITZED_CHANNELS][NUM_SAMP];  ///< Array of noise at digitizer
   Double_t fDiodeOutput[NUM_DIGITZED_CHANNELS][NUM_SAMP];     ///< Array of tunnel diode output
   Double_t SNRAtTrigger[NUM_DIGITZED_CHANNELS];               ///< Array of SNR at trigger
   Double_t maxSNRAtTriggerV;                                  ///< Max SNR at trigger V-POL
@@ -67,7 +69,7 @@ class TruthAnitaEvent: public TObject
   Double_t maxSNRAtDigitizerH;                                ///< Max SNR at digitizer H-POL
   Double_t thresholds[NUM_DIGITZED_CHANNELS];                 ///< Channel thresholds used in icemc
   
-  ClassDef(TruthAnitaEvent,5);
+  ClassDef(TruthAnitaEvent,6);
 };
 
 
