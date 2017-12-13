@@ -434,30 +434,28 @@ int AnitaDataset::getEvent(int eventNumber, bool quiet)
 {
 
   int entry  =  (fDecimated ? fDecimatedHeadTree : fHeadTree)->GetEntryNumberWithIndex(eventNumber); 
-  if (entry < 0) 
+
+  if (entry < 0 && (eventNumber < fHeadTree->GetMinimum("eventNumber") || eventNumber > fHeadTree->GetMaximum("eventNumber")))
   {
     int run = getRunContainingEventNumber(eventNumber);
     if(run > 0)
     {
-      loadRun(run, fDecimated ? true : false);
+      loadRun(run, fDecimated);
       if (!quiet) fprintf(stderr, "changed run to %d\n", run);
-      entry = (fDecimated ? fDecimatedHeadTree : fHeadTree)->GetEntryNumberWithIndex(eventNumber); 
+      getEvent(eventNumber, quiet); 
     }
-    if (entry < 0) 
-    {
+  }
+  else if (entry < 0 ) 
+  {
       if (!quiet) fprintf(stderr,"WARNING: event %lld not found in header tree\n", fWantedEntry); 
       if (fDecimated) 
       {
         if (!quiet) fprintf(stderr,"\tWe are using decimated tree, so maybe that's why?\n"); 
       }
       return -1; 
-    }
-  }
-  if (!(entry < 0))
-  {
-    getEntry(entry);
-  }
+   }
 
+  getEntry(entry);
   return fDecimated ? fDecimatedEntry : fWantedEntry; 
 }
   
@@ -594,7 +592,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
 
     if (strcasestr(the_right_file,"SimulatedAnitaHeadFile")) simulated = true; 
 
-    printf("Using head file: %s\n",the_right_file); 
+    fprintf(stderr,"Using head file: %s\n",the_right_file); 
     TFile * f = new TFile(the_right_file); 
     filesToClose.push_back(f); 
     fHeadTree = (TTree*) f->Get("headTree"); 
