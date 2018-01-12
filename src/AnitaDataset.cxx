@@ -33,6 +33,48 @@ std::vector<UInt_t> firstEvents[NUM_ANITAS];
 std::vector<UInt_t> lastEvents[NUM_ANITAS];
 std::vector<Int_t> runs[NUM_ANITAS];
 
+
+std::vector<UInt_t> hiCalEventNumbers[NUM_ANITAS];
+
+
+bool AnitaDataset::isKnownHiCalEvent(UInt_t eventNumber, Int_t anita){
+
+  // @todo do this for other ANITAs
+  if(anita!=3){
+    std::cerr << "Error in " << __PRETTY_FUNCTION__ << ", only implemented for ANITA-3, not ANITA-" << anita << ", returning false!" << std::endl;
+    return false;
+  }
+
+  if(hiCalEventNumbers[anita].size()==0){
+    static TMutex m;
+    m.Lock();
+
+    const char* installDir = getenv("ANITA_UTIL_INSTALL_DIR");
+
+    TString fileName = TString::Format("%s/share/anitaCalib/hiCal1EventNumbers.txt", installDir, anita);
+    std::ifstream hiCalEventListFile(fileName.Data());
+    if (!hiCalEventListFile.is_open()) {
+      std::cerr << "Error in " << __PRETTY_FUNCTION__ << " couldn't find " << fileName << std::endl;
+    }
+
+    Int_t hcRun, isDirect, isPaired;
+    UInt_t hcEventNumber;
+
+    while(!hiCalEventListFile.eof()){
+      hiCalEventListFile >> hcRun >> hcEventNumber >> isDirect >> isPaired;
+      hiCalEventNumbers[anita].push_back(hcEventNumber);
+    }
+
+    m.UnLock();
+  }
+
+  return (std::find(hiCalEventNumbers[anita].begin(), hiCalEventNumbers[anita].end(), eventNumber)!=hiCalEventNumbers[anita].end());
+}
+
+
+
+
+
 void AnitaDataset::loadRunToEv(int anita){
   static TMutex m;
   m.Lock();

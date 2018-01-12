@@ -125,6 +125,19 @@ class AnitaDataset
     /** Returns the run at the requested time */ 
     static int getRunAtTime(double t);
 
+  /** 
+   * Check against the list of known Hi-Cal events.
+   * Warning... this list is likely incomplete!
+   * @todo implement this for ANITA-4
+   * 
+   * @param eventNumber the eventNumber
+   * @param anita which ANITA flight? (optional: uses AnitaVersion::get() if not supplied.)
+   * 
+   * @return true if the event is on the list, false otherwise.
+   */
+    static bool isKnownHiCalEvent(UInt_t eventNumber, Int_t anita=AnitaVersion::get());
+
+
     /** Constructor loading a run with calibration type and anita version.  If decimated is true, the decimated header file is read and you only have access to the 10% dataset.
      * 
      *  cal changes the calibration type. 
