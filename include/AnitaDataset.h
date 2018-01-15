@@ -305,6 +305,12 @@ class AnitaDataset
     /* Wraps the random number generator for polarity inversion so it is derministic regardless of event processing order */
     bool maybeInvertPolarity(UInt_t eventNumber);
 
+    /* Where was hical at a particular time?*/
+    static void hical(UInt_t unixTime, Double_t& longitude,  Double_t& latitude, Double_t& altitude);
+
+    /* Where was hical? Uses the current header realTime*/ 
+    void hical(Double_t& longitude,  Double_t& latitude, Double_t& altitude);
+
   protected:
     void unloadRun();
     TTree * fHeadTree;
@@ -333,7 +339,7 @@ class AnitaDataset
     Bool_t fSurfDirty;
 
     TTree * fTruthTree; 
-    TruthAnitaEvent * fTruth; 
+    TruthAnitaEvent * fTruth;
 
 
     /* place to store the current run but that can't be confusingly changed */
@@ -350,6 +356,7 @@ class AnitaDataset
     int fCutIndex;
 
     static void loadRunToEv(int anita); // read runToEvA*.txt
+    static void loadHiCalGps(); /// Where was HiCal?
     int loadPlaylist(const char* playlist);
     int fPlaylistIndex;
     std::vector<std::vector<long> > fPlaylist;
@@ -382,6 +389,7 @@ class AnitaDataset
     std::vector<UInt_t> eventsToOverwrite;
     std::vector<AnitaPol::AnitaPol_t> polarityOfEventToInsert;
     std::vector<Int_t> fakeTreeEntries;
+
 
   
 };

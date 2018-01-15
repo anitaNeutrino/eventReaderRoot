@@ -36,6 +36,13 @@ std::vector<Int_t> runs[NUM_ANITAS];
 
 std::vector<UInt_t> hiCalEventNumbers[NUM_ANITAS];
 
+TFile* fHiCalGpsFile;
+TTree* fHiCalGpsTree;
+Double_t fHiCalLon;
+Double_t fHiCalLat;
+Double_t fHiCalAlt;
+Int_t fHiCalUnixTime;
+
 
 bool AnitaDataset::isKnownHiCalEvent(UInt_t eventNumber, Int_t anita){
 
@@ -51,7 +58,9 @@ bool AnitaDataset::isKnownHiCalEvent(UInt_t eventNumber, Int_t anita){
 
     const char* installDir = getenv("ANITA_UTIL_INSTALL_DIR");
 
-    TString fileName = TString::Format("%s/share/anitaCalib/hiCal1EventNumbers.txt", installDir, anita);
+    //hiCal1EventNumbers13Jan2018.txt
+    //hiCal1EventNumbers.txt
+    TString fileName = TString::Format("%s/share/anitaCalib/hiCal1EventNumbers13Jan2018.txt", installDir, anita);
     std::ifstream hiCalEventListFile(fileName.Data());
     if (!hiCalEventListFile.is_open()) {
       std::cerr << "Error in " << __PRETTY_FUNCTION__ << " couldn't find " << fileName << std::endl;
@@ -61,7 +70,8 @@ bool AnitaDataset::isKnownHiCalEvent(UInt_t eventNumber, Int_t anita){
     UInt_t hcEventNumber;
 
     while(!hiCalEventListFile.eof()){
-      hiCalEventListFile >> hcRun >> hcEventNumber >> isDirect >> isPaired;
+      // hiCalEventListFile >> hcRun >> hcEventNumber >> isDirect >> isPaired;
+      hiCalEventListFile >> hcRun >> hcEventNumber >> isDirect;
       hiCalEventNumbers[anita].push_back(hcEventNumber);
     }
 
@@ -566,6 +576,7 @@ AnitaDataset::~AnitaDataset()
     fBlindFile->Close();
     delete fBlindFile;
   }
+
   
 }
 
@@ -1438,6 +1449,75 @@ void AnitaDataset::loadBlindTrees() {
   // std::cout << __PRETTY_FUNCTION__ << ": here 4" << std::endl;
 
 }
+
+
+
+void AnitaDataset::loadHiCalGps() {
+  if(!fHiCalGpsFile){
+
+    const TString theRootPwd = gDirectory->GetPath();    
+
+    TString fName = TString::Format("%s/share/anitaCalib/H1b_GPS_time_interp.root", getenv("ANITA_UTIL_INSTALL_DIR"));
+    fHiCalGpsFile = TFile::Open(fName);
+    fHiCalGpsTree = (TTree*) fHiCalGpsFile->Get("Tpos");
+
+    fHiCalGpsTree->BuildIndex("unixTime");
+
+    fHiCalGpsTree->SetBranchAddress("longitude", &fHiCalLon);
+    fHiCalGpsTree->SetBranchAddress("latitude", &fHiCalLat);
+    fHiCalGpsTree->SetBranchAddress("altitude", &fHiCalAlt);
+    fHiCalGpsTree->SetBranchAddress("unixTime", &fHiCalUnixTime);
+
+    gDirectory->cd(theRootPwd);
+  }
+}
+
+
+
+/** 
+ * Where was hical? Uses the current header realTime to query the hical gps tree...
+ * 
+ * @param longitude hical position
+ * @param latitude hical position
+ * @param altitude hical position
+ */
+void AnitaDataset::hical(Double_t& longitude, Double_t& latitude, Double_t& altitude) {
+  UInt_t realTime = fHeader ? fHeader->realTime : 0;
+  hical(realTime, longitude, latitude, altitude);
+}
+
+
+
+/** 
+ * Where was hical at a particular time?
+ * 
+ * @param longitude hical position
+ * @param latitude hical position
+ * @param altitude hical position
+ * @param realTime unixTime stamp of the gps tree
+ */
+void AnitaDataset::hical(UInt_t realTime, Double_t& longitude, Double_t& latitude, Double_t& altitude) {
+  loadHiCalGps();
+  Long64_t entry = fHiCalGpsTree->GetEntryNumberWithIndex(realTime);
+
+  if(entry > 0){
+    fHiCalGpsTree->GetEntry(entry);
+    longitude = fHiCalLon;
+    latitude = fHiCalLat;
+    const double feetToMeters = 0.3048;
+    altitude = fHiCalAlt*feetToMeters;
+  }
+  else{
+    longitude = -9999;
+    latitude = -9999;
+    altitude = -9999;
+  }
+}
+
+
+
+ 
+
 
 /**
  * Loop through list of events to overwrite for a given polarisation and return the fakeTreeEntry we need to overwrite
