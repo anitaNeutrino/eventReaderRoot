@@ -1481,9 +1481,9 @@ void AnitaDataset::loadHiCalGps() {
  * @param latitude hical position
  * @param altitude hical position
  */
-void AnitaDataset::hical(Double_t& longitude, Double_t& latitude, Double_t& altitude) {
+void AnitaDataset::hiCal(Double_t& longitude, Double_t& latitude, Double_t& altitude) {
   UInt_t realTime = fHeader ? fHeader->realTime : 0;
-  hical(realTime, longitude, latitude, altitude);
+  hiCal(realTime, longitude, latitude, altitude);
 }
 
 
@@ -1496,7 +1496,7 @@ void AnitaDataset::hical(Double_t& longitude, Double_t& latitude, Double_t& alti
  * @param altitude hical position
  * @param realTime unixTime stamp of the gps tree
  */
-void AnitaDataset::hical(UInt_t realTime, Double_t& longitude, Double_t& latitude, Double_t& altitude) {
+void AnitaDataset::hiCal(UInt_t realTime, Double_t& longitude, Double_t& latitude, Double_t& altitude) {
   loadHiCalGps();
   Long64_t entry = fHiCalGpsTree->GetEntryNumberWithIndex(realTime);
 

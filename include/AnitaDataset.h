@@ -305,11 +305,11 @@ class AnitaDataset
     /* Wraps the random number generator for polarity inversion so it is derministic regardless of event processing order */
     bool maybeInvertPolarity(UInt_t eventNumber);
 
-    /* Where was hical at a particular time?*/
-    static void hical(UInt_t unixTime, Double_t& longitude,  Double_t& latitude, Double_t& altitude);
+    /* Where was HiCal at a particular time?*/
+    static void hiCal(UInt_t unixTime, Double_t& longitude,  Double_t& latitude, Double_t& altitude);
 
     /* Where was hical? Uses the current header realTime*/ 
-    void hical(Double_t& longitude,  Double_t& latitude, Double_t& altitude);
+    void hiCal(Double_t& longitude,  Double_t& latitude, Double_t& altitude);
 
   protected:
     void unloadRun();
