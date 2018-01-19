@@ -29,19 +29,19 @@
 
 
 // from runToEvA*.txt
-std::vector<UInt_t> firstEvents[NUM_ANITAS];
-std::vector<UInt_t> lastEvents[NUM_ANITAS];
-std::vector<Int_t> runs[NUM_ANITAS];
+static std::vector<UInt_t> firstEvents[NUM_ANITAS+1];
+static std::vector<UInt_t> lastEvents[NUM_ANITAS+1];
+static std::vector<Int_t> runs[NUM_ANITAS+1];
 
 
-std::vector<UInt_t> hiCalEventNumbers[NUM_ANITAS];
+static std::vector<UInt_t> hiCalEventNumbers[NUM_ANITAS+1];
 
-TFile* fHiCalGpsFile;
-TTree* fHiCalGpsTree;
-Double_t fHiCalLon;
-Double_t fHiCalLat;
-Double_t fHiCalAlt;
-Int_t fHiCalUnixTime;
+static TFile* fHiCalGpsFile;
+static TTree* fHiCalGpsTree;
+static Double_t fHiCalLon;
+static Double_t fHiCalLat;
+static Double_t fHiCalAlt;
+static Int_t fHiCalUnixTime;
 
 
 bool AnitaDataset::isKnownHiCalEvent(UInt_t eventNumber, Int_t anita){
@@ -1184,6 +1184,7 @@ struct run_info
 
 static std::vector<run_info> run_times[NUM_ANITAS+1]; 
 
+static TMutex run_at_time_mutex; 
 int AnitaDataset::getRunAtTime(double t)
 {
 
@@ -1191,8 +1192,7 @@ int AnitaDataset::getRunAtTime(double t)
 
   if (!run_times[version].size())
   {
-    static TMutex m; 
-    m.Lock(); 
+    TLockGuard lock(&run_at_time_mutex); 
     if (!run_times[version].size()) 
     {
 
@@ -1281,7 +1281,6 @@ int AnitaDataset::getRunAtTime(double t)
 
       }
     }
-    m.UnLock(); 
   }
   
   run_info test; 
