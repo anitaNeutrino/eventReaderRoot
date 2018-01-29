@@ -214,6 +214,8 @@ AnitaDataset::AnitaDataset(int run, bool decimated, WaveCalType::WaveCalType_t c
   fTruthTree(0), fTruth(0), 
   fCutList(0), fRandy()
 {
+  fCalibInfo = 0;
+  fHaveCalibInfo = false;
   setCalType(cal); 
   setStrategy(strategy); 
   currRun = run;
@@ -522,6 +524,9 @@ AnitaDataset::~AnitaDataset()
 
   if (fHeader) 
     delete fHeader; 
+
+  if (fCalibInfo)
+    delete fCalibInfo;
 
   if (fCalEvent) 
     delete fCalEvent; 
