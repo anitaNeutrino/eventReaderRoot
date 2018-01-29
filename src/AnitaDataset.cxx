@@ -710,6 +710,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
      filesToClose.push_back(f); 
      fEventTree = (TTree*) f->Get("eventTree"); 
      fHaveCalibFile = true; 
+     fHaveCalibInfo = false;
      fEventTree->SetBranchAddress("event",&fCalEvent); 
   }
   else 
@@ -722,6 +723,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
        filesToClose.push_back(f); 
        fEventTree = (TTree*) f->Get("eventTree"); 
        fHaveCalibFile = false; 
+       fHaveCalibInfo = false;
        fEventTree->SetBranchAddress("event",&fRawEvent); 
        if(checkIfFileExists(fname2.Data()))
        {
@@ -740,6 +742,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
         filesToClose.push_back(f); 
         fEventTree = (TTree*) f->Get("eventTree"); 
         fHaveCalibFile = false;
+        fHaveCalibInfo = false;
         fEventTree->SetBranchAddress("event",&fUseful);
       } else {
         fprintf(stderr,"Could not find event file for run %d, giving up!\n",run); 
