@@ -1180,7 +1180,7 @@ TruthAnitaEvent * AnitaDataset::truth(bool force_reload)
 std::vector<Double_t>* AnitaDataset::calibInfo(bool force_reload) 
 {
 
-  if (!fCalibInfoTree) return fCalibInfo; 
+  if (!fCalibInfoTree) return 0; 
   if (fCalibInfoTree->GetReadEntry() != fWantedEntry || force_reload) 
   {
     fCalibInfoTree->GetEntry(fWantedEntry); 
