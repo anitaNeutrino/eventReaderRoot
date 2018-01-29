@@ -238,7 +238,8 @@ void  AnitaDataset::unloadRun()
   fHkTree = 0; 
   fGpsTree = 0; 
   fTurfTree = 0; 
-  fSurfTree = 0; 
+  fSurfTree = 0;
+  fCalibInfoTree = 0;
   fRunLoaded = false;
   filesToClose.clear();
 
@@ -395,7 +396,8 @@ UsefulAnitaEvent * AnitaDataset::useful(bool force_load)
     }
     else if (fRawEvent)
     {
-      new (fUseful) UsefulAnitaEvent(fRawEvent, fCalType, header()); 
+      if(fHaveCalibInfo) new (fUseful) UsefulAnitaEvent(fRawEvent, fCalType, header(), calibInfo()); 
+      else new (fUseful) UsefulAnitaEvent(fRawEvent, fCalType, header()); 
     }
     fUsefulDirty = false; 
   }
@@ -713,6 +715,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
   else 
   {
     fname = TString::Format("%s/run%d/eventFile%d.root", data_dir, run, run); 
+    fname2 = TString::Format("%s/run%d/calibratedEventInfo%d.root", data_dir, run, run); 
     if (checkIfFileExists(fname.Data()))
     {
        TFile * f = new TFile(fname.Data()); 
@@ -720,6 +723,14 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
        fEventTree = (TTree*) f->Get("eventTree"); 
        fHaveCalibFile = false; 
        fEventTree->SetBranchAddress("event",&fRawEvent); 
+       if(checkIfFileExists(fname2.Data()))
+       {
+         TFile * f2 = new TFile(fname2.Data());
+         filesToClose.push_back(f2);
+         fCalibInfoTree = (TTree*) f2->Get("calInfoTree");
+         fHaveCalibInfo = true;
+         fCalibInfoTree->SetBranchAddress("tempCalInfo", &fCalibInfo);
+       }
     }
     else 
     {
@@ -1166,6 +1177,17 @@ TruthAnitaEvent * AnitaDataset::truth(bool force_reload)
   return fTruth; 
 }
 
+std::vector<Double_t>* AnitaDataset::calibInfo(bool force_reload) 
+{
+
+  if (!fCalibInfoTree) return fCalibInfo; 
+  if (fCalibInfoTree->GetReadEntry() != fWantedEntry || force_reload) 
+  {
+    fCalibInfoTree->GetEntry(fWantedEntry); 
+  }
+
+  return fCalibInfo; 
+}
 
 struct run_info
 {

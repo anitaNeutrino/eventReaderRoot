@@ -295,6 +295,9 @@ class AnitaDataset
 
     /** Loads the MCTruth. This will be NULL if there is no truth (like if you're working with real data. */ 
     TruthAnitaEvent * truth(bool force_reload = true); 
+    
+    /** Loads the calibInfo file. These are computed by makeCalibratedEventInfo in anitaTreeMaker so that you can have consistent calibratedEventFiles that can be generated on the fly */
+    std::vector<Double_t>* calibInfo(bool force_reload = false);
 
     /** Lets you check to see if you have a header and event file actually loaded, or if it failed loading */
     bool fRunLoaded;
@@ -319,9 +322,11 @@ class AnitaDataset
     Long64_t fIndex;
     RawAnitaHeader * fHeader;
     TTree *fEventTree;
+    TTree* fCalibInfoTree;
     CalibratedAnitaEvent * fCalEvent;
     RawAnitaEvent * fRawEvent;
     UsefulAnitaEvent * fUseful;
+    std::vector<Double_t>* fCalibInfo;
     Bool_t fUsefulDirty;
     Bool_t fCalDirty;  // used only with raw data
     Bool_t fGpsDirty;  // used only with gpsFile data
@@ -349,6 +354,7 @@ class AnitaDataset
     Long64_t fDecimatedEntry;
     Bool_t fHaveGpsEvent;
     Bool_t fHaveCalibFile;
+    Bool_t fHaveCalibInfo;
     WaveCalType::WaveCalType_t fCalType;
     std::vector<TFile *> filesToClose;
     bool fDecimated;

@@ -149,7 +149,7 @@ class AnitaEventCalibrator : public TObject
   Double_t RfPowYInt[NUM_SURF][NUM_CHAN];
   Double_t RfPowSlope[NUM_SURF][NUM_CHAN];
 
-
+  bool fHaveCalibInfo;
 
 
   AnitaEventCalibrator(); // don't want multiple calibrators lying around for no reason

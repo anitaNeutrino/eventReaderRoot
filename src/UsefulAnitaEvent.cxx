@@ -136,11 +136,41 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   calibrateEvent(calType);
 }
 
+
+UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, RawAnitaHeader* theHd, std::vector<Double_t>* calibInfo)
+  : RawAnitaEvent(*eventPtr)
+{
+
+  //In this case, we can automatically detect the ANITA version
+  AnitaVersion::setVersionFromUnixTime(theHd->realTime);
+
+  checkIfTreatingCalibratedEventAsRawEvent(eventPtr, __PRETTY_FUNCTION__);
+
+  fCalibrator=0;
+  fFromCalibratedAnitaEvent=0;
+  fC3poNum=theHd->c3poNum;
+  fLastEventGuessed=0;
+  gotCalibTemp=0;
+  fClockProblem = 0;
+  fClockSpike = 0;  
+  fRFSpike = 0;
+
+
+  setAlfaFilterFlag(AnitaVersion::get() == 3);
+
+  if(theHd->eventNumber != eventPtr->eventNumber){
+    std::cerr << "Warning! eventNumber mismatch in " << __FILE__ << " line " << __LINE__ << "." << std::endl;
+    std::cerr << "RawAnitaHeader->eventNumber = " << theHd->eventNumber << " but "
+	      << "UsefulAnitaEvent->eventNumber = " << eventPtr->eventNumber
+	      << std::endl;
+  }
+
+  calibrateEventWithInfo(calType, calibInfo);
+}
+
 UsefulAnitaEvent::~UsefulAnitaEvent() {
   //Default Destructor
 }
-
-
 
 int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
 {
@@ -149,6 +179,17 @@ int UsefulAnitaEvent::calibrateEvent(WaveCalType::WaveCalType_t calType)
   return 0;
 }
 
+int UsefulAnitaEvent::calibrateEventWithInfo(WaveCalType::WaveCalType_t calType, std::vector<Double_t>* calibInfo)
+{
+  fCalibrator=AnitaEventCalibrator::Instance();
+  fCalibrator->fHaveCalibInfo = true;
+  for(int surf = 0; surf < NUM_SURF; surf++) 
+  {
+    fCalibrator->tempFactors[surf] = calibInfo->at(surf);
+  }
+  fCalibrator->calibrateUsefulEvent(this,calType);
+  return 0;
+}
 
 TGraph *UsefulAnitaEvent::getGraphFromSurfAndChan(int surf, int chan) const 
 {
