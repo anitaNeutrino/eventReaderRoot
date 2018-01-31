@@ -33,6 +33,7 @@ UsefulAnitaEvent::UsefulAnitaEvent()
   fC3poNum=0;
   fFromCalibratedAnitaEvent=0;
   fCalibrator=0;
+  fRFSpike = 0;
   setAlfaFilterFlag(false);
 
   //Default Constructor
@@ -85,6 +86,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   else{
     gotCalibTemp=0;
   }
+  fRFSpike = 0;
 
   setAlfaFilterFlag(AnitaVersion::get() == 3);
   calibrateEvent(calType);
@@ -131,6 +133,7 @@ UsefulAnitaEvent::UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalT
   fFromCalibratedAnitaEvent=0;
   gotCalibTemp=1;
   calibTemp=surfTemp;
+  fRFSpike = 0;
   setAlfaFilterFlag(false);
 
   calibrateEvent(calType);
