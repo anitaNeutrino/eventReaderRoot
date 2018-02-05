@@ -34,7 +34,6 @@ AnitaEventCalibrator::AnitaEventCalibrator(){
   nominalDeltaT = 1./2.6; ///< in nanoseconds
   fClockProblem = 0; ///< If unreasonable number of zero crossings in clock, raise flag & skip temp correction update
   initializeVectors();
-  fHaveCalibInfo = false;
 
   for(int surf=0; surf < NUM_SURF; surf++){
     numPointsArray[surf] = 0;
@@ -333,10 +332,7 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
     // If we want deltaTs then we definitely need to know what RCO phase we are in...
 
     if(eventPtr->fFromCalibratedAnitaEvent==0){ // Figure out the RCO if we don't have calibrated input
-      if(!fHaveCalibInfo)
-      {
-        getTempFactors(eventPtr); // Get last temperature correction for this event's LAB
-      }
+      getTempFactors(eventPtr); // Get last temperature correction for this event's LAB
       guessRco(eventPtr);
     }
     else{// If have calibrated anita event, then copy result and don't guess
@@ -374,14 +370,14 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
   //! Step 4: Update rolling temperature correction (copy to usefulAnitaEvent)
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   if(eventPtr->fFromCalibratedAnitaEvent==0){ // Then figure it out from event information
-    if(fClockProblem!=0 || fHaveCalibInfo){
+    if(fClockProblem!=0){
     //   std::cerr << "Clock problem found in eventNumber = " << eventPtr->eventNumber
     // 		<< ", skipped temperature correction" << std::endl;
     }
     else{
       updateTemperatureCorrection(eventPtr); ///< This is pretty important as RCO guess needs accurate clock
       }
-    if(!fHaveCalibInfo) getTempFactors(eventPtr);
+    getTempFactors(eventPtr);
     for(Int_t surf=0; surf<NUM_SURF; surf++){
       eventPtr->fTempFactorGuesses[surf] = tempFactors.at(surf);
     }

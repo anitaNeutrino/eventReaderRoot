@@ -38,10 +38,9 @@ class UsefulAnitaEvent: public RawAnitaEvent
   UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, PrettyAnitaHk *theHk=0); ///< Assignment constructor using PrettyAnitaHk for the temperature calibration. See WaveCalType for calibration options
   UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, RawAnitaHeader *theHd); ///< Assignment constructor using RawAnitaHeader for the c3p0Num to do the temperature calibration using the 125MHz clock. See WaveCalType for calibration options
   UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, Double_t surfTemp); ///< Assignment constructor using surfTemp for the temperature calibration.  See WaveCalType for calibration options
-  UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, RawAnitaHeader *theHd, std::vector<Double_t>* calibInfo); ///< Assignment constructor using calibInfo from makeCalibratedEventInfo in anitaTreeMaker for thermal corrections. See WaveCalType for calibration options
+  UsefulAnitaEvent(RawAnitaEvent *eventPtr,WaveCalType::WaveCalType_t calType, RawAnitaHeader *theHd, std::vector<Double_t>* rcoInfo, std::vector<Double_t>* clockPhiInfo, std::vector<Double_t>* tempFactorInfo, Int_t clockProblemInfo, Int_t clockSpikeInfo, Int_t rfSpikeInfo); ///< Assignment constructor using calibInfo from makeCalibratedEventInfo in anitaTreeMaker for thermal corrections. See WaveCalType for calibration options
   virtual ~UsefulAnitaEvent(); ///< Destructor
   int calibrateEvent(WaveCalType::WaveCalType_t calType); ///< Work horse member function called by constructor
-  int calibrateEventWithInfo(WaveCalType::WaveCalType_t calType, std::vector<Double_t>* calibInfo); ///< Work horse member function called by constructor
 
   //Generally useful function
   static int getChanIndex(int surf, int chan)

@@ -214,7 +214,12 @@ AnitaDataset::AnitaDataset(int run, bool decimated, WaveCalType::WaveCalType_t c
   fTruthTree(0), fTruth(0), 
   fCutList(0), fRandy()
 {
-  fCalibInfo = 0;
+  fRcoInfo = 0;
+  fClockPhiInfo = 0;
+  fTempFactorInfo = 0;
+  fClockProblemInfo = 0;
+  fClockSpikeInfo = 0;
+  fRFSpikeInfo = 0;
   fHaveCalibInfo = false;
   setCalType(cal); 
   setStrategy(strategy); 
@@ -398,7 +403,7 @@ UsefulAnitaEvent * AnitaDataset::useful(bool force_load)
     }
     else if (fRawEvent)
     {
-      if(fHaveCalibInfo) new (fUseful) UsefulAnitaEvent(fRawEvent, fCalType, header(), calibInfo()); 
+      if(fHaveCalibInfo) new (fUseful) UsefulAnitaEvent(fRawEvent, fCalType, header(), RcoInfo(), ClockPhiInfo(), TempFactorInfo(), ClockProblemInfo(), ClockSpikeInfo(), RFSpikeInfo()); 
       else new (fUseful) UsefulAnitaEvent(fRawEvent, fCalType, header()); 
     }
     fUsefulDirty = false; 
@@ -525,8 +530,14 @@ AnitaDataset::~AnitaDataset()
   if (fHeader) 
     delete fHeader; 
 
-  if (fCalibInfo)
-    delete fCalibInfo;
+  if (fRcoInfo)
+    delete fRcoInfo;
+ 
+  if (fClockPhiInfo)
+    delete fClockPhiInfo;
+  
+  if (fTempFactorInfo)
+    delete fTempFactorInfo;
 
   if (fCalEvent) 
     delete fCalEvent; 
@@ -736,7 +747,12 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
          filesToClose.push_back(f2);
          fCalibInfoTree = (TTree*) f2->Get("calInfoTree");
          fHaveCalibInfo = true;
-         fCalibInfoTree->SetBranchAddress("tempCalInfo", &fCalibInfo);
+         fCalibInfoTree->SetBranchAddress("rcoArray", &fRcoInfo);
+         fCalibInfoTree->SetBranchAddress("clockPhiArray", &fClockPhiInfo);
+         fCalibInfoTree->SetBranchAddress("tempFactorGuesses", &fTempFactorInfo);
+         fCalibInfoTree->SetBranchAddress("clockProblem", &fClockProblemInfo);
+         fCalibInfoTree->SetBranchAddress("clockSpike", &fClockSpikeInfo);
+         fCalibInfoTree->SetBranchAddress("rfSpike", &fRFSpikeInfo);
        }
     }
     else 
@@ -1185,16 +1201,70 @@ TruthAnitaEvent * AnitaDataset::truth(bool force_reload)
   return fTruth; 
 }
 
-std::vector<Double_t>* AnitaDataset::calibInfo(bool force_reload) 
+std::vector<Double_t>* AnitaDataset::RcoInfo(bool force_reload) 
 {
-
   if (!fCalibInfoTree) return 0; 
   if (fCalibInfoTree->GetReadEntry() != fWantedEntry || force_reload) 
   {
     fCalibInfoTree->GetEntry(fWantedEntry); 
   }
 
-  return fCalibInfo; 
+  return fRcoInfo; 
+}
+
+std::vector<Double_t>* AnitaDataset::ClockPhiInfo(bool force_reload) 
+{
+  if (!fCalibInfoTree) return 0; 
+  if (fCalibInfoTree->GetReadEntry() != fWantedEntry || force_reload) 
+  {
+    fCalibInfoTree->GetEntry(fWantedEntry); 
+  }
+
+  return fClockPhiInfo; 
+}
+
+std::vector<Double_t>* AnitaDataset::TempFactorInfo(bool force_reload) 
+{
+  if (!fCalibInfoTree) return 0; 
+  if (fCalibInfoTree->GetReadEntry() != fWantedEntry || force_reload) 
+  {
+    fCalibInfoTree->GetEntry(fWantedEntry); 
+  }
+
+  return fTempFactorInfo; 
+}
+
+Int_t AnitaDataset::ClockProblemInfo(bool force_reload) 
+{
+  if (!fCalibInfoTree) return 0; 
+  if (fCalibInfoTree->GetReadEntry() != fWantedEntry || force_reload) 
+  {
+    fCalibInfoTree->GetEntry(fWantedEntry); 
+  }
+
+  return fClockProblemInfo; 
+}
+
+Int_t AnitaDataset::ClockSpikeInfo(bool force_reload) 
+{
+  if (!fCalibInfoTree) return 0; 
+  if (fCalibInfoTree->GetReadEntry() != fWantedEntry || force_reload) 
+  {
+    fCalibInfoTree->GetEntry(fWantedEntry); 
+  }
+
+  return fClockSpikeInfo; 
+}
+
+Int_t AnitaDataset::RFSpikeInfo(bool force_reload) 
+{
+  if (!fCalibInfoTree) return 0; 
+  if (fCalibInfoTree->GetReadEntry() != fWantedEntry || force_reload) 
+  {
+    fCalibInfoTree->GetEntry(fWantedEntry); 
+  }
+
+  return fRFSpikeInfo; 
 }
 
 struct run_info

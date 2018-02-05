@@ -296,8 +296,18 @@ class AnitaDataset
     /** Loads the MCTruth. This will be NULL if there is no truth (like if you're working with real data. */ 
     TruthAnitaEvent * truth(bool force_reload = true); 
     
-    /** Loads the calibInfo file. These are computed by makeCalibratedEventInfo in anitaTreeMaker so that you can have consistent calibratedEventFiles that can be generated on the fly */
-    std::vector<Double_t>* calibInfo(bool force_reload = false);
+    /** Loads the calibInfo file and produces the rco info part. These are computed by makeCalibratedEventInfo in anitaTreeMaker so that you can have consistent calibratedEventFiles that can be generated on the fly */
+    std::vector<Double_t>* RcoInfo(bool force_reload = false);
+    /** Loads the calibInfo file and produces the clockphi info part. */
+    std::vector<Double_t>* ClockPhiInfo(bool force_reload = false);
+    /** Loads the calibInfo file and produces the tempfactor info part. */
+    std::vector<Double_t>* TempFactorInfo(bool force_reload = false);
+    /** Loads the calibInfo file and produces the clock problem info part. */
+    Int_t ClockProblemInfo(bool force_reload = false);
+    /** Loads the calibInfo file and produces the clock spike info part. */
+    Int_t ClockSpikeInfo(bool force_reload = false);
+    /** Loads the calibInfo file and produces the rf spike info part. */
+    Int_t RFSpikeInfo(bool force_reload = false);
 
     /** Lets you check to see if you have a header and event file actually loaded, or if it failed loading */
     bool fRunLoaded;
@@ -326,7 +336,12 @@ class AnitaDataset
     CalibratedAnitaEvent * fCalEvent;
     RawAnitaEvent * fRawEvent;
     UsefulAnitaEvent * fUseful;
-    std::vector<Double_t>* fCalibInfo;
+    std::vector<Double_t>* fRcoInfo;
+    std::vector<Double_t>* fClockPhiInfo;
+    std::vector<Double_t>* fTempFactorInfo;
+    Int_t fClockProblemInfo;
+    Int_t fClockSpikeInfo;
+    Int_t fRFSpikeInfo;
     Bool_t fUsefulDirty;
     Bool_t fCalDirty;  // used only with raw data
     Bool_t fGpsDirty;  // used only with gpsFile data
