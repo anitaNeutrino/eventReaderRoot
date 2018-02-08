@@ -561,11 +561,11 @@ Int_t RawAnitaHeader::setMask (UShort_t newL2Mask, UShort_t newPhiMask, AnitaPol
   // Copied from ANITA-3 branch, not verified for ANITA-4
   switch(pol) {
   case AnitaPol::kVertical:
-    l2TrigMask   = newL2Mask;
-    phiTrigMask  = newPhiMask;
+    l1TrigMaskOffline   = l2TrigMask   = newL2Mask;
+    phiTrigMaskOffline  = phiTrigMask  = newPhiMask;
   case AnitaPol::kHorizontal:
-    l2TrigMaskH  = newL2Mask;
-    phiTrigMaskH = newPhiMask;
+    l1TrigMaskHOffline  = l2TrigMaskH  = newL2Mask;
+    phiTrigMaskHOffline = phiTrigMaskH = newPhiMask;
   default:
     return -1;
   }
