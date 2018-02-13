@@ -1,8 +1,6 @@
-##############################################################################
-###### Event Reader --- An ANITA Event Reader in ROOT format            ######
-######                                                                  ######
-###### Author: Ryan Nichol (rjn@hep.ucl.ac.uk)                          ######
-##############################################################################
+# eventReaderRoot
+## Event Reader --- An ANITA Event Reader in ROOT format
+Author: Ryan Nichol (rjn@hep.ucl.ac.uk)
 
 Website
 ========
