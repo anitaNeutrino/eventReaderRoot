@@ -292,30 +292,31 @@ Int_t AnitaEventCalibrator::calibrateUsefulEvent(UsefulAnitaEvent *eventPtr,
       }
     }
 
-    // Loop through all Surf, add flag if the clock has a problem
-    if(eventPtr->fFromCalibratedAnitaEvent==0){ // Figure out the fClockSpike if we don't have calibrated input
-      for(Int_t surf=0; surf<NUM_SURF; surf++){
+    // Loop through all Surf
+    for(Int_t surf=0; surf<NUM_SURF; surf++){
+      if(eventPtr->fFromCalibratedAnitaEvent==0){
         //spiky clock channel
         for(Int_t samp=0;samp<NUM_SAMP;samp++){
           if(eventPtr->data[surf*NUM_CHAN + 8][samp] <-200 or eventPtr->data[surf*NUM_CHAN + 8][samp] > 200){
             eventPtr->fClockSpike = 1;
           }
         }
-        //Handling spiky RF channel
-        for(Int_t chan=0;chan<NUM_CHAN-1;chan++){
-          for(Int_t samp=0;samp<NUM_SAMP;samp++){
-            // surf10 chipB problem
-            if(surf == 9 and (eventPtr->chipIdFlag[surf*NUM_CHAN + chan]&0x03) == 0x01 and eventPtr->data[surf*NUM_CHAN + chan][samp]>358 and eventPtr->data[surf*NUM_CHAN + chan][samp]<470){
-              eventPtr->data[surf*NUM_CHAN + chan][samp] -= 512;
-            }
-            if(eventPtr->data[surf*NUM_CHAN + chan][samp]< -470 or eventPtr->data[surf*NUM_CHAN + chan][samp]>470){
-              eventPtr->fRFSpike = 1;
-              eventPtr->SpikeyRFChannelList.push_back(surf*NUM_CHAN + chan);
-            }
+      }
+      //Handling spiky RF channel
+      for(Int_t chan=0;chan<NUM_CHAN-1;chan++){
+        for(Int_t samp=0;samp<NUM_SAMP;samp++){
+          // surf10 chipB problem
+          if(surf == 9 and (eventPtr->chipIdFlag[surf*NUM_CHAN + chan]&0x03) == 0x01 and eventPtr->data[surf*NUM_CHAN + chan][samp]>358 and eventPtr->data[surf*NUM_CHAN + chan][samp]<470){
+            eventPtr->data[surf*NUM_CHAN + chan][samp] -= 512;
+          }
+          if(eventPtr->data[surf*NUM_CHAN + chan][samp]< -470 or eventPtr->data[surf*NUM_CHAN + chan][samp]>470){
+            eventPtr->fRFSpike = 1;
+            eventPtr->SpikeyRFChannelList.push_back(surf*NUM_CHAN + chan);
           }
         }
       }
     }
+    
     
   }   
 
