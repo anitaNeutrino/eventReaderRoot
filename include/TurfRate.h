@@ -42,10 +42,8 @@ class TurfRate: public TObject
   
   //!  Dead Time
   /*!
-    The number of of 65535Hz clock ticks in the previous second  which all four buffers were full and new triggers were inhibited. So in terms of percentage:
-    - "0" == 0%
-    - "65535" = 100%
-    - "2897" == 2897/65535 * 100 %
+   *  The deadtime counter uses 16.384 us ticks ( 256 ns * 2^6) to keep track of the deadtime within a second. Maximum deadtime would then be 61305 in a second. 
+   *
     Users are encouraged to use the getDeadTimeFrac function where available. A differential dead time number is available in the RawAnitaHeader, which only includes the fraction of the current second before the event trigger in the count.
   */ 
    UShort_t        deadTime; 
@@ -75,7 +73,7 @@ class TurfRate: public TObject
 
    Int_t isPhiMasked(int phi); ///< Is the Phi Sector masked
    Int_t isL2Masked(int phi); ///< Returns 1 if given phi is masked   
-   Float_t getDeadTimeFrac() {return deadTime/65535.;} ///< Returns the deadtime as a fraction of a second (by dividing by 65535)
+   Float_t getDeadTimeFrac() {return deadTime/61305.;} ///< Returns the deadtime as a fraction of a second (by dividing by 61305)
    Int_t getL2Rate(int phi)
    { return l2Rates[phi]; }
    Int_t getL3Rate(int phi)
