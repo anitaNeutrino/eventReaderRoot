@@ -42,7 +42,7 @@ class TurfRate: public TObject
   
   //!  Dead Time
   /*!
-   *  The deadtime counter uses 16.384 us ticks ( 256 ns * 2^6) to keep track of the deadtime within a second. Maximum deadtime would then be 61305 in a second. 
+   *  The deadtime counter uses 16.384 us ticks ( 256 ns * 2^6) to keep track of the deadtime within a second. Maximum deadtime would then be 61035 in a second. 
    *
     Users are encouraged to use the getDeadTimeFrac function where available. A differential dead time number is available in the RawAnitaHeader, which only includes the fraction of the current second before the event trigger in the count.
   */ 
@@ -73,7 +73,7 @@ class TurfRate: public TObject
 
    Int_t isPhiMasked(int phi); ///< Is the Phi Sector masked
    Int_t isL2Masked(int phi); ///< Returns 1 if given phi is masked   
-   Float_t getDeadTimeFrac() {return deadTime/61305.;} ///< Returns the deadtime as a fraction of a second (by dividing by 61305)
+   Float_t getDeadTimeFrac() {return deadTime/61035.;} ///< Returns the deadtime as a fraction of a second (by dividing by 61305)
    Int_t getL2Rate(int phi)
    { return l2Rates[phi]; }
    Int_t getL3Rate(int phi)

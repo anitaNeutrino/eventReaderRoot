@@ -68,7 +68,7 @@ class SummedTurfRate: public TObject
    Int_t isPhiMasked(int phi,AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Returns 1 if given phi is masked off
    Int_t isL2Masked(int phi); ///< Returns 1 if given phi is masked off
 
-   Float_t getDeadTimeFrac() { return deadTime/(61305.*numRates);}
+   Float_t getDeadTimeFrac() { return deadTime/(61035.*numRates);}
 
    Int_t isL1Masked(int phi,AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< Deprecated
    ClassDef(SummedTurfRate,44);
