@@ -51,7 +51,7 @@ Adu5Sat::Adu5Sat(Int_t           trun,
 }
 
 
-void Adu5Sat::getCirclePlot(TPad *padSat, char *title)
+void Adu5Sat::getCirclePlot(TPad *padSat, const char *title)
 {
   padSat->cd();
   TEllipse *lippy = new TEllipse();
