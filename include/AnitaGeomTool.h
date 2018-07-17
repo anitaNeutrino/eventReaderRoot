@@ -31,13 +31,14 @@
 
 class UsefulAnitaEvent;
 
-//Are actually geometry things
-#define R_EARTH 6.378137E6
-#define  GEOID_MAX 6.378137E6 // parameters of geoid model
-#define  GEOID_MIN 6.356752E6
-#define C_LIGHT 299792458 //meters
-#define FLATTENING_FACTOR (1./298.257223563)
+// //Are actually geometry things
+// #define R_EARTH 6.378137E6
+// #define  GEOID_MAX 6.378137E6 // parameters of geoid model
+// #define  GEOID_MIN 6.356752E6
+// #define C_LIGHT 299792458 //meters
+// #define FLATTENING_FACTOR (1./298.257223563)
 
+static constexpr double C_LIGHT = 299792458; //meters per second
 
 //!  AnitaGeomTool -- The ANITA Geometry Tool
 /*!
@@ -249,96 +250,112 @@ class AnitaGeomTool
    }
 
 
-  inline Double_t getGeoid(Double_t theta) {
-    Double_t c=TMath::Cos(theta);
-    return GEOID_MIN*GEOID_MAX/TMath::Sqrt(GEOID_MIN*GEOID_MIN-
-					   (GEOID_MIN*GEOID_MIN-GEOID_MAX*GEOID_MAX)*c*c);    
-  }   ///<Returns the geoid radiuus as a function of theta (the polar angle?)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
-  void getCartesianCoords(Double_t lat, Double_t lon, Double_t alt, Double_t p[3]);
-  void getLatLonAltFromCartesian(Double_t p[3], Double_t &lat, Double_t &lon, Double_t &alt);
-  Double_t getDistanceToCentreOfEarth(Double_t lat);
 
-  inline Double_t getLat(Double_t theta) {      
-     return (90.-((theta*TMath::RadToDeg()))); 
-  } ///< Converts polar angle to latitude
+  // inline Double_t getGeoid(Double_t theta) {
+  //   Double_t c=TMath::Cos(theta);
+  //   return GEOID_MIN*GEOID_MAX/TMath::Sqrt(GEOID_MIN*GEOID_MIN-
+  // 					   (GEOID_MIN*GEOID_MIN-GEOID_MAX*GEOID_MAX)*c*c);    
+  // }   ///<Returns the geoid radiuus as a function of theta (the polar angle?)
   
-  inline Double_t getLon(Double_t phi){ 
-     //Need to fix this somehow
-     Double_t phi_deg = phi*TMath::RadToDeg();
-     if (phi_deg>270)
-	phi_deg-=360;	
-     return (90.-phi_deg);
-  } ///< Converts a azimuthal angle to longitude
+  // void getCartesianCoords(Double_t lat, Double_t lon, Double_t alt, Double_t p[3]);
+  // void getLatLonAltFromCartesian(Double_t p[3], Double_t &lat, Double_t &lon, Double_t &alt);
+  // Double_t getDistanceToCentreOfEarth(Double_t lat);
 
-  inline Double_t getThetaFromLat(Double_t lat) {       
-     return (90.- lat)*TMath::DegToRad(); 
-  } ///< Converts latitude to polar angle
+  // inline Double_t getLat(Double_t theta) {
+  //    return (90.-((theta*TMath::RadToDeg()))); 
+  // } ///< Converts polar angle to latitude
   
-  inline Double_t getPhiFromLon(Double_t lon){ 
-     //Need to fix this somehow
-     Double_t phi_deg = 90. - lon;
-     if(phi_deg<0) phi_deg+=360;
-     return phi_deg*TMath::DegToRad();
-  } ///<Converts longitude to azimuthal angle
+  // inline Double_t getLon(Double_t phi){ 
+  //    //Need to fix this somehow
+  //    Double_t phi_deg = phi*TMath::RadToDeg();
+  //    if (phi_deg>270)
+  // 	phi_deg-=360;	
+  //    return (90.-phi_deg);
+  // } ///< Converts a azimuthal angle to longitude
+
+  // inline Double_t getThetaFromLat(Double_t lat) {       
+  //    return (90.- lat)*TMath::DegToRad(); 
+  // } ///< Converts latitude to polar angle
   
-  inline Double_t getPhi(Double_t p[3]){
-      // returns phi between 0 and 2pi.
-        Double_t pt=0;
-        Double_t phi=0;
-        pt=sqrt(p[0]*p[0]+p[1]*p[1]);
-        if (pt==0)
-          return 0.;
-        else if (pt!=0) {
-          if (p[1]/pt>1 || p[1]/pt<-1) {
-                std::cerr << "Error in getPhi. \n";
-                return 0;
-            }
-            phi=asin(p[1]/pt);
-        }
-        if (p[1]<0. && p[0]>0) phi += 2*TMath::Pi();
-        else if (phi>0 && p[0]<0.) phi = TMath::Pi() - phi;
-        else if (phi<0 && p[0]<0.) phi = -(TMath::Pi()+phi)+2*TMath::Pi();
-        return phi;
-  } ///<Converts cartesian coordinates to azimuthal angle
+  // inline Double_t getPhiFromLon(Double_t lon){ 
+  //    //Need to fix this somehow
+  //    Double_t phi_deg = 90. - lon;
+  //    if(phi_deg<0) phi_deg+=360;
+  //    return phi_deg*TMath::DegToRad();
+  // } ///<Converts longitude to azimuthal angle
+  
+  // inline Double_t getPhi(Double_t p[3]){
+  //     // returns phi between 0 and 2pi.
+  //       Double_t pt=0;
+  //       Double_t phi=0;
+  //       pt=sqrt(p[0]*p[0]+p[1]*p[1]);
+  //       if (pt==0)
+  //         return 0.;
+  //       else if (pt!=0) {
+  //         if (p[1]/pt>1 || p[1]/pt<-1) {
+  //               std::cerr << "Error in getPhi. \n";
+  //               return 0;
+  //           }
+  //           phi=asin(p[1]/pt);
+  //       }
+  //       if (p[1]<0. && p[0]>0) phi += 2*TMath::Pi();
+  //       else if (phi>0 && p[0]<0.) phi = TMath::Pi() - phi;
+  //       else if (phi<0 && p[0]<0.) phi = -(TMath::Pi()+phi)+2*TMath::Pi();
+  //       return phi;
+  // } ///<Converts cartesian coordinates to azimuthal angle
 
-     inline Double_t getPhi(TVector3 &thePos) {
-       Double_t p[3]={thePos.X(),thePos.Y(),thePos.Z()};
-       return getPhi(p);
-       //return thePos.Theta();
-    } ///<Converts cartesian coordinates to azimuthal angle
+  //    inline Double_t getPhi(TVector3 &thePos) {
+  //      Double_t p[3]={thePos.X(),thePos.Y(),thePos.Z()};
+  //      return getPhi(p);
+  //      //return thePos.Theta();
+  //   } ///<Converts cartesian coordinates to azimuthal angle
 
-     inline Double_t getTheta(Double_t p[3]) {
-      Double_t pz,pt;
-      Double_t tantheta1=0;
-      Double_t theta=0;
+  //    inline Double_t getTheta(Double_t p[3]) {
+  //     Double_t pz,pt;
+  //     Double_t tantheta1=0;
+  //     Double_t theta=0;
 
-      pz=p[2];
-      pt=sqrt(p[0]*p[0]+p[1]*p[1]);
-      tantheta1=pt/pz;
-      theta=atan(tantheta1);
+  //     pz=p[2];
+  //     pt=sqrt(p[0]*p[0]+p[1]*p[1]);
+  //     tantheta1=pt/pz;
+  //     theta=atan(tantheta1);
 
-      if (pz<0)
-        theta += TMath::Pi();
-      return theta;
-    } ///<Converts cartesian coordinates to polar angle
+  //     if (pz<0)
+  //       theta += TMath::Pi();
+  //     return theta;
+  //   } ///<Converts cartesian coordinates to polar angle
 
 
-     inline Double_t getTheta(TVector3 &thePos) {
-	Double_t p[3]={thePos.X(),thePos.Y(),thePos.Z()};
-	thePos.GetXYZ(p);
-	return getTheta(p);
-     } ///<Converts cartesian coordinates to polar angle
+  //    inline Double_t getTheta(TVector3 &thePos) {
+  // 	Double_t p[3]={thePos.X(),thePos.Y(),thePos.Z()};
+  // 	thePos.GetXYZ(p);
+  // 	return getTheta(p);
+  //    } ///<Converts cartesian coordinates to polar angle
      
-     inline void getLonLat(Double_t p[3],Double_t& lon,Double_t& lat) {
-        lon=getLon(getPhi(p));
-        lat=getLat(getTheta(p));
-    } ///<Converts cartesian coordinates to latitude and longitude
+  //    inline void getLonLat(Double_t p[3],Double_t& lon,Double_t& lat) {
+  //       lon=getLon(getPhi(p));
+  //       lat=getLat(getTheta(p));
+  //   } ///<Converts cartesian coordinates to latitude and longitude
 
-     inline void getLonLat(TVector3 &thePos,Double_t& lon,Double_t& lat) {
-        lon=getLon(getPhi(thePos));
-        lat=getLat(getTheta(thePos));
-    } ///<Converts cartesian coordinates to latitude and longitude
+  //    inline void getLonLat(TVector3 &thePos,Double_t& lon,Double_t& lat) {
+  //       lon=getLon(getPhi(thePos));
+  //       lat=getLat(getTheta(thePos));
+  //   } ///<Converts cartesian coordinates to latitude and longitude
 
 
           

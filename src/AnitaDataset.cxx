@@ -26,6 +26,7 @@
 #include <fstream>
 #include <sstream>
 #include "AnitaConventions.h"
+#include "TGraphAntarctica.h"
 
 
 // from runToEvA*.txt
@@ -60,13 +61,13 @@ bool AnitaDataset::isKnownHiCalEvent(UInt_t eventNumber, Int_t anita){
 
     //hiCal1EventNumbers13Jan2018.txt
     //hiCal1EventNumbers.txt
-    TString fileName = TString::Format("%s/share/anitaCalib/hiCal1EventNumbers13Jan2018.txt", installDir, anita);
+    TString fileName = TString::Format("%s/share/anitaCalib/hiCal1EventNumbers13Jan2018.txt", installDir);
     std::ifstream hiCalEventListFile(fileName.Data());
     if (!hiCalEventListFile.is_open()) {
       std::cerr << "Error in " << __PRETTY_FUNCTION__ << " couldn't find " << fileName << std::endl;
     }
 
-    Int_t hcRun, isDirect, isPaired;
+    Int_t hcRun, isDirect;
     UInt_t hcEventNumber;
 
     while(!hiCalEventListFile.eof()){
@@ -1718,4 +1719,69 @@ void AnitaDataset::overwriteEvent(UsefulAnitaEvent* useful, AnitaPol::AnitaPol_t
 
 
 
+/** 
+ * Construct a TGraphAntarctica from run firstRun to lastRun (inclusive)
+ * This is mostly for plotting purposes, otherwise 
+ * 
+ * @param firstRun is the first run
+ * @param lastRun is the last run
+ * @param gpsTreeStride, only sample every n-th point of the GPS data
+ * @param quiet default true
+ *
+ * @return the newly constructed TGraphAntarctica
+ */
+TGraphAntarctica* AnitaDataset::makeGpsGraph(int firstRun, int lastRun, int gpsTreeStride,bool quiet){
+  if (!quiet) std::cout << "makeGpsGraph(): starting..." << std::endl;
 
+  // handle default tree stride
+  gpsTreeStride = gpsTreeStride <= 0 ? defaultStrideForGpsTGraphAntarctica : gpsTreeStride;
+
+  TGraphAntarctica* gr = new TGraphAntarctica();
+
+  for(int run=firstRun; run<=lastRun; run++){
+    if (AnitaVersion::get() == 3) {
+      if (run > 256 && run < 264) {
+	std::cout << "makeGpsGraph(): In ANITA3 runs 257 through 263 are broken, skipping to 264..." << std::endl;
+	run = 264;
+      }
+    }
+    
+    AnitaDataset d(run);
+    TGraphAntarctica* grPart = d.makeGpsGraph(gpsTreeStride, quiet);
+
+    for(int i=0; i < grPart->GetN(); i++){
+      gr->SetPointEastingNorthing(gr->GetN(),
+				  grPart->GetEasting()[i],
+				  grPart->GetNorthing()[i]);
+    }
+    delete grPart;
+  }
+  return gr;
+}
+
+
+/** 
+ * Construct a TGraph antarctica for this run
+ * This is mostly for plotting purposes, otherwise 
+ * 
+ * @param gpsTreeStride, only sample every n-th point of the GPS data
+ * @param quiet default true
+ *
+ * @return the newly constructed TGraphAntarctica
+ */
+TGraphAntarctica* AnitaDataset::makeGpsGraph(int gpsTreeStride,bool quiet){
+  int run = getCurrRun();
+  if (!quiet){
+    std::cout << "makeGpsGraph(): starting run" << run << " - d.N()=" << N() << std::endl;
+  }
+  TGraphAntarctica* gr = new TGraphAntarctica();
+  for(int entry=0; entry < N(); entry+=gpsTreeStride){
+    if (!quiet) std::cout << "makeGpsGraph(): run:" << run << " entry:" << entry << std::endl;
+    getEntry(entry);
+    Adu5Pat* pat = gps();
+
+    gr->SetPoint(gr->GetN(), pat->longitude, pat->latitude);
+
+  }
+  return gr;
+}

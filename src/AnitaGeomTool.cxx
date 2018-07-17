@@ -52,45 +52,43 @@ namespace AnitaGeom {
    
   ///< 1 is Normal orientation, -1 is 180 degree flip. (Top ring needs to be inverted in software when signals come through seaveys.)
   // Apparently -2 is a 90 degree flip.
-    Int_t antOrientationMapAnita3[NUM_SEAVEYS] =
-      {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; 
+    Int_t antOrientationMapAnita3[NUM_SEAVEYS] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+						   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+						   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-    Int_t antOrientationMap[NUM_SEAVEYS] =
-      {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; 
+    Int_t antOrientationMap[NUM_SEAVEYS] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+					    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+					    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 
 
   ///< Map from SURF to antenna+polarization.
   ///< The numbers 1-48 indicate antenna as the negative sign is used to indicate polarization.
   ///< The negative sign indicates polarization (-ve is VPOL, +ve is HPOL)
-  Int_t surfToAntMapAnita4[ACTIVE_SURFS][RFCHAN_PER_SURF]= {{-42,-34,-48,-40,42,34,48,40},
-						      {-44,-36,-46,-38,44,36,46,38},
-						      {-32,-24,-28,-20,32,24,28,20},
-						      {-30,-22,-26,-18,30,22,26,18},
-						      {-12, 4,-14,-6,12,-4,14,6},  //ABL changed -/+4
-						      {-10,-2,-16,-8,10,2,16,8},
-						      {-45,-37,-41,-33,45,37,41,33},
-						      {-47,-39,-43,-35,47,39,43,35},
-						      {-27,-19,-29,-21,27,19,29,21},
-						      {-25,-17,-31,-23,25,17,31,23},
-						      {-15,-7,-11,-3,15,7,11,3},
-						      {-13,-5,-9,-1,13,5,9,1}};
+  Int_t surfToAntMapAnita4[ACTIVE_SURFS][RFCHAN_PER_SURF]= {{-42, -34, -48, -40, 42, 34, 48, 40},
+							    {-44, -36, -46, -38, 44, 36, 46, 38},
+							    {-32, -24, -28, -20, 32, 24, 28, 20},
+							    {-30, -22, -26, -18, 30, 22, 26, 18},
+							    {-12,   4, -14,  -6, 12, -4, 14, 6 },  //ABL changed -/+4
+							    {-10,  -2, -16,  -8, 10,  2, 16, 8 },
+							    {-45, -37, -41, -33, 45, 37, 41, 33},
+							    {-47, -39, -43, -35, 47, 39, 43, 35},
+							    {-27, -19, -29, -21, 27, 19, 29, 21},
+							    {-25, -17, -31, -23, 25, 17, 31, 23},
+							    {-15,  -7, -11,  -3, 15,  7, 11, 3 },
+							    {-13,  -5,  -9,  -1, 13,  5,  9, 1 }};
       
-  Int_t surfToAntMapAnita3[ACTIVE_SURFS][RFCHAN_PER_SURF]= {{-42,-34,-48,-40,42,34,48,40},
-						      {-44,-36,-46,-38,44,36,46,38},
-						      {-32,-24,-28,-20,32,24,28,20},
-						      {-30,-22,-26,-18,30,22,26,18},
-						      {-12,4,-14,-6,12,-4,14,6}, 
-						      {-10,-2,-16,-8,10,2,16,8},
-						      {-45,-37,-41,-33,45,37,41,33},
-						      {-47,-39,-43,-35,47,39,43,35},
-						      {-27,-19,-29,-21,27,19,29,21},
-						      {-25,-17,-31,-23,25,17,31,23},
-						      {-15,-7,-11,-3,15,7,11,3},
-						      {-13,-5,-9,-1,13,5,9,1}};
+  Int_t surfToAntMapAnita3[ACTIVE_SURFS][RFCHAN_PER_SURF]= {{-42, -34, -48, -40, 42, 34, 48, 40},
+							    {-44, -36, -46, -38, 44, 36, 46, 38},
+							    {-32, -24, -28, -20, 32, 24, 28, 20},
+							    {-30, -22, -26, -18, 30, 22, 26, 18},
+							    {-12,   4, -14,  -6, 12, -4, 14,  6},
+							    {-10,  -2, -16,  -8, 10,  2, 16,  8},
+							    {-45, -37, -41, -33, 45, 37, 41, 33},
+							    {-47, -39, -43, -35, 47, 39, 43, 35},
+							    {-27, -19, -29, -21, 27, 19, 29, 21},
+							    {-25, -17, -31, -23, 25, 17, 31, 23},
+							    {-15,  -7, -11,  -3, 15,  7, 11,  3},
+							    {-13,  -5,  -9,  -1, 13,  5, 9,   1}};
  
   ///< Map from phi-sector to antenna. Both start counting at zero.
   Int_t topAntNums[NUM_PHI]    = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
@@ -471,120 +469,6 @@ Int_t AnitaGeomTool::getChanIndex(Int_t surf, Int_t chan){
 
 
 
-void AnitaGeomTool::getCartesianCoords(Double_t lat, Double_t lon, Double_t alt, Double_t p[3])
-{
-  if(lat<0) lat*=-1;
-   //Note that x and y are switched to conform with previous standards
-   lat*=TMath::DegToRad();
-   lon*=TMath::DegToRad();
-   //calculate x,y,z coordinates
-   Double_t C2=pow(cos(lat)*cos(lat)+(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR)*sin(lat)*sin(lat),-0.5);
-   Double_t Q2=(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR)*C2;
-   p[1]=(R_EARTH*C2+alt)*TMath::Cos(lat)*TMath::Cos(lon);
-   p[0]=(R_EARTH*C2+alt)*TMath::Cos(lat)*TMath::Sin(lon);
-   p[2]=(R_EARTH*Q2+alt)*TMath::Sin(lat);
-}
-
-void AnitaGeomTool::getLatLonAltFromCartesian(Double_t p[3], Double_t &lat, Double_t &lon, Double_t &alt)
-{
-  //Here again x and y are flipped for confusions sake
-  Double_t xt=p[1];
-  Double_t yt=p[0];
-  Double_t zt=p[2]; //And flipped z for a test
-
-  static Double_t cosaeSq=(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR);
-  Double_t lonVal=TMath::ATan2(yt,xt);
-  Double_t xySq=TMath::Sqrt(xt*xt+yt*yt);
-  Double_t tanPsit=zt/xySq;
-  Double_t latGuess=TMath::ATan(tanPsit/cosaeSq);
-  Double_t nextLat=latGuess;
-  Double_t geomBot=R_EARTH*R_EARTH*xySq;
-  do {
-    latGuess=nextLat;
-    Double_t N=R_EARTH/TMath::Sqrt(cos(latGuess)*cos(latGuess)+(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR)*sin(latGuess)*sin(latGuess));
-    Double_t top=(R_EARTH*R_EARTH*zt + (1-cosaeSq)*cosaeSq*TMath::Power(N*TMath::Sin(latGuess),3));
-    Double_t bottom=geomBot-(1-cosaeSq)*TMath::Power(N*TMath::Cos(latGuess),3);        
-    nextLat=TMath::ATan(top/bottom);
-    //    std::cout << latGuess << "\t" << nextLat << "\n";
-    
-  } while(TMath::Abs(nextLat-latGuess)>0.0001);
-  latGuess=nextLat;
-  Double_t N=R_EARTH/TMath::Sqrt(cos(latGuess)*cos(latGuess)+(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR)*sin(latGuess)*sin(latGuess));
-  Double_t height=(xySq/TMath::Cos(nextLat))-N;
-  
-  lat=latGuess*TMath::RadToDeg();
-  lon=lonVal*TMath::RadToDeg();
-  alt=height;
-  if(lat>0) lat*=-1;
- 
-}
-
-Double_t AnitaGeomTool::getDistanceToCentreOfEarth(Double_t lat)
-{
-  Double_t pVec[3];
-  this->getCartesianCoords(lat,0,0,pVec);
-//   Double_t cosLat=TMath::Cos(lat);
-//   Double_t sinLat=TMath::Sin(lat);
-//   Double_t a=R_EARTH;
-//   Double_t b=a-FLATTENING_FACTOR*a;
-//   Double_t radSq=(a*a*cosLat)*(a*a*cosLat)+(b*b*sinLat)*(b*b*sinLat);
-//   radSq/=(a*cosLat)*(a*cosLat)+(b*sinLat)*(b*sinLat);
- //  Double_t cosSqAe=(1-FLATTENING_FACTOR)*(1-FLATTENING_FACTOR);
-//   Double_t N=R_EARTH/TMath::Sqrt(cosLat*cosLat+cosSqAe*sinLat*sinLat);
-//   Double_t radSq=N*N*(cosLat*cosLat+cosSqAe*cosSqAe*sinLat*sinLat);
-  return TMath::Sqrt(pVec[0]*pVec[0]+pVec[1]*pVec[1]+pVec[2]*pVec[2]);
-}
-
-
-// void AnitaGeomTool::getPhiWave(Double_t balloonLon, Double_t balloonLat, Double_t balloonAlt, Double_t balloonHeading, Double_t sourceLon, Double_t sourceLat, Double_t sourceAlt, Double_t &thetaWave, Double_t &phiWave)
-// {
-//   Double_t thetaBalloon=getThetaFromLat(TMath::Abs(balloonLat));
-//   Double_t phiBalloon=getPhiFromLon(balloonLon);
-//   Double_t balloonHeight=getGeoid(thetaBalloon)+balloonAlt;
-   
-//   Double_t thetaSource=getThetaFromLat(TMath::Abs(sourceLat));
-//   Double_t phiSource=getPhiFromLon(sourceLon);
-//   Double_t radiusSource=getGeoid(thetaSource)+sourceAlt;
-
-//   //Get vector from Earth's centre to source
-//   TVector3 fSourcePos;
-//   fSourcePos.SetX(radiusSource*TMath::Sin(thetaSource)*TMath::Cos(phiSource));
-//   fSourcePos.SetY(radiusSource*TMath::Sin(thetaSource)*TMath::Sin(phiSource));
-//   fSourcePos.SetZ(radiusSource*TMath::Cos(thetaSource));
-   
-//   //Rotate such that balloon is at 0,0,balloonHeight
-//   fSourcePos.RotateZ(-1*phiBalloon);
-//   fSourcePos.RotateY(-1*thetaBalloon);
-
-//   //Now find thetaWave and phiWave
-//   thetaWave=TMath::ATan((balloonHeight-fSourcePos.Z())/TMath::Sqrt(fSourcePos.X()*fSourcePos.X() + fSourcePos.Y()*fSourcePos.Y()));
-   
-//   //phiWave is just atan(yp/xp) only looks confusing to make sure I get the sign and 0-360 convention
-//   phiWave=0;
-//   if(fSourcePos.X()==0) {
-//     phiWave=TMath::PiOver2();
-//     if(fSourcePos.Y()<0)
-//       phiWave+=TMath::Pi();
-//   }
-//   else if(fSourcePos.X()<0) {
-//     phiWave=TMath::Pi()+TMath::ATan(fSourcePos.Y()/fSourcePos.X());
-//   }
-//   else {
-//     phiWave=TMath::ATan(fSourcePos.Y()/fSourcePos.X());
-//     if(fSourcePos.Y()<0) {
-//       phiWave+=TMath::TwoPi();
-//     }
-//   }   
-
-//   //Now need to take account of balloon heading
-//   //Will have to check heading at some point
-//   if(balloonHeading>=0 && balloonHeading<=360) {
-//     phiWave+=balloonHeading*TMath::DegToRad();
-//     if(phiWave>TMath::TwoPi())
-//       phiWave-=TMath::TwoPi();
-//   }
-
-// }
 
 Double_t AnitaGeomTool::getPhiDiff(Double_t firstPhi, Double_t secondPhi)
 {
@@ -798,6 +682,7 @@ Int_t AnitaGeomTool::getSurfChanFromChanIndex(Int_t chanIndex, // input channel 
   return 1;
 
 }
+
 Int_t AnitaGeomTool::getAntPolFromSurfChan(Int_t surf,Int_t chan,Int_t &ant, AnitaPol::AnitaPol_t &pol) 
 {
 
@@ -805,18 +690,20 @@ Int_t AnitaGeomTool::getAntPolFromSurfChan(Int_t surf,Int_t chan,Int_t &ant, Ani
 
   if (v >4 && v < 3) return 0; 
 
-  ant= v == 4 ? AnitaGeom::surfToAntMapAnita4[surf][chan] : 
-       v == 3 ? AnitaGeom::surfToAntMapAnita3[surf][chan] :
-       0 ; 
+  ant = v == 4 ? AnitaGeom::surfToAntMapAnita4[surf][chan] : 
+        v == 3 ? AnitaGeom::surfToAntMapAnita3[surf][chan] :
+        0 ; 
 
 
   //  std::cout << "surf, chan, ant are " << surf << " " << chan << "\n";
 
-  if (ant>0)
-    pol=AnitaPol::kHorizontal;
-  else
-    pol=AnitaPol::kVertical;
-
+  if (ant>0){
+    pol = AnitaPol::kHorizontal;
+  }
+  else{
+    pol = AnitaPol::kVertical;
+  }
+  
   ant=abs(ant)-1; // so that it's from 0 to 31
 
   return 1;

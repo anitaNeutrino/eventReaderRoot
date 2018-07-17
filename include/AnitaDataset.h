@@ -43,10 +43,13 @@ class TCut;
 class TEventList;
 class SurfHk;
 class TruthAnitaEvent;
+class TGraphAntarctica;
 
 class AnitaDataset
 {
   public:
+
+  
 
 
   // All the blinding options.
@@ -323,6 +326,15 @@ class AnitaDataset
 
     /* Where was hical? Uses the current header realTime*/ 
     void hiCal(Double_t& longitude,  Double_t& latitude, Double_t& altitude);
+
+  
+  enum {
+	defaultStrideForGpsTGraphAntarctica = 10000
+  };
+  
+  TGraphAntarctica* makeGpsGraph(int gpsTreeStride=defaultStrideForGpsTGraphAntarctica, bool quiet=true);
+  static TGraphAntarctica* makeGpsGraph(int firstRun, int lastRun, int gpsTreeStride=defaultStrideForGpsTGraphAntarctica, bool quiet=true);
+  
 
   protected:
     void unloadRun();

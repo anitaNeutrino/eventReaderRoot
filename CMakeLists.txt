@@ -47,6 +47,12 @@ else()
  link_directories(${UTIL_LIB_DIR})
 endif()
 
+if(TARGET AntarcticaRoot)
+  message("AntarcticaRoot is a target")
+else()
+ link_directories(${UTIL_LIB_DIR})
+endif()
+
 
 #---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
 
@@ -78,7 +84,7 @@ ROOT_GENERATE_DICTIONARY(${DICTNAME} ${HEADER_FILES} LINKDEF LinkDef.h)
 
 #---Create a shared library with geneated dictionary
 add_library(${libname} SHARED ${SOURCE_FILES} ${DICTNAME}.cxx)
-target_link_libraries(${libname} ${ZLIB_LIBRARIES} RootFftwWrapper ${ROOT_LIBRARIES} ${FFTW_LIBRARIES})
+target_link_libraries(${libname} ${ZLIB_LIBRARIES} RootFftwWrapper AntarcticaRoot ${ROOT_LIBRARIES} ${FFTW_LIBRARIES})
 
 if( ${ROOT_VERSION} VERSION_GREATER "5.99.99")
     add_custom_target(${DICTNAME}.pcm DEPENDS ${DICTNAME})
