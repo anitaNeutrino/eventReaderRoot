@@ -153,7 +153,7 @@ The second byte (reserved[1]) is currently reserved.
   UShort_t        ppsNum; ///< Number of GPS PPS since last clear all
   //!  Dead Time
   /*!
-    The number of of 65535Hz clock ticks in the current second, upto triggerTimeNs ns, which all four buffers were full. A more consistent definition of deadTime is available in the TurfRate class.
+    The number of of 16.384 us clock ticks in the current second, upto triggerTimeNs ns, which all four buffers were full. A more consistent definition of deadTime is available in the TurfRate class.
   */
   UShort_t        deadTime;
   //!  Buffer depth
