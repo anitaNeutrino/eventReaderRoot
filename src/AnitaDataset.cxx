@@ -501,7 +501,7 @@ int AnitaDataset::getEvent(int eventNumber, bool quiet)
     int run = getRunContainingEventNumber(eventNumber);
     if(run > 0)
     {
-      loadRun(run, fDecimated);
+      loadRun(run, fDecimated,datadir);
       if (!quiet) fprintf(stderr, "changed run to %d\n", run);
       getEvent(eventNumber, quiet); 
     }
@@ -600,6 +600,8 @@ AnitaDataset::~AnitaDataset()
 
 bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir) 
 {
+
+  datadir = dir; 
 
   // stop loadRun() changing the ROOT directory
   // in case you book histograms or trees after instantiating AnitaDataset  

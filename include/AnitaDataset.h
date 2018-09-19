@@ -411,6 +411,7 @@ class AnitaDataset
     std::vector<AnitaPol::AnitaPol_t> polarityOfEventToInsert;
     std::vector<Int_t> fakeTreeEntries;
 
+    DataDirectory datadir; 
 
   
 };
