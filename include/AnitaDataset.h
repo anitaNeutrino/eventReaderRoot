@@ -209,6 +209,11 @@ class AnitaDataset
     /** Returns the nth event (in case the entries are not in order). returns the entry of it. */
     int nthEvent(int i);
 
+    /** Loads next minbias event. returns the entry of it */
+    int nextMinBiasEvent();
+
+    /** Loads previous minbias event. returns the entry of it */
+    int previousMinBiasEvent();
 
     /** Applies a cut to the entire dataset. Supercedes any previous cut.
      * Once you apply a cut, you may use NInCut, firstInCut(), nextInCut(), previousInCut(), lastInCut()
