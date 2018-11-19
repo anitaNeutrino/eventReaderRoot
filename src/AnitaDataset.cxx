@@ -905,6 +905,49 @@ int AnitaDataset::N() const
   return t ? t->GetEntries() : 0;
 }
 
+int AnitaDataset::previousMinBiasEvent()
+{
+  if (fIndex < 0)
+  {
+    fIndex = TMath::BinarySearch(N(), fIndices, fDecimated ? fDecimatedEntry : fWantedEntry);
+  }
+
+  while(fIndex >= 0)
+  {
+    fIndex--;
+    if(fIndex < 0)
+    {
+      loadRun(currRun - 1);
+      fIndex = N() - 1;
+    }
+    fHeadTree->GetEntry(fIndex);
+    if((fHeader->trigType&1) == 0) break;
+  }
+  
+  return nthEvent(fIndex);
+}
+
+int AnitaDataset::nextMinBiasEvent()
+{
+  if (fIndex < 0)
+  {
+    fIndex = TMath::BinarySearch(N(), fIndices, fDecimated ? fDecimatedEntry : fWantedEntry);
+  }
+
+  while(fIndex <= N()-1)
+  {
+    fIndex++;
+    if(fIndex == N())
+    {
+      loadRun(currRun + 1);
+      fIndex = 0;
+    }
+    fHeadTree->GetEntry(fIndex);
+    if((fHeader->trigType&1) == 0) break;
+  }
+  
+  return nthEvent(fIndex);
+}
 
 
 int AnitaDataset::setCut(const TCut & cut)
