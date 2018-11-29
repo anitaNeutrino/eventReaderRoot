@@ -688,9 +688,15 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
   if (const char * the_right_file = checkIfFilesExist(2,fname.Data(),fname2.Data()))
   {
      TFile * f = new TFile(the_right_file); 
-     filesToClose.push_back(f); 
-     fGpsTree = (TTree*) f->Get("adu5PatTree"); 
-     fHaveGpsEvent = true; 
+     filesToClose.push_back(f);
+
+     for(auto treeName : {"adu5PatTree", "patTree"}){
+       fGpsTree = (TTree*) f->Get(treeName);
+       if(fGpsTree!=nullptr){
+	 fHaveGpsEvent = true;
+	 break;
+       }
+     }
 
   }
   // load gps file instead
