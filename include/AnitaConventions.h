@@ -279,8 +279,8 @@ namespace AnitaLocations {
 
   //Anita 4 location (from Ben Strutt on Slack)
   // And now with an elog note https://www.phys.hawaii.edu/elog/anita_notes/699
-  const Double_t LATITUDE_WAIS_A4 = - (-79.468116); ///< Latitude of WAIS divide pulser
-  const Double_t LONGITUDE_WAIS_A4 = -(112.059258); ///< Longitude of WAIS divide pulser
+  const Double_t LATITUDE_WAIS_A4 = -79.468116; ///< Latitude of WAIS divide pulser
+  const Double_t LONGITUDE_WAIS_A4 = -112.059258; ///< Longitude of WAIS divide pulser
   const Double_t ALTITUDE_WAIS_A4 = 1779.80;///< Altitude of WAIS divide pulser
 
   //Flight independent calls
