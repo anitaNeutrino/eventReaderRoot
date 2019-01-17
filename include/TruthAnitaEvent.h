@@ -34,6 +34,7 @@ class TruthAnitaEvent: public TObject
   Double_t        nuPos[3];               ///< Neutrino position
   Double_t        nuDir[3];               ///< Neutrino direction
   Double_t        nuMom;                  ///< Neutrino momentum
+  Double_t        showerE;                ///< Shower energy  
   Double_t        rfExitNor[5][3];        ///< Normal vector in direction of exit point to balloon - 5 iterations
   Double_t        rfExitPos[5][3];        ///< Position where the RF exits the ice- 5 iterations, 3 dimensions each
   Int_t           nu_pdg;                 ///< Neutrino PDG code
@@ -53,6 +54,7 @@ class TruthAnitaEvent: public TObject
   Double_t        sourceLat;              ///< RF position when leaving the ice: Latitude  (using icemc model)
   Double_t        sourceAlt;              ///< RF position when leaving the ice: Altitude  (using icemc model)
   Double_t        weight;                 ///< Weight assigned by icemc
+  Double_t        weight1;                 ///< Absorption weight assigned by icemc
 
 
   Double_t fTimes[NUM_DIGITZED_CHANNELS][NUM_SAMP];           ///< Array of unwrapped (unless kNoCalib) times for each channel
@@ -69,7 +71,7 @@ class TruthAnitaEvent: public TObject
   Double_t maxSNRAtDigitizerH;                                ///< Max SNR at digitizer H-POL
   Double_t thresholds[NUM_DIGITZED_CHANNELS];                 ///< Channel thresholds used in icemc
   
-  ClassDef(TruthAnitaEvent,7);
+  ClassDef(TruthAnitaEvent,9);
 };
 
 
