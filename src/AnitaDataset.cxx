@@ -658,7 +658,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
   TString fname3 = TString::Format("%s/run%d/headFile%d.root", data_dir, run, run); 
   TString fname4 = TString::Format("%s/run%d/SimulatedAnitaHeadFile%d.root", data_dir, run, run);
 
-  bool simulated = true; 
+  bool simulated = false; 
 
   if (const char * the_right_file = checkIfFilesExist(5, fname0.Data(), fname1.Data(), fname2.Data(), fname3.Data(), fname4.Data()))
   {
