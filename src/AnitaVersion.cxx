@@ -4,7 +4,7 @@
 //#define ANITA_VERSION_DEBUG 1
 
 #include <stdio.h>
-
+#include <iostream>
 
 
 
@@ -42,19 +42,34 @@ static const unsigned version_cutoffs[] =
   1451606400   // Jan 1, 2016, ANITA-4 data will be newer
 }; 
 
-
+bool firstTime = true;
 
 void AnitaVersion::set(int v) 
 { 
 #ifdef ANITA_VERSION_DEBUG 
   printf(":::DEBUG:::   Called AnitaVersion::set(%d)\n", v); 
 #endif
-  version = v; 
+
+  if(firstTime || version!=v){
+    std::cerr << "AnitaVersion=" << v << std::endl;
+  }
+  version = v;
+  firstTime = false; // don't print warning on AnitaVersion::get() if we called AnitaVersion::set(v)
 } 
 
 int AnitaVersion::get() 
-{ 
-  return version; 
+{
+  /**
+   * Since this whole AnitaVersion::get()/AnitaVersion::set() business amounts to global variables (which can be set at compile! time) 
+   * influencing lots of downstream code, we try to nudge the user to manually set the value in code.
+   */
+  if(firstTime==true){
+    std::cerr << "AnitaVersion=" << version << std::endl;
+    firstTime = false;
+  }
+
+  return version;
+
 } 
 
 int AnitaVersion::setVersionFromUnixTime(unsigned t) 
