@@ -1595,7 +1595,7 @@ Double_t AnitaGeomTool::getAntPhiPosition(Int_t ant, AnitaPol::AnitaPol_t pol) {
   return 0;
 }
 
-Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(Int_t ant, AnitaPol::AnitaPol_t pol) {
+Double_t AnitaGeomTool::getAntPhiPositionRelToAftFore(Int_t ant, AnitaPol::AnitaPol_t pol) const {
 
   if(fUsePhotogrammetryNumbers==0) {
     //    std::cout << "Using simon phi-rel\n";

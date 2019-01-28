@@ -48,7 +48,7 @@ static constexpr double C_LIGHT = 299792458; //meters per second
 
 class AnitaGeomTool 
 {
- public:
+public:
 
   /********************************************************************************************************
   Constructor and destructor functions
@@ -67,20 +67,20 @@ class AnitaGeomTool
 					   AnitaPol::AnitaPol_t pol,
 					   Int_t &surf, Int_t &chan, Int_t &ant); ///< Convert ring-phi-pol to surf-chan-ant
   static void getRingAntPolPhiFromSurfChan(Int_t surf, Int_t chan,
-					  AnitaRing::AnitaRing_t &ring,
-					  Int_t &ant,
-					  AnitaPol::AnitaPol_t &pol,
+					   AnitaRing::AnitaRing_t &ring,
+					   Int_t &ant,
+					   AnitaPol::AnitaPol_t &pol,
 					   Int_t &phi); ///< Convert surf-chan to ring-ant-pol-phi
   static Int_t getChanIndex(Int_t surf, Int_t chan);///< Surf + channel to channel index
   static Int_t getChanIndexFromRingPhiPol(AnitaRing::AnitaRing_t ring,
-					Int_t phi,
-					AnitaPol::AnitaPol_t pol); ///< Convert ring-phi-pol to logical index
+					  Int_t phi,
+					  AnitaPol::AnitaPol_t pol); ///< Convert ring-phi-pol to logical index
   static Int_t getChanIndexFromAntPol(Int_t ant,
-				    AnitaPol::AnitaPol_t pol); ///< Convert ant-pol to logical index
+				      AnitaPol::AnitaPol_t pol); ///< Convert ant-pol to logical index
   static Int_t getSurfFromAnt(Int_t ant);
   static Int_t getChanFromAntPol(Int_t ant,AnitaPol::AnitaPol_t pol);
   static Int_t getSurfChanFromChanIndex(Int_t chanIndex, // input channel index
-				      Int_t &surf,Int_t &chan); ///< Convert logical index to  surf and channel
+					Int_t &surf,Int_t &chan); ///< Convert logical index to  surf and channel
   static Int_t getPhiRingPolFromSurfChanTrigger(Int_t surf, Int_t chan, Int_t &phi,
 						AnitaRing::AnitaRing_t &ring,AnitaTrigPol::AnitaTrigPol_t &pol);
   static Int_t getSurfChanTriggerFromPhiRingPol(Int_t phi, AnitaRing::AnitaRing_t ring,
@@ -88,11 +88,11 @@ class AnitaGeomTool
   static Int_t getPhiRingFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &phi, //a4 only 
 					AnitaRing::AnitaRing_t &ring);
   static Int_t getPhiPolFromSurfL1Chan(Int_t surf, Int_t l1Chan, Int_t &phi, //a3 only 
-					AnitaPol::AnitaPol_t &pol);
+				       AnitaPol::AnitaPol_t &pol);
   static Int_t getSurfL1TriggerChanFromPhiRing(Int_t phi, AnitaRing::AnitaRing_t ring, //a4 only 
 					       Int_t &surf, Int_t &l1Chan);
   static Int_t getSurfL1TriggerChanFromPhiPol(Int_t phi, AnitaPol::AnitaPol_t ring, //a3 only 
-					       Int_t &surf, Int_t &l1Chan);
+					      Int_t &surf, Int_t &l1Chan);
   static Int_t getSurfL2TriggerChanFromPhi(Int_t phi, Int_t &surf, Int_t &l2Chan);
   static Int_t getAntPolFromSurfChan(Int_t surf, Int_t chan, Int_t &ant,
 				     AnitaPol::AnitaPol_t &pol); ///< Convert surf-chan to ant-pol
@@ -120,7 +120,7 @@ class AnitaGeomTool
   Double_t getAntZ(Int_t ant, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna z position
   Double_t getAntR(Int_t ant, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna r position
   Double_t getAntPhiPosition(Int_t ant, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna phi position
-  Double_t getAntPhiPositionRelToAftFore(Int_t ant, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna phi position relative to ADU5 AFT-FORE line
+  Double_t getAntPhiPositionRelToAftFore(Int_t ant, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical) const; ///< get antenna phi position relative to ADU5 AFT-FORE line
   Double_t getMeanAntPairPhiRelToAftFore(Int_t firstAnt, Int_t secondAnt, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< The mean of the two antenna phi positions
   Int_t getTopAntNearestPhiWave(Double_t phiWave, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical); ///< get antenna closest to given plane wave direction
   Int_t getUpperAntNearestPhiWave(Double_t phiWave, AnitaPol::AnitaPol_t pol=AnitaPol::kVertical);
@@ -147,219 +147,110 @@ class AnitaGeomTool
   Double_t apertureElFromDeckHorn[NUM_SEAVEYS]; //radians
   
    
-   Double_t xPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t yPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t zPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t rPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t azPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //radians
+  Double_t xPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //m
+  Double_t yPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //m
+  Double_t zPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //m
+  Double_t rPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //m
+  Double_t azPhaseCentreFromDeckHorn[NUM_SEAVEYS][NUM_POLS]; //radians
 
    
-   Double_t xAntFromDeckBicone[NUM_BICONES]; //m
-   Double_t yAntFromDeckBicone[NUM_BICONES]; //m
-   Double_t zAntFromDeckBicone[NUM_BICONES]; //m
+  Double_t xAntFromDeckBicone[NUM_BICONES]; //m
+  Double_t yAntFromDeckBicone[NUM_BICONES]; //m
+  Double_t zAntFromDeckBicone[NUM_BICONES]; //m
 
-   Double_t xAntFromDeckDiscone[NUM_DISCONES]; //m
-   Double_t yAntFromDeckDiscone[NUM_DISCONES]; //m
-   Double_t zAntFromDeckDiscone[NUM_DISCONES]; //m
+  Double_t xAntFromDeckDiscone[NUM_DISCONES]; //m
+  Double_t yAntFromDeckDiscone[NUM_DISCONES]; //m
+  Double_t zAntFromDeckDiscone[NUM_DISCONES]; //m
 
-   Double_t xAnitaBoxFromDeckCorner[4];
-   Double_t yAnitaBoxFromDeckCorner[4];
-   Double_t zAnitaBoxFromDeckCorner[4];
-   Double_t xBatteryBoxFromDeckCorner[4];
-   Double_t yBatteryBoxFromDeckCorner[4];
-   Double_t zBatteryBoxFromDeckCorner[4];
-   Double_t xSipBoxFromDeckCorner[4];
-   Double_t ySipBoxFromDeckCorner[4];
-   Double_t zSipBoxFromDeckCorner[4];
+  Double_t xAnitaBoxFromDeckCorner[4];
+  Double_t yAnitaBoxFromDeckCorner[4];
+  Double_t zAnitaBoxFromDeckCorner[4];
+  Double_t xBatteryBoxFromDeckCorner[4];
+  Double_t yBatteryBoxFromDeckCorner[4];
+  Double_t zBatteryBoxFromDeckCorner[4];
+  Double_t xSipBoxFromDeckCorner[4];
+  Double_t ySipBoxFromDeckCorner[4];
+  Double_t zSipBoxFromDeckCorner[4];
    
-   Double_t gpsPlaneFromDeck[3];
-   Double_t gpsHeadingFromDeck[3];
-   Double_t aftForeOffsetAngleDeck;
+  Double_t gpsPlaneFromDeck[3];
+  Double_t gpsHeadingFromDeck[3];
+  Double_t aftForeOffsetAngleDeck;
 
-   Double_t xAntFromVerticalHorn[NUM_SEAVEYS]; //m
-   Double_t yAntFromVerticalHorn[NUM_SEAVEYS]; //m
-   Double_t zAntFromVerticalHorn[NUM_SEAVEYS]; //m
-   Double_t rAntFromVerticalHorn[NUM_SEAVEYS]; //m
-   Double_t azCentreFromVerticalHorn[NUM_SEAVEYS]; //radians
-   Double_t apertureAzFromVerticalHorn[NUM_SEAVEYS]; //radians
-   Double_t apertureElFromVerticalHorn[NUM_SEAVEYS]; //radians
+  Double_t xAntFromVerticalHorn[NUM_SEAVEYS]; //m
+  Double_t yAntFromVerticalHorn[NUM_SEAVEYS]; //m
+  Double_t zAntFromVerticalHorn[NUM_SEAVEYS]; //m
+  Double_t rAntFromVerticalHorn[NUM_SEAVEYS]; //m
+  Double_t azCentreFromVerticalHorn[NUM_SEAVEYS]; //radians
+  Double_t apertureAzFromVerticalHorn[NUM_SEAVEYS]; //radians
+  Double_t apertureElFromVerticalHorn[NUM_SEAVEYS]; //radians
   
-   Double_t xPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t yPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t zPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t rPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t azPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //radians
+  Double_t xPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //m
+  Double_t yPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //m
+  Double_t zPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //m
+  Double_t rPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //m
+  Double_t azPhaseCentreFromVerticalHorn[NUM_SEAVEYS][NUM_POLS]; //radians
 
    
-   Double_t xAntFromVerticalBicone[NUM_BICONES]; //m
-   Double_t yAntFromVerticalBicone[NUM_BICONES]; //m
-   Double_t zAntFromVerticalBicone[NUM_BICONES]; //m
+  Double_t xAntFromVerticalBicone[NUM_BICONES]; //m
+  Double_t yAntFromVerticalBicone[NUM_BICONES]; //m
+  Double_t zAntFromVerticalBicone[NUM_BICONES]; //m
 
-   Double_t xAntFromVerticalDiscone[NUM_DISCONES]; //m
-   Double_t yAntFromVerticalDiscone[NUM_DISCONES]; //m
-   Double_t zAntFromVerticalDiscone[NUM_DISCONES]; //m
+  Double_t xAntFromVerticalDiscone[NUM_DISCONES]; //m
+  Double_t yAntFromVerticalDiscone[NUM_DISCONES]; //m
+  Double_t zAntFromVerticalDiscone[NUM_DISCONES]; //m
 
-   Double_t xAnitaBoxFromVerticalCorner[4];
-   Double_t yAnitaBoxFromVerticalCorner[4];
-   Double_t zAnitaBoxFromVerticalCorner[4];
-   Double_t xBatteryBoxFromVerticalCorner[4];
-   Double_t yBatteryBoxFromVerticalCorner[4];
-   Double_t zBatteryBoxFromVerticalCorner[4];
-   Double_t xSipBoxFromVerticalCorner[4];
-   Double_t ySipBoxFromVerticalCorner[4];
-   Double_t zSipBoxFromVerticalCorner[4];
+  Double_t xAnitaBoxFromVerticalCorner[4];
+  Double_t yAnitaBoxFromVerticalCorner[4];
+  Double_t zAnitaBoxFromVerticalCorner[4];
+  Double_t xBatteryBoxFromVerticalCorner[4];
+  Double_t yBatteryBoxFromVerticalCorner[4];
+  Double_t zBatteryBoxFromVerticalCorner[4];
+  Double_t xSipBoxFromVerticalCorner[4];
+  Double_t ySipBoxFromVerticalCorner[4];
+  Double_t zSipBoxFromVerticalCorner[4];
    
-   Double_t gpsPlaneFromVertical[3];
-   Double_t gpsHeadingFromVertical[3];
-   Double_t aftForeOffsetAngleVertical;
+  Double_t gpsPlaneFromVertical[3];
+  Double_t gpsHeadingFromVertical[3];
+  Double_t aftForeOffsetAngleVertical;
 
-   //Simon's position calib numbers
-   Double_t deltaRPhaseCentre[NUM_SEAVEYS][NUM_POLS]; //Relative to photogrammetry + ring offset
-   Double_t deltaZPhaseCentre[NUM_SEAVEYS][NUM_POLS]; //Relative to photogrammetry + ring offset
-   Double_t deltaPhiPhaseCentre[NUM_SEAVEYS][NUM_POLS]; //Relative to photogrammetry + ring offset
-   Double_t ringPhaseCentreOffset[3]; //Offset for each ring, upper lower and nadir
-
-
-   TVector3 fHeadingRotationAxis;
-   TVector3 fPitchRotationAxis;
-   TVector3 fRollRotationAxis;
+  //Simon's position calib numbers
+  Double_t deltaRPhaseCentre[NUM_SEAVEYS][NUM_POLS]; //Relative to photogrammetry + ring offset
+  Double_t deltaZPhaseCentre[NUM_SEAVEYS][NUM_POLS]; //Relative to photogrammetry + ring offset
+  Double_t deltaPhiPhaseCentre[NUM_SEAVEYS][NUM_POLS]; //Relative to photogrammetry + ring offset
+  Double_t ringPhaseCentreOffset[3]; //Offset for each ring, upper lower and nadir
 
 
-   //Kurt's ANITA-3 numbers
-   Double_t xAntFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //m
-   Double_t yAntFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //m
-   Double_t zAntFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //m
-   Double_t rAntFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //m
-   Double_t azCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //radians
-   Double_t apertureAzFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //radians
-   Double_t apertureElFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //radians
+  TVector3 fHeadingRotationAxis;
+  TVector3 fPitchRotationAxis;
+  TVector3 fRollRotationAxis;
+
+
+  //Kurt's ANITA-3 numbers
+  Double_t xAntFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //m
+  Double_t yAntFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //m
+  Double_t zAntFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //m
+  Double_t rAntFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //m
+  Double_t azCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //radians
+  Double_t apertureAzFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //radians
+  Double_t apertureElFromVerticalHornPhotogrammetry[NUM_SEAVEYS]; //radians
   
-   Double_t xPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t yPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t zPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t rPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //m
-   Double_t azPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //radians
-   Double_t aftForeOffsetAngleVerticalPhotogrammetry; //radians
+  Double_t xPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //m
+  Double_t yPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //m
+  Double_t zPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //m
+  Double_t rPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //m
+  Double_t azPhaseCentreFromVerticalHornPhotogrammetry[NUM_SEAVEYS][NUM_POLS]; //radians
+  Double_t aftForeOffsetAngleVerticalPhotogrammetry; //radians
 
-   void updateAnt(Double_t deltaR,Double_t deltaRL,Double_t deltaUD);
-   void printAntPos();
-   void addPhaseCenters();
+  void updateAnt(Double_t deltaR,Double_t deltaRL,Double_t deltaUD);
+  void printAntPos();
+  void addPhaseCenters();
 
-   void usePhotogrammetryNumbers(Int_t flag) {
-     fUsePhotogrammetryNumbers=flag;
-   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  // inline Double_t getGeoid(Double_t theta) {
-  //   Double_t c=TMath::Cos(theta);
-  //   return GEOID_MIN*GEOID_MAX/TMath::Sqrt(GEOID_MIN*GEOID_MIN-
-  // 					   (GEOID_MIN*GEOID_MIN-GEOID_MAX*GEOID_MAX)*c*c);    
-  // }   ///<Returns the geoid radiuus as a function of theta (the polar angle?)
-  
-  // void getCartesianCoords(Double_t lat, Double_t lon, Double_t alt, Double_t p[3]);
-  // void getLatLonAltFromCartesian(Double_t p[3], Double_t &lat, Double_t &lon, Double_t &alt);
-  // Double_t getDistanceToCentreOfEarth(Double_t lat);
-
-  // inline Double_t getLat(Double_t theta) {
-  //    return (90.-((theta*TMath::RadToDeg()))); 
-  // } ///< Converts polar angle to latitude
-  
-  // inline Double_t getLon(Double_t phi){ 
-  //    //Need to fix this somehow
-  //    Double_t phi_deg = phi*TMath::RadToDeg();
-  //    if (phi_deg>270)
-  // 	phi_deg-=360;	
-  //    return (90.-phi_deg);
-  // } ///< Converts a azimuthal angle to longitude
-
-  // inline Double_t getThetaFromLat(Double_t lat) {       
-  //    return (90.- lat)*TMath::DegToRad(); 
-  // } ///< Converts latitude to polar angle
-  
-  // inline Double_t getPhiFromLon(Double_t lon){ 
-  //    //Need to fix this somehow
-  //    Double_t phi_deg = 90. - lon;
-  //    if(phi_deg<0) phi_deg+=360;
-  //    return phi_deg*TMath::DegToRad();
-  // } ///<Converts longitude to azimuthal angle
-  
-  // inline Double_t getPhi(Double_t p[3]){
-  //     // returns phi between 0 and 2pi.
-  //       Double_t pt=0;
-  //       Double_t phi=0;
-  //       pt=sqrt(p[0]*p[0]+p[1]*p[1]);
-  //       if (pt==0)
-  //         return 0.;
-  //       else if (pt!=0) {
-  //         if (p[1]/pt>1 || p[1]/pt<-1) {
-  //               std::cerr << "Error in getPhi. \n";
-  //               return 0;
-  //           }
-  //           phi=asin(p[1]/pt);
-  //       }
-  //       if (p[1]<0. && p[0]>0) phi += 2*TMath::Pi();
-  //       else if (phi>0 && p[0]<0.) phi = TMath::Pi() - phi;
-  //       else if (phi<0 && p[0]<0.) phi = -(TMath::Pi()+phi)+2*TMath::Pi();
-  //       return phi;
-  // } ///<Converts cartesian coordinates to azimuthal angle
-
-  //    inline Double_t getPhi(TVector3 &thePos) {
-  //      Double_t p[3]={thePos.X(),thePos.Y(),thePos.Z()};
-  //      return getPhi(p);
-  //      //return thePos.Theta();
-  //   } ///<Converts cartesian coordinates to azimuthal angle
-
-  //    inline Double_t getTheta(Double_t p[3]) {
-  //     Double_t pz,pt;
-  //     Double_t tantheta1=0;
-  //     Double_t theta=0;
-
-  //     pz=p[2];
-  //     pt=sqrt(p[0]*p[0]+p[1]*p[1]);
-  //     tantheta1=pt/pz;
-  //     theta=atan(tantheta1);
-
-  //     if (pz<0)
-  //       theta += TMath::Pi();
-  //     return theta;
-  //   } ///<Converts cartesian coordinates to polar angle
-
-
-  //    inline Double_t getTheta(TVector3 &thePos) {
-  // 	Double_t p[3]={thePos.X(),thePos.Y(),thePos.Z()};
-  // 	thePos.GetXYZ(p);
-  // 	return getTheta(p);
-  //    } ///<Converts cartesian coordinates to polar angle
-     
-  //    inline void getLonLat(Double_t p[3],Double_t& lon,Double_t& lat) {
-  //       lon=getLon(getPhi(p));
-  //       lat=getLat(getTheta(p));
-  //   } ///<Converts cartesian coordinates to latitude and longitude
-
-  //    inline void getLonLat(TVector3 &thePos,Double_t& lon,Double_t& lat) {
-  //       lon=getLon(getPhi(thePos));
-  //       lat=getLat(getTheta(thePos));
-  //   } ///<Converts cartesian coordinates to latitude and longitude
-
+  void usePhotogrammetryNumbers(Int_t flag) {
+    fUsePhotogrammetryNumbers=flag;
+  }
 
           
- private:
+private:
   void readAnita2Photogrammetry();
   void readPhotogrammetry(int version);
   void readSimonsNumbers();
