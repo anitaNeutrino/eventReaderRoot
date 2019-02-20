@@ -70,6 +70,7 @@
 #pragma link C++ class AnitaDataset+;
 #pragma link C++ class RTLSpectrum+;
 #pragma link C++ class TruthAnitaEvent+;
+#pragma link C++ class TruthAnitaNeutrino+;
 #pragma link C++ class TuffNotchStatus+;
 #pragma link C++ class TuffRawCmd+;
 #pragma link C++ namespace AnitaVersion;
