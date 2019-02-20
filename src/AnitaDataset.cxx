@@ -1096,7 +1096,6 @@ int AnitaDataset::previousInPlaylist()
 }
 
 
-
 int AnitaDataset::getRunContainingEventNumber(UInt_t ev){
 
   // TMutex();
@@ -1152,55 +1151,80 @@ int AnitaDataset::getRunContainingEventNumber(UInt_t ev){
 
 int AnitaDataset::loadPlaylist(const char* playlist)
 {
-	std::vector<std::vector<long> > runEv;
-	int rN;
-	int evN;
-	std::ifstream pl(playlist);
-	pl >> evN;
-	if(evN < 400)
+  std::vector<std::vector<long> > runEv;
+  int rN;
+  int evN;
+  std::ifstream pl(playlist);
+  pl >> evN;
+  
+  // Simulated events
+  // As iceMC generates random eventNumbers, simulated data event numbers aren't linked to actual event numbers, so ignore evN restrictions
+  Bool_t simulatedData = false; // must be set to false for non-simulated data
+  if(simulatedData == true)
+    {
+      std::cout << "Using simulated data! Turn off the simulatedData variable if you are working with real data." << std::endl;
+      rN = evN;
+      pl >> evN;
+      std::vector<long> Row;
+      Row.push_back(rN);
+      Row.push_back(evN);
+      runEv.push_back(Row);
+      while(pl >> rN >> evN)
 	{
-		rN = evN;
-		pl >> evN;
-		std::vector<long> Row;
-		Row.push_back(rN);
-		Row.push_back(evN);
-		runEv.push_back(Row);
-		while(pl >> rN >> evN)
-		{
-			std::vector<long> newRow;
-			newRow.push_back(rN);
-			newRow.push_back(evN);
-			runEv.push_back(newRow);
-		}
+	  std::vector<long> newRow;
+	  newRow.push_back(rN);
+	  newRow.push_back(evN);
+	  runEv.push_back(newRow);
 	}
-	else
+
+    }
+  else
+    {	
+      if(evN < 400)
 	{
-		rN = getRunContainingEventNumber(evN);
-		if(rN == -1)
-		{
-			fprintf(stderr, "Something is wrong with your playlist\n");
-			return -1;
-		}
-		std::vector<long> Row;
-		Row.push_back(rN);
-		Row.push_back(evN);
-		runEv.push_back(Row);
-		while(pl >> evN)
-		{
-			rN = getRunContainingEventNumber(evN);
-			if(rN == -1)
-			{
-				fprintf(stderr, "Something is wrong with your playlist\n");
-				return -1;
-			}
-			std::vector<long> newRow;
-			newRow.push_back(rN);
-			newRow.push_back(evN);
-			runEv.push_back(newRow);
-		}
+	  rN = evN;
+	  pl >> evN;
+	  std::vector<long> Row;
+	  Row.push_back(rN);
+	  Row.push_back(evN);
+	  runEv.push_back(Row);
+	  while(pl >> rN >> evN)
+	    {
+	      std::vector<long> newRow;
+	      newRow.push_back(rN);
+	      newRow.push_back(evN);
+	      runEv.push_back(newRow);
+	    }
 	}
-	fPlaylist = runEv;
-	return runEv.size();
+      else
+	{
+	  rN = getRunContainingEventNumber(evN);
+	  if(rN == -1)
+	    {
+	      fprintf(stderr, "Something is wrong with your playlist\n");
+	      return -1;
+	    }
+	  std::vector<long> Row;
+	  Row.push_back(rN);
+	  Row.push_back(evN);
+	  runEv.push_back(Row);
+	  while(pl >> evN)
+	    {
+	      rN = getRunContainingEventNumber(evN);
+	      if(rN == -1)
+		{
+		  fprintf(stderr, "Something is wrong with your playlist\n");
+		  return -1;
+		}
+	      std::vector<long> newRow;
+	      newRow.push_back(rN);
+	      newRow.push_back(evN);
+	      runEv.push_back(newRow);
+	    }
+	}
+    }
+  fPlaylist = runEv;
+  return runEv.size();
 }
 
 TurfRate* AnitaDataset::turf(bool force_reload) 
