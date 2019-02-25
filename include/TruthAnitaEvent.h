@@ -45,7 +45,7 @@ class TruthAnitaEvent: public TObject
   Double_t        n_component[48];            ///< Normal comp along polarization
   Double_t        e_component_k[48];          ///< Component of e-field along the rx e-plane
   Double_t        h_component_k[48];          ///< Component of the e-field along the rx h-plane
-  Double_t        n_component_k[48];          ///< Component of the e-field along the normal 
+ Double_t        n_component_k[48];          ///< Component of the e-field along the normal 
   Double_t        hitangle_e[48];         ///< Hit angles rel. to e plane stored for each antenna
   Double_t        hitangle_h[48];         ///< Hit angles rel. to h plane stored for each antenna
   Double_t        vmmhz[128];             ///< V/m/MHz at balloon (128 frequency bins)
@@ -58,6 +58,10 @@ class TruthAnitaEvent: public TObject
   Double_t        weight;                 ///< Weight assigned by icemc
   Double_t        weight1;                 ///< Absorption weight assigned by icemc
   Double_t        phaseWeight;                 ///< Phase weight assigned by icemc
+  // Source origin info
+  Double_t        RA;                 ///  Right ascension of source
+  Double_t        dec;                 ///  Declination of source
+  std::string        objName;                 ///  Name of the source
 
 
   Double_t fTimes[NUM_DIGITZED_CHANNELS][NUM_SAMP];           ///< Array of unwrapped (unless kNoCalib) times for each channel
