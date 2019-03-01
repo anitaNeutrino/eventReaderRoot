@@ -62,6 +62,7 @@ class TruthAnitaEvent: public TObject
   Double_t        RA;                 ///  Right ascension of source
   Double_t        dec;                 ///  Declination of source
   std::string        objName;                 ///  Name of the source
+  Int_t source_index; 
 
 
   Double_t fTimes[NUM_DIGITZED_CHANNELS][NUM_SAMP];           ///< Array of unwrapped (unless kNoCalib) times for each channel
@@ -78,7 +79,7 @@ class TruthAnitaEvent: public TObject
   Double_t maxSNRAtDigitizerH;                                ///< Max SNR at digitizer H-POL
   Double_t thresholds[NUM_DIGITZED_CHANNELS];                 ///< Channel thresholds used in icemc
   
-  ClassDef(TruthAnitaEvent,10);
+  ClassDef(TruthAnitaEvent,11);
 };
 
 
