@@ -15,8 +15,8 @@ TruthAnitaEvent::TruthAnitaEvent()
   //cheating, don't do this at home! 
   memset(&run, 0, size_t(&weight) + sizeof(weight) - size_t(&run)); 
 
-  //payloadPhi = -999; 
-  //payloadTheta = -999; 
+  payloadPhi = -999; 
+  payloadTheta = -999; 
 
   //Default Constructor
 }
