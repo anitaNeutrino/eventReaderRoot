@@ -58,6 +58,7 @@ class TruthAnitaEvent: public TObject
   Double_t        weight;                 ///< Weight assigned by icemc
   Double_t        weight1;                 ///< Absorption weight assigned by icemc
   Double_t        phaseWeight;                 ///< Phase weight assigned by icemc
+  Double_t        timeWeight;                 ///< Relative Time weight assigned by icemc
   // Source origin info
   Double_t        RA;                 ///  Right ascension of source
   Double_t        dec;                 ///  Declination of source
@@ -79,7 +80,7 @@ class TruthAnitaEvent: public TObject
   Double_t maxSNRAtDigitizerH;                                ///< Max SNR at digitizer H-POL
   Double_t thresholds[NUM_DIGITZED_CHANNELS];                 ///< Channel thresholds used in icemc
   
-  ClassDef(TruthAnitaEvent,11);
+  ClassDef(TruthAnitaEvent,12);
 };
 
 
@@ -94,9 +95,9 @@ class TruthAnitaNeutrino
     double nuE() const {return pow(10,log10_nuMom); }
     double showerE() const { return nuE() * (hadFrac() + emFrac()); }
     TVector3 nuDir() const { return TVector3(_nuDir); } 
-    TVector3 nuPos() const { return TVector3(nupos_R_km*1e3 * cos(nupos_phi) * cos(nupos_theta), 
+    TVector3 nuPos() const { return haveNu() ? TVector3(nupos_R_km*1e3 * cos(nupos_phi) * cos(nupos_theta), 
                                        nupos_R_km*1e3 * sin(nupos_phi) * cos(nupos_theta), 
-                                       nupos_R_km*1e3*sin(nupos_theta)); }
+                                       nupos_R_km*1e3*sin(nupos_theta)) : TVector3(0,0,0); }
         
     TVector3 anitaPos() const { return TVector3(anita_R_km*1e3 * cos(anita_phi) * cos(anita_theta), 
                                        anita_R_km*1e3 * sin(anita_phi) * cos(anita_theta), 
@@ -105,12 +106,13 @@ class TruthAnitaNeutrino
     bool weightWasSet() const { return have_weight; } 
     double weight() const { return !have_weight ? 0 : pow(10,log10_weight); }
     double phaseSpaceWeight() const { return !have_weight ? 0 : pow(10,log10_phase_weight); }
+    double timeWeight() const { return !have_weight ? 0 : pow(10,log10_time_weight); }
 
 
     bool fracWasSet() const { return have_frac; } 
     double hadFrac() const { return !have_frac ? 0 : _had_frac; } 
     double emFrac() const { return !have_frac ? 0 : _em_frac; } 
-    int nuPdg() const  { return _nu_pdg; } 
+    int nuPdg() const  { return haveNu() ? _nu_pdg : -1; } 
 
     void setSkipped(bool skip, bool zero_frac = true, bool zero_weights  = true, bool zero_dir = true) {
       if (skip)
@@ -120,6 +122,7 @@ class TruthAnitaNeutrino
         {
           log10_weight=0;
           log10_phase_weight =0;
+          log10_time_weight =0;
           have_weight = false;
         }
         if (zero_frac) 
@@ -138,10 +141,11 @@ class TruthAnitaNeutrino
     bool isSkipped() const { return skipped; } 
 
 
-    void setWeights(double weight =1e-100, double phase_space_weight = 1e-4) 
+    void setWeights(double weight =1e-100, double phase_space_weight = 1e-4, double time_weight = 1e-10) 
     {
       log10_weight = log10(weight); 
       log10_phase_weight=log10(phase_space_weight); 
+      log10_time_weight=log10(time_weight); 
       have_weight = true;
     }
 
@@ -154,18 +158,7 @@ class TruthAnitaNeutrino
       nupos_theta = v.Theta(); 
       nupos_phi = v.Phi(); 
 
-      TVector3 b(bx,by,bz); 
-      anita_R_km = b.Mag()/1e3; 
-      anita_theta = b.Theta(); 
-      anita_phi = b.Phi(); 
- 
-      time_t tmp_t = t; 
-      struct tm * T = gmtime(&tmp_t); 
-      year = T->tm_year-100; 
-      day = T->tm_mday; 
-      hour = T->tm_hour; 
-      min = T->tm_min;
-      sec = T->tm_sec;
+      setBalloon(bx,by,bz,t);
     }
 
     void setNoDir() 
@@ -196,12 +189,28 @@ class TruthAnitaNeutrino
     {
       log10_nuMom = log10(nuE); 
       _nu_pdg = nupdg; 
+      have_nu = true; 
     }
+
+
+    void setNoNu(double bx, double by, double bz,  int t) 
+    {
+      have_nu = false; 
+      setBalloon(bx,by,bz,t); 
+      setSkipped(true); 
+      //Set these to something for compression goodness
+      log10_nuMom = 15; 
+      nupos_R_km = 6350; 
+      nupos_theta = 0; 
+      nupos_phi = 0; 
+    }
+
     virtual ~TruthAnitaNeutrino() {; } 
 
     bool haveDir() const {return have_dir; }
     bool haveFrac() const { return have_frac; } 
     bool haveWeight() const {return have_weight; }
+    bool haveNu() const {return have_nu; }
 
     int time() const 
     {
@@ -228,6 +237,23 @@ class TruthAnitaNeutrino
     Double32_t log10_phase_weight; //[-4,0,16] 
     Double32_t _had_frac; //[0,1,10]; 
     Double32_t _em_frac; //[0,1,10]; 
+    Double32_t log10_time_weight; //[-5,3,16]; 
+
+    void setBalloon(double bx, double by, double bz, int t) 
+    {
+      TVector3 b(bx,by,bz); 
+      anita_R_km = b.Mag()/1e3; 
+      anita_theta = b.Theta(); 
+      anita_phi = b.Phi(); 
+ 
+      time_t tmp_t = t; 
+      struct tm * T = gmtime(&tmp_t); 
+      year = T->tm_year-100; 
+      day = T->tm_mday; 
+      hour = T->tm_hour; 
+      min = T->tm_min;
+      sec = T->tm_sec;
+    }
 
     //store time as ymdms since I think it will compress better! 
     int year; 
@@ -240,7 +266,8 @@ class TruthAnitaNeutrino
     bool have_weight;
     bool have_frac;
     bool have_dir; 
-  ClassDef(TruthAnitaNeutrino,2); 
+    bool have_nu; 
+  ClassDef(TruthAnitaNeutrino,4); 
 };
 
 
