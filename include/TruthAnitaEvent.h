@@ -79,8 +79,9 @@ class TruthAnitaEvent: public TObject
   Double_t maxSNRAtDigitizerV;                                ///< Max SNR at digitizer V-POL
   Double_t maxSNRAtDigitizerH;                                ///< Max SNR at digitizer H-POL
   Double_t thresholds[NUM_DIGITZED_CHANNELS];                 ///< Channel thresholds used in icemc
+  Short_t tuffIndex;                                           ///< TUFF configuration index
   
-  ClassDef(TruthAnitaEvent,12);
+  ClassDef(TruthAnitaEvent,13);
 };
 
 
