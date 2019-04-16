@@ -62,7 +62,7 @@ class TruthAnitaEvent: public TObject
   // Source origin info
   Double_t        RA;                 ///  Right ascension of source
   Double_t        dec;                 ///  Declination of source
-  std::string        objName;                 ///  Name of the source
+  TString        objName;                 ///  Name of the source
   Int_t source_index; 
 
 
@@ -81,7 +81,7 @@ class TruthAnitaEvent: public TObject
   Double_t thresholds[NUM_DIGITZED_CHANNELS];                 ///< Channel thresholds used in icemc
   Short_t tuffIndex;                                           ///< TUFF configuration index
   
-  ClassDef(TruthAnitaEvent,13);
+  ClassDef(TruthAnitaEvent,14);
 };
 
 
