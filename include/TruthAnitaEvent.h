@@ -63,7 +63,7 @@ class TruthAnitaEvent: public TObject
   // Source origin info
   Double_t        RA;                 ///  Right ascension of source
   Double_t        dec;                 ///  Declination of source
-  std::string        objName;                 ///  Name of the source
+  TString        objName;                 ///  Name of the source
   Int_t source_index; 
 
 
