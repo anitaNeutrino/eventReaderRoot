@@ -59,6 +59,7 @@ class TruthAnitaEvent: public TObject
   Double_t        weight1;                 ///< Absorption weight assigned by icemc
   Double_t        phaseWeight;                 ///< Phase weight assigned by icemc
   Double_t        timeWeight;                 ///< Relative Time weight assigned by icemc
+  Double_t        projectedArea;              ///< If in unbiased mode, the projected sampled area for an event in this direction. 
   // Source origin info
   Double_t        RA;                 ///  Right ascension of source
   Double_t        dec;                 ///  Declination of source
@@ -80,8 +81,9 @@ class TruthAnitaEvent: public TObject
   Double_t maxSNRAtDigitizerH;                                ///< Max SNR at digitizer H-POL
   Double_t thresholds[NUM_DIGITZED_CHANNELS];                 ///< Channel thresholds used in icemc
   Short_t tuffIndex;                                           ///< TUFF configuration index
+
   
-  ClassDef(TruthAnitaEvent,13);
+  ClassDef(TruthAnitaEvent,14);
 };
 
 
