@@ -40,12 +40,14 @@ class TruthAnitaEvent: public TObject
   Double_t        rfExitNor[5][3];        ///< Normal vector in direction of exit point to balloon - 5 iterations
   Double_t        rfExitPos[5][3];        ///< Position where the RF exits the ice- 5 iterations, 3 dimensions each
   Int_t           nu_pdg;                 ///< Neutrino PDG code
+  Int_t           canary_c0fefe;                ///< this shoudl always equal 0xc0fefe 
   Double_t        e_component[48];            ///< E comp along polarization
   Double_t        h_component[48];            ///< H comp along polarization
   Double_t        n_component[48];            ///< Normal comp along polarization
   Double_t        e_component_k[48];          ///< Component of e-field along the rx e-plane
   Double_t        h_component_k[48];          ///< Component of the e-field along the rx h-plane
  Double_t        n_component_k[48];          ///< Component of the e-field along the normal 
+  Int_t           canary_deadbeef;           ///< this shoudl always equal 0xdeadbeef 
   Double_t        hitangle_e[48];         ///< Hit angles rel. to e plane stored for each antenna
   Double_t        hitangle_h[48];         ///< Hit angles rel. to h plane stored for each antenna
   Double_t        vmmhz[128];             ///< V/m/MHz at balloon (128 frequency bins)
@@ -65,6 +67,7 @@ class TruthAnitaEvent: public TObject
   Double_t        dec;                 ///  Declination of source
   TString        objName;                 ///  Name of the source
   Int_t source_index; 
+  Int_t          canary_12345;            //should always equal 0x12345 
 
 
   Double_t fTimes[NUM_DIGITZED_CHANNELS][NUM_SAMP];           ///< Array of unwrapped (unless kNoCalib) times for each channel
@@ -81,9 +84,10 @@ class TruthAnitaEvent: public TObject
   Double_t maxSNRAtDigitizerH;                                ///< Max SNR at digitizer H-POL
   Double_t thresholds[NUM_DIGITZED_CHANNELS];                 ///< Channel thresholds used in icemc
   Short_t tuffIndex;                                           ///< TUFF configuration index
+  Int_t          canary_09f91102;            //should always equal 09f91102 
 
   
-  ClassDef(TruthAnitaEvent,14);
+  ClassDef(TruthAnitaEvent,17);
 };
 
 
