@@ -13,6 +13,7 @@
 #include <TObject.h>
 #include "TVector3.h" 
 #include <ctime>
+#include <cmath> 
 
 #include "AnitaConventions.h"
 
@@ -58,7 +59,8 @@ class TruthAnitaEvent: public TObject
   Double_t        sourceLat;              ///< RF position when leaving the ice: Latitude  (using icemc model)
   Double_t        sourceAlt;              ///< RF position when leaving the ice: Altitude  (using icemc model)
   Double_t        weight;                 ///< Weight assigned by icemc
-  Double_t        weight1;                 ///< Absorption weight assigned by icemc
+  Double_t        weight_prob;                    ///< weight including probability of interacting! 
+  Double_t        weight1;                ///< Absorption weight assigned by icemc
   Double_t        phaseWeight;                 ///< Phase weight assigned by icemc
   Double_t        timeWeight;                 ///< Relative Time weight assigned by icemc
   Double_t        projectedArea;              ///< If in unbiased mode, the projected sampled area for an event in this direction. 
@@ -87,7 +89,7 @@ class TruthAnitaEvent: public TObject
   Int_t          canary_09f91102;            //should always equal 09f91102 
 
   
-  ClassDef(TruthAnitaEvent,17);
+  ClassDef(TruthAnitaEvent,19);
 };
 
 
