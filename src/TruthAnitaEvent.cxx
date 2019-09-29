@@ -70,6 +70,8 @@ TruthAnitaEvent::TruthAnitaEvent()
   canary_deadbeef = 0xdeadbeef; 
   canary_c0fefe = 0xc0fefe; 
 
+  weight_prob = 0; 
+
   //Default Constructor
 }
 
