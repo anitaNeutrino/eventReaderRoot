@@ -63,7 +63,8 @@ class TruthAnitaEvent: public TObject
   Double_t        weight1;                ///< Absorption weight assigned by icemc
   Double_t        phaseWeight;                 ///< Phase weight assigned by icemc
   Double_t        timeWeight;                 ///< Relative Time weight assigned by icemc
-  Double_t        projectedArea;              ///< If in unbiased mode, the projected sampled area for an event in this direction. 
+  Double_t        sourceTimeWeight;           ///< Relative Time weight for the given source assigned by icemc
+  Double_t        projectedArea;              ///< If in unbiased mode, the appropriate sampling area for this interaction
   // Source origin info
   Double_t        RA;                 ///  Right ascension of source
   Double_t        dec;                 ///  Declination of source
@@ -89,7 +90,7 @@ class TruthAnitaEvent: public TObject
   Int_t          canary_09f91102;            //should always equal 09f91102 
 
   
-  ClassDef(TruthAnitaEvent,19);
+  ClassDef(TruthAnitaEvent,20);
 };
 
 

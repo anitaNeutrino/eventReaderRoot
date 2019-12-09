@@ -44,6 +44,7 @@ TruthAnitaEvent::TruthAnitaEvent()
   weight1 = -1;
   phaseWeight =-1; 
   timeWeight=-1; 
+  sourceTimeWeight = -1; 
   projectedArea=-1;
   RA=-999; 
   dec=-999;
