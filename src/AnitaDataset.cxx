@@ -491,7 +491,7 @@ int AnitaDataset::getEntry(int entryNumber)
 }
 
 
-int AnitaDataset::getEvent(int eventNumber, bool quiet)
+int AnitaDataset::getEvent(ULong_t eventNumber, bool quiet)
 {
 
   int entry  =  (fDecimated ? fDecimatedHeadTree : fHeadTree)->GetEntryNumberWithIndex(eventNumber); 
