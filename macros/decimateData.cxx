@@ -17,7 +17,7 @@ void decimateData()
   
   RawAnitaHeader * header = 0;
   
-  const int firstRun = 42;
+  const int firstRun = 41;
   const int lastRun = 367;
 
   TString baseDir = getenv("ANITA4_ROOT_DATA");
