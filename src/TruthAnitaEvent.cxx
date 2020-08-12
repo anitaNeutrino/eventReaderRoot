@@ -36,7 +36,6 @@ TruthAnitaEvent::TruthAnitaEvent()
   vmmhz_max = -999; 
   payloadPhi = -999; 
   payloadTheta = -999; 
-
   sourceLon = -999;
   sourceLat = -999;
   sourceAlt = -999;
@@ -45,6 +44,7 @@ TruthAnitaEvent::TruthAnitaEvent()
   phaseWeight =-1; 
   timeWeight=-1; 
   sourceTimeWeight = -1; 
+  l_int = 0; 
   projectedArea=-1;
   RA=-999; 
   dec=-999;

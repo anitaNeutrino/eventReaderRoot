@@ -65,6 +65,7 @@ class TruthAnitaEvent: public TObject
   Double_t        timeWeight;                 ///< Relative Time weight assigned by icemc
   Double_t        sourceTimeWeight;           ///< Relative Time weight for the given source assigned by icemc
   Double_t        projectedArea;              ///< If in unbiased mode, the appropriate sampling area for this interaction
+  Double_t        l_int;                      ///< Interaction length
   // Source origin info
   Double_t        RA;                 ///  Right ascension of source
   Double_t        dec;                 ///  Declination of source
@@ -90,7 +91,7 @@ class TruthAnitaEvent: public TObject
   Int_t          canary_09f91102;            //should always equal 09f91102 
 
   
-  ClassDef(TruthAnitaEvent,20);
+  ClassDef(TruthAnitaEvent,21);
 };
 
 
