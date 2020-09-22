@@ -14,17 +14,11 @@ import os
 ALFA_chan = 104 
 run = 200  # a random run
 useDecimated = False 
-numdigitized = 108 
-numsamp =260 
 
 #set ANITA_ROOT_DATA if necessary: 
 # os.environ["ANITA_ROOT_DATA"] = "/where/the/files/are" 
 
-
-
 # ANITA library Loads
-
-
 ROOT.gSystem.Load("${ANITA_UTIL_INSTALL_DIR}/lib/libRootFftwWrapper.so") #not sure if it's necessary 
 ROOT.gSystem.Load("${ANITA_UTIL_INSTALL_DIR}/lib/libAnitaEvent.so")
 
@@ -47,16 +41,13 @@ for ientry in range(0, nentries):  # just the first 10 events
   d.getEntry(ientry) 
 
 
-#  Check if we want this event
-
-# this filter sout all RF events
+  #  Check if we want this event
+  #  this filters out all RF events but you can do whatever, obviously
   if d.header().getTriggerBitRF(): 
     continue 
 
   # there are two ways to grab the calibrated event data, both through the UsefulAnitaEvent 
-   
-
-  useful = d.useful() 
+    useful = d.useful() 
 
   # it's often easier to use d.useful().getGraph( ) but there are some issues with that: 
   #    1) You have to set the flag not to filter out ALFA data each time  BEFORE asking for the graph on each event: 
@@ -73,7 +64,7 @@ for ientry in range(0, nentries):  # just the first 10 events
 
 
   #  I prefer to just directly grab the points manually, which you can do like
-  #  this. It's a bit convoluted since you have to do the indexing yourself (we
+  #  this. It's a bit convoluted since you have to get the maximum number of valid samples yourself (we
   #  could add helpers to UsefulAnitaEvent to make this easier). 
   #  Unfortunately, if you're using ROOT 6.22 right now the most straightforward way might not work so you may have to use my hack, below,. 
 
@@ -87,10 +78,11 @@ for ientry in range(0, nentries):  # just the first 10 events
 #  volts = numpy.frombuffer(useful.fVolts[ALFA_chan],dtype=numpy.float64,count=NPoints) 
 #  times = numpy.frombuffer(useful.fTimes[ALFA_chan],dtype=numpy.float64,count=NPoints) 
 
-## HACK HACK HACK to workaround ROOT 6.22 bad pythonization of multidimensional arrays. 
+  ## HACK HACK HACK to workaround ROOT 6.22 bad pythonization of multidimensional arrays by tricking PyROOT into showing us a one-dimensional array (with JITed helper function defined above) 
   volts = numpy.frombuffer(ROOT.hack_volts(useful, ALFA_chan), dtype=numpy.float64, count =NPoints)
   times = numpy.frombuffer(ROOT.hack_times(useful, ALFA_chan), dtype=numpy.float64, count =NPoints)
   
+  # do something with the data, here I want to make sure the two methods give the same result
   print ("RMS computed from graph is: %g, from direct: %g\n" %( numpy.sqrt(numpy.mean(v*v)), numpy.sqrt(numpy.mean(volts*volts))))
 
 
