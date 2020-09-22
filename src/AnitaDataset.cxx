@@ -122,7 +122,15 @@ void AnitaDataset::loadRunToEv(int anita){
 
 static bool checkIfFileExists(const char * file)
 {
-  return access(file, R_OK) !=-1; 
+  //stupid check  if we're on a newtork filesystem and it's a root file 
+  if (strstr(file,"://") && strstr(file,".root"))
+  {
+    TFile * f = TFile::Open(file); 
+    if (!f) return false; 
+    delete f; //what a monumental waste!
+    return true; 
+  }
+  else return access(file, R_OK) !=-1; 
 }
 
 static const char * checkIfFilesExist(int num, ...)

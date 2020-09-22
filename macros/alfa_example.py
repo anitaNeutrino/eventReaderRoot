@@ -45,9 +45,9 @@ for ientry in range(0, nentries):  # just the first 10 events
   #  this filters out all RF events but you can do whatever, obviously
   if d.header().getTriggerBitRF(): 
     continue 
-
+  
   # there are two ways to grab the calibrated event data, both through the UsefulAnitaEvent 
-    useful = d.useful() 
+  useful = d.useful() 
 
   # it's often easier to use d.useful().getGraph( ) but there are some issues with that: 
   #    1) You have to set the flag not to filter out ALFA data each time  BEFORE asking for the graph on each event: 
