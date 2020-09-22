@@ -631,7 +631,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
     TString fname = TString::Format("%s/run%d/decimatedHeadFile%d.root", data_dir, run, run); 
     if (checkIfFileExists(fname.Data()))
     {
-      TFile * f = new TFile(fname.Data()); 
+      TFile * f = TFile::Open(fname.Data()); 
       filesToClose.push_back(f); 
       fDecimatedHeadTree = (TTree*) f->Get("headTree"); 
       fDecimatedHeadTree->BuildIndex("eventNumber"); 
@@ -666,7 +666,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
     if (strcasestr(the_right_file,"SimulatedAnitaHeadFile")) simulated = true; 
 
     fprintf(stderr,"Using head file: %s\n",the_right_file); 
-    TFile * f = new TFile(the_right_file); 
+    TFile * f = TFile::Open(the_right_file); 
     filesToClose.push_back(f); 
     fHeadTree = (TTree*) f->Get("headTree"); 
   }
@@ -688,7 +688,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
   fname2 = TString::Format("%s/run%d/SimulatedAnitaGpsFile%d.root", data_dir, run, run); 
   if (const char * the_right_file = checkIfFilesExist(2,fname.Data(),fname2.Data()))
   {
-     TFile * f = new TFile(the_right_file); 
+     TFile * f = TFile::Open(the_right_file); 
      filesToClose.push_back(f); 
      fGpsTree = (TTree*) f->Get("adu5PatTree"); 
      fHaveGpsEvent = true; 
@@ -700,7 +700,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
     fname = TString::Format("%s/run%d/gpsFile%d.root", data_dir, run, run);
     if (const char * the_right_file = checkIfFilesExist(1, fname.Data()))
     {
-       TFile * f = new TFile(the_right_file); 
+       TFile * f = TFile::Open(the_right_file); 
        filesToClose.push_back(f); 
        fGpsTree = (TTree*) f->Get("adu5PatTree"); 
        fGpsTree->BuildIndex("realTime"); 
@@ -724,7 +724,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
   fname3 = TString::Format("%s/run%d/SimulatedAnitaEventFile%d.root", data_dir, run, run); 
   if (const char * the_right_file = checkIfFilesExist(2, fname.Data(), fname2.Data()))
   {
-     TFile * f = new TFile(the_right_file); 
+     TFile * f = TFile::Open(the_right_file); 
      filesToClose.push_back(f); 
      fEventTree = (TTree*) f->Get("eventTree"); 
      fHaveCalibFile = true; 
@@ -737,7 +737,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
     fname2 = TString::Format("%s/run%d/calibratedEventInfo%d.root", data_dir, run, run); 
     if (checkIfFileExists(fname.Data()))
     {
-       TFile * f = new TFile(fname.Data()); 
+       TFile * f = TFile::Open(fname.Data()); 
        filesToClose.push_back(f); 
        fEventTree = (TTree*) f->Get("eventTree"); 
        fHaveCalibFile = false; 
@@ -745,7 +745,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
        fEventTree->SetBranchAddress("event",&fRawEvent); 
        if(checkIfFileExists(fname2.Data()))
        {
-         TFile * f2 = new TFile(fname2.Data());
+         TFile * f2 = TFile::Open(fname2.Data());
          filesToClose.push_back(f2);
          fCalibInfoTree = (TTree*) f2->Get("calInfoTree");
          fHaveCalibInfo = true;
@@ -761,7 +761,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
     {
       if (checkIfFileExists(fname3.Data()))
       {
-        TFile * f = new TFile(fname3.Data()); 
+        TFile * f = TFile::Open(fname3.Data()); 
         filesToClose.push_back(f); 
         fEventTree = (TTree*) f->Get("eventTree"); 
         fHaveCalibFile = false;
@@ -779,7 +779,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
   fname = TString::Format("%s/run%d/prettyHkFile%d.root", data_dir, run, run); 
   if (checkIfFileExists(fname.Data()))
   {
-     TFile * f = new TFile(fname.Data()); 
+     TFile * f = TFile::Open(fname.Data()); 
      filesToClose.push_back(f); 
      fHkTree = (TTree*) f->Get("prettyHkTree"); 
      fHkTree->SetBranchAddress("hk",&fHk); 
@@ -797,7 +797,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
   if (checkIfFileExists(fname.Data()))
   {
 
-     TFile * f = new TFile(fname.Data()); 
+     TFile * f = TFile::Open(fname.Data()); 
      filesToClose.push_back(f); 
      fTurfTree = (TTree*) f->Get("turfRateTree"); 
      fTurfTree->BuildIndex("realTime"); 
@@ -814,7 +814,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
   if (checkIfFileExists(fname.Data()))
   {
 
-     TFile * f = new TFile(fname.Data()); 
+     TFile * f = TFile::Open(fname.Data()); 
      filesToClose.push_back(f); 
      fSurfTree = (TTree*) f->Get("surfHkTree"); 
      fSurfTree->BuildIndex("payloadTime","payloadTimeUs"); 
@@ -832,7 +832,7 @@ bool  AnitaDataset::loadRun(int run, bool dec,  DataDirectory dir)
     fname = TString::TString::Format("%s/run%d/SimulatedAnitaTruthFile%d.root",data_dir,run,run);
     if (checkIfFileExists(fname.Data()))
     {
-     TFile * f = new TFile(fname.Data()); 
+     TFile * f = TFile::Open(fname.Data()); 
      filesToClose.push_back(f); 
      fTruthTree = (TTree*) f->Get("truthAnitaTree"); 
      fTruthTree->SetBranchAddress("truth",&fTruth); 
