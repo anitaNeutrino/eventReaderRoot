@@ -8,6 +8,9 @@ http://www.hep.ucl.ac.uk/uhen/anita/eventReader/
 
 Introduction
 ============
+This 'pueo' branch is for side-by-side installation of nicemc/pueoSim with icemc
+
+
 This is version 4 of the ANITA Event Reader for ROOT Data and Raw Data, and is the first designed for ANITA II data. At present backwards compatibility is broken this will hoepfully be restored at some point once I work out how to do it. It is meant to be a simple class that will read in the raw event data (in ROOT file or raw psev_ format ) and convert it into UsefulAnitaEvent calibrated objects (the raw data reader actually creates text files of times and voltages).
 
 Prerequisites
@@ -23,7 +26,7 @@ Installation
 ============
 Checkout the code from the SVN repository, eg.: 
 svn co https://delos.mps.ohio-state.edu/anitaGround/eventReaderRoot/trunk myEventReaderDir
-Define the ANITA_UTIL_INSTALL_DIR to point to the location you want the library installed (the library files will end up in (ANITA_UTIL_INSTALL_DIR)/lib and the header files in (ANITA_UTIL_INSTALL_DIR)/include).
+Define the PUEO_UTIL_INSTALL_DIR to point to the location you want the library installed (the library files will end up in (PUEO_UTIL_INSTALL_DIR)/lib and the header files in (PUEO_UTIL_INSTALL_DIR)/include).
 Do
 make
 make install

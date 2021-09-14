@@ -57,7 +57,7 @@ bool AnitaDataset::isKnownHiCalEvent(UInt_t eventNumber, Int_t anita){
     static TMutex m;
     m.Lock();
 
-    const char* installDir = getenv("ANITA_UTIL_INSTALL_DIR");
+    const char* installDir = getenv("PUEO_UTIL_INSTALL_DIR");
 
     //hiCal1EventNumbers13Jan2018.txt
     //hiCal1EventNumbers.txt
@@ -90,7 +90,7 @@ void AnitaDataset::loadRunToEv(int anita){
   static TMutex m;
   m.Lock();
 
-  const char* installDir = getenv("ANITA_UTIL_INSTALL_DIR");
+  const char* installDir = getenv("PUEO_UTIL_INSTALL_DIR");
 
   TString fileName = TString::Format("%s/share/anitaCalib/runToEvA%d.txt", installDir, anita);
   std::ifstream runToEv(fileName.Data());
@@ -1351,7 +1351,7 @@ int AnitaDataset::getRunAtTime(double t)
 
 
       TString cache_file1= TString::Format("%s/timerunmap_%d.txt", getenv("ANITA_CALIB_DIR"),version) ; 
-      TString cache_file2= TString::Format("%s/share/anitaCalib/timerunmap_%d.txt", getenv("ANITA_UTIL_INSTALL_DIR"),version) ; 
+      TString cache_file2= TString::Format("%s/share/anitaCalib/timerunmap_%d.txt", getenv("PUEO_UTIL_INSTALL_DIR"),version) ; 
       TString cache_file3= TString::Format("./calib/timerunmap_%d.txt",version); 
 
       const char * cache_file_name = checkIfFilesExist(3, cache_file1.Data(), cache_file2.Data(), cache_file3.Data()); 
@@ -1504,7 +1504,7 @@ void AnitaDataset::loadBlindTrees() {
     char fileName[FILENAME_MAX];
     char *calibEnv=getenv("ANITA_CALIB_DIR");
     if(!calibEnv) {
-      char *utilEnv=getenv("ANITA_UTIL_INSTALL_DIR");
+      char *utilEnv=getenv("PUEO_UTIL_INSTALL_DIR");
       if(!utilEnv){
 	sprintf(calibDir,"calib");
       }
@@ -1606,7 +1606,7 @@ void AnitaDataset::loadHiCalGps() {
 
     const TString theRootPwd = gDirectory->GetPath();    
 
-    TString fName = TString::Format("%s/share/anitaCalib/H1b_GPS_time_interp.root", getenv("ANITA_UTIL_INSTALL_DIR"));
+    TString fName = TString::Format("%s/share/anitaCalib/H1b_GPS_time_interp.root", getenv("PUEO_UTIL_INSTALL_DIR"));
     fHiCalGpsFile = TFile::Open(fName);
     fHiCalGpsTree = (TTree*) fHiCalGpsFile->Get("Tpos");
 
